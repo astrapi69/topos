@@ -7,7 +7,7 @@ row from the matching language column.
 The parity test in [backend/tests/test_i18n_parity.py](../../tests/test_i18n_parity.py)
 does not inspect this file; it is maintenance metadata only.
 
-## 2026-04-22 — Git + SSH + export-dialog strings (ES, FR, EL, PT, TR, JA)
+## 2026-04-22 - Git + SSH + export-dialog strings (ES, FR, EL, PT, TR, JA)
 
 19 keys translated into 6 languages = 114 translation cells. All
 stem from the v0.21.0 Git-backup, SSH-key and dry-run-export
@@ -37,7 +37,7 @@ translations so the i18n advisory check stops flagging them.
 | `ui.ssh.confirm_overwrite` | ES, FR, EL, PT, TR, JA |
 | `ui.ssh.intro` | ES, FR, EL, PT, TR, JA |
 
-## 2026-04-24 — CIO-03 folder-upload wizard strings for DE, ES, FR, EL, PT, TR, JA
+## 2026-04-24 - CIO-03 folder-upload wizard strings for DE, ES, FR, EL, PT, TR, JA
 
 3 new keys per language added for the folder-upload UI shipped in
 commit 896e7e6:
@@ -49,7 +49,7 @@ commit 896e7e6:
 Placeholders (`{count}`, `{max}`) preserved across all languages.
 Machine-translated; native-speaker review welcome.
 
-## 2026-04-23 — Import wizard (`ui.import_wizard.*`) strings for DE, ES, FR, EL, PT, TR, JA
+## 2026-04-23 - Import wizard (`ui.import_wizard.*`) strings for DE, ES, FR, EL, PT, TR, JA
 
 46 keys under `ui.import_wizard.*` plus one `ui.dashboard.import_new`
 added for the new CIO-01 import wizard (see
@@ -73,12 +73,12 @@ Placeholders (`{n}`, `{title}`, `{count}`, `{formats}`, `{size}`,
   The parity test enforces this.
 - Length should stay within ~1.3× the English value; the
   Dashboard buttons and dialog body copy have limited space.
-- Where the English value uses an em-dash (—), translations
+- Where the English value uses an em-dash (-), translations
   retain it for consistency even though the coding standards
   discourage em-dashes in code. Changing this is a separate
   editorial pass.
 
-## 2026-05-09 — Medium-import frontend strings (PT, TR, JA)
+## 2026-05-09 - Medium-import frontend strings (PT, TR, JA)
 
 46 keys under `ui.medium_import.*` for the new
 `/articles/import/medium` page (drop zone, progress, result table,
@@ -104,7 +104,7 @@ convention: Medium, ZIP, .zip, MB, CDN, URL.
 Placeholders preserved: `{count}`, `{imported}`, `{skipped}`,
 `{errored}`. The parity test enforces placeholder set equality.
 
-## 2026-05-09 — Medium-import set_first_image_as_featured (PT, TR, JA)
+## 2026-05-09 - Medium-import set_first_image_as_featured (PT, TR, JA)
 
 2 new keys for the new "use first body image as featured image"
 toggle in the Medium-import settings panel. EN, DE authored
@@ -120,7 +120,7 @@ review.
 No placeholders. Technical term "Medium" left untranslated per
 the existing convention.
 
-## 2026-05-11 — Bulk-delete strings (PT, TR, JA)
+## 2026-05-11 - Bulk-delete strings (PT, TR, JA)
 
 26 new keys under `ui.bulk_delete.*` for the bulk-delete feature
 (Articles + Books dashboards). EN, DE authored fully. ES, FR, EL

@@ -1,6 +1,3 @@
-# TEMPLATE: This test is included as adaptable example.
-# Replace with your domain logic when project domain is finalized.
-
 """i18n parity test.
 
 Enforces that every language file in backend/config/i18n/ has the same
@@ -43,7 +40,7 @@ def _load(lang: str) -> dict[str, object]:
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     # The top-level ``_meta`` block is catalog metadata (review status,
     # translator credits, reference language). Treat it like JSON
-    # comments — silent for parity / placeholder / structural checks.
+    # comments - silent for parity / placeholder / structural checks.
     # A dedicated test below verifies its shape when present.
     if isinstance(raw, dict):
         raw.pop("_meta", None)
@@ -264,7 +261,7 @@ def test_review_status_marker_shape(lang: str) -> None:
     meta = raw.get("_meta") if isinstance(raw, dict) else None
     if lang in _MARKER_FORBIDDEN_FOR:
         assert meta is None, (
-            f"{lang}: must not carry a _meta block — it is the reference or "
+            f"{lang}: must not carry a _meta block - it is the reference or "
             f"a maintainer-validated catalog. Remove _meta: from "
             f"backend/config/i18n/{lang}.yaml."
         )

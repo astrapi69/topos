@@ -18,7 +18,7 @@ from collections.abc import Callable
 
 logger = logging.getLogger("topos_launcher.update_check")
 
-RELEASES_URL = "https://api.github.com/repos/astrapi69/pluginforge-app-template/releases/latest"
+RELEASES_URL = "https://api.github.com/repos/astrapi69/topos/releases/latest"
 TIMEOUT_SECONDS = 5.0
 
 

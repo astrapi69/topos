@@ -208,11 +208,6 @@ def update_app_settings(body: AppSettingsUpdate) -> dict[str, Any]:
     # Reload config in the manager so changes take effect
     config_overlay.refresh_manager_overlay(_manager)
 
-    # Invalidate the plugin-status cache so the editor sees fresh state
-    from app.main import invalidate_plugin_status_cache
-
-    invalidate_plugin_status_cache()
-
     return current
 
 

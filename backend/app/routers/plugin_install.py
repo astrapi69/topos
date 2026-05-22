@@ -5,7 +5,7 @@ The installed-plugin directory lives under ``get_data_dir() /
 tree being writable. The previous location
 (``BASE_DIR / "plugins" / "installed"`` = ``backend/plugins/
 installed/``) crashed in Docker because the bind-mounted project
-tree was not writable by the container's user — see the
+tree was not writable by the container's user - see the
 "Filesystem isolation" rule in ``.claude/rules/lessons-learned.md``.
 
 Plugin metadata writes (the YAML config inside the ZIP and the

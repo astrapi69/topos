@@ -1,6 +1,3 @@
-# TEMPLATE: This test is included as adaptable example.
-# Replace with your domain logic when project domain is finalized.
-
 """Tests for BodySizeLimitMiddleware (BACKEND-UPLOAD-SIZE-LIMIT-01).
 
 Two enforcement paths to pin:
@@ -150,7 +147,7 @@ def test_content_length_over_cap_returns_413() -> None:
 
 
 def test_get_request_is_not_rate_limited() -> None:
-    """GETs bypass entirely — they don't carry a body in this app."""
+    """GETs bypass entirely - they don't carry a body in this app."""
     from fastapi.testclient import TestClient
 
     app = _build_app_with_cap(1024)

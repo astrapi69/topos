@@ -1,6 +1,3 @@
-# TEMPLATE: This test is included as adaptable example.
-# Replace with your domain logic when project domain is finalized.
-
 """Bilingual parity for docs/help/en/ and docs/help/de/.
 
 Every English help page must have a German counterpart at the
@@ -12,7 +9,7 @@ Sub-task 5 of MKDOCS-DISCIPLINE-01. The hand-maintained-twice
 drift between mkdocs.yml and _meta.yaml (closed in commits 1-3
 of that series) was one shape of docs drift; bilingual asymmetry
 is another. Pre-inspection on 2026-05-07 found zero asymmetries
-in the v0.30.0 state — the test passes out of the gate. Future
+in the v0.30.0 state - the test passes out of the gate. Future
 asymmetries that are intentional (e.g. landing pages) get added
 to the EXCEPTIONS_ constants below with a comment.
 """

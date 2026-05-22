@@ -10,8 +10,8 @@ companion.
 
 | Code | Language | Status | Translator | Date | Notes |
 |------|----------|--------|------------|------|-------|
-| en | English | **source / reference** | maintainer | — | The reference catalog. Every other catalog mirrors its key set. No `_meta` block. |
-| de | Deutsch | **maintainer-validated** | maintainer | — | Native-speaker authoritative. Real umlauts (ä ö ü ß) per the project rule. No `_meta` block. |
+| en | English | **source / reference** | maintainer | - | The reference catalog. Every other catalog mirrors its key set. No `_meta` block. |
+| de | Deutsch | **maintainer-validated** | maintainer | - | Native-speaker authoritative. Real umlauts (ä ö ü ß) per the project rule. No `_meta` block. |
 | es | Español | **partial: pending native speaker for new namespaces** | Claude (Anthropic) | 2026-05-12 | Most of the catalog was user-validated against `LAUNCHER-I18N-NATIVE-REVIEW-01` precedent. The three v0.31.0 new namespaces (`ai_template`, `bulk_ai_fill`, `comments`) are still passthru English. |
 | fr | Français | **partial: pending native speaker for new namespaces** | Claude (Anthropic) | 2026-05-12 | Same shape as `es`. Tutoiement (informal) elsewhere; new namespaces left in English. |
 | el | Ελληνικά | **partial: pending native speaker for new namespaces** | Claude (Anthropic) | 2026-05-12 | Same shape as `es`. Monotonic Greek elsewhere; new namespaces left in English. |
@@ -42,7 +42,7 @@ ui:
 ```
 
 The backend's `i18n` loader (`backend/app/i18n.py`) and the
-frontend's `useI18n` hook treat `_meta` as silent metadata —
+frontend's `useI18n` hook treat `_meta` as silent metadata -
 no `t("_meta....")` lookup ever resolves to a UI string.
 
 The parity tests in `backend/tests/test_i18n_parity.py` enforce

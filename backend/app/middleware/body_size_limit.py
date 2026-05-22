@@ -1,4 +1,4 @@
-"""BodySizeLimitMiddleware — fail fast on oversized request bodies.
+"""BodySizeLimitMiddleware - fail fast on oversized request bodies.
 
 BACKEND-UPLOAD-SIZE-LIMIT-01 close. Defense-in-depth for every
 ``POST`` / ``PUT`` / ``PATCH`` endpoint, in particular the
@@ -12,7 +12,7 @@ Two enforcement points:
 
 1. **Content-Length header**: if the incoming request advertises a
    body larger than ``max_bytes``, the middleware returns HTTP 413
-   immediately — before consuming any body bytes. This is the
+   immediately - before consuming any body bytes. This is the
    happy path for browsers and well-behaved clients (every fetch
    / XHR / curl POST sets Content-Length).
 2. **Streamed body counter**: clients that use chunked transfer

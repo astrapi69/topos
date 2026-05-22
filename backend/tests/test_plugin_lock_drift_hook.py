@@ -1,12 +1,9 @@
-# TEMPLATE: This test is included as adaptable example.
-# Replace with your domain logic when project domain is finalized.
-
 """Self-check tests for the plugin-lock-paired pre-commit hook.
 
 Sub-task 3 of PLUGIN-LOCKFILE-DRIFT-01. Tests the script directly
 (option 3a in the pre-inspection): cheap, no Poetry invocation, runs
-in milliseconds. The expensive-but-thorough drift detection — running
-`poetry install --dry-run` per plugin — stays as the existing CI gate
+in milliseconds. The expensive-but-thorough drift detection - running
+`poetry install --dry-run` per plugin - stays as the existing CI gate
 (`.github/workflows/ci.yml` plugin matrix) and the optional manual
 `make verify-plugin-locks` target.
 
@@ -50,7 +47,7 @@ def isolated_git(tmp_path: Path) -> Path:
 
     The hook only reads `git diff --cached --name-only` from the cwd,
     so a fresh git init with the plugin files committed and then
-    selectively staged is enough to exercise the contract — without
+    selectively staged is enough to exercise the contract - without
     touching the actual repo's index.
     """
     work = tmp_path / "work"
@@ -183,7 +180,7 @@ def test_lockfile_only_change_does_not_trigger(
     in argv) is valid and must not fail.
 
     This test exercises the case where pre-commit's `files:` regex
-    DID NOT match anything (so argv is empty) — which is what would
+    DID NOT match anything (so argv is empty) - which is what would
     happen for a lockfile-only commit. The hook must exit 0.
     """
     _modify(isolated_git, "plugins/topos-plugin-export/poetry.lock")
@@ -198,8 +195,8 @@ def test_empty_staged_set_with_pyproject_in_argv_passes(
 ) -> None:
     """`pre-commit run --all-files` (and CI's "Run hooks on all
     files" step) passes every matching file as argv but does NOT
-    stage anything. The hook's contract is staging-relative —
-    "a staged pyproject must be paired with its staged lock" —
+    stage anything. The hook's contract is staging-relative -
+    "a staged pyproject must be paired with its staged lock" -
     so an empty staged set means the contract is vacuous and the
     hook must exit 0.
 
@@ -218,7 +215,7 @@ def test_empty_staged_set_with_pyproject_in_argv_passes(
         ["plugins/topos-plugin-export/pyproject.toml"],
     )
     assert result.returncode == 0, (
-        f"expected exit 0 (vacuous contract — no commit happening), "
+        f"expected exit 0 (vacuous contract - no commit happening), "
         f"got {result.returncode}.\n"
         f"stdout: {result.stdout}\nstderr: {result.stderr}"
     )

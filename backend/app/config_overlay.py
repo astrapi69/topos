@@ -4,10 +4,10 @@ Topos ships configuration in two layers:
 
 1. **Project tree** (read at runtime, never written from runtime
    code):
-   - ``backend/config/app.yaml`` — auto-created from
+   - ``backend/config/app.yaml`` - auto-created from
      ``app.yaml.example`` on first start; on legacy installs may
      also carry user edits from before the overlay landed.
-   - ``backend/config/plugins/*.yaml`` — bundled plugin defaults.
+   - ``backend/config/plugins/*.yaml`` - bundled plugin defaults.
 
 2. **User overlay** (writable, under ``get_data_dir() / "config"``):
    runtime writes from the Settings UI and plugin
@@ -21,7 +21,7 @@ Reason: dev-docker bind-mounts ``./backend:/app`` so the project
 tree is not writable by the container user. Production Docker
 (``USER topos`` + ``chown -R topos:topos /app``)
 makes the project tree writable, but the divergence between
-environments was a footgun — the v0.31.0 Phase 2 sweep
+environments was a footgun - the v0.31.0 Phase 2 sweep
 fixed ``backup_history.json`` and ``plugins/installed/`` the same
 way; this module closes the remaining 10+ write sites in
 ``settings.py`` and ``plugin_install.py``.
@@ -214,7 +214,7 @@ def load_app_config_for_edit() -> dict[str, Any]:
     when neither file exists.
 
     Use this for any code path that loads, mutates, then writes
-    back — the merge-based reader strips comments.
+    back - the merge-based reader strips comments.
 
     ``CommentedMap`` is dict-compatible at the type-check level,
     so the declared ``dict[str, Any]`` return type is honoured.

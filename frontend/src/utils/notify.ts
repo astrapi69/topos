@@ -125,7 +125,7 @@ function SaveErrorContent(
 
 /** Content for bulk-action toasts with an Undo action button.
  *  Mirrors SaveErrorContent's shape but uses the success/info
- *  toast styling, since bulk-actions succeed by default — the
+ *  toast styling, since bulk-actions succeed by default - the
  *  Undo is for "oops, I didn't mean that batch" recovery, not
  *  for error retry. */
 function BulkActionContent(
@@ -204,13 +204,10 @@ function SuccessActionContent(
   );
 }
 
-function recordToast(level: string, message: string) {
-  try {
-    // Dynamic import to avoid circular dependencies
-    import('./eventRecorder').then(({eventRecorder}) => {
-      eventRecorder.add({type: 'toast', timestamp: performance.now(), level, message})
-    }).catch(() => {})
-  } catch { /* ignore */ }
+function recordToast(_level: string, _message: string) {
+  // Phase 3 of the bootstrap removed the event recorder along with
+  // the rest of the book-app instrumentation. Reintroduce when a
+  // diagnostic layer is genuinely needed.
 }
 
 export const notify = {
@@ -234,7 +231,7 @@ export const notify = {
   success: (message: string) => { recordToast('success', message); return toast.success(message, {autoClose: 5000}) },
   /** Success toast with an Undo action button. Used by bulk-delete
    *  (soft path) so the user can recover from "oops, I selected the
-   *  wrong filter". Hard-delete does NOT call this — the data is
+   *  wrong filter". Hard-delete does NOT call this - the data is
    *  gone, an Undo button would be a lie. autoClose is longer than
    *  success() because the user needs time to click Undo. */
   bulkAction: (message: string, onUndo: () => void, undoLabel: string) => {

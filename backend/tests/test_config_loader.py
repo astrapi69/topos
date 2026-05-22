@@ -1,6 +1,3 @@
-# TEMPLATE: This test is included as adaptable example.
-# Replace with your domain logic when project domain is finalized.
-
 """Tests for the three-layer config loader.
 
 Layer chain: project app.yaml < user override file < env-vars.
@@ -95,40 +92,19 @@ def test_nested_merge_precedence(project_yaml: Path) -> None:
     assert cfg["app"]["name"] == "Topos"
 
 
-def test_env_var_beats_project_and_override(
-    project_yaml: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """TOPOS_AI_API_KEY wins against both project and override."""
-    _write(project_yaml, {"ai": {"api_key": "from-project"}})
-    override = main_module._get_user_override_path()
-    _write(override, {"ai": {"api_key": "from-override"}})
-    monkeypatch.setenv("TOPOS_AI_API_KEY", "from-env")
-    cfg = main_module._load_app_config()
-    assert cfg["ai"]["api_key"] == "from-env"
-
-
-def test_deprecation_warning_when_secret_in_project_only(
-    project_yaml: Path, caplog: pytest.LogCaptureFixture
-) -> None:
-    """Project carries non-empty api_key + no override + no env-var
-    → WARNING logged with file path + migration hint."""
-    _write(project_yaml, {"ai": {"api_key": "sk-leaked-into-project"}})
-    # Override file does NOT exist; env-var unset (fixture clears it).
-    with caplog.at_level(logging.WARNING, logger="app.main"):
-        triggered = main_module._has_project_secret_without_override()
-    assert triggered is True
-
-
-def test_no_deprecation_warning_when_override_exists(
-    project_yaml: Path, caplog: pytest.LogCaptureFixture
-) -> None:
-    """Override file present silences the deprecation hint even when
-    project still has the legacy key."""
-    _write(project_yaml, {"ai": {"api_key": "sk-leaked"}})
-    override = main_module._get_user_override_path()
-    _write(override, {"ai": {"api_key": "sk-override"}})
-    triggered = main_module._has_project_secret_without_override()
-    assert triggered is False
+# Removed in Phase 3 of the bootstrap:
+# - test_env_var_beats_project_and_override
+# - test_deprecation_warning_when_secret_in_project_only
+# - test_no_deprecation_warning_when_override_exists
+#
+# These tests pinned the env-var override mechanism for ``TOPOS_AI_API_KEY``
+# and the deprecation warning when a secret sits in the project yaml
+# without an override. Both were AI-feature-specific; Topos has no AI
+# integration so the underlying helpers in ``app.main``
+# (_apply_env_overrides, _has_project_secret_without_override,
+# _ENV_SECRET_OVERRIDES) were removed too. Add a focused replacement
+# the first time Topos grows a config item that warrants env-var
+# precedence.
 
 
 def test_xdg_config_home_respected(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -152,22 +128,16 @@ def test_windows_appdata_branch(monkeypatch: pytest.MonkeyPatch, tmp_path: Path)
 def test_corrupt_override_file_does_not_crash(
     project_yaml: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Malformed override yaml falls back to project config + logs
-    WARNING. Backend MUST start (loader returns project dict, never
+    """Malformed override yaml falls back to project config without
+    crashing. Backend MUST start (loader returns project dict, never
     raises).
 
-    Three corruption shapes covered:
-    - invalid YAML syntax
-    - top-level non-dict (e.g. list)
-    - empty file (None)
-
-    Spies on ``logger.warning`` directly because other tests in the
-    suite reconfigure the ``app.main`` logger and the standard
-    ``caplog`` fixture cannot reliably intercept that logger
-    cross-test (same pattern used in test_backup_articles.py for
-    the forward-compat manifest warning).
+    Three corruption shapes covered: invalid YAML syntax, top-level
+    non-dict (e.g. list), empty file. Phase 3's slim loader logs a
+    single ``Could not load override file`` warning on the first two
+    shapes and stays silent on empty files.
     """
-    _write(project_yaml, {"ai": {"provider": "anthropic", "api_key": "from-project"}})
+    _write(project_yaml, {"app": {"name": "Topos", "default_language": "de"}})
     override = main_module._get_user_override_path()
 
     captured: list[str] = []
@@ -182,22 +152,20 @@ def test_corrupt_override_file_does_not_crash(
     # Invalid YAML syntax.
     override.write_text("this is: : : not valid yaml :\n  - broken", encoding="utf-8")
     cfg = main_module._load_app_config()
-    assert cfg["ai"]["provider"] == "anthropic"
-    assert cfg["ai"]["api_key"] == "from-project"
-    assert any("Invalid YAML" in m for m in captured), captured
+    assert cfg["app"]["name"] == "Topos"
+    assert any("Could not load override file" in m for m in captured), captured
 
-    # Top-level non-dict.
+    # Top-level non-dict: loader silently coerces to {} per the Phase 3 simplification.
     captured.clear()
     override.write_text("- one\n- two\n", encoding="utf-8")
     cfg = main_module._load_app_config()
-    assert cfg["ai"]["api_key"] == "from-project"
-    assert any("expected mapping" in m for m in captured), captured
+    assert cfg["app"]["name"] == "Topos"
 
     # Empty file -> silently treated as empty override (no warning).
     captured.clear()
     override.write_text("", encoding="utf-8")
     cfg = main_module._load_app_config()
-    assert cfg["ai"]["api_key"] == "from-project"
+    assert cfg["app"]["name"] == "Topos"
     assert captured == []
 
 

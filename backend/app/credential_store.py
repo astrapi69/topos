@@ -90,7 +90,7 @@ def save_encrypted(
     """Encrypt and persist a credential file. Returns metadata (never the key).
 
     The caller is responsible for validating the content BEFORE calling
-    this function — ``save_encrypted`` only does the encrypt-and-write
+    this function - ``save_encrypted`` only does the encrypt-and-write
     part so it stays reusable for future credential types.
     """
     target_dir = credentials_dir or DEFAULT_CREDENTIALS_DIR

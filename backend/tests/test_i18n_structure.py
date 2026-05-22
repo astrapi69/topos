@@ -1,10 +1,7 @@
-# TEMPLATE: This test is included as adaptable example.
-# Replace with your domain logic when project domain is finalized.
-
 """Structural consistency tests for the i18n YAMLs.
 
-The goal is NOT full translation-completeness — that is tracked as a
-roadmap item (I-03) — but to catch *structural* drift like the one
+The goal is NOT full translation-completeness - that is tracked as a
+roadmap item (I-03) - but to catch *structural* drift like the one
 discovered in the v0.11 -> v0.12 audit:
 
 1. A new subsection gets inserted at the wrong indent level, silently
@@ -17,7 +14,7 @@ discovered in the v0.11 -> v0.12 audit:
 The tests here keep EN as the reference and verify, for every language,
 that the same top-level ``ui.*`` sections exist and that no section has
 non-string keys. They do not require that every leaf key is translated
-(that's I-03) — only that the skeleton matches.
+(that's I-03) - only that the skeleton matches.
 """
 
 from pathlib import Path
@@ -88,7 +85,7 @@ def test_top_level_sections_match_reference(lang: str):
     This catches the placement bug found in the v0.12.0 audit where
     ``ui.translation`` was inserted *inside* ``ui.settings``, effectively
     cutting the settings block short. The test does not require leaf
-    keys to match — just the section roots.
+    keys to match - just the section roots.
 
     Scoped to DE for now because the other six languages still have
     missing sections from older snapshots (roadmap I-03). Expanding
@@ -104,31 +101,26 @@ def test_top_level_sections_match_reference(lang: str):
     )
 
 
-# Keys we absolutely cannot lose from ``ui.settings`` because multiple
-# frontend call sites depend on them and the hardcoded fallback is
-# only ever an English string. Derived from the v0.12.0 bug: these are
-# exactly the keys that got silently moved into ``ui.translation``.
-_CRITICAL_SETTINGS_KEYS = {
-    "free", "premium", "active", "inactive", "standard",
-    "off", "on",
-    "expand_settings", "collapse", "remove_plugin",
-    "plugin_export", "plugin_help", "plugin_getstarted",
-    "license_required", "enter_license",
-}
+# Critical-keys regression list will be repopulated in Phase 6 once
+# the Topos settings UI lands. The original template's pinned list
+# (free/premium/active/inactive/standard/etc.) belonged to the
+# book-authoring app; carrying it over without re-deriving it from
+# real frontend callsites would just produce a stale shopping list.
+_CRITICAL_SETTINGS_KEYS: set[str] = set()
 
 
 @pytest.mark.parametrize("lang", [REFERENCE, "de"])
 def test_critical_settings_keys_present(lang: str):
-    """DE and EN must be fully structurally correct — other languages
-    still have known gaps that are tracked as I-03 in the roadmap.
+    """DE and EN must carry every ``ui.settings`` key the frontend
+    hard-depends on. Empty until Phase 6 derives the list from the
+    Topos settings page; intentionally permissive in the bootstrap.
     """
+    if not _CRITICAL_SETTINGS_KEYS:
+        return
     settings = _ui(_load(lang)).get("settings", {})
     missing = _CRITICAL_SETTINGS_KEYS - set(settings.keys())
     assert not missing, (
-        f"{lang}.yaml ui.settings is missing critical keys: {sorted(missing)}. "
-        f"This is the regression shape from the v0.12.0 i18n audit: a new "
-        f"subsection was likely inserted inside ui.settings, moving these "
-        f"keys into the wrong section."
+        f"{lang}.yaml ui.settings is missing critical keys: {sorted(missing)}."
     )
 
 
