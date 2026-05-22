@@ -90,8 +90,17 @@ Today the only first-class secret consumed by Topos itself is
 `secret_key`. Topos uses it as the HMAC signing key for premium
 plugin licenses; the licensing infrastructure ships dormant
 (`LICENSING_ENABLED = False`), so the secret is reserved for future
-work. Set it now if you want stability across restarts when
-licensing is activated:
+work.
+
+> **Warning:** the project ships with a hard-coded default
+> (`pluginforge-default-key`) so the dormant licensing
+> infrastructure can boot. **Replace the default `secret_key`
+> before any production deployment.** Either set
+> `TOPOS_SECRET_KEY` in the environment or put a real value
+> into `~/.config/topos/secrets.yaml`.
+
+Set it now if you want stability across restarts when licensing
+is activated:
 
 ```yaml
 secret_key: "your-fernet-or-hmac-key-here"

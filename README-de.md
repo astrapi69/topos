@@ -1,152 +1,105 @@
-# PluginForge App Template
+# Topos
 
-Produktionsfähiges Projektgerüst zum Bauen plugin-getriebener Full-Stack-Anwendungen auf Basis von [PluginForge](https://github.com/astrapi69/pluginforge). Liefert ein sauberes FastAPI + React + TypeScript-Skelett mit CRUD, Einstellungen, i18n, Tests, CI, plattformübergreifendem Launcher und Docker-Deployment. Domänenmodelle werden als `EXAMPLE-DOMAIN` ausgeliefert — pro Projekt zu ersetzen.
+> Persönliche Inventarverwaltung für Ordner, Boxen und ihren Inhalt.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Topos ist eine quelloffene Web-Anwendung zum Erfassen physischer
+Ablage - Hängeregister-Ordner, Archivboxen, Schubladen - und
+ihres Inhalts. Einträge leben in hierarchischen Kategorien;
+offene Folgeaktionen werden als Actions geführt; das ganze
+Inventar ist durchsuchbar, filterbar und aus einer
+Excel-Arbeitsmappe importierbar. Läuft als offline-fähige PWA im
+Browser oder als plattformübergreifende Desktop-Anwendung über
+PyInstaller.
+
+English version: [README.md](README.md).
+
+## Funktionen
+
+- **Vier-Entitäten-Inventar** - Container (Ordner + Boxen),
+  Einträge, hierarchische Kategorien, Folgeaktionen.
+- **Excel-Import** - eine `Ordner-Ordnung.xlsx` (oder eine
+  beliebige Mappe gleicher Drei-Blatt-Struktur) ablegen und Topos
+  baut das Inventar inklusive der Vorfahren-Kategoriebaum auf.
+  Idempotent über die Container-Externe-ID; ein erneuter Import
+  derselben Datei erzeugt null Duplikate.
+- **Deutsch -> Englisch Slug-Übersetzung** beim Import, das
+  Original-Deutsch bleibt als Anzeigename erhalten.
+- **Offline-fähige PWA** mit Dexie als Read-Through-Cache -
+  Seiten rendern sofort aus IndexedDB, dann revalidiert die API.
+- **Plugin-getriebene Erweiterbarkeit** auf Basis von
+  [PluginForge](https://github.com/astrapi69/pluginforge): der
+  Excel-Importer ist selbst ein Plugin. Künftige Importer,
+  Exporter, QR-Etiketten und Foto-Anhänge folgen demselben
+  Muster.
+- **Plattformübergreifender Desktop-Launcher** (Linux, macOS,
+  Windows) aus derselben FastAPI + React Codebasis.
+
+## Ökosystem
+
+Topos ist eines aus einer Familie von MIT-lizenzierten Projekten:
+
+- [pluginforge](https://github.com/astrapi69/pluginforge) - das
+  anwendungs-agnostische Plugin-Framework, auf dem Topos läuft
+- [pluginforge-app-template](https://github.com/astrapi69/pluginforge-app-template) -
+  das Gerüst, aus dem Topos extrahiert wurde
+- [adaptive-learner](https://github.com/astrapi69/adaptive-learner),
+  [bibliogon](https://github.com/astrapi69/bibliogon) -
+  Geschwister-Anwendungen
 
 ## Schnellstart
 
 ```bash
-# Klonen und als eigenes Repo aufsetzen
-git clone https://github.com/astrapi69/pluginforge-app-template.git my-app
-cd my-app
-rm -rf .git && git init
-
-# Anpassungsleitfaden lesen BEVOR make install läuft
-cat CUSTOMIZE.md
-```
-
-Dann [CUSTOMIZE.md](CUSTOMIZE.md) für die globale Umbenennung, den EXAMPLE-DOMAIN-Austausch und die ersten Plugin-Schritte folgen. Nach der Anpassung:
-
-```bash
+git clone https://github.com/astrapi69/topos.git
+cd topos
 make install              # Poetry (Backend + Launcher) + npm (Frontend)
-make test                 # Backend pytest + Frontend vitest
+make test                 # Backend pytest + Frontend Vitest
 make dev                  # Backend auf :8000, Frontend auf :5173
 ```
 
-## Was enthalten ist
+<http://localhost:5173> im Browser öffnen; das Dashboard
+erscheint mit leerem Inventar.
 
-### Backend
-- **FastAPI**-App mit geschichteter Architektur (Routers → Services → Models)
-- **SQLAlchemy 2.0** Mapped Columns + **Alembic**-Migrationen
-- **Pydantic v2**-Schemas für Request/Response-Validierung
-- **PluginForge**-Integration: Hookspec-Discovery, Entry-Point-Loader, Plugin-Lebenszyklus
-- **Geschichtete Konfiguration**: Projekt-YAML < User-Override (`~/.config/topos/`) < Env-Variablen (`TOPOS_*`)
-- **Test-Isolation**: tmp-Datenverzeichnis + Produktions-Marker-Sicherung + In-Memory-Test-DB
-- **i18n**: 8 Sprachen (DE, EN, ES, FR, EL, PT, TR, JA) in `backend/config/i18n/*.yaml`
-- **Soft-Delete + Papierkorb-Lebenszyklus** auf EXAMPLE-DOMAIN-Entitäten (Book, Article, Comment)
-- **Backup / Restore**-Gerüst (`backup_history`-Modell + Service)
-- **Lizenzierungs**-Infrastruktur (HMAC-signierte offline-validierbare Schlüssel, standardmäßig ruhend)
+Aus einer Excel-Mappe füllen:
 
-### Frontend
-- **React 18 + TypeScript (strict)** mit Vite-Build
-- **Radix UI**-Primitive (Dialog, Tabs, Dropdown, Select, Tooltip)
-- **@dnd-kit** für Drag-and-Drop, **Lucide React** für Icons, **react-toastify** für Feedback
-- **Theming**: CSS Custom Properties, mehrere Paletten × hell/dunkel
-- **Typisierter API-Client** in `frontend/src/api/client.ts` mit `ApiError`-Klasse und Toast-freundlicher Fehlerkette
-- **i18n-Hook** (`useI18n`), liest die Backend-YAML-Kataloge
+1. `/import` im Browser öffnen.
+2. Die `Ordner-Ordnung.xlsx` (oder eine Mappe mit den drei
+   Blättern `Meine Ordner`, `Ordner Eltern`, `Boxen`) per
+   Drag-and-Drop ablegen.
+3. Auf Hochladen klicken.
+4. Der Importbericht zeigt, wie viele Container, Einträge,
+   Aktionen und Kategorien angelegt wurden; unter Container ist
+   das Ergebnis sofort sichtbar.
 
-### Plugin-System
-- **Keine Plugins enthalten** — der Loader ist verdrahtet und einsatzbereit
-- `plugins/README.md` dokumentiert das minimale Plugin-Layout
-- Hook-Specs in `backend/app/hookspecs.py`; Entry-Point-Gruppe `topos.plugins`
+Zum Desktop-Launcher (Einzelbinär-Installation) siehe
+[launcher/README.md](launcher/README.md).
 
-### Launcher
-- **Plattformübergreifender PyInstaller-Launcher** unter `launcher/` (Linux + macOS + Windows)
-- Startet das Backend, öffnet das Frontend im Browser, verwaltet Auto-Update + Deinstallation
-- Build-Pipelines pro OS: `.github/workflows/launcher-{linux,macos,windows}.yml`
-- Single-Source-of-Truth für die Version (nur `backend/pyproject.toml` wird per Hand editiert; alle anderen Versionsfelder leiten sich via `make sync-versions` ab)
+## Architektur
 
-### CI/CD
-- **GitHub Actions**: `ci.yml`, `coverage.yml`, `docs.yml`, `launcher-{linux,macos,windows}.yml`, `release-gate.yml`, `mutation-import.yml`
-- **Pre-Commit-Hooks**: ruff (Lint + Format), check-yaml/json, trailing-whitespace, end-of-file-fixer
-- **Release-Gate**-Erzwingung (Versionspins synchron; Subsystem-Lockstep; install.sh-Template-Aktualität)
+Vier Schichten: React-Frontend -> FastAPI-Backend -> PluginForge
+-> Plugins. Container, Einträge, Kategorien und Aktionen liegen
+im Kern; alles andere (Import, Export, QR-Etiketten,
+Foto-Anhänge) wird als Plugin eingehängt. Das Backend ist die
+einzige Wahrheitsquelle; der Dexie-Speicher der PWA ist ein
+Read-Through-Cache. Lange Version: siehe
+[docs/CONCEPT.md](docs/CONCEPT.md).
 
-### Docs
-- **MkDocs Material** mit i18n (`mkdocs.yml`, `docs/pyproject.toml` enthält das Docs-Venv)
-- `docs/CONCEPT.md`, `docs/ROADMAP.md`, `docs/API.md`, `docs/help/{en,de}/...`
-- Generator-Skripte für ROADMAP-Archivierung, MkDocs-Nav, Audit-Reports
+## Status
 
-### Deployment
-- **Docker Compose** (Dev + Prod)
-- **install.sh / install.cmd / install.ps1 / install.command** Einzeiler-Installer
-- **start.sh / stop.sh / uninstall.sh** Einstiegspunkte
+Bootstrap-Phase. Die sieben Phasen des Projekt-Bootstraps
+(Umbenennung, Domänentausch, Services, Router,
+Excel-Import-Plugin, Frontend-Seiten, Dokumentation) sind
+abgeschlossen und getestet. Die Roadmap-Punkte unter
+[docs/ROADMAP.md](docs/ROADMAP.md) listen die nächsten konkreten
+Arbeiten: tree-api-Portierung, QR-Etiketten, Foto-Anhänge,
+PWA-Härtung, Launcher-Binär-Pipeline.
 
-## Tech-Stack im Überblick
-
-| Schicht | Stack |
-|---------|-------|
-| Backend | Python 3.11+, FastAPI, SQLAlchemy 2.0, SQLite, Pydantic v2, Poetry |
-| Frontend | React 18+, TypeScript (strict), Vite, Radix UI, @dnd-kit, Lucide, react-toastify |
-| Plugins | pluginforge ^0.10.0 (PyPI) |
-| Launcher | PyInstaller |
-| Tests | pytest, Vitest, Playwright, mutmut, Stryker |
-| Werkzeuge | Poetry, npm, Docker, Make, ruff, ESLint, Prettier, pre-commit |
-| Docs | MkDocs Material |
-
-## Repository-Struktur
-
-```
-pluginforge-app-template/
-├── backend/app/           # FastAPI-Kern (main, models, routers, services, hookspecs)
-├── backend/config/        # app.yaml + i18n/ (8 Sprachen)
-├── backend/tests/         # pytest-Suite (mit Test-Isolations-Sicherungen)
-├── plugins/               # leer + plugins/README.md
-├── frontend/src/          # React-App (api, components, pages, styles)
-├── e2e/                   # Playwright-Specs (smoke + full)
-├── launcher/              # PyInstaller plattformübergreifender Launcher
-├── docs/                  # MkDocs-Site + CONCEPT/ROADMAP/API
-├── scripts/               # Versions-Sync, ROADMAP-Archiv, Audits
-├── .github/workflows/     # CI/CD-Pipelines
-└── Makefile, docker-compose*.yml, install.{sh,cmd,ps1,command}, .env.example
-```
-
-Siehe [CUSTOMIZE.md](CUSTOMIZE.md) als Feldführer für die Anpassung der einzelnen Teile.
-
-## Ökosystem
-
-| Repo | Rolle |
-|------|-------|
-| [pluginforge](https://github.com/astrapi69/pluginforge) | Plugin-Framework (PyPI). Die Laufzeit-Grundlage. |
-| [pluginforge-app-template](https://github.com/astrapi69/pluginforge-app-template) | Dieses Template. Generisches Gerüst für neue PluginForge-Apps. |
-| [adaptive-learner](https://github.com/astrapi69/adaptive-learner) | Referenz-Downstream-App. Die Muster in `.claude/rules/` sind hier entstanden. |
-| [bibliogon](https://github.com/astrapi69/bibliogon) | Buch-Autorenplattform. Aus ihr wurde das ursprüngliche Skelett extrahiert. Attribution; keine Laufzeit-Abhängigkeit. |
-
-## Kommandos
-
-```bash
-make install              # Poetry + npm install
-make dev                  # Backend (8000) + Frontend (5173) parallel
-make dev-bg / dev-down    # Hintergrund-Modus
-make test                 # Backend pytest + Frontend vitest
-make test-coverage        # Opt-in Coverage-Lauf
-make test-backend         # nur Backend
-make test-frontend        # nur vitest
-make prod                 # Docker Compose (Prod-Compose-Datei)
-make prod-down            # Docker stoppen
-make clean                # Build-Artefakte entfernen
-make help                 # alle Targets auflisten
-```
-
-E2E-Tests laufen NICHT im Standard-`make test`-Pfad. Separat ausführen:
-
-```bash
-npx playwright test --project=smoke
-npx playwright test --project=full
-```
-
-## Versionierung
-
-Das Template folgt Semantic Versioning. Die aktuelle Minor-Version (`v0.x`) spiegelt eine sich entwickelnde Template-Oberfläche wider; das erste feature-vollständige Release wird `v1.0.0`. Single Source of Truth für den Versions-Pin ist `backend/pyproject.toml`; alles andere leitet sich via `make sync-versions` ab.
+Noch nicht produktionshart. Nicht ohne Reverse-Proxy und ohne
+Austausch des Standard-`secret_key` auf gemeinsam genutzter
+Infrastruktur betreiben (siehe
+[docs/configuration.md](docs/configuration.md)).
 
 ## Lizenz
 
-MIT — siehe [LICENSE](LICENSE).
-
-## Dokumentation
-
-- [CUSTOMIZE.md](CUSTOMIZE.md) — erste Lektüre nach dem Clone
-- [CLAUDE.md](CLAUDE.md) — Anleitung für die Arbeit mit Claude Code an diesem Codebase
-- [docs/CONCEPT.md](docs/CONCEPT.md) — Architektur-Konzept
-- [docs/help/de/](docs/help/de/) — In-App-Hilfe (auch via MkDocs ausgeliefert)
-- [.claude/rules/](.claude/rules/) — Entwicklungsregeln (Architektur, Coding-Standards, Hygiene, Lessons Learned, Quality Checks, Release-Workflow)
+MIT - siehe [LICENSE](LICENSE).

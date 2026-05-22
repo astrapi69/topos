@@ -1,860 +1,266 @@
-<!--
-TODO: Adapt for your project. Current content is inherited from
-upstream (Topos) and serves as structural reference only.
-The shape of this document (sections, headings, formatting
-conventions) is reusable; the specifics are not.
--->
+# Topos - concept
 
-# Topos - concept document
+**Repository:** [github.com/astrapi69/topos](https://github.com/astrapi69/topos)
+**Built on:** [PluginForge](https://github.com/astrapi69/pluginforge) (PyPI: pluginforge ^0.10.0)
+**Sibling projects:**
+[pluginforge-app-template](https://github.com/astrapi69/pluginforge-app-template) (the scaffold Topos was extracted from),
+[adaptive-learner](https://github.com/astrapi69/adaptive-learner),
+[bibliogon](https://github.com/astrapi69/bibliogon)
 
-**Repository:** [github.com/astrapi69/pluginforge-app-template](https://github.com/astrapi69/pluginforge-app-template)
-**Related project:** [github.com/astrapi69/write-book-template](https://github.com/astrapi69/write-book-template)
-**PluginForge:** [github.com/astrapi69/pluginforge](https://github.com/astrapi69/pluginforge) (PyPI: pluginforge ^0.10.0)
-
-This document describes the architecture and the concept. For version history see `docs/CHANGELOG.md`, for current and planned work see `docs/ROADMAP.md`.
+This document describes the architecture and the concept. For
+runtime configuration see [configuration.md](configuration.md); for
+the current backlog see [ROADMAP.md](ROADMAP.md).
 
 ---
 
 ## 1. Goal
 
-Topos consists of two parts:
+Topos is a **personal inventory tracker** for physical storage:
+file folders, archive boxes, drawers, anything with a number on it.
+Every container holds zero or more **items** (a line of content,
+e.g. "checking account statement 2025"); items live in
+hierarchical **categories** (finance → bank → checking-account); a
+container or item can carry pending **actions** (call the bank,
+request a copy, file the receipt).
 
-1. **PluginForge** - An application-agnostic plugin framework for Python/FastAPI applications. Built on top of [pluggy](https://pluggy.readthedocs.io/) (the hook system behind pytest), extended with YAML configuration, plugin lifecycle, FastAPI integration and frontend plugin loading. Any developer can use it as the foundation for their own plugin-capable applications.
+The starting dataset is a real spreadsheet: 209 file folders + 70
+parent-owned folders + 166 archive boxes from one person's
+home-office inventory. Topos imports that workbook once and then
+becomes the long-term tool for keeping the inventory current.
 
-2. **Topos app** - An open-source web platform for writing and exporting books. The first application built on PluginForge. The entire export (EPUB, PDF, write-book-template structure) is itself a plugin.
+Topos runs as:
 
-The principle: the app core (UI, database, chapter editor) is lean. Everything else - export, children's book mode, audiobook, KDP integration - is delivered via plugins. All plugins are free and open source (MIT). Donations are the current funding model.
+1. An **offline-first PWA** in the browser.
+2. A **cross-platform desktop app** (Linux, macOS, Windows) via the
+   PyInstaller launcher inherited from the template.
 
-Both PluginForge and the Topos core are open source (MIT license).
-
----
-
-## 2. Architecture
-
-### 2.1 Layered architecture
-
-```
-+----------------------------------------------------------+
-|  Topos app (frontend: React + TipTap)                |
-+----------------------------------------------------------+
-|  Topos app (backend: FastAPI, Book/Chapter CRUD)     |
-+----------------------------------------------------------+
-|  PluginForge (framework)                                  |
-|  +-- pluggy (hook specs + hook impls)                    |
-|  +-- YAML configuration (app, plugins, i18n)             |
-|  +-- plugin lifecycle (init, activate, deactivate)       |
-|  +-- FastAPI router integration                          |
-|  +-- Alembic migration support for plugin tables         |
-+----------------------------------------------------------+
-|  Plugins                                                  |
-|  +-- plugin-export       (EPUB, PDF, write-book-template)|
-|  +-- plugin-kinderbuch   (image layout, special export)  |
-|  +-- plugin-audiobook    (TTS, MP3/M4B)                  |
-|  +-- plugin-kdp          (KDP metadata, preview)         |
-|  +-- ...                                                  |
-+----------------------------------------------------------+
-```
-
-### 2.2 Two repositories
-
-| Repository | Description | License |
-|------------|-------------|---------|
-| `pluginforge` | Application-agnostic plugin framework (based on pluggy) | MIT |
-| `topos` | Book authoring platform, uses PluginForge | MIT (all plugins free during development) |
-
-PluginForge is a standalone PyPI package:
-
-```toml
-# topos/backend/pyproject.toml
-[tool.poetry.dependencies]
-pluginforge = "^0.10.0"
-```
-
-Another developer can use PluginForge independently:
-
-```toml
-# podcast-tool/pyproject.toml
-[tool.poetry.dependencies]
-pluginforge = "^0.10.0"
-```
-
-### 2.3 Tech stack
-
-| Component | Technology |
-|-----------|------------|
-| PluginForge | Python 3.11+, pluggy, YAML, entry points, Alembic |
-| Backend | FastAPI, SQLAlchemy, SQLite/PostgreSQL, Pydantic v2 |
-| Frontend | React 18, TypeScript, TipTap (15 extensions), Vite, Radix UI, @dnd-kit, Lucide icons |
-| Export plugin | manuscripta (PyPI), Pandoc, write-book-template structure |
-| Tooling | Poetry, npm, Docker, Make, Playwright (E2E) |
-
-### 2.4 UI component strategy
-
-Principle: use existing open-source libraries instead of reinventing the wheel.
-
-| Library | Purpose | License |
-|---------|---------|---------|
-| **Radix UI** | Unstyled accessible primitives (Dialog, Tabs, Dropdown, Select, Tooltip) | MIT |
-| **@dnd-kit** | Drag-and-drop (chapter sorting, list reordering) | MIT |
-| **TipTap** | WYSIWYG/Markdown editor (StarterKit + 15 extensions) | MIT |
-| **@pentestpad/tiptap-extension-figure** | Figure + figcaption (captions) | MIT |
-| **@tiptap/extension-table** | Tables (+ row, cell, header) | MIT |
-| **@tiptap/extension-text-align** | Text alignment (left, center, right, justify) | MIT |
-| **@tiptap/extension-typography** | Smart quotes, automatic dashes | MIT |
-| **@tiptap/extension-character-count** | Word and character count | MIT |
-| **@tiptap/extension-highlight** | Highlight text | MIT |
-| **@tiptap/extension-task-list** | Checklists with checkboxes | MIT |
-| **@tiptap/extension-underline** | Underline | MIT |
-| **@tiptap/extension-sub/superscript** | Subscript/superscript (H2O, E=mc2) | MIT |
-| **Lucide React** | Icons | ISC |
-| **react-toastify** | Toast notifications | MIT |
-
-Why Radix UI:
-- Unstyled: fits our CSS variable theming (3 themes x light/dark)
-- Accessible: ARIA attributes, focus management, keyboard navigation out of the box
-- Individually installable: only the primitives we need
-- No Tailwind required: we keep styling with custom properties
-
-Rejected alternatives:
-- shadcn/ui (requires Tailwind), MUI (too opinionated), Ant Design (too heavy), Mantine/Chakra (their own theme system)
-
-This strategy is also a reference for other projects that build on PluginForge.
+Source is open under MIT. The user owns their data; the backend is
+the single source of truth; there is no cloud-saas tier.
 
 ---
 
-## 3. PluginForge - the framework
+## 2. Domain model
 
-### 3.1 Core concept
+Four entities. See [backend/app/models/](../backend/app/models/)
+for the SQLAlchemy definitions.
 
-PluginForge builds on pluggy and adds:
+### Container
 
-| Feature | pluggy | PluginForge |
-|---------|--------|-------------|
-| Hook specs and hook impls | Yes | Yes (via pluggy) |
-| Entry point discovery | Yes | Yes (via pluggy) |
-| YAML configuration | No | Yes (app, plugins, i18n) |
-| Plugin lifecycle | No | Yes (init, activate, deactivate) |
-| Enable/disable per config | No | Yes |
-| FastAPI router integration | No | Yes (plugin routes mounted automatically) |
-| DB migration support | No | Yes (Alembic per plugin) |
-| Plugin dependencies | No | Yes (declarative in YAML) |
-| Frontend plugin loading | No | Yes (manifest for UI components) |
-| API versioning | No | Yes (hook specs versioned) |
+A physical storage unit. Either a hanging-file folder or an
+archive box. Has a numeric `external_id` (the number written on
+the spine), a `type` (`folder` | `box`), an `owner`
+(`self` | `parents` | `shared`), a free-text `label`, an optional
+`description` (which can span multiple lines from the source
+spreadsheet), an optional `location` (where it sits - "office",
+"basement shelf 2"), and an optional `size_group` for boxes
+(e.g. `"3000 bis 3099"` denotes the very-large-box range).
 
-### 3.2 Configuration system
+### Item
 
-Everything application-specific lives in YAML files. No hardcoded strings.
+A single inventoried content line attached to a container.
+Examples: "bank statement 2024", "tax forms 2023". An item has
+`content` (the visible text), a `priority` (none / low / medium /
+high / very_high), an optional slug-shaped `category_path`
+(e.g. `"finance/bank/checking-account"`), and optional `notes`.
+Items cascade-delete with their container.
 
-**App configuration (`config/app.yaml`):**
+### Category
 
-```yaml
-app:
-  name: "Topos"
-  version: "0.2.0"
-  description: "Open-source book authoring platform"
-  default_language: "de"
-  supported_languages: ["de", "en", "es", "fr", "el"]
+The hierarchical taxonomy. Each row carries a slash-separated
+English `path` (the canonical kebab-case slug - stable across
+languages), a `parent_path` link, a leaf `name`, and a
+`display_name` (the human-readable label, German by default since
+the seed dataset is German). The tree is materialised on demand
+via `GET /api/categories/tree`. Item-to-category coupling is
+loose - items just store the slug, categories live independently
+so the same path keeps working even if an item moves containers.
 
-plugins:
-  entry_point_group: "topos.plugins"
-  config_dir: "config/plugins"
-  enabled:
-    - "export"
-    - "kdp"
-  disabled:
-    - "audiobook"
+### Action
 
-ui:
-  title: "Topos"
-  subtitle: "Write and export books"
-  logo: "assets/logo.svg"
-  theme: "warm-literary"
-```
+A pending or completed follow-up tied to an item. Examples from
+the seed dataset: "review and possibly cancel", "request
+statement", "check meter reading". Status is one of
+`open` / `done` / `archived`; the `complete` endpoint records the
+completion time. Actions cascade-delete with their item.
 
-**Plugin configuration (`config/plugins/export.yaml`):**
+The deliberate non-features:
 
-```yaml
-plugin:
-  name: "export"
-  display_name:
-    de: "Buch-Export"
-    en: "Book Export"
-    es: "Exportar libro"
-    fr: "Export de livre"
-  description:
-    de: "EPUB, PDF und Projektstruktur-Export via Pandoc"
-    en: "EPUB, PDF and project structure export via Pandoc"
-  version: "1.0.0"
-  license: "MIT"
-  depends_on: []            # no dependencies
-  api_version: "1"          # compatible with hook spec v1
-
-settings:
-  pandoc_path: "pandoc"
-  default_format: "epub"
-  pdf_engine: "xelatex"
-  toc_depth: 2
-
-formats:
-  - id: "epub"
-    label: { de: "EPUB", en: "EPUB" }
-    extension: "epub"
-    media_type: "application/epub+zip"
-  - id: "pdf"
-    label: { de: "PDF", en: "PDF" }
-    extension: "pdf"
-    media_type: "application/pdf"
-  - id: "project"
-    label: { de: "Projektstruktur (ZIP)", en: "Project Structure (ZIP)" }
-    extension: "zip"
-    media_type: "application/zip"
-```
-
-**Internationalization (`config/i18n/de.yaml`):**
-
-```yaml
-ui:
-  dashboard:
-    title: "Meine Buecher"
-    new_book: "Neues Buch"
-    no_books: "Noch keine Buecher"
-    confirm_delete: "Buch wirklich loeschen?"
-  editor:
-    new_chapter: "Neues Kapitel"
-    confirm_delete_chapter: "Kapitel wirklich loeschen?"
-    placeholder: "Beginne zu schreiben..."
-    saving: "Speichert..."
-    saved: "Gespeichert"
-  export:
-    title: "Export"
-  common:
-    cancel: "Abbrechen"
-    create: "Erstellen"
-    delete: "Loeschen"
-    save: "Speichern"
-```
-
-For a different application (e.g. a podcast tool) you only change the YAML files:
-
-```yaml
-# config/app.yaml for a podcast tool
-app:
-  name: "PodForge"
-  version: "1.0.0"
-
-plugins:
-  entry_point_group: "podforge.plugins"
-  enabled: ["recording", "editing", "publishing"]
-
-ui:
-  title: "PodForge"
-  subtitle: "Record, edit, publish"
-```
-
-### 3.3 Why pluggy as the base
-
-pluggy is the de-facto standard for Python plugin systems. pytest, tox, datasette and kedro use it. It provides:
-
-- Hook specification and hook implementation as decorators
-- Entry point discovery (`load_setuptools_entrypoints`)
-- firstresult hooks (the first return value wins)
-- Call-order management (trylast, tryfirst)
-- Type-safe hook calls
-
-PluginForge does not reinvent the wheel, it adds the layers pluggy is missing: configuration, lifecycle, web integration.
-
-### 3.4 Plugin interface (v0.10.0)
-
-```python
-# pluginforge/base.py (PyPI package, not local)
-
-from abc import ABC
-from typing import Any
-
-class BasePlugin(ABC):
-    name: str
-    version: str = "0.1.0"
-    api_version: str = "1"
-    description: str = ""
-    author: str = ""
-    depends_on: list[str] = []        # plugin dependencies as a class attribute
-    config_schema: dict[str, type] | None = None  # optional config validation
-    target_application: str | None = None  # v0.7.0+ identity gating; required under v0.9.0 hard-filter when host sets app_id
-    min_app_version: str | None = None     # v0.6.0+ SemVer gate against host app_version
-
-    def init(self, app_config, plugin_config) -> None: ...
-    def activate(self) -> None: ...
-    def deactivate(self) -> None: ...
-    def get_routes(self) -> list: ...           # FastAPI router
-    def get_frontend_manifest(self) -> dict | None: ...  # UI manifest
-    def health(self) -> dict[str, Any]: ...     # health check
-    def get_migrations_dir(self) -> str | None: ...      # Alembic
-```
-
-```python
-# Topos main.py - integration with PluginForge v0.10.0
-from pluginforge import PluginManager
-
-manager = PluginManager(
-    config_path="config/app.yaml",
-    pre_activate=license_check,  # callback before plugin activation
-    api_version="1",
-    app_id="topos",              # v0.7.0+ identity; v0.9.0 hard-filters plugins without target_application
-    app_version=__version__,     # v0.6.0+ host version, compared against plugin.min_app_version
-)
-manager.register_hookspecs(ToposHookSpec)
-manager.discover_plugins()       # load entry points, filter, sort, activate
-manager.mount_routes(app)        # mount FastAPI routers (prefix="/api")
-
-# runtime API
-manager.get_active_plugins()     # list of active plugins
-manager.get_plugin("export")     # plugin instance by name
-manager.deactivate_plugin("x")   # deactivate + hook unregister
-manager.reload_plugin("x")       # hot reload
-manager.refresh_config(notify=...) # reload from disk + replace snapshot (v0.6.0; notify kwarg v0.10.0)
-manager.merge_app_config(overlay, notify=...) # deep-merge overlay onto snapshot (v0.10.0)
-manager.health_check()           # health of all plugins
-manager.get_load_errors()        # errors during loading (legacy dict API; still supported)
-manager.get_last_discovery_result()  # v0.6.0+ DiscoveryResult with PluginError + severity
-manager.inspect_plugin(name)     # v0.9.0 PluginInspection snapshot (state, config, health, hooks, routes)
-manager.call_hook("hook_name")   # invoke a hook
-manager.get_text("key", "de")    # i18n string
-```
-
-### 3.5 PluginForge repository
-
-PluginForge is a standalone PyPI package: https://github.com/astrapi69/pluginforge
-
-```
-pluginforge/       # own repo, not part of Topos
-├── pluginforge/
-│   ├── __init__.py          # public API: BasePlugin, PluginManager
-│   ├── base.py              # BasePlugin ABC (lifecycle, routes, health, manifest)
-│   ├── manager.py           # PluginManager (wraps pluggy, pre_activate, hot reload)
-│   ├── config.py            # YAML config loader
-│   ├── discovery.py         # entry points + topological sort
-│   ├── lifecycle.py         # init/activate/deactivate control
-│   ├── fastapi_ext.py       # mount FastAPI routers (configurable prefix)
-│   ├── alembic_ext.py       # collect Alembic migrations
-│   ├── i18n.py              # multi-language strings from YAML
-│   └── security.py          # plugin name validation, path traversal prevention
-├── tests/
-├── pyproject.toml
-├── README.md
-└── LICENSE
-```
-
-Dependencies: `pluggy`, `pyyaml`. Nothing else. FastAPI and Alembic are optional extras:
-
-```toml
-[tool.poetry.dependencies]
-pluggy = "^1.5.0"
-pyyaml = "^6.0"
-
-[tool.poetry.extras]
-fastapi = ["fastapi"]
-migrations = ["alembic"]
-```
+- No nesting of containers inside containers. Folders and boxes
+  sit at one level; categorisation is what makes them findable.
+- No per-item attachments (photos, scanned PDFs) in v1. Filed
+  for a later phase.
+- No tagging system beyond categories. Categories carry the same
+  weight as tags would; one taxonomy is enough.
 
 ---
 
-## 4. Topos app
+## 3. Architecture
 
-### 4.1 Data model
+Four layers, top to bottom (per `.claude/rules/architecture.md`):
 
-**Current (v0.7.0):**
+1. **Frontend** - React 18 + TypeScript + Vite. Pages under
+   `frontend/src/pages/`. Radix UI for accessible primitives
+   (Dialog, Collapsible). No Tailwind. No editor (Topos has no
+   long-form text). State is local React + Dexie cache; no global
+   store.
+2. **Backend** - FastAPI + SQLAlchemy 2.0 + SQLite + Pydantic v2.
+   Layered as routers → services → models per code-hygiene.md.
+   Routers stay thin; services raise typed `ToposError` subclasses;
+   a global exception handler maps to HTTP status codes.
+3. **PluginForge** - External PyPI package
+   (`pluginforge ^0.10.0`), based on `pluggy`. Hooks discovered
+   from the `topos.plugins` entry-point group; plugin manager
+   mounts each plugin's routes under `/api`. Hookspec lives at
+   `backend/app/hookspecs.py`.
+4. **Plugins** - Standalone Python packages under `plugins/`.
+   v1 ships one: [`topos-plugin-excel-import`](../plugins/topos-plugin-excel-import/).
 
-```
-Book
-  id: str (UUID)
-  title: str
-  subtitle: str?
-  author: str
-  language: str (default: "de")
-  series: str?
-  series_index: int?
-  description: str?
-  # Publishing
-  edition: str?
-  publisher: str?
-  publisher_city: str?
-  publish_date: str?
-  isbn_ebook: str?
-  isbn_paperback: str?
-  isbn_hardcover: str?
-  asin_ebook: str?
-  asin_paperback: str?
-  asin_hardcover: str?
-  # Marketing
-  keywords: str? (JSON array)
-  html_description: str?
-  backpage_description: str?
-  backpage_author_bio: str?
-  # Design
-  cover_image: str?
-  custom_css: str?
-  # Timestamps
-  created_at: datetime
-  updated_at: datetime
-  deleted_at: datetime? (soft delete)
-  chapters: [Chapter]
-  assets: [Asset]
+The frontend talks to the backend via the typed client at
+`frontend/src/api/client.ts`. The client normalises snake_case
+JSON to camelCase TS at the boundary, so the rest of the
+frontend stays idiomatic.
 
-ChapterType (enum, 14 values)
-  CHAPTER, PREFACE, FOREWORD, ACKNOWLEDGMENTS,
-  ABOUT_AUTHOR, APPENDIX, BIBLIOGRAPHY, GLOSSARY,
-  EPILOGUE, IMPRINT, NEXT_IN_SERIES, PART_INTRO,
-  INTERLUDE, TABLE_OF_CONTENTS
+### Dexie as a read-through cache
 
-Chapter
-  id: str (UUID)
-  book_id: str (FK -> Book)
-  title: str
-  content: str (TipTap JSON, see 4.3)
-  position: int
-  chapter_type: ChapterType (default: CHAPTER)
-  created_at: datetime
-  updated_at: datetime
+The PWA needs to render usefully even on a flaky connection. So
+every page that lists entities (`useContainers`, `useItems`,
+`useCategories`, `useActions`) follows the stale-while-revalidate
+pattern: load cached rows from IndexedDB (instant render), then
+fetch fresh from the API and swap. Mutations go through the API
+directly; the cache is updated from the response.
 
-Asset
-  id: str
-  book_id: str (FK -> Book)
-  filename: str
-  asset_type: str (cover, figure, diagram, table)
-  path: str
-  uploaded_at: datetime
-```
-
-**Earlier versions:**
-
-```
-UserBackup (v0.4.0 - now replaced by the .bgb backup)
-  id: str
-  created_at: datetime
-  format: str (zip)
-  path: str
-```
-
-### 4.2 Integration with PluginForge v0.10.0
-
-```python
-# topos/backend/app/main.py
-
-from pluginforge import PluginManager
-
-manager = PluginManager(
-    config_path="config/app.yaml",
-    pre_activate=license_check,  # license check before activation
-    api_version="1",
-    app_id="topos",              # v0.7.0+ identity; v0.9.0 hard-filters plugins without target_application
-    app_version=__version__,     # v0.6.0+ host version, compared against plugin.min_app_version
-)
-manager.register_hookspecs(ToposHookSpec)
-
-# Apply user-overlay BEFORE discovery (v0.10.0 merge_app_config; no
-# active plugins yet, so notify=False). See config_overlay.refresh_manager_overlay
-# for the shared helper that wraps merge_app_config plus reload_config.
-from app import config_overlay
-config_overlay.refresh_manager_overlay(manager, notify=False)
-
-manager.discover_plugins()
-manager.mount_routes(app)  # mount FastAPI routers
-
-# Health check and load errors
-@app.get("/api/plugins/health")
-def health(): return manager.health_check()
-
-@app.get("/api/plugins/errors")
-def errors(): return manager.get_load_errors()
-```
-
-### 4.3 Internal storage format
-
-TipTap can store content as HTML or as JSON. We use **TipTap JSON** as the internal format:
-
-- Structured and machine-readable
-- Lossless roundtrips (JSON -> editor -> JSON)
-- Easier to transform than HTML (e.g. for export)
-- Editor-independent (migratable to another editor)
-
-On export the export plugin converts TipTap JSON to Markdown (for write-book-template) or HTML (for EPUB). The conversion is therefore a plugin responsibility, not a core responsibility.
-
-```json
-{
-  "type": "doc",
-  "content": [
-    {
-      "type": "heading",
-      "attrs": { "level": 2 },
-      "content": [{ "type": "text", "text": "Chapter 1" }]
-    },
-    {
-      "type": "paragraph",
-      "content": [{ "type": "text", "text": "Once upon a time..." }]
-    }
-  ]
-}
-```
-
-### 4.4 Export as a plugin
-
-The entire export is a plugin (`topos-plugin-export`):
-
-```
-topos-plugin-export/
-├── pyproject.toml
-├── topos_export/
-│   ├── __init__.py
-│   ├── plugin.py            # ExportPlugin(BasePlugin)
-│   ├── hookimpls.py         # hook implementations
-│   ├── scaffolder.py        # write-book-template directory structure
-│   ├── pandoc_runner.py     # Pandoc calls
-│   ├── tiptap_to_md.py      # TipTap JSON -> Markdown conversion
-│   └── routes.py            # /api/books/{id}/export/{fmt}
-├── config/
-│   └── export.yaml
-└── tests/
-```
-
-```toml
-# topos-plugin-export/pyproject.toml
-[project.entry-points."topos.plugins"]
-export = "topos_export.plugin:ExportPlugin"
-```
-
-### 4.5 write-book-template directory structure
-
-On export the plugin produces:
-
-```
-{book-title}/
-├── manuscript/
-│   ├── chapters/
-│   │   ├── 01-chapter-title.md
-│   │   ├── 02-chapter-title.md
-│   ├── front-matter/
-│   │   ├── toc.md
-│   │   ├── preface.md
-│   │   ├── foreword.md
-│   │   └── acknowledgments.md
-│   ├── back-matter/
-│   │   ├── about-the-author.md
-│   │   ├── appendix.md
-│   │   ├── bibliography.md
-│   │   ├── glossary.md
-│   │   └── index.md
-│   ├── figures/
-│   └── tables/
-├── assets/
-│   ├── covers/
-│   └── figures/
-│       ├── diagrams/
-│       └── infographics/
-├── config/
-│   ├── metadata.yaml
-│   ├── styles.css
-│   └── template.tex          (optional)
-├── output/
-│   ├── book.epub
-│   └── book.pdf
-├── scripts/
-├── README.md
-└── pyproject.toml             (optional)
-```
-
-Mapping DB -> filesystem:
-
-| Topos (DB) | write-book-template (filesystem) |
-|----------------|----------------------------------|
-| `Book.title` | project folder name, `config/metadata.yaml` -> `title` |
-| `Book.subtitle` | `config/metadata.yaml` -> `subtitle` |
-| `Book.author` | `config/metadata.yaml` -> `author`, `back-matter/about-the-author.md` |
-| `Book.language` | `config/metadata.yaml` -> `lang` |
-| `Book.series` | `config/metadata.yaml` -> `series` |
-| `Book.series_index` | `config/metadata.yaml` -> `series_index` |
-| `Book.description` | `config/metadata.yaml` -> `description` |
-| `Chapter.title` | filename `{NN}-{slug}.md`, H1 in the content |
-| `Chapter.content` | Markdown body (converted from TipTap JSON) |
-| `Chapter.position` | numeric prefix (`01-`, `02-`, ...) |
-
-### 4.6 Offline/local-first
-
-Topos has to work completely offline:
-
-- SQLite as the default DB (no external DB required)
-- All assets local on the filesystem
-- Frontend deliverable as static files (no CDN forced)
-- Only exception: plugins that call external APIs (TTS, AI help) naturally need network access
-
-### 4.7 Backup
-
-Full-data backup as a ZIP:
-
-```
-topos-backup-2026-03-26/
-├── books/
-│   ├── {book-id-1}/
-│   │   ├── book.json          # book metadata
-│   │   ├── chapters/
-│   │   │   ├── {chapter-id}.json  # chapter with TipTap JSON
-│   │   │   └── ...
-│   │   └── assets/            # associated images
-│   └── {book-id-2}/
-│       └── ...
-├── settings.json              # app settings
-└── manifest.json              # backup metadata, version, date
-```
-
-Importing a backup restores the entire state. Independent of the export plugin (which produces the write-book-template structure).
+The backend remains the source of truth. There is no offline
+mutation queue, no CRDT, no two-way sync. If a request fails the
+mutation fails; the UI surfaces an error. This is a deliberate
+non-feature; see Section 5.
 
 ---
 
-## 5. Business model
+## 4. Excel as the bootstrap data source
 
-| Layer | License | Content |
-|-------|---------|---------|
-| PluginForge | MIT (free) | Framework, usable by anyone |
-| Topos core | MIT (free) | UI, editor, Book/Chapter CRUD, backup |
-| plugin-export | MIT (free) | EPUB, PDF, project structure |
-| Community plugins | MIT (free) | Developed by the community |
-| All other plugins | MIT (free) | Audiobook, children's books, KDP, translation, grammar |
+The seed dataset is an `.xlsx` file with a specific three-sheet
+shape (the user's personal `Ordner-Ordnung.xlsx`):
 
-### 5.1 Plugin catalog
+| Sheet | Owner | Type | Cols 0-6 |
+|---|---|---|---|
+| `Meine Ordner` | `self` | `folder` | id, label, content, priority, category-path, location, action |
+| `Ordner Eltern` | `parents` | `folder` | id, label, content, priority (no location or action) |
+| `Boxen` | `self` | `box` | id-or-range, label, ..., content (col 4), category-path (col 5) |
 
-**Free (MIT):**
+The `topos-plugin-excel-import` plugin owns the parse + import
+loop. It is idempotent on `Container.external_id`; re-importing
+the same workbook produces zero inserts. Items match within a
+container on `(container_id, content)`; actions match on
+`(item_id, text)`. Existing action status is preserved across
+re-imports (a completed action stays completed even if the
+source row still lists it as open).
 
-| Plugin | Type | Description |
-|--------|------|-------------|
-| `plugin-export` | Export | EPUB, PDF, write-book-template ZIP |
-| `plugin-characters` | Structure | Character database, relationship graph |
-| `plugin-wordcount` | Editor | Word count per chapter and total |
+German source labels (priority strings like "sehr hoch",
+category segments like "Finanzen/Bank/Girokonto") are translated
+to English slugs via two mapping tables in
+`plugins/topos-plugin-excel-import/topos_excel_import/mappings.py`.
+The original German is preserved in `Category.display_name` so
+the UI can show the user's vocabulary even when the slug is
+English.
 
-**Premium:**
-
-| Plugin | Type | Description | Depends on |
-|--------|------|-------------|------------|
-| `plugin-kinderbuch` | Export + editor | One-image-per-page layout, special templates | plugin-export |
-| `plugin-kdp` | Export | KDP metadata, cover validation, preview | plugin-export |
-| `plugin-audiobook` | Export | Text-to-speech, MP3/M4B, chapter markers | plugin-export |
-| `plugin-grammar` | Editor | LanguageTool integration | - |
-| `plugin-ai-assist` | Editor | AI writing help | - |
-| `plugin-collaboration` | Structure | Multi-user real-time editing (exploration) | - |
-| `plugin-versioning` | Editor | Chapter version history with diff | - |
-| `plugin-docx` | Export | Word export for editors | plugin-export |
-
-### 5.2 Plugin dependencies
-
-Declared in the plugin YAML:
-
-```yaml
-plugin:
-  name: "kinderbuch"
-  depends_on: ["export"]
-```
-
-On load PluginForge verifies that all dependencies are active (topological sort). Missing dependencies cause the plugin to be skipped with a warning (visible via `get_load_errors()`). Dependencies are now declared as a class attribute:
-
-```python
-class KinderbuchPlugin(BasePlugin):
-    name = "kinderbuch"
-    depends_on = ["export"]
-```
-
-### 5.3 Plugin licensing (offline)
-
-Licensing is Topos-specific (not part of PluginForge) and lives in `backend/app/licensing.py`. The check runs via a `pre_activate` callback on the PluginManager:
-
-```python
-manager = PluginManager(
-    config_path="config/app.yaml",
-    pre_activate=license_check,  # return False -> plugin is not activated
-)
-```
-
-The codebase contains a dormant HMAC-SHA256 licensing system in `backend/app/licensing.py` (disabled via `LICENSING_ENABLED = False`). All plugins are free and activate without license checks. See `docs/explorations/monetization.md` for reactivation planning.
+Categories are created lazily on import: every segment in an
+item's category path that doesn't yet exist gets a fresh
+`Category` row, parent-to-leaf, so the tree is always fully
+materialised.
 
 ---
 
-## 5.4 Plugin installation (ZIP)
+## 5. Sync strategy: there isn't one
 
-Third-party plugins can be installed as a ZIP file via the Settings UI. Installation happens dynamically at runtime (strategy B: dynamic loading).
+The backend is the single source of truth. Dexie is a read-through
+cache. If multiple devices (browser + desktop launcher) want to
+share state, they point at the same backend instance.
 
-**ZIP structure:**
+Out-of-scope by design:
 
-```
-my-plugin.zip
-└── my-plugin/
-    ├── plugin.yaml          # plugin configuration (required)
-    ├── my_plugin/           # Python package (required)
-    │   ├── __init__.py
-    │   ├── plugin.py        # plugin class (BasePlugin subclass)
-    │   └── routes.py        # optional FastAPI router
-    └── requirements.txt     # optional dependencies
-```
+- Multi-master replication / CRDT-based sync.
+- Offline mutation queue that replays on reconnect.
+- Per-user authentication or multi-tenant data partitioning.
+- A cloud-hosted Topos service. Run your own backend.
 
-**plugin.yaml minimum content:**
-
-```yaml
-plugin:
-  name: "my-plugin"
-  display_name:
-    de: "Mein Plugin"
-    en: "My Plugin"
-  description:
-    de: "Beschreibung"
-    en: "Description"
-  version: "1.0.0"
-  license: "MIT"
-  depends_on: []
-  api_version: "1"
-  entry_point: "my_plugin.plugin"  # optional, auto-detected
-
-settings:
-  # plugin-specific settings
-```
-
-**Installation flow:**
-
-1. User uploads the ZIP through Settings > Plugins > "Install ZIP"
-2. Backend validates the ZIP structure (plugin.yaml, Python package, plugin.py)
-3. Extraction to `plugins/installed/{plugin-name}/`
-4. Plugin config is copied to `config/plugins/{name}.yaml`
-5. Plugin is added to `sys.path` and registered dynamically
-6. Plugin shows up in the settings and can be configured
-
-**Security:**
-
-- Plugin names are validated (lowercase letters, digits, hyphens only)
-- ZIP paths are checked for path traversal
-- Plugins run in the same process (no sandboxing) - only install trusted plugins
-
-**API endpoints:**
-
-- `POST /api/plugins/install` - upload and install a plugin ZIP
-- `DELETE /api/plugins/install/{name}` - uninstall a plugin
-- `GET /api/plugins/installed` - list installed plugins
-
-### 5.5 Plugin UI strategy (manifest-driven)
-
-Plugins can declare UI extensions through the `get_frontend_manifest()` method. The frontend queries `GET /api/plugins/manifests` and renders predefined UI slots.
-
-**Predefined UI slots:**
-
-| Slot | Description | Location in the app |
-|------|-------------|---------------------|
-| `sidebar_actions` | Buttons in the chapter sidebar | BookEditor sidebar |
-| `toolbar_buttons` | Buttons in the editor toolbar | Editor toolbar |
-| `editor_panels` | Panels next to the editor | BookEditor |
-| `settings_section` | Additional settings | Settings > Plugins |
-| `export_options` | Options in the export dialog | ExportDialog |
-
-**Manifest example (export plugin):**
-
-```python
-def get_frontend_manifest(self) -> dict | None:
-    return {
-        "sidebar_actions": [
-            {
-                "id": "export_epub",
-                "label": {"de": "EPUB exportieren", "en": "Export EPUB"},
-                "icon": "download",
-                "action": "/api/books/{book_id}/export/epub",
-            }
-        ],
-        "export_options": [
-            {
-                "id": "toc_depth",
-                "type": "select",
-                "label": {"de": "Inhaltsverzeichnis-Tiefe", "en": "TOC Depth"},
-                "options": [1, 2, 3, 4],
-                "default": 2,
-            }
-        ],
-    }
-```
-
-**Strategy for complex plugin UIs:**
-
-For plugins that go beyond simple manifest declarations (e.g. interactive preview, complex forms), Web Components as custom elements can be delivered. The plugin ZIP then contains a compiled JS bundle that is loaded through a defined slot.
-
-## 6. API versioning
-
-Hook specs are versioned. Plugins declare which API version they support:
-
-```python
-# topos/hookspecs.py - version 1
-import pluggy
-hookspec = pluggy.HookspecMarker("topos.plugins")
-
-class ToposHookSpec:
-    @hookspec
-    def export_formats(self) -> list[dict]:
-        """Return list of supported export formats."""
-
-    @hookspec(firstresult=True)
-    def export_execute(self, book, fmt: str, options: dict) -> Path:
-        """Execute an export. First plugin to return wins."""
-```
-
-When hooks change, a new spec version is created (v2). Old plugins (api_version: "1") keep working as long as the v1 hooks are not removed. Deprecation warnings on old hooks.
+This isn't a stance against future sync; it's a stance against
+**bootstrap-phase complexity**. The user's actual workflow is one
+person + one backend + one mobile browser + occasional desktop
+use. CRDT machinery is a tax that this workflow doesn't pay.
 
 ---
 
-## 7. Roadmap
+## 6. Plugin extension points
 
-Feature details and open items see `docs/ROADMAP.md` (with IDs for prompt references). Per-version history see `docs/CHANGELOG.md`.
+`backend/app/hookspecs.py` currently exposes one placeholder hook:
+`app_ready(app_id, app_version)`. The rest of the plugin surface
+is the same as PluginForge's defaults: each plugin can mount
+FastAPI routes via `get_routes()`, declare frontend UI surfaces
+via `get_frontend_manifest()`, and report health via `health()`.
 
----
+The `topos-plugin-excel-import` plugin demonstrates the route
+pattern: it mounts `POST /api/import/excel` and is discovered via
+the `topos.plugins` entry-point group.
 
-## 8. Scope
+Plugins that need their own secrets register env-var overrides at
+activation time via
+`app.secrets_store.register_plugin_secret_override("plugins.<name>.<key>", "TOPOS_PLUGIN_<NAME>_<KEY>")`.
+The resolved value lands at the matching dotted path in the
+merged config dict; see [configuration.md](configuration.md).
 
-### What Topos is
+### Likely future plugins
 
-- A web UI for writing books
-- Built on PluginForge (reusable plugin framework)
-- Offline-capable and local-first
-- A generator for write-book-template project structures (via a plugin)
-- An EPUB/PDF export tool via Pandoc (via a plugin)
-- Open source (MIT)
+These are sketches, not commitments:
 
-### What PluginForge is
+- **CSV import** - sibling to the Excel importer for users with
+  different source formats.
+- **QR-label printer** - generate a printable sheet of QR codes
+  keyed by `Container.external_id` so a phone scan jumps to the
+  detail page.
+- **Photo attachments** - one or more photos per container,
+  scaled + stored under the data dir.
+- **Voice import** - local speech-to-text for entering items
+  hands-free while standing in front of a shelf.
+- **Backup / restore** - periodic export of the SQLite DB +
+  uploads to a chosen filesystem path or remote.
 
-- An extension layer on top of pluggy, not a replacement
-- Application-agnostic, reusable
-- YAML-configurable (title, labels, settings, i18n)
-- With FastAPI integration and DB migration support
-
-### What neither is
-
-- Not an AI text generator (but extensible via a plugin)
-- Not a collaborative real-time tool (but extensible via a plugin)
-- Not a layout program (no InDesign replacement)
-
----
-
-## 9. Competitive analysis
-
-| Tool | Open source | Web | Offline | Plugin system | Project structure |
-|------|-------------|-----|---------|---------------|-------------------|
-| Scrivener | No | No | Yes | No | Proprietary |
-| Reedsy Studio | No | Yes | No | No | No |
-| Manuskript | Yes | No | Yes | No | Proprietary |
-| Obsidian | No | No | Yes | Yes (community) | No |
-| VS Code | Yes | Yes | Yes | Yes (extensions) | No |
-| **Topos** | **Yes** | **Yes** | **Yes** | **Yes (PluginForge)** | **write-book-template** |
-
-No other authoring tool combines open source, a web UI, offline capability, a real plugin framework on top of pluggy, and a standardized Pandoc-compatible project structure.
+Each lands as a standalone plugin under `plugins/`. None ship in
+v1.
 
 ---
 
-## 10. Open questions
+## 7. Tech stack
 
-1. ~~**PluginForge name:** is `pluginforge` available as a PyPI package name?~~ Done - published on PyPI as `pluginforge`.
+- **Backend:** Python 3.11+, FastAPI, SQLAlchemy 2.0, SQLite,
+  Pydantic v2, Alembic, Poetry, pluginforge 0.10.x.
+- **Frontend:** React 18, TypeScript (strict), Vite, Radix UI,
+  @dnd-kit (carried from the template for future drag-reorder
+  work), Lucide, react-toastify, Dexie 4.
+- **Plugins:** pluginforge entry-point group `topos.plugins`.
+- **Launcher:** PyInstaller-based cross-OS desktop launcher
+  (`launcher/`).
+- **Testing:** pytest (backend + plugins), Vitest (frontend),
+  Playwright (e2e).
+- **Tooling:** Poetry, npm, ruff, ESLint, Prettier, pre-commit,
+  Make, Docker.
 
-2. **Frontend plugin loading:** dynamic loading of React components at runtime (module federation, importmaps) or static bundling at build time?
+---
 
-3. **PluginForge scope frontend:** should PluginForge also have an npm counterpart for frontend plugin loading, or does that stay Topos-specific?
+## 8. Out of scope
 
-4. **Plugin DB migrations:** Alembic with multiple `versions` folders (one per plugin) or a central folder with a plugin prefix?
+Things Topos deliberately does not do:
 
-5. **TipTap JSON size:** for long chapters TipTap JSON can be noticeably larger than HTML. Check relevance for SQLite performance before phase 7 (PostgreSQL).
+- AI-driven categorisation, summarisation, or any LLM features.
+  Topos is a deterministic record-keeper.
+- A cloud / SaaS / multi-tenant offering. Run your own
+  backend.
+- WYSIWYG editing. Items are short strings; notes are plain
+  text.
+- Mobile-native apps (iOS / Android). The PWA covers mobile.
+- Auth + per-user data partitioning. Single-user.
+- The TypeScript port of `astrapi69/tree-api` +
+  `astrapi69/gen-tree`. Categories use a slash-separated string
+  today; the tree-api port is filed for a later phase.
+
+If any of these turn out to be load-bearing, they get reopened.
+For now they are filed.
