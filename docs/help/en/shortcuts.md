@@ -1,6 +1,6 @@
 # Keyboard Shortcuts
 
-The following shortcuts are available throughout MyApp. On macOS, replace Ctrl with Cmd.
+The following shortcuts are available throughout Topos. On macOS, replace Ctrl with Cmd.
 
 ## App
 

@@ -22,7 +22,7 @@ from pluginforge.config import load_i18n
 # bare top-level `app` package name does not shadow the `app = FastAPI(
 # ...)` assignment below (mypy attr-defined cascade otherwise).
 from app import import_plugins as _register_core_import_handlers  # noqa: F401, E402
-from app.hookspecs import MyAppHookSpec
+from app.hookspecs import ToposHookSpec
 from app.import_plugins import handlers as _import_plugins_handlers  # noqa: F401, E402
 from app.licensing import LicenseError, LicenseStore, LicenseValidator
 from app.routers import (
@@ -63,9 +63,9 @@ if not CONFIG_PATH.exists() and CONFIG_EXAMPLE_PATH.exists():
     logging.getLogger(__name__).info("Created config/app.yaml from app.yaml.example")
 
 # Environment configuration
-DEBUG = os.getenv("MYAPP_DEBUG", "true").lower() in ("true", "1", "yes")
-CORS_ORIGINS = os.getenv("MYAPP_CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
-SECRET_KEY = os.getenv("MYAPP_SECRET_KEY", "")
+DEBUG = os.getenv("TOPOS_DEBUG", "true").lower() in ("true", "1", "yes")
+CORS_ORIGINS = os.getenv("TOPOS_CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+SECRET_KEY = os.getenv("TOPOS_SECRET_KEY", "")
 
 # App config helpers
 import yaml
@@ -80,17 +80,17 @@ def _get_user_override_path() -> Path:
 
     XDG-conformant on Linux/macOS, ``%APPDATA%`` on Windows. Set
     ``XDG_CONFIG_HOME`` to relocate; otherwise defaults to
-    ``~/.config/myapp/secrets.yaml``.
+    ``~/.config/topos/secrets.yaml``.
     """
     if sys.platform == "win32":
         appdata = os.environ.get("APPDATA")
         if appdata:
-            return Path(appdata) / "myapp" / "secrets.yaml"
-        return Path.home() / "AppData" / "Roaming" / "myapp" / "secrets.yaml"
+            return Path(appdata) / "topos" / "secrets.yaml"
+        return Path.home() / "AppData" / "Roaming" / "topos" / "secrets.yaml"
     xdg_config = os.environ.get("XDG_CONFIG_HOME")
     if xdg_config:
-        return Path(xdg_config) / "myapp" / "secrets.yaml"
-    return Path.home() / ".config" / "myapp" / "secrets.yaml"
+        return Path(xdg_config) / "topos" / "secrets.yaml"
+    return Path.home() / ".config" / "topos" / "secrets.yaml"
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
@@ -116,7 +116,7 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 # in a separate refactor (PluginManager loader has its own config path
 # and reload machinery).
 _ENV_SECRET_OVERRIDES: dict[str, tuple[str, ...]] = {
-    "MYAPP_AI_API_KEY": ("ai", "api_key"),
+    "TOPOS_AI_API_KEY": ("ai", "api_key"),
 }
 
 
@@ -192,9 +192,9 @@ def _load_app_config() -> dict[str, Any]:
     1. Project ``app.yaml`` (defaults shipped with the app).
     2. User-overlay ``<data_dir>/config/app.yaml`` (Settings UI
        writes; see ``app.config_overlay``).
-    3. Secrets override ``~/.config/myapp/secrets.yaml``
+    3. Secrets override ``~/.config/topos/secrets.yaml``
        (long-standing user-home secrets file).
-    4. Environment variables (``MYAPP_AI_API_KEY`` etc.).
+    4. Environment variables (``TOPOS_AI_API_KEY`` etc.).
 
     Higher layers win. Lists REPLACE; dicts deep-merge. Called
     per-request where freshness matters; cheap (small yaml files,
@@ -231,7 +231,7 @@ def _has_project_secret_without_override() -> bool:
         return False
     if _get_user_override_path().exists():
         return False
-    if os.environ.get("MYAPP_AI_API_KEY"):
+    if os.environ.get("TOPOS_AI_API_KEY"):
         return False
     return True
 
@@ -240,7 +240,7 @@ if _has_project_secret_without_override():
     logger.warning(
         "Secrets found in %s (ai.api_key). This file is gitignored but "
         "may be committed accidentally, end up in backups, or appear in "
-        "screen-shares. Move secrets to %s or set MYAPP_AI_API_KEY. "
+        "screen-shares. Move secrets to %s or set TOPOS_AI_API_KEY. "
         "See docs/configuration.md for details.",
         CONFIG_PATH,
         _get_user_override_path(),
@@ -298,17 +298,17 @@ manager = PluginManager(
     config_path=str(CONFIG_PATH),
     pre_activate=_check_license,
     api_version="1",
-    app_id="myapp",
+    app_id="topos",
     app_version=__version__,
 )
-manager.register_hookspecs(MyAppHookSpec)
+manager.register_hookspecs(ToposHookSpec)
 
 
 def _sync_manager_with_overlay() -> None:
     """Apply the user-overlay layer to the manager's app-config snapshot.
 
     PluginForge's ``PluginManager.__init__`` loads the project app.yaml
-    into its internal snapshot. MyApp's runtime config additionally
+    into its internal snapshot. Topos's runtime config additionally
     layers a user-overlay on top (see ``app.config_overlay``); without
     this call the snapshot is stale relative to Settings-UI writes made
     on a previous run. Pre-discovery (no active plugins to notify), so
@@ -345,11 +345,11 @@ def _load_installed_plugins() -> None:
                 if path_str not in sys.path:
                     sys.path.insert(0, path_str)
 
-    # Bundled plugins (e.g. plugins/myapp-plugin-audiobook/)
+    # Bundled plugins (e.g. plugins/topos-plugin-audiobook/)
     bundled_dir = BASE_DIR.parent / "plugins"
     if bundled_dir.exists():
         for plugin_dir in bundled_dir.iterdir():
-            if plugin_dir.is_dir() and plugin_dir.name.startswith("myapp-plugin-"):
+            if plugin_dir.is_dir() and plugin_dir.name.startswith("topos-plugin-"):
                 path_str = str(plugin_dir)
                 if path_str not in sys.path:
                     sys.path.insert(0, path_str)
@@ -367,7 +367,7 @@ def _enabled_plugins_from_config() -> list[str]:
 
 
 def _discovered_entry_points() -> list[str]:
-    """Names of all plugins registered under the ``myapp.plugins``
+    """Names of all plugins registered under the ``topos.plugins``
     entry-point group.
 
     Distinguishes 'plugin not in entry-point set' (= not installed,
@@ -378,7 +378,7 @@ def _discovered_entry_points() -> list[str]:
     try:
         from importlib.metadata import entry_points
 
-        return sorted(ep.name for ep in entry_points(group="myapp.plugins"))
+        return sorted(ep.name for ep in entry_points(group="topos.plugins"))
     except Exception:  # noqa: BLE001 - diagnostic only
         return []
 
@@ -391,7 +391,7 @@ def _log_plugin_diagnostics_pre(*, enabled_in_config: list[str]) -> None:
     """
     discovered = _discovered_entry_points()
     logger.info(
-        "Plugin discovery: %d entry points found via 'myapp.plugins' group: %s",
+        "Plugin discovery: %d entry points found via 'topos.plugins' group: %s",
         len(discovered),
         ", ".join(discovered) if discovered else "none",
     )
@@ -444,7 +444,7 @@ def _log_plugin_diagnostics_post(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Starting MyApp (debug=%s)", DEBUG)
+    logger.info("Starting Topos (debug=%s)", DEBUG)
     # Migrate v0.25.0-and-earlier project-tree data into the canonical
     # XDG data dir on first start after the Phase 2 path swap. Runs
     # BEFORE init_db so a moved SQLite DB is picked up rather than
@@ -454,7 +454,7 @@ async def lifespan(app: FastAPI):
     migrate_data_dir_if_needed()
     # Stamp the data dir as production so the test conftest tripwire
     # can refuse to run if a test ever points at this same path.
-    # No-op in test mode (MYAPP_TEST=1).
+    # No-op in test mode (TOPOS_TEST=1).
     from app.paths import mark_data_dir_as_production
 
     mark_data_dir_as_production()
@@ -503,12 +503,12 @@ async def lifespan(app: FastAPI):
     )
 
     yield
-    logger.info("Shutting down MyApp")
+    logger.info("Shutting down Topos")
     manager.deactivate_all()
 
 
 app = FastAPI(
-    title="MyApp",
+    title="Topos",
     description="Open-source book authoring platform.",
     version=__version__,
     lifespan=lifespan,
@@ -586,11 +586,11 @@ app.include_router(ws_router, prefix="/api")
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from app.exceptions import MyAppError
+from app.exceptions import ToposError
 
 
-@app.exception_handler(MyAppError)
-async def myapp_error_handler(request: Request, exc: MyAppError):
+@app.exception_handler(ToposError)
+async def topos_error_handler(request: Request, exc: ToposError):
     """Map typed domain errors to HTTP responses (per code-hygiene.md)."""
     if exc.status_code >= 500:
         logger.error(

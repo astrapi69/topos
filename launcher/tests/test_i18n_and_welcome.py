@@ -17,7 +17,7 @@ from unittest.mock import patch
 
 import pytest
 
-from myapp_launcher import i18n, settings
+from topos_launcher import i18n, settings
 
 
 # --- i18n -----------------------------------------------------------
@@ -32,16 +32,16 @@ class TestI18n:
 
     def test_returns_english_when_active_lang_is_en(self) -> None:
         i18n.set_language("en")
-        assert i18n.t("welcome.title") == "Welcome to MyApp"
+        assert i18n.t("welcome.title") == "Welcome to Topos"
 
     def test_returns_german_when_active_lang_is_de(self) -> None:
         i18n.set_language("de")
-        assert i18n.t("welcome.title") == "Willkommen bei MyApp"
+        assert i18n.t("welcome.title") == "Willkommen bei Topos"
 
     def test_falls_back_to_english_when_key_missing_from_de(self) -> None:
         i18n.set_language("de")
         i18n._CATALOG["de"].pop("welcome.title", None)
-        assert i18n.t("welcome.title") == "Welcome to MyApp"
+        assert i18n.t("welcome.title") == "Welcome to Topos"
 
     def test_returns_key_itself_when_missing_from_both(self) -> None:
         i18n.set_language("en")
@@ -53,22 +53,22 @@ class TestI18n:
         assert i18n.active_language() == "en"
 
     def test_locale_de_resolves_to_de_catalog(self) -> None:
-        with patch("myapp_launcher.ui._current_lang", return_value="de"):
+        with patch("topos_launcher.ui._current_lang", return_value="de"):
             assert i18n._resolve_language(None) == "de"
 
     def test_locale_en_resolves_to_en_catalog(self) -> None:
-        with patch("myapp_launcher.ui._current_lang", return_value="en"):
+        with patch("topos_launcher.ui._current_lang", return_value="en"):
             assert i18n._resolve_language(None) == "en"
 
     def test_unknown_locale_falls_back_to_en(self) -> None:
         # Use "zh" (Chinese) as a placeholder for an unsupported
         # language. JA used to play this role before the JA catalog
         # shipped in v0.30.0.
-        with patch("myapp_launcher.ui._current_lang", return_value="zh"):
+        with patch("topos_launcher.ui._current_lang", return_value="zh"):
             assert i18n._resolve_language(None) == "en"
 
     def test_settings_language_overrides_locale(self) -> None:
-        with patch("myapp_launcher.ui._current_lang", return_value="en"):
+        with patch("topos_launcher.ui._current_lang", return_value="en"):
             assert i18n._resolve_language("de") == "de"
 
     def test_german_catalog_uses_real_umlauts(self) -> None:
@@ -132,7 +132,7 @@ class TestDockerMissingDialog:
     webbrowser, settings, retry helpers."""
 
     def _run(self, choice: str):
-        from myapp_launcher import __main__ as main_mod
+        from topos_launcher import __main__ as main_mod
 
         opens: list[str] = []
 
@@ -148,13 +148,13 @@ class TestDockerMissingDialog:
         return rc, opens, dlg
 
     def test_install_button_opens_docker_download_page(self) -> None:
-        from myapp_launcher import __main__ as main_mod
+        from topos_launcher import __main__ as main_mod
 
         rc, opens, _ = self._run("primary")
         assert rc == 1
         assert opens == [main_mod.DOCKER_INSTALL_URL]
 
-    def test_guide_button_opens_myapp_docker_guide(self) -> None:
+    def test_guide_button_opens_topos_docker_guide(self) -> None:
         rc, opens, _ = self._run("secondary")
         assert rc == 1
         assert len(opens) == 1
@@ -175,7 +175,7 @@ class TestWelcomeBeforeDockerCheck:
     are essential to the UX contract documented in the prompt."""
 
     def test_welcome_fires_when_welcomed_false(self, tmp_path: Path) -> None:
-        from myapp_launcher import __main__ as main_mod
+        from topos_launcher import __main__ as main_mod
 
         seen: dict[str, object] = {}
 
@@ -198,7 +198,7 @@ class TestWelcomeBeforeDockerCheck:
         update_mock.assert_any_call("welcomed", True)
 
     def test_welcome_skipped_when_welcomed_true(self) -> None:
-        from myapp_launcher import __main__ as main_mod
+        from topos_launcher import __main__ as main_mod
 
         with (
             patch.object(main_mod.settings, "get", return_value=True),

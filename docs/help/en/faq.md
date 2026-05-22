@@ -1,6 +1,6 @@
 # FAQ
 
-**What format is used internally?** MyApp stores chapter content as TipTap JSON. During export, this is converted to Markdown and then to the target format.
+**What format is used internally?** Topos stores chapter content as TipTap JSON. During export, this is converted to Markdown and then to the target format.
 
 **How do I export my book?** Open your book in the editor. The sidebar contains export buttons for EPUB, PDF, DOCX, HTML, Markdown, and project structure (ZIP).
 
@@ -12,7 +12,7 @@
 
 **What is Markdown mode?** The editor supports switching between WYSIWYG and Markdown views. Content is converted automatically when toggling.
 
-**Does MyApp work offline?** Yes. MyApp uses SQLite and stores everything locally. Only plugins that access external APIs (Grammar, Translation, Audiobook with cloud engines, AI with cloud providers) require an internet connection. Fonts are bundled locally.
+**Does Topos work offline?** Yes. Topos uses SQLite and stores everything locally. Only plugins that access external APIs (Grammar, Translation, Audiobook with cloud engines, AI with cloud providers) require an internet connection. Fonts are bundled locally.
 
 **How do I set up AI features?** Go to Settings > General > AI Assistant. Enable AI, pick a provider, enter your API key, and test the connection. See the [AI help page](ai.md) for details.
 
@@ -20,7 +20,7 @@
 
 **How do I find a specific book?** Use the search bar and filter dropdowns at the top of the Dashboard. You can filter by genre, language, and sort by date, title, or author.
 
-**What happens if I close the browser without saving?** MyApp saves automatically as you type (debounced). Additionally, unsaved changes are stored locally in your browser (IndexedDB). If you reopen a chapter with unsaved changes, you will be offered to restore them.
+**What happens if I close the browser without saving?** Topos saves automatically as you type (debounced). Additionally, unsaved changes are stored locally in your browser (IndexedDB). If you reopen a chapter with unsaved changes, you will be offered to restore them.
 
 **What are the available themes?** Six themes with light and dark variants each: Warm Literary, Cool Modern, Nord, Classic, Studio, and Notebook. Change themes in Settings > General.
 

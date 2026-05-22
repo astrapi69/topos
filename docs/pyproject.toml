@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "myapp-docs"
+name = "topos-docs"
 version = "0.1.0"
-description = "MyApp documentation build tools (MkDocs)"
+description = "Topos documentation build tools (MkDocs)"
 authors = ["Asterios Raptis"]
 license = "MIT"
 package-mode = false

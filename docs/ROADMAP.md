@@ -1,6 +1,6 @@
 <!--
 TODO: Adapt for your project. Current content is inherited from
-upstream (MyApp) and serves as structural reference only.
+upstream (Topos) and serves as structural reference only.
 The shape of this document (sections, headings, formatting
 conventions) is reusable; the specifics are not.
 -->
@@ -24,11 +24,11 @@ conventions) is reusable; the specifics are not.
 
 ---
 
-# MyApp Roadmap (inherited content below)
+# Topos Roadmap (inherited content below)
 
 Current phase: Phase 2 - build for real users, not just developers
 Last updated: 2026-05-07 (v0.30.0 cut)
-Latest release: v0.30.0 (launcher localized in 8 languages with full parity-test enforcement; DEP-DBPATH-01 cycle closes — MYAPP_DB_PATH no longer honoured as a path override, warning-only on lingering env var; 5 new bilingual core help pages — books bulk-export, cross-platform installers, architecture, contributing, deployment, API reference; plugin dev guide refreshed for Vite 8 + Node 24; pre-release dependency sweep with fastapi 0.135 → 0.136 lock-step + in-range patches across all subsystems).
+Latest release: v0.30.0 (launcher localized in 8 languages with full parity-test enforcement; DEP-DBPATH-01 cycle closes — TOPOS_DB_PATH no longer honoured as a path override, warning-only on lingering env var; 5 new bilingual core help pages — books bulk-export, cross-platform installers, architecture, contributing, deployment, API reference; plugin dev guide refreshed for Vite 8 + Node 24; pre-release dependency sweep with fastapi 0.135 → 0.136 lock-step + in-range patches across all subsystems).
 Open tasks: 1 P2 (PB-PHASE4) + 3 active (P3..P5) + 2 BLOCKED-on-upstream + 1 P5 (LAUNCHER-I18N-NATIVE-REVIEW-01, public call-for-reviewers at [#18](https://github.com/astrapi69/pluginforge-app-template/issues/18))
 Archive: [docs/roadmap-archive/](roadmap-archive/)
 
@@ -102,9 +102,9 @@ upgrades. See backlog for a curated daily-planning view.
     - [ ] Session 6 — EPUB3 Fixed-Layout export + epubcheck.
     - [ ] Session 7 — Polish + onboarding (new-children-book
       starter template, in-app help, builtin BookTemplate).
-  - Plugin separation: `myapp-plugin-kinderbuch` owns
+  - Plugin separation: `topos-plugin-kinderbuch` owns
     `picture_book` exclusively. A separate
-    `myapp-plugin-comics` will own `comic_book` once
+    `topos-plugin-comics` will own `comic_book` once
     user-demand triggers the work (see backlog
     `COMIC-BOOK-PLUGIN-01`).
   - Out of scope for v1: convert prose <-> picture_book,

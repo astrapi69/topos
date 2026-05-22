@@ -1,7 +1,7 @@
 """Article ⇄ ArticleComment reclassification.
 
 UX-Polish v0.32.0 F2b. Companion to the two-tier comment-detection
-heuristic in plugins/myapp-plugin-medium-import/walker.py:
+heuristic in plugins/topos-plugin-medium-import/walker.py:
 when the heuristic misclassifies a post (in either direction),
 the user reclassifies via these endpoints.
 
@@ -70,7 +70,7 @@ def article_to_comment(
       use)
     - ``Article.canonical_url`` → ``ArticleComment.canonical_url``
     - ``Article.created_at`` → ``ArticleComment.imported_at``
-      (preserves the "when did this first enter MyApp?"
+      (preserves the "when did this first enter Topos?"
       timestamp; on the article side that lives in created_at,
       on the comment side it lives in imported_at)
     - ``Article.created_at`` → ``ArticleComment.created_at``
@@ -192,7 +192,7 @@ def _derive_source_metadata(article: Article) -> tuple[str, str | None]:
     ``(imported_from, source_filename)``.
 
     Returns ``("manual", None)`` when the article has no
-    import_source row — native MyApp articles get the
+    import_source row — native Topos articles get the
     ``"manual"`` discriminator per the model docstring.
     """
     if article.import_source is None:

@@ -16,7 +16,7 @@ This template is part of a small family of MIT-licensed projects:
 - **[adaptive-learner](https://github.com/astrapi69/adaptive-learner)** — reference downstream application built on this template (the patterns in `.claude/rules/` evolved there).
 - **[bibliogon](https://github.com/astrapi69/bibliogon)** — book-authoring application from which the original skeleton was extracted. Acknowledged here for attribution; not a runtime dependency.
 
-In `myapp` (the placeholder name throughout this template), `myapp_*` env vars, `myapp.plugins` entry-point group, and `MyApp` UI strings, the literal `myapp` is meant to be globally renamed by the user (see `CUSTOMIZE.md`).
+In `topos` (the placeholder name throughout this template), `topos_*` env vars, `topos.plugins` entry-point group, and `Topos` UI strings, the literal `topos` is meant to be globally renamed by the user (see `CUSTOMIZE.md`).
 
 ## Development guidelines
 
@@ -39,7 +39,7 @@ On a conflict between CLAUDE.md and the rules, the rules win.
 
 - **Backend:** Python 3.11+, FastAPI, SQLAlchemy 2.0, SQLite, Pydantic v2, Poetry
 - **Frontend:** React 18+, TypeScript (strict), Vite, Radix UI, @dnd-kit, Lucide, react-toastify
-- **Plugins:** pluginforge ^0.10.0 (PyPI), entry points under group `myapp.plugins`. Host passes `app_id="myapp"` + `app_version`, so plugins must declare `target_application = "myapp"` or they are rejected with `missing_target_application`. The user-overlay layer is applied via `config_overlay.refresh_manager_overlay(manager)` which wraps PluginForge v0.10.0's `merge_app_config()` public API (replaces the prior `manager._app_config = ...` private-attribute write).
+- **Plugins:** pluginforge ^0.10.0 (PyPI), entry points under group `topos.plugins`. Host passes `app_id="topos"` + `app_version`, so plugins must declare `target_application = "topos"` or they are rejected with `missing_target_application`. The user-overlay layer is applied via `config_overlay.refresh_manager_overlay(manager)` which wraps PluginForge v0.10.0's `merge_app_config()` public API (replaces the prior `manager._app_config = ...` private-attribute write).
 - **Launcher:** PyInstaller-based cross-OS desktop launcher (`launcher/`)
 - **Testing:** pytest, Vitest, Playwright, mutmut, Stryker
 - **Tooling:** Poetry, npm, Docker, Make, ruff, ESLint, Prettier, pre-commit
@@ -90,8 +90,8 @@ The skeleton ships with **zero plugins**. The loader infrastructure (`backend/ap
 
 Cross-OS desktop launcher under `launcher/`, packaged with PyInstaller. Produces a single-file installer-launcher binary per OS that bootstraps the backend, opens the frontend in the user's browser, and manages auto-update + uninstall.
 
-- **Spec:** `launcher/myapp-launcher.spec` (PyInstaller)
-- **Python package:** `launcher/myapp_launcher/`
+- **Spec:** `launcher/topos-launcher.spec` (PyInstaller)
+- **Python package:** `launcher/topos_launcher/`
 - **Per-OS build pipelines:** `.github/workflows/launcher-{linux,macos,windows}.yml` build artifacts on release tags
 - **Embedded version:** injected at PyInstaller build time from `backend/pyproject.toml` via the spec (no hardcoded literal)
 - **User-facing install scripts:** `install.sh` (Linux), `install.command` (macOS), `install.cmd` + `install.ps1` (Windows) — generated from `*.template` files at release time
@@ -126,7 +126,7 @@ pluginforge-app-template/
 - CSS: custom properties, dark mode via `[data-theme="dark"]`
 - Commits: English, conventional (feat/fix/refactor/docs)
 - E2E: `data-testid` selectors only
-- Secrets NEVER in committed config files. Three-layer chain: project `backend/config/app.yaml` (defaults) < `~/.config/myapp/secrets.yaml` (user override, gitignored) < env-vars (`MYAPP_*`).
+- Secrets NEVER in committed config files. Three-layer chain: project `backend/config/app.yaml` (defaults) < `~/.config/topos/secrets.yaml` (user override, gitignored) < env-vars (`TOPOS_*`).
 
 ## Tests
 
@@ -137,8 +137,8 @@ pluginforge-app-template/
 
 Tests run in a temporary data directory, never against production data. Two layers of protection in `backend/tests/conftest.py`:
 
-1. `MYAPP_TEST=1` + `TEST_DATABASE_URL=sqlite:///:memory:` set BEFORE any `app.*` import. `MYAPP_DATA_DIR` set to a process-scoped tmp dir.
-2. Production data directories carry a `.myapp-production` marker file. If any test ever sees this marker, the run aborts with `pytest.exit(returncode=2)`.
+1. `TOPOS_TEST=1` + `TEST_DATABASE_URL=sqlite:///:memory:` set BEFORE any `app.*` import. `TOPOS_DATA_DIR` set to a process-scoped tmp dir.
+2. Production data directories carry a `.topos-production` marker file. If any test ever sees this marker, the run aborts with `pytest.exit(returncode=2)`.
 
 Path conventions: `Path("uploads")` is forbidden (CWD-relative). Use `app.paths.get_upload_dir()`. Frozen module-level imports of paths are forbidden — use the helper functions.
 

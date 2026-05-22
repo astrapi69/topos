@@ -40,7 +40,7 @@ def _make_plugin_zip(
 ) -> io.BytesIO:
     """Build a valid plugin ZIP in memory."""
     buf = io.BytesIO()
-    top = f"myapp-plugin-{plugin_name}"
+    top = f"topos-plugin-{plugin_name}"
 
     with zipfile.ZipFile(buf, "w") as zf:
         if include_yaml:
@@ -65,7 +65,7 @@ def _make_plugin_zip(
                 f"class TestPlugin(BasePlugin):\n"
                 f"    name = '{plugin_name}'\n"
                 f"    version = '{version}'\n"
-                f"    target_application = 'myapp'\n",
+                f"    target_application = 'topos'\n",
             )
 
         if extra_files:
@@ -116,7 +116,7 @@ def client(temp_base, monkeypatch):
     pi_module._installed_dir = temp_base / "plugins" / "installed"
     pi_module._manager = None  # skip dynamic registration
     config_overlay.set_project_config_dir(temp_base / "config")
-    monkeypatch.setenv("MYAPP_DATA_DIR", str(temp_base))
+    monkeypatch.setenv("TOPOS_DATA_DIR", str(temp_base))
 
     yield TestClient(app)
 
@@ -234,15 +234,15 @@ def test_install_invalid_plugin_name_rejected(client):
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:
         zf.writestr(
-            "myapp-plugin-bad/plugin.yaml",
+            "topos-plugin-bad/plugin.yaml",
             yaml.dump({"plugin": {"name": "INVALID!", "version": "1.0.0"}}),
         )
-        zf.writestr("myapp-plugin-bad/bad_pkg/__init__.py", "")
+        zf.writestr("topos-plugin-bad/bad_pkg/__init__.py", "")
         zf.writestr(
-            "myapp-plugin-bad/bad_pkg/plugin.py",
+            "topos-plugin-bad/bad_pkg/plugin.py",
             "from pluginforge import BasePlugin\n"
             "class P(BasePlugin):\n"
-            "  target_application = 'myapp'\n"
+            "  target_application = 'topos'\n"
             "  name='bad'\n"
             "  version='1'\n",
         )

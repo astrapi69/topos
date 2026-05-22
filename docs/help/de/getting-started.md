@@ -4,18 +4,18 @@
 
 ## Installation
 
-MyApp läuft als Sammlung von Docker-Containern auf deinem eigenen Rechner. Bücher, Einstellungen und Exporte bleiben lokal; nichts wird zu einem Dienst hochgeladen.
+Topos läuft als Sammlung von Docker-Containern auf deinem eigenen Rechner. Bücher, Einstellungen und Exporte bleiben lokal; nichts wird zu einem Dienst hochgeladen.
 
 ### Voraussetzungen
 
-Du brauchst eine laufende [Docker](https://docs.docker.com/get-docker/)-Installation, bevor du MyApp starten kannst. Docker Desktop (Windows, macOS) oder Docker Engine mit Compose (Linux) funktionieren beide.
+Du brauchst eine laufende [Docker](https://docs.docker.com/get-docker/)-Installation, bevor du Topos starten kannst. Docker Desktop (Windows, macOS) oder Docker Engine mit Compose (Linux) funktionieren beide.
 
 ### Schnellinstallation (empfohlen)
 
-Der Einzeiler lädt MyApp nach `~/myapp`, baut die Docker-Images und startet die Anwendung.
+Der Einzeiler lädt Topos nach `~/topos`, baut die Docker-Images und startet die Anwendung.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/astrapi69/myapp/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/astrapi69/topos/main/install.sh | bash
 ```
 
 Sobald der Installer fertig ist, öffne [http://localhost:7880](http://localhost:7880) im Browser.
@@ -26,34 +26,34 @@ Wenn du das Repository lieber selbst klonst:
 
 ```bash
 git clone https://github.com/astrapi69/pluginforge-app-template.git
-cd myapp
+cd topos
 ./start.sh
 ```
 
 `start.sh` baut die Images beim ersten Aufruf und startet danach denselben Docker-Stack wie der Einzeiler. Die Anwendung ist unter [http://localhost:7880](http://localhost:7880) erreichbar.
 
-## MyApp ausführen
+## Topos ausführen
 
-Nach der Installation wird MyApp mit zwei Skripten im Installationsverzeichnis gesteuert.
+Nach der Installation wird Topos mit zwei Skripten im Installationsverzeichnis gesteuert.
 
 | Aktion      | Befehl                              |
 | ----------- | ----------------------------------- |
-| Stoppen     | `cd ~/myapp && ./stop.sh`       |
-| Starten     | `cd ~/myapp && ./start.sh`      |
+| Stoppen     | `cd ~/topos && ./stop.sh`       |
+| Starten     | `cd ~/topos && ./start.sh`      |
 | Neu starten | `./stop.sh && ./start.sh`           |
 
 Beim Stoppen bleiben deine Daten auf der Festplatte erhalten; beim erneuten Starten findest du alles unverändert wieder vor.
 
 ## Deinstallation
 
-So entfernst du MyApp und alle lokalen Daten:
+So entfernst du Topos und alle lokalen Daten:
 
 ```bash
-cd ~/myapp && ./stop.sh
-cd ~ && rm -rf ~/myapp
+cd ~/topos && ./stop.sh
+cd ~ && rm -rf ~/topos
 ```
 
-Das stoppt die Container und löscht das Installationsverzeichnis samt SQLite-Datenbank, hochgeladenen Assets und allen Exporten unter `~/myapp`. Lege vorher ein Backup an, wenn du deine Bücher behalten willst (Dashboard > **Backup**).
+Das stoppt die Container und löscht das Installationsverzeichnis samt SQLite-Datenbank, hochgeladenen Assets und allen Exporten unter `~/topos`. Lege vorher ein Backup an, wenn du deine Bücher behalten willst (Dashboard > **Backup**).
 
 ## Optional: PDF-Export mit Pandoc
 
@@ -61,11 +61,11 @@ EPUB-, Word-, HTML- und Markdown-Export funktionieren ohne weitere Schritte. PDF
 
 ## Für Entwickler
 
-Die Arbeit an MyApp selbst nutzt ein anderes Setup: `make install` (Poetry + npm + Plugins) und `make dev` (FastAPI auf Port 8000, Vite auf Port 5173). Das Target `make prod` startet denselben Docker-Stack wie `./start.sh`. Die vollständige Entwicklerdokumentation steht im [README](https://github.com/astrapi69/pluginforge-app-template#development) und in der [CLAUDE.md](https://github.com/astrapi69/pluginforge-app-template/blob/main/CLAUDE.md).
+Die Arbeit an Topos selbst nutzt ein anderes Setup: `make install` (Poetry + npm + Plugins) und `make dev` (FastAPI auf Port 8000, Vite auf Port 5173). Das Target `make prod` startet denselben Docker-Stack wie `./start.sh`. Die vollständige Entwicklerdokumentation steht im [README](https://github.com/astrapi69/pluginforge-app-template#development) und in der [CLAUDE.md](https://github.com/astrapi69/pluginforge-app-template/blob/main/CLAUDE.md).
 
 ## Erster Start
 
-Wenn du [http://localhost:7880](http://localhost:7880) zum ersten Mal öffnest, ist die Datenbank leer. MyApp nutzt SQLite als lokale Datenbank; alle Daten liegen auf deinem Rechner, es wird kein externer Server benötigt. Über die Einstellungen kannst du Sprache und Theme anpassen. Es stehen sechs Themes (Warm Literary, Cool Modern, Nord, Klassisch, Studio, Notizbuch) jeweils in Light- und Dark-Variante zur Verfügung - Details im Abschnitt Themes.
+Wenn du [http://localhost:7880](http://localhost:7880) zum ersten Mal öffnest, ist die Datenbank leer. Topos nutzt SQLite als lokale Datenbank; alle Daten liegen auf deinem Rechner, es wird kein externer Server benötigt. Über die Einstellungen kannst du Sprache und Theme anpassen. Es stehen sechs Themes (Warm Literary, Cool Modern, Nord, Klassisch, Studio, Notizbuch) jeweils in Light- und Dark-Variante zur Verfügung - Details im Abschnitt Themes.
 
 ## Dashboard: Filter, Sortierung, Papierkorb
 
@@ -85,6 +85,6 @@ Nach dem Anlegen wirst du direkt in den Editor weitergeleitet. Dort kannst du ü
 
 ## Bestehende Projekte importieren
 
-Wenn du bereits ein Buchprojekt im write-book-template-Format besitzt, kannst du es direkt importieren. Klicke auf dem Dashboard auf **Importieren** und wähle die entsprechende ZIP-Datei aus. MyApp liest die Kapitelstruktur, Metadaten (Titel, Autor, ISBN, Sprache) und Assets (Bilder, Cover) automatisch ein und legt das Buch mit allen Inhalten an.
+Wenn du bereits ein Buchprojekt im write-book-template-Format besitzt, kannst du es direkt importieren. Klicke auf dem Dashboard auf **Importieren** und wähle die entsprechende ZIP-Datei aus. Topos liest die Kapitelstruktur, Metadaten (Titel, Autor, ISBN, Sprache) und Assets (Bilder, Cover) automatisch ein und legt das Buch mit allen Inhalten an.
 
 Ebenso lassen sich Backups wiederherstellen. Eine Backup-Datei (.bgb) enthält den gesamten Zustand aller Bücher. Über **Backup** auf dem Dashboard exportierst du den aktuellen Stand, über **Restore** stellst du ihn wieder her.

@@ -117,9 +117,9 @@ This rule generalizes beyond settings:
 
 The 2026-05-09 retroactive fix added 6 such tests to `test_medium_import_endpoint.py`. The smoke-test pattern is not banned (it's still useful for diagnosing where in the chain a regression broke), but it cannot be the only coverage of a flag's behavior.
 
-## TipTap image node in MyApp is `imageFigure`, not `image`
+## TipTap image node in Topos is `imageFigure`, not `image`
 
-MyApp's editor ([frontend/src/components/Editor.tsx](../../frontend/src/components/Editor.tsx)) does NOT load `@tiptap/extension-image`. It loads `@pentestpad/tiptap-extension-figure`, which registers its node under `name: "imageFigure"`. `@tiptap/extension-image` IS in `package.json` but is never imported.
+Topos's editor ([frontend/src/components/Editor.tsx](../../frontend/src/components/Editor.tsx)) does NOT load `@tiptap/extension-image`. It loads `@pentestpad/tiptap-extension-figure`, which registers its node under `name: "imageFigure"`. `@tiptap/extension-image` IS in `package.json` but is never imported.
 
 Consequence: any TipTap doc that contains a plain `{type: "image", ...}` node fails the editor's strict ProseMirror schema. The unknown node breaks doc construction and the editor renders empty — for the WHOLE doc, not just the image.
 
@@ -138,11 +138,11 @@ Walker shipped with this bug originally (commit `b986397`); fix landed in `cfd8b
 
 ## Bulk operations earn page-route UX even when single-item siblings use modals
 
-Existing import surfaces in MyApp are modals (`ImportWizardModal` opened from Dashboard + ArticleList — single book, single article, single project, single git repo). The new `/articles/import/medium` page deliberately diverges to a top-level route. The deciding factors:
+Existing import surfaces in Topos are modals (`ImportWizardModal` opened from Dashboard + ArticleList — single book, single article, single project, single git repo). The new `/articles/import/medium` page deliberately diverges to a top-level route. The deciding factors:
 
 1. **Bulk operations have multi-minute processing time.** A single-item import is sub-second to a few seconds; a 200-post Medium archive with image downloads runs 30-60 seconds (often longer). A modal that locks the screen for that long is hostile.
 2. **Structured results need review surface, not just acknowledgement.** Single-item imports produce one outcome ("imported" or "failed"); bulk imports produce a 3-section table (imported / skipped / errored) the user genuinely reads, sometimes for several minutes.
-3. **Stable URL matters for help-doc deep links.** "Open MyApp → Articles → click Importieren button → select Medium" is multi-step verbal instruction; a direct URL is one click. For features with longer learning curves (the Medium import has 4 settings worth explaining) the help-doc anchor is real value.
+3. **Stable URL matters for help-doc deep links.** "Open Topos → Articles → click Importieren button → select Medium" is multi-step verbal instruction; a direct URL is one click. For features with longer learning curves (the Medium import has 4 settings worth explaining) the help-doc anchor is real value.
 4. **Pattern-adherence is not an end in itself.** Diverging knowingly for a use-case-specific reason is fine; diverging by accident is not. The decision was surfaced explicitly to the user — including the audit-finding that the original "matches existing pattern" reasoning was based on a misconception (no `/import` route existed) — and confirmed before any code shipped.
 
 When choosing route vs modal for a new import / batch surface:
@@ -176,7 +176,7 @@ Generalizes to any global that callers invoke with `new` (`WebSocket`, `Worker`,
 1. **`disable_existing_loggers=True` is the default.** Every `logging.Logger` created BEFORE `init_db()` (in our app: at least `app.main`'s module-level logger) is disabled. Subsequent `logger.info(...)` calls drop to the floor.
 2. **The root logger level is reset** to whatever `[logger_root] level = ...` says in `alembic.ini` (`WARNING` in this repo). So even fresh loggers created after the call inherit the lower level.
 
-**Symptom**: you see `Starting MyApp` (logged before `init_db()`), then alembic's own setup messages, then your subsequent INFO lines silently disappear. Plugin loading still WORKS — routes mount, the app responds — but the audit trail is dark. Burned several debugging hours on the v0.30.0+ medium-import session by treating "no plugin loading log = plugin not loading" as a true causal link.
+**Symptom**: you see `Starting Topos` (logged before `init_db()`), then alembic's own setup messages, then your subsequent INFO lines silently disappear. Plugin loading still WORKS — routes mount, the app responds — but the audit trail is dark. Burned several debugging hours on the v0.30.0+ medium-import session by treating "no plugin loading log = plugin not loading" as a true causal link.
 
 **Fix**: in `migrations/env.py`, gate the `fileConfig` call so it only fires when the FastAPI app has not already configured logging:
 
@@ -200,7 +200,7 @@ PluginForge reads each plugin's settings from the backend-wide `config_dir`, con
 backend/config/plugins/{plugin_slug}.yaml
 ```
 
-NOT `plugins/myapp-plugin-{slug}/config/{slug}.yaml`. The latter is fine for shipping the file inside the plugin's distributable ZIP, but at runtime PluginForge looks ONLY in the backend's config_dir.
+NOT `plugins/topos-plugin-{slug}/config/{slug}.yaml`. The latter is fine for shipping the file inside the plugin's distributable ZIP, but at runtime PluginForge looks ONLY in the backend's config_dir.
 
 **Symptom**: the plugin loads and activates, but `self._settings = self.config.get("settings", {})` returns an empty dict. User-visible settings silently fall back to in-code defaults; the YAML you wrote is never read. The startup log shows it as a single DEBUG line:
 
@@ -216,7 +216,7 @@ That line has appeared in the wild for one shipped-without-defaults plugin (`med
 ## Commit ordering for breaking-change dependency upgrades
 
 - Pin the version bump BEFORE migrating call sites when the new code uses imports that only exist in the new release. Backward-compatible exports in the new version (e.g. v0.8.0 keeping `compile_book` and `OUTPUT_FILE` for one cycle) keep the intermediate state green. Doing it the other way - migrate first, bump pin last - leaves the migration commit red against the still-installed old version and breaks the "each commit green individually" rule.
-- Path-installed plugins do not auto-refresh when their `pyproject.toml` changes. After bumping a transitive dependency in a plugin (e.g. `manuscripta` in `plugins/myapp-plugin-export/pyproject.toml`), run `poetry lock` AND `poetry install` in the BACKEND directory too - the backend's `poetry.lock` caches the resolved deps of the plugin's old pin until you regenerate.
+- Path-installed plugins do not auto-refresh when their `pyproject.toml` changes. After bumping a transitive dependency in a plugin (e.g. `manuscripta` in `plugins/topos-plugin-export/pyproject.toml`), run `poetry lock` AND `poetry install` in the BACKEND directory too - the backend's `poetry.lock` caches the resolved deps of the plugin's old pin until you regenerate.
 
 ## Atomic commits are bounded by "green individually", not "one thing"
 
@@ -248,26 +248,26 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 ## Pandoc raw-HTML pass-through is format-specific
 
 - Pandoc's HTML and EPUB writers preserve raw HTML blocks verbatim. The LaTeX (PDF) and DOCX writers SILENTLY DROP raw HTML - including `<figure>`, `<img>`, `<figcaption>`. The verbose log records `Not rendering RawBlock (Format "html") "<figure>"` per dropped element.
-- Practical consequence: any Markdown emitted by myapp that contains raw HTML images will produce an EPUB with images and a PDF without them. Same input, different output, no error message. We hit this in v0.13.x: imported books exported to PDF with zero embedded images while EPUB worked, and there was no way to tell something was wrong.
+- Practical consequence: any Markdown emitted by topos that contains raw HTML images will produce an EPUB with images and a PDF without them. Same input, different output, no error message. We hit this in v0.13.x: imported books exported to PDF with zero embedded images while EPUB worked, and there was no way to tell something was wrong.
 - Fix: when converting to Markdown for export, always emit native Pandoc syntax for content that must survive PDF/DOCX. For figures, that is `![caption](src "alt")` - Pandoc's `implicit_figures` extension (default in `gfm`/`markdown`) promotes a single-image paragraph back into a real `\begin{figure}` / `<figure>` block in every output format. The raw-HTML form is acceptable ONLY for HTML/EPUB-only content.
-- See [html_to_markdown.py:_close_figure](../../plugins/myapp-plugin-export/myapp_export/html_to_markdown.py) for the converter that emits native syntax for simple figures and falls back to raw HTML (with a warning log) for complex shapes (multiple imgs, mixed content). The warning fires the moment real-world content hits the fallback so we discover it before users do.
+- See [html_to_markdown.py:_close_figure](../../plugins/topos-plugin-export/topos_export/html_to_markdown.py) for the converter that emits native syntax for simple figures and falls back to raw HTML (with a warning log) for complex shapes (multiple imgs, mixed content). The warning fires the moment real-world content hits the fallback so we discover it before users do.
 - Note: manuscripta v0.8.0's `strict_images=True` does NOT catch this class of bug. Strict mode parses Pandoc stderr for unresolved-resource warnings, which only fire when the *reader* fails to resolve a path the *writer* is trying to embed. Raw HTML is dropped at the writer stage before resolution is attempted, so strict mode never sees it.
 
 ## manuscripta v0.8.0 migration: source_dir + run_export + strict_images
 
 - v0.7.x had no first-class library entry point; callers imported `manuscripta.export.book.compile_book` and relied on `os.chdir(project_dir)` plus mutating `manuscripta.export.book.OUTPUT_FILE` (a module global) before the call. Both are gone in v0.8.0.
 - v0.8.0 ships `run_export(source_dir, *, output_file=..., no_type_suffix=..., strict_images=True, ...)`. Pass `source_dir` explicitly; the library never calls `os.chdir` itself, so callers must not rely on cwd. `output_file`/`no_type_suffix` are proper kwargs; do NOT mutate `OUTPUT_FILE` even though it still exists for the CLI's internal use.
-- New typed exception hierarchy under `from manuscripta import ...`: `ManuscriptaError` (base), `ManuscriptaImageError(.unresolved: list[str])`, `ManuscriptaPandocError(.returncode, .stderr, .cmd)`, `ManuscriptaLayoutError(.source_dir, .missing, .reason)`. Per ADR-0004 in upstream, `__str__()` of these is diagnostic; pin error handling on attributes, NOT on parsing the rendered text. MyApp wraps them in `MissingImagesError`/`PandocError` with the original as `.cause`.
+- New typed exception hierarchy under `from manuscripta import ...`: `ManuscriptaError` (base), `ManuscriptaImageError(.unresolved: list[str])`, `ManuscriptaPandocError(.returncode, .stderr, .cmd)`, `ManuscriptaLayoutError(.source_dir, .missing, .reason)`. Per ADR-0004 in upstream, `__str__()` of these is diagnostic; pin error handling on attributes, NOT on parsing the rendered text. Topos wraps them in `MissingImagesError`/`PandocError` with the original as `.cause`.
 - `strict_images=True` is the new default and the right choice for plugin-export: scaffolder writes assets into `project_dir/assets/` from the DB, so any unresolved image is a real bug worth surfacing as a 422 with the `.unresolved` list to the frontend toast.
-- Backend `poetry.lock` caches the resolved dependencies of path-installed plugins. After bumping `manuscripta` in `plugins/myapp-plugin-export/pyproject.toml`, run `poetry lock` AND `poetry install` in the backend dir too - otherwise `myapp-plugin-export` shows the old pin and you ImportError on `from manuscripta import ManuscriptaError`.
+- Backend `poetry.lock` caches the resolved dependencies of path-installed plugins. After bumping `manuscripta` in `plugins/topos-plugin-export/pyproject.toml`, run `poetry lock` AND `poetry install` in the backend dir too - otherwise `topos-plugin-export` shows the old pin and you ImportError on `from manuscripta import ManuscriptaError`.
 - TTS adapter API (`manuscripta.audiobook.tts.create_adapter`, `VoiceInfo`, all engine names) is unchanged in v0.8.0; no audiobook plugin code touches v0.8.0's typed `TTSError` hierarchy yet (existing broad `except Exception` blocks still work). Narrowing those is a separate hygiene pass, NOT part of the v0.8.0 upgrade.
 
 ## Alembic migration + fresh test DB
 
-- For every new Alembic migration that touches `books` (or another core table) via `ALTER TABLE`: the file `backend/myapp.db` MUST be deleted before the next `make test`. Otherwise you get `sqlite3.OperationalError: duplicate column name: ...`.
+- For every new Alembic migration that touches `books` (or another core table) via `ALTER TABLE`: the file `backend/topos.db` MUST be deleted before the next `make test`. Otherwise you get `sqlite3.OperationalError: duplicate column name: ...`.
 - Reason: `backend/tests/conftest.py` calls `Base.metadata.create_all(engine)` before every test and creates the tables with the NEW schema. At the same time the on-disk DB still has `alembic_version` pinned to the old revision. `TestClient(app)` triggers the lifespan `init_db()`, which runs `upgrade head` when tables + `alembic_version` both exist - which tries to add the new column via ALTER TABLE a second time and crashes.
-- Permanent fix: `rm backend/myapp.db` after `git pull` with a new migration, then `make test`. `init_db()` now sees no tables, runs `create_all` + `stamp head`, and subsequent test runs pass because `alembic_version` is already at the new head.
-- The clean solution would be a real in-memory test DB setup (e.g. via a `MYAPP_TEST=1` env var) that skips `init_db()` in test mode - does not exist yet.
+- Permanent fix: `rm backend/topos.db` after `git pull` with a new migration, then `make test`. `init_db()` now sees no tables, runs `create_all` + `stamp head`, and subsequent test runs pass because `alembic_version` is already at the new head.
+- The clean solution would be a real in-memory test DB setup (e.g. via a `TOPOS_TEST=1` env var) that skips `init_db()` in test mode - does not exist yet.
 
 ## TipTap editor
 
@@ -377,14 +377,14 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 - Previously `BookMetadataEditor` and `Settings` fell back to a hardcoded `EDGE_TTS_VOICES` list when `/api/voices?engine=X&language=Y` returned an empty array. Effect: user picks Google TTS / pyttsx3 / ElevenLabs, the backend cache has no voices for those engines (only Edge is seeded via `sync_edge_tts_voices`) -> frontend dumps 16 Edge-DE voices into the dropdown even though the engine cannot play them. Bug report was "dropdown shows ALL voices instead of only the matching ones".
 - Solution: a shared helper `api.audiobook.listVoices(engine, language)` tries `/api/voices` (cache) first, then `/api/audiobook/voices` (live plugin endpoint), then returns `[]`. NO more hardcoded list. Both UI sites render a clear empty state "No voices available for {engine} in {language}" on `voices.length === 0` instead of faking something.
 - `frontend/src/data/edge-tts-voices.ts` was deleted entirely. If a user really wants to see Edge-DE voices, Edge is the only engine the backend cache seeds and the dropdown fills through the normal path.
-- Backend `voice_store.get_voices` now matches in two steps: if the `language` contains a hyphen (`"de-DE"`), it is an exact case-insensitive match. A bare code (`"de"`) is a prefix match (`de-DE`, `de-AT`, `de-CH`). Previously it always stripped the region suffix, so `"de-DE"` and `"de"` returned the same result - irrelevant for MyApp's current data model (Book.language is a bare code), but the strict variant protects plugin tests and future callers.
+- Backend `voice_store.get_voices` now matches in two steps: if the `language` contains a hyphen (`"de-DE"`), it is an exact case-insensitive match. A bare code (`"de"`) is a prefix match (`de-DE`, `de-AT`, `de-CH`). Previously it always stripped the region suffix, so `"de-DE"` and `"de"` returned the same result - irrelevant for Topos's current data model (Book.language is a bare code), but the strict variant protects plugin tests and future callers.
 - Tests: `backend/tests/test_voice_store.py` (8 tests) covers every path (engine isolation, bare vs region, case insensitivity, unknown engine, unknown language, engine-leak regression). `frontend/src/api/client.test.ts` pins that the helper returns NO hardcoded Edge fallback on `[]` from both endpoints - this is the regression insurance against the original symptom.
 
 ## Audiobook progress dialog: the SSE listener belongs in the context, not in the component
 
 - Previously the `EventSource` lived in the `AudioExportProgress` modal. As soon as the user minimized or a re-render happened, the listener was rebuilt and events were lost - or worse, the job was gone after `clear()` because the modal was the only place holding live state.
 - Solution: the entire SSE lifecycle (open/onmessage/close) now lives in `AudiobookJobProvider`. Phase, event log, current/total/currentTitle, downloadUrl/chapterFiles - everything is in the context. Modal and badge are pure consumers and do not talk to each other.
-- Reload recovery: jobId+bookId+bookTitle are mirrored into `localStorage` (`myapp.audiobook_job`). On provider mount a `useEffect` checks whether a persisted job exists and reactivates the SSE connection. The badge reappears after F5, the modal stays minimized (no pop-up in the user's face).
+- Reload recovery: jobId+bookId+bookTitle are mirrored into `localStorage` (`topos.audiobook_job`). On provider mount a `useEffect` checks whether a persisted job exists and reactivates the SSE connection. The badge reappears after F5, the modal stays minimized (no pop-up in the user's face).
 - The persisted entry is cleared on the `stream_end` event. Otherwise a reload would bring back a job that already finished.
 - Important convention: chapter numbers are pure display logic. `formatChapterPrefix(index, total)` builds "01 | Foreword" / "003 | Foreword" - the TTS engine still only gets the bare chapter title, no number, no pipe. The SSE event carries `{type, index, title, duration_seconds}` as separate fields; the frontend does the formatting. A test in `tests/test_generator.py` pins that `chapter_done` ships a `duration_seconds` field, a Vitest test in `AudioExportProgress.test.ts` pins that the frontend NEVER renders "Chapter X:".
 - BookEditor now reads `?view=metadata` from `useSearchParams`, so the badge can call `navigate("/book/{id}?view=metadata")` after completion and the tab is already open. `setShowMetadata` was wrapped into `_setShowMetadata` that keeps the query param and state in sync.
@@ -415,7 +415,7 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 - Progress events emitted by the generator: `start`, `chapter_start`, `chapter_done`, `chapter_skipped`, `chapter_error`, `merge_start`, `merge_done`, `merge_error`, `done`. The route wrapper adds `ready` (with `download_url`) and `JobStore.update()` appends the synthetic `stream_end` so SSE subscribers exit cleanly.
 - Frontend uses the browser-native `EventSource` (no package required). The modal is `modal=true` and cannot be dismissed via Escape/click-outside until the job is in a terminal status - otherwise the user orphans jobs with a stray click.
 - Generator callbacks must never kill the export: `progress_callback` calls are wrapped in `try/except` and only log. A broken subscriber must NOT destroy an hour of TTS work.
-- Tests must run through `with TestClient(app) as c:`, otherwise FastAPI's lifespan does not fire and the plugin manager never mounts the audiobook/export routes (404 instead of 410). Always mock the TTS engine via `patch("myapp_audiobook.generator.get_engine", ...)`.
+- Tests must run through `with TestClient(app) as c:`, otherwise FastAPI's lifespan does not fire and the plugin manager never mounts the audiobook/export routes (404 instead of 410). Always mock the TTS engine via `patch("topos_audiobook.generator.get_engine", ...)`.
 
 ## Async in the FastAPI lifespan
 
@@ -440,10 +440,10 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 ## Deployment
 
 - Default port: 7880 (not 8080, too often taken).
-- /api/test/reset ONLY in debug mode (MYAPP_DEBUG=true).
-- CORS configurable via MYAPP_CORS_ORIGINS (not hardcoded).
+- /api/test/reset ONLY in debug mode (TOPOS_DEBUG=true).
+- CORS configurable via TOPOS_CORS_ORIGINS (not hardcoded).
 - SQLite path configurable with Docker volume persistence.
-- MYAPP_SECRET_KEY is auto-generated by start.sh when not set.
+- TOPOS_SECRET_KEY is auto-generated by start.sh when not set.
 - Non-root user in the Dockerfile.
 
 ## Licensing
@@ -485,16 +485,16 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 - Data classes (dataclass, TypedDict) instead of loose dicts for context between functions.
 
 ### Error-handling mistakes we made
-- HTTPException thrown directly from services. Makes services untestable without a FastAPI context. Solution: our own exception hierarchy (MyAppError).
+- HTTPException thrown directly from services. Makes services untestable without a FastAPI context. Solution: our own exception hierarchy (ToposError).
 - Bare `except Exception: pass` in plugin code. Errors vanish silently. Solution: catch specific exceptions, at least log them.
 - External tool errors (Pandoc subprocess.CalledProcessError) passed up unwrapped. The user sees a cryptic error message. Solution: ExternalServiceError with a clear service name.
 - Frontend: API calls without catch. User clicks "Export" and nothing happens. Solution: always try/catch with toast feedback and finally for the loading state.
 
 ### Error reporting rules
 - Error details must make a GitHub Issue directly actionable, without follow-up questions.
-- Chain: MyAppError (detail + str(e)) -> API response (detail + traceback in debug mode) -> frontend ApiError -> toast with "Report issue" button -> GitHub Issue (title, stacktrace, browser, app version).
+- Chain: ToposError (detail + str(e)) -> API response (detail + traceback in debug mode) -> frontend ApiError -> toast with "Report issue" button -> GitHub Issue (title, stacktrace, browser, app version).
 - EVERY except block MUST call logger.error() with exc_info=True.
-- EVERY except block MUST include str(e) in the MyAppError subclass (NOT HTTPException).
+- EVERY except block MUST include str(e) in the ToposError subclass (NOT HTTPException).
 - EVERY frontend catch block MUST call toast.error() with the ApiError object, NOT just with a string.
 - Generic error messages like "Export failed" or "Import failed" without details are FORBIDDEN. They make GitHub Issues worthless.
 - File upload functions (fetch instead of request()) must throw ApiError on failure, not Error.
@@ -579,7 +579,7 @@ Stability filter:
 - `install.sh` pinned `VERSION="v0.7.0"` as the default, but Dockerfile and docker-compose.prod.yml evolved significantly after that tag. The v0.7.0 compose used `build: ./backend` (backend-only context), while current uses `context: .` (repo root). Plugins live at `<repo>/plugins/` which is entirely outside the v0.7.0 build context, so `poetry install` inside the container could never find them.
 - The fix for the original Docker bug (commit 59cf3d6) was verified by building from the local working tree, not by running install.sh end-to-end. The local build used the current compose/Dockerfile; install.sh used the ancient tagged version. The verification test was wrong because it didn't test the actual user flow.
 - Rule: when fixing an install/deployment script, always test THE SCRIPT, not just the artifacts it references. `docker build -f Dockerfile .` is not the same test as `./install.sh` because the script may select a different version of the files.
-- install.sh now pins to the latest release tag (updated as part of the release workflow, Step 4). Users can override with `MYAPP_VERSION=vX.Y.Z` for older versions.
+- install.sh now pins to the latest release tag (updated as part of the release workflow, Step 4). Users can override with `TOPOS_VERSION=vX.Y.Z` for older versions.
 - Corollary: install scripts are a special class of code where the test must simulate the actual distribution path. CI that tests scripts should run them the way users run them, not the way developers run them. `docker build -f Dockerfile .` from a working tree is not the same test as `curl ... | bash` which downloads, checks out a tag, and then builds.
 - 2026-05-04 SSoT refactor: install.sh became a generated artifact built from `install.sh.template` + `backend/pyproject.toml` via `scripts/generate_install_sh.sh`. The committed install.sh stays in git because users curl-pipe it directly from the raw GitHub URL; it cannot be a build-time artifact hidden behind .gitignore. Treat it like generated docs: edit the template, regenerate at release time, commit both. `verify_version_pins.sh` runs `--check` to catch drift between template and committed output.
 
@@ -805,7 +805,7 @@ In scope:
 - `docs/CHANGELOG.md`, `docs/CONCEPT.md`, `docs/ROADMAP.md`,
   `docs/backlog.md`
 - `plugins/*/content/de/**/*.md`,
-  `plugins/*/myapp_*/content/de/**/*.md`
+  `plugins/*/topos_*/content/de/**/*.md`
 - `README.md`
 
 Explicitly NOT in scope (do not add):
@@ -861,19 +861,19 @@ When a layout fix requires setting `overflow: hidden` on one of the three, think
 
 ## Filesystem isolation: production data lives outside the project tree
 
-Production MyApp data NEVER lives in the project tree. All paths resolve via `app.paths` helpers (`get_data_dir`, `get_config_dir`, `get_cache_dir`, `get_upload_dir`, `get_db_path`) which use platformdirs (XDG-conformant) by default and respect a `MYAPP_DATA_DIR` (etc.) env-var override. Resolution is **always** via fresh function calls, never via frozen module-level imports.
+Production Topos data NEVER lives in the project tree. All paths resolve via `app.paths` helpers (`get_data_dir`, `get_config_dir`, `get_cache_dir`, `get_upload_dir`, `get_db_path`) which use platformdirs (XDG-conformant) by default and respect a `TOPOS_DATA_DIR` (etc.) env-var override. Resolution is **always** via fresh function calls, never via frozen module-level imports.
 
 Default locations (Phase 2 swap, 2026-05-04):
 
-- Linux/macOS: `~/.local/share/myapp/`
-- Windows: `%LOCALAPPDATA%\myapp\`
+- Linux/macOS: `~/.local/share/topos/`
+- Windows: `%LOCALAPPDATA%\topos\`
 - Tests: a `tmp_path_factory`-managed dir, set by `backend/tests/conftest.py` before any `app.*` import
-- Docker: `/app/data/` via `MYAPP_DATA_DIR=/app/data` in compose, mounted as the named `myapp-data` volume
+- Docker: `/app/data/` via `TOPOS_DATA_DIR=/app/data` in compose, mounted as the named `topos-data` volume
 
 Three layers of protection prevent test runs from touching production data:
 
-1. **Production marker file**. Production directories contain a `.myapp-production` marker (written by the FastAPI lifespan via `app.paths.mark_data_dir_as_production`). If tests ever see one, the entire run aborts with `pytest.exit(returncode=2)`.
-2. **Test conftest sets `MYAPP_DATA_DIR`** to a tmp dir before any `app.*` import. The autouse session fixture also asserts the resolved path looks like a tmp location.
+1. **Production marker file**. Production directories contain a `.topos-production` marker (written by the FastAPI lifespan via `app.paths.mark_data_dir_as_production`). If tests ever see one, the entire run aborts with `pytest.exit(returncode=2)`.
+2. **Test conftest sets `TOPOS_DATA_DIR`** to a tmp dir before any `app.*` import. The autouse session fixture also asserts the resolved path looks like a tmp location.
 3. **All path access via helpers**, never via CWD-relative `Path("foo")` and never via frozen module-level imports.
 
 **Forbidden patterns:**
@@ -886,24 +886,24 @@ Three layers of protection prevent test runs from touching production data:
 
 - `upload_dir = get_upload_dir()` inside the function that uses it.
 
-If `make test` aborts with exit code 2, check what path was mounted via `MYAPP_DATA_DIR`. NEVER delete the marker just to make the test pass; investigate why a test pointed at production. Origin: April 2026 data-loss incident — DB tripwire landed in `a4cf7cf`, filesystem tripwire + paths.py in the same period.
+If `make test` aborts with exit code 2, check what path was mounted via `TOPOS_DATA_DIR`. NEVER delete the marker just to make the test pass; investigate why a test pointed at production. Origin: April 2026 data-loss incident — DB tripwire landed in `a4cf7cf`, filesystem tripwire + paths.py in the same period.
 
 ### Phase 2 migration
 
-Users with v0.25.0-and-earlier data in the project tree (`backend/myapp.db`, `backend/uploads/`) get auto-migrated on first start after the platformdirs swap. Helper: `app.data_dir_migration.migrate_data_dir_if_needed`, run from the FastAPI lifespan BEFORE `init_db()`. Properties:
+Users with v0.25.0-and-earlier data in the project tree (`backend/topos.db`, `backend/uploads/`) get auto-migrated on first start after the platformdirs swap. Helper: `app.data_dir_migration.migrate_data_dir_if_needed`, run from the FastAPI lifespan BEFORE `init_db()`. Properties:
 
 - Idempotent (`.migration-complete` marker short-circuits)
 - Fail-loud on conflict (RuntimeError if both legacy and target hold the same item; silent merge would corrupt data)
 - Breadcrumb at old paths (`.migrated-YYYY-MM-DD` file beside each moved item)
-- Skipped in test mode (`MYAPP_TEST=1`)
+- Skipped in test mode (`TOPOS_TEST=1`)
 
 Rule: when adding a new persistent path under `get_data_dir()`, also add it to `_legacy_paths()` in `data_dir_migration.py` if a v0.25.0-and-earlier code path could have written to a different location. Otherwise users lose data on the next upgrade.
 
 ## Two installation paths diverge: `make test` vs per-plugin CI
 
-MyApp's plugins are installed two different ways depending on context:
+Topos's plugins are installed two different ways depending on context:
 
-- **`make test` path:** the backend's combined `poetry.lock` resolves every plugin as a path-dep (`myapp-plugin-{name} = {path = "../plugins/...", develop = true}`). One `poetry install` from `backend/` brings every plugin's external deps in via the backend's lock.
+- **`make test` path:** the backend's combined `poetry.lock` resolves every plugin as a path-dep (`topos-plugin-{name} = {path = "../plugins/...", develop = true}`). One `poetry install` from `backend/` brings every plugin's external deps in via the backend's lock.
 - **CI plugin-matrix path:** `.github/workflows/ci.yml` and `.github/workflows/coverage.yml` run `poetry install --no-interaction --no-ansi` **inside each plugin directory** against THAT plugin's own `poetry.lock`. The backend lock is irrelevant here.
 
 When a shared external dep (e.g. fastapi) bumps in every pyproject (backend + 10 plugins), the backend lock and the per-plugin locks drift independently. If only the backend lock gets regenerated:
@@ -917,9 +917,9 @@ This shape bit during the v0.30.0 release: the pre-v0.30.0 dep sweep bumped fast
 
 **Mitigation pattern (now enforced):**
 
-- `make lock-all-plugins` (Makefile target shipped in PLUGIN-LOCKFILE-DRIFT-01 commit `1b43aec`): iterates `plugins/myapp-plugin-*/` and runs `poetry lock` in each. Use after any shared-dep pin bump.
+- `make lock-all-plugins` (Makefile target shipped in PLUGIN-LOCKFILE-DRIFT-01 commit `1b43aec`): iterates `plugins/topos-plugin-*/` and runs `poetry lock` in each. Use after any shared-dep pin bump.
 - `make verify-plugin-locks` (Makefile target shipped in the same commit): runs `poetry install --dry-run --no-interaction --no-ansi` per plugin and greps for "changed significantly". Exits 1 with a remediation hint on drift; manual diagnostic, NOT in the pre-tag chain (the pre-commit hook below + the CI per-plugin matrix already cover the right times).
-- Pre-commit hook `plugin-lock-paired-with-pyproject` (shipped in commit `8f6fcea`): scoped via `files: ^plugins/myapp-plugin-[^/]+/pyproject\.toml$`, fails when a staged plugin pyproject lacks a paired staged `poetry.lock`. Catches the operational mistake at commit time. Verified by 6 hook self-check tests in `backend/tests/test_plugin_lock_drift_hook.py` (commit `e31c4fd`), all green at 0.22 s.
+- Pre-commit hook `plugin-lock-paired-with-pyproject` (shipped in commit `8f6fcea`): scoped via `files: ^plugins/topos-plugin-[^/]+/pyproject\.toml$`, fails when a staged plugin pyproject lacks a paired staged `poetry.lock`. Catches the operational mistake at commit time. Verified by 6 hook self-check tests in `backend/tests/test_plugin_lock_drift_hook.py` (commit `e31c4fd`), all green at 0.22 s.
 - Discovery channel without these gates: CI red on main, AFTER a release tag has already been cut. The retro's commitment to "discrete pre-release dep sweep commits" pays off (rollback granularity stays intact), but the better gate is to catch the drift before push, not from the GitHub Actions red badge.
 
 ## AI-prompts embedded in data files beat per-call system-prompts for portability
@@ -936,16 +936,16 @@ passed as a system prompt at API call time.
 Consequence: the same artefact works across THREE workflows
 without any code branching:
 
-1. Built-in AI: MyApp's existing AI-provider abstraction
+1. Built-in AI: Topos's existing AI-provider abstraction
    reads the YAML at runtime, builds its own system+user
    prompts (`backend/app/ai/article_template_prompts.py` /
    `book_template_prompts.py`), and calls the configured
    provider. The rules-in-file are redundant here but harmless.
-2. Custom local endpoint (LM Studio / Ollama): same MyApp
+2. Custom local endpoint (LM Studio / Ollama): same Topos
    code path; `app.ai.llm_client.LLMClient` is endpoint-
    agnostic.
 3. External AI via YAML round-trip: the user pastes the YAML
-   into Claude.ai or ChatGPT with zero MyApp context. The
+   into Claude.ai or ChatGPT with zero Topos context. The
    rules-in-file are load-bearing here — they are the ONLY
    instruction the AI sees. The AI reads them, fills
    `current_value` per the rules, returns valid YAML, the user
@@ -957,7 +957,7 @@ application's call path. A feature whose semantics travel
 WITH the data artifact can run anywhere — paid cloud APIs,
 free-tier playgrounds, local laptops, chat sessions, even
 hand-edits by a human author. The same `.biblio.yaml` exported
-from MyApp can be filled in any of those contexts and
+from Topos can be filled in any of those contexts and
 re-imported.
 
 Generalizes to: file formats that consumers might want to
@@ -1099,7 +1099,7 @@ the browser doesn't drop the connection. Both surfaces (dock
 badge + expanded modal) are trivially testable because they're
 just consumers of the context.
 
-When adding the next long-running job type to MyApp, the
+When adding the next long-running job type to Topos, the
 pattern to follow is: context provider holds the SSE state +
 persistence, components consume it, never the other way around.
 
@@ -1231,7 +1231,7 @@ or "preserves the comment's own canonical URL." Both shapes
 imply the field carries data. Reality, verified after the
 fact: the v1 Medium importer sets the field to ``None``
 universally (line ``responds_to_url=None`` in
-``plugins/myapp-plugin-medium-import/myapp_medium_import/importer.py``),
+``plugins/topos-plugin-medium-import/topos_medium_import/importer.py``),
 and the pre-inspection audit on the user's 209-file export
 already showed Medium's HTML carries no parent-reference
 data to extract.
@@ -1321,27 +1321,27 @@ GDPR / data-portability reasons; "everyone else's data on
 your content" is someone else's data, not yours, so it
 stays.
 
-Concrete rules for any importer surface in MyApp:
+Concrete rules for any importer surface in Topos:
 
 - **Help-doc expectations management.** When a platform's
   export is "your data only", the help doc's "What is NOT
   imported" section must explicitly say so. The
   "comments-other-people-wrote" gap is exactly the kind
   of thing users discover by smoke-test and report as a
-  MyApp bug; a one-paragraph disclaimer in the help
+  Topos bug; a one-paragraph disclaimer in the help
   doc pre-empts that.
 - **The schema can still support the missing data type
-  for forward compatibility.** MyApp's
+  for forward compatibility.** Topos's
   ``ArticleComment.imported_from String(50)`` column can
   carry ``"manual"`` for a future user-entry workflow.
   The column doesn't have to wait for a platform that
   exports incoming-comments; manual entry IS the
   workaround, and the schema is already prepared.
-- **The "no MyApp bug" distinction matters.** When a
+- **The "no Topos bug" distinction matters.** When a
   user reports "X is missing", the diagnosis should
-  separate "MyApp failed to import X" from "the
+  separate "Topos failed to import X" from "the
   source export never contained X." The second is a
-  platform limitation, not a MyApp limitation; the
+  platform limitation, not a Topos limitation; the
   fix is documentation + maybe a follow-up manual-entry
   workflow, NOT an importer change.
 
@@ -1435,7 +1435,7 @@ transitives are still wanted, switch to a per-plugin
 Surfaced during the 2026-05-12 dep-update audit Phase 3,
 on a single test plugin run before going wider.
 
-Bare ``poetry update`` on ``myapp-plugin-help`` (one of
+Bare ``poetry update`` on ``topos-plugin-help`` (one of
 11 plugins, used as a pre-flight test) pulled:
 
 - ✅ ``pydantic 2.12.5 -> 2.13.4`` (low-risk patch)
@@ -1500,15 +1500,15 @@ overstated by one environment-class. The actual breakdown:
 
 - **Dev Docker** (the `docker-compose.yml` bind-mount path
   `./backend:/app`): the bind mount inherits the host's UID,
-  so the container's `myapp` user cannot write to the
+  so the container's `topos` user cannot write to the
   project tree. The endpoint crashes; the bug is real for
   every contributor who runs `docker compose up` from the dev
   compose.
 - **Production Docker** (`docker-compose.prod.yml`, no bind
   mount on `/app`): the Dockerfile does
-  `RUN groupadd -r myapp && useradd -r -g myapp
-  myapp && mkdir -p /app/data && chown -R myapp:myapp
-  /app` then `USER myapp`. The container's user OWNS the
+  `RUN groupadd -r topos && useradd -r -g topos
+  topos && mkdir -p /app/data && chown -R topos:topos
+  /app` then `USER topos`. The container's user OWNS the
   entire `/app/` tree including `config/`. The CWD-relative
   write happens to land in a writable directory. The bug
   **never fired in production**.
@@ -1561,7 +1561,7 @@ The "up to one minute" claim is false for large archives — a
 500MB Medium export takes substantially longer than 60s on
 the same hardware that handles a 50MB archive in under 10s.
 User sees no progress feedback past the minute mark and
-assumes MyApp has crashed.
+assumes Topos has crashed.
 
 Wrong:
 
@@ -1884,9 +1884,9 @@ contributor adds an old-major action by habit.
 ## Module-level caches survive test boundaries (test isolation,
    in-memory edition)
 
-MyApp's filesystem and DB test isolation is well-documented
-in `CLAUDE.md` ("Test isolation" section) — the `MYAPP_TEST=1`
-+ `MYAPP_DATA_DIR` chain plus the production marker tripwire
+Topos's filesystem and DB test isolation is well-documented
+in `CLAUDE.md` ("Test isolation" section) — the `TOPOS_TEST=1`
++ `TOPOS_DATA_DIR` chain plus the production marker tripwire
 cover those layers. But **in-memory caches in service modules
 have no equivalent guard**, and they survive ALL test boundaries
 inside a single pytest process.
@@ -2065,7 +2065,7 @@ Same shape applies to:
   ``clearBookSelection`` callbacks bound to filter state changes.
   Pin tests for both patterns when adding a new list page.
 
-### MyApp's bar-visibility convention at count===0
+### Topos's bar-visibility convention at count===0
 
 Both bulk-action bars (``ArticleBulkActionBar``,
 ``BookBulkActionBar``) are rendered conditionally on
@@ -2077,7 +2077,7 @@ Linear, Notion, etc.
 This is a UI-rendering decision orthogonal to the selection-
 cleanup rule above: the cleanup happens regardless; the
 unmounting is a consequence of the count going to 0. Future
-bulk-action surfaces in MyApp should follow the same shape:
+bulk-action surfaces in Topos should follow the same shape:
 
 ```typescript
 {selection.count > 0 ? (
@@ -2246,7 +2246,7 @@ misread as causal.
 
 ### The trap
 
-MyApp's SW config has a single `urlPattern: /^\/api\//`
+Topos's SW config has a single `urlPattern: /^\/api\//`
 runtime-cache rule registered for `'GET'` only. **Every non-GET
 API call** (every POST, PATCH, DELETE) triggers a Workbox
 `No route found for: <url>` console message. **This is
@@ -2254,7 +2254,7 @@ informational — it means "no runtime-cache rule applied,
 falling through to default fetch"**, which is exactly the
 intended pass-through behavior.
 
-MyApp ALSO has `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` in
+Topos ALSO has `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` in
 workflows and SW dev-tools that show precaching-attempt logs for
 every API URL. None of those messages indicate an error.
 
@@ -2282,7 +2282,7 @@ console message as evidence:
    endpoint via curl to check current state.
 3. **Cross-check with the parallel feature**: if Books works
    and Articles doesn't, see whether the SW route is actually
-   asymmetric in `vite.config.ts` (in MyApp's case it's not
+   asymmetric in `vite.config.ts` (in Topos's case it's not
    — single rule covers all `/api/*`).
 4. **Read the workbox doc text literally**: "No route found"
    ≠ "blocked"; it's "no special handling, default fetch
@@ -2513,14 +2513,14 @@ release cycle, user reports "data loss".
 
 ## Test-isolation discipline: never run integration smoke-tests outside pytest
 
-The MyApp harness ships three protective layers against
+The Topos harness ships three protective layers against
 test runs hitting production data:
 
-1. ``MYAPP_TEST=1`` env-var, set by
+1. ``TOPOS_TEST=1`` env-var, set by
    ``backend/tests/conftest.py`` BEFORE any ``app.*`` import.
 2. ``TEST_DATABASE_URL=sqlite:///:memory:`` env-var, set in
    the same place.
-3. ``.myapp-production`` marker file in real data dirs,
+3. ``.topos-production`` marker file in real data dirs,
    plus a session-scoped autouse tripwire that aborts the
    pytest run with ``returncode=2`` if it ever sees the
    marker.
@@ -2529,7 +2529,7 @@ test runs hitting production data:
 ``poetry run python -c "from app.main import app; ..."``
 script bypasses every one of them — conftest never executes
 for direct-Python invocations, so the FastAPI app points at
-the real production DB at ``~/.local/share/myapp/myapp.db``.
+the real production DB at ``~/.local/share/topos/topos.db``.
 
 ### Concrete incident
 
@@ -2540,7 +2540,7 @@ against ``TestClient(app)``. The script ran successfully ―
 and emptied the user's real production ``article_comments``
 table, hard-deleting all 61 soft-deleted comments in one
 ``empty_trash`` call. The 14:25 ``.bgb`` backup did not
-carry comments (MyApp backup format only persists
+carry comments (Topos backup format only persists
 Article + Publication + ArticleAsset), so .bgb-based
 recovery was impossible.
 
@@ -2568,7 +2568,7 @@ or any code path that imports ``app.main`` /
   command with the env-vars manually:
 
   ```bash
-  MYAPP_TEST=1 TEST_DATABASE_URL=sqlite:///:memory: \
+  TOPOS_TEST=1 TEST_DATABASE_URL=sqlite:///:memory: \
     poetry run python -c "..."
   ```
 
@@ -2580,7 +2580,7 @@ or any code path that imports ``app.main`` /
   import app; ..."``. The FastAPI app's lifespan fires
   ``init_db()``, which connects to the production DB via
   ``app.database.DATABASE_URL`` (resolved at import time
-  from ``MYAPP_DATABASE_URL`` / ``DATABASE_URL`` env
+  from ``TOPOS_DATABASE_URL`` / ``DATABASE_URL`` env
   vars — neither of which the bare command sets).
 
 ### Detection grep
@@ -2592,7 +2592,7 @@ For self-audit before running any one-off probe:
 history | grep -E 'python -c.*app\.main|python -c.*import app'
 ```
 
-If a hit lacks the ``MYAPP_TEST=1`` prefix, do not run
+If a hit lacks the ``TOPOS_TEST=1`` prefix, do not run
 it. Rewrite as a pytest file.
 
 ### Pairs with
@@ -2723,7 +2723,7 @@ is intentional:
   asks "why aren't categories on Articles too?" should find
   this entry as the answer and close the question without a
   re-investigation. The KDP plugin's metadata checker
-  (``plugin-kdp/myapp_kdp/metadata_checker.py``) is the
+  (``plugin-kdp/topos_kdp/metadata_checker.py``) is the
   only place that validates BISAC codes at write-time —
   the backend schema validator (``app.schemas.BISAC_CODE_RE``)
   is the canonical regex and the plugin duplicates it
@@ -2754,7 +2754,7 @@ answer.
 
 **Recurring-issue-class observed 2 times across 2 release cycles.**
 
-MyApp's theming system uses CSS custom properties
+Topos's theming system uses CSS custom properties
 (``var(--token, #hex-fallback)``) for color, spacing, and shadow
 tokens. Each token must be defined in all 10 theme variants
 (5 palettes × light/dark). When a token is undefined in one
@@ -3081,7 +3081,7 @@ auto-close — for example:
 
 - An "advanced options" sub-flow where the menu stays open
   while a popover-style inline panel expands beneath the
-  item. (Not currently used in MyApp.)
+  item. (Not currently used in Topos.)
 - A multi-step picker where each click reveals another tier
   of the same menu. (Use Radix `DropdownMenu.Sub` instead —
   the composed sub-menu has the right semantics natively.)

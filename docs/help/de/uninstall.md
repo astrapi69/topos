@@ -1,12 +1,12 @@
-# MyApp deinstallieren
+# Topos deinstallieren
 
-Es gibt zwei Wege, MyApp zu deinstallieren, je nach Installationsart.
+Es gibt zwei Wege, Topos zu deinstallieren, je nach Installationsart.
 
 ## Weg A: Launcher (alle Plattformen)
 
-Wenn du MyApp über einen der Launcher installiert hast ([Windows](launcher-windows.md), [macOS](launcher-macos.md) oder [Linux](launcher-linux.md)):
+Wenn du Topos über einen der Launcher installiert hast ([Windows](launcher-windows.md), [macOS](launcher-macos.md) oder [Linux](launcher-linux.md)):
 
-1. Öffne den MyApp-Launcher.
+1. Öffne den Topos-Launcher.
 2. Klicke auf **Uninstall**.
 3. Bestätige die Abfrage.
 
@@ -18,10 +18,10 @@ Um auch Docker-Volumes und -Images zu entfernen, führe die Befehle im Abschnitt
 
 ## Weg B: Skript (alle Plattformen)
 
-Wenn du MyApp über `install.sh` installiert hast oder eine vollständige Entfernung inklusive Docker-Ressourcen möchtest:
+Wenn du Topos über `install.sh` installiert hast oder eine vollständige Entfernung inklusive Docker-Ressourcen möchtest:
 
 ```bash
-cd ~/myapp
+cd ~/topos
 bash uninstall.sh
 ```
 
@@ -34,21 +34,21 @@ Das Deinstallationsskript entfernt:
 | Komponente | Ort | Befehl |
 |------------|-----|--------|
 | Docker-Container | Laufender Stack | `docker compose -f docker-compose.prod.yml down` |
-| Docker-Volumes | Buchdaten, Datenbank | `docker volume ls --filter name=myapp -q \| xargs docker volume rm` |
-| Docker-Images | Backend- + Frontend-Images | `docker images --filter reference='*myapp*' -q \| xargs docker image rm` |
+| Docker-Volumes | Buchdaten, Datenbank | `docker volume ls --filter name=topos -q \| xargs docker volume rm` |
+| Docker-Images | Backend- + Frontend-Images | `docker images --filter reference='*topos*' -q \| xargs docker image rm` |
 | Launcher-Manifest | Plattform-Konfigurationsverzeichnis | Siehe unten |
-| Installationsverzeichnis | `~/myapp` (Standard) | `rm -rf ~/myapp` |
+| Installationsverzeichnis | `~/topos` (Standard) | `rm -rf ~/topos` |
 
 Launcher-Manifest-Speicherorte:
-- Windows: `%APPDATA%\myapp\install.json`
-- macOS: `~/Library/Application Support/myapp/install.json`
-- Linux: `~/.config/myapp/install.json`
+- Windows: `%APPDATA%\topos\install.json`
+- macOS: `~/Library/Application Support/topos/install.json`
+- Linux: `~/.config/topos/install.json`
 
 ## Daten sichern
 
 Wenn du deine Bücher vor der Deinstallation sichern möchtest:
 
-1. Öffne MyApp im Browser
+1. Öffne Topos im Browser
 2. Gehe zum Dashboard
 3. Nutze **Backup** um jedes Buch als `.bgb`-Datei zu exportieren
 4. Speichere die `.bgb`-Dateien an einem sicheren Ort

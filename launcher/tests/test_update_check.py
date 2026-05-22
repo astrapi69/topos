@@ -11,7 +11,7 @@ import threading
 import time
 from unittest.mock import MagicMock, patch
 
-from myapp_launcher import update_check
+from topos_launcher import update_check
 
 
 class TestIsNewer:
@@ -146,7 +146,7 @@ class TestCheckForUpdateAsync:
 class TestConstants:
 
     def test_releases_url_targets_correct_repo(self) -> None:
-        assert "astrapi69/myapp" in update_check.RELEASES_URL
+        assert "astrapi69/topos" in update_check.RELEASES_URL
         assert update_check.RELEASES_URL.endswith("/releases/latest")
 
     def test_timeout_is_reasonable(self) -> None:

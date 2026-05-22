@@ -1,6 +1,6 @@
 """Project-tree + user-overlay config merge helpers.
 
-MyApp ships configuration in two layers:
+Topos ships configuration in two layers:
 
 1. **Project tree** (read at runtime, never written from runtime
    code):
@@ -19,7 +19,7 @@ stays untouched at runtime.
 
 Reason: dev-docker bind-mounts ``./backend:/app`` so the project
 tree is not writable by the container user. Production Docker
-(``USER myapp`` + ``chown -R myapp:myapp /app``)
+(``USER topos`` + ``chown -R topos:topos /app``)
 makes the project tree writable, but the divergence between
 environments was a footgun — the v0.31.0 Phase 2 sweep
 fixed ``backup_history.json`` and ``plugins/installed/`` the same
@@ -72,7 +72,7 @@ def get_user_config_dir() -> Path:
     """User-overlay config directory: writable, under ``get_data_dir()``.
 
     Re-resolved on every call so test env-var overrides
-    (``MYAPP_DATA_DIR``) take effect after this module is
+    (``TOPOS_DATA_DIR``) take effect after this module is
     imported.
     """
     return get_data_dir() / "config"

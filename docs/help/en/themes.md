@@ -1,17 +1,17 @@
 # Themes
 
-MyApp ships with six color palettes, each available in a light and a dark variant. Pick the palette under **Settings > Display**; toggle light and dark with the sun/moon icon in the sidebar.
+Topos ships with six color palettes, each available in a light and a dark variant. Pick the palette under **Settings > Display**; toggle light and dark with the sun/moon icon in the sidebar.
 
 ## Available palettes
 
 ### Warm Literary *(default)*
-Warm cream and brown tones with Crimson Pro as the serif typeface. MyApp's original palette, evoking classic print on paper.
+Warm cream and brown tones with Crimson Pro as the serif typeface. Topos's original palette, evoking classic print on paper.
 
 ### Cool Modern
 Cool blue-grey tones with Inter as the sans-serif typeface. Clean, modern layout for authors who prefer a sober look.
 
 ### Nord
-The popular Nord palette, adapted for MyApp. Muted pastel tones suited to long reading sessions.
+The popular Nord palette, adapted for Topos. Muted pastel tones suited to long reading sessions.
 
 ![Nord theme](../assets/screenshots/theme-nord.png)
 
@@ -42,4 +42,4 @@ Each of the six palettes exists in a light and a dark variant. Light/dark is ind
 
 - All themes use the same CSS variables. Plugins that contribute UI can support every theme without additional work by using `var(--bg-*)`, `var(--text-*)`, `var(--accent)`, `var(--border)`, `var(--shadow-*)` instead of hardcoded colors.
 - All fonts are bundled locally (O-01 completed). No external font services are contacted.
-- The theme selection is persisted in browser `localStorage` (`myapp-app-theme` for the palette, `myapp-theme` for light/dark). On first launch MyApp follows the system preference for light/dark and defaults the palette to Warm Literary.
+- The theme selection is persisted in browser `localStorage` (`topos-app-theme` for the palette, `topos-theme` for light/dark). On first launch Topos follows the system preference for light/dark and defaults the palette to Warm Literary.

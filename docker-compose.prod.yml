@@ -5,17 +5,17 @@ services:
       dockerfile: backend/Dockerfile
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
     volumes:
-      - myapp-data:/app/data
+      - topos-data:/app/data
     environment:
       - PYTHONDONTWRITEBYTECODE=1
-      - MYAPP_DEBUG=false
-      # Single canonical data dir. DB lives at $DATA_DIR/myapp.db
+      - TOPOS_DEBUG=false
+      # Single canonical data dir. DB lives at $DATA_DIR/topos.db
       # and uploads at $DATA_DIR/uploads/, both inside the named
       # volume so they survive container rebuilds. The volume mount
       # at /app/data is the persistence boundary.
-      - MYAPP_DATA_DIR=/app/data
-      - MYAPP_CORS_ORIGINS=${MYAPP_CORS_ORIGINS:-http://localhost:7880}
-      - MYAPP_SECRET_KEY=${MYAPP_SECRET_KEY:-}
+      - TOPOS_DATA_DIR=/app/data
+      - TOPOS_CORS_ORIGINS=${TOPOS_CORS_ORIGINS:-http://localhost:7880}
+      - TOPOS_SECRET_KEY=${TOPOS_SECRET_KEY:-}
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 30s
@@ -27,11 +27,11 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "${MYAPP_PORT:-7880}:80"
+      - "${TOPOS_PORT:-7880}:80"
     depends_on:
       backend:
         condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  myapp-data:
+  topos-data:

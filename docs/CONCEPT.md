@@ -1,11 +1,11 @@
 <!--
 TODO: Adapt for your project. Current content is inherited from
-upstream (MyApp) and serves as structural reference only.
+upstream (Topos) and serves as structural reference only.
 The shape of this document (sections, headings, formatting
 conventions) is reusable; the specifics are not.
 -->
 
-# MyApp - concept document
+# Topos - concept document
 
 **Repository:** [github.com/astrapi69/pluginforge-app-template](https://github.com/astrapi69/pluginforge-app-template)
 **Related project:** [github.com/astrapi69/write-book-template](https://github.com/astrapi69/write-book-template)
@@ -17,15 +17,15 @@ This document describes the architecture and the concept. For version history se
 
 ## 1. Goal
 
-MyApp consists of two parts:
+Topos consists of two parts:
 
 1. **PluginForge** - An application-agnostic plugin framework for Python/FastAPI applications. Built on top of [pluggy](https://pluggy.readthedocs.io/) (the hook system behind pytest), extended with YAML configuration, plugin lifecycle, FastAPI integration and frontend plugin loading. Any developer can use it as the foundation for their own plugin-capable applications.
 
-2. **MyApp app** - An open-source web platform for writing and exporting books. The first application built on PluginForge. The entire export (EPUB, PDF, write-book-template structure) is itself a plugin.
+2. **Topos app** - An open-source web platform for writing and exporting books. The first application built on PluginForge. The entire export (EPUB, PDF, write-book-template structure) is itself a plugin.
 
 The principle: the app core (UI, database, chapter editor) is lean. Everything else - export, children's book mode, audiobook, KDP integration - is delivered via plugins. All plugins are free and open source (MIT). Donations are the current funding model.
 
-Both PluginForge and the MyApp core are open source (MIT license).
+Both PluginForge and the Topos core are open source (MIT license).
 
 ---
 
@@ -35,9 +35,9 @@ Both PluginForge and the MyApp core are open source (MIT license).
 
 ```
 +----------------------------------------------------------+
-|  MyApp app (frontend: React + TipTap)                |
+|  Topos app (frontend: React + TipTap)                |
 +----------------------------------------------------------+
-|  MyApp app (backend: FastAPI, Book/Chapter CRUD)     |
+|  Topos app (backend: FastAPI, Book/Chapter CRUD)     |
 +----------------------------------------------------------+
 |  PluginForge (framework)                                  |
 |  +-- pluggy (hook specs + hook impls)                    |
@@ -60,12 +60,12 @@ Both PluginForge and the MyApp core are open source (MIT license).
 | Repository | Description | License |
 |------------|-------------|---------|
 | `pluginforge` | Application-agnostic plugin framework (based on pluggy) | MIT |
-| `myapp` | Book authoring platform, uses PluginForge | MIT (all plugins free during development) |
+| `topos` | Book authoring platform, uses PluginForge | MIT (all plugins free during development) |
 
 PluginForge is a standalone PyPI package:
 
 ```toml
-# myapp/backend/pyproject.toml
+# topos/backend/pyproject.toml
 [tool.poetry.dependencies]
 pluginforge = "^0.10.0"
 ```
@@ -149,14 +149,14 @@ Everything application-specific lives in YAML files. No hardcoded strings.
 
 ```yaml
 app:
-  name: "MyApp"
+  name: "Topos"
   version: "0.2.0"
   description: "Open-source book authoring platform"
   default_language: "de"
   supported_languages: ["de", "en", "es", "fr", "el"]
 
 plugins:
-  entry_point_group: "myapp.plugins"
+  entry_point_group: "topos.plugins"
   config_dir: "config/plugins"
   enabled:
     - "export"
@@ -165,7 +165,7 @@ plugins:
     - "audiobook"
 
 ui:
-  title: "MyApp"
+  title: "Topos"
   subtitle: "Write and export books"
   logo: "assets/logo.svg"
   theme: "warm-literary"
@@ -292,17 +292,17 @@ class BasePlugin(ABC):
 ```
 
 ```python
-# MyApp main.py - integration with PluginForge v0.10.0
+# Topos main.py - integration with PluginForge v0.10.0
 from pluginforge import PluginManager
 
 manager = PluginManager(
     config_path="config/app.yaml",
     pre_activate=license_check,  # callback before plugin activation
     api_version="1",
-    app_id="myapp",              # v0.7.0+ identity; v0.9.0 hard-filters plugins without target_application
+    app_id="topos",              # v0.7.0+ identity; v0.9.0 hard-filters plugins without target_application
     app_version=__version__,     # v0.6.0+ host version, compared against plugin.min_app_version
 )
-manager.register_hookspecs(MyAppHookSpec)
+manager.register_hookspecs(ToposHookSpec)
 manager.discover_plugins()       # load entry points, filter, sort, activate
 manager.mount_routes(app)        # mount FastAPI routers (prefix="/api")
 
@@ -326,7 +326,7 @@ manager.get_text("key", "de")    # i18n string
 PluginForge is a standalone PyPI package: https://github.com/astrapi69/pluginforge
 
 ```
-pluginforge/       # own repo, not part of MyApp
+pluginforge/       # own repo, not part of Topos
 ├── pluginforge/
 │   ├── __init__.py          # public API: BasePlugin, PluginManager
 │   ├── base.py              # BasePlugin ABC (lifecycle, routes, health, manifest)
@@ -358,7 +358,7 @@ migrations = ["alembic"]
 
 ---
 
-## 4. MyApp app
+## 4. Topos app
 
 ### 4.1 Data model
 
@@ -438,7 +438,7 @@ UserBackup (v0.4.0 - now replaced by the .bgb backup)
 ### 4.2 Integration with PluginForge v0.10.0
 
 ```python
-# myapp/backend/app/main.py
+# topos/backend/app/main.py
 
 from pluginforge import PluginManager
 
@@ -446,10 +446,10 @@ manager = PluginManager(
     config_path="config/app.yaml",
     pre_activate=license_check,  # license check before activation
     api_version="1",
-    app_id="myapp",              # v0.7.0+ identity; v0.9.0 hard-filters plugins without target_application
+    app_id="topos",              # v0.7.0+ identity; v0.9.0 hard-filters plugins without target_application
     app_version=__version__,     # v0.6.0+ host version, compared against plugin.min_app_version
 )
-manager.register_hookspecs(MyAppHookSpec)
+manager.register_hookspecs(ToposHookSpec)
 
 # Apply user-overlay BEFORE discovery (v0.10.0 merge_app_config; no
 # active plugins yet, so notify=False). See config_overlay.refresh_manager_overlay
@@ -498,12 +498,12 @@ On export the export plugin converts TipTap JSON to Markdown (for write-book-tem
 
 ### 4.4 Export as a plugin
 
-The entire export is a plugin (`myapp-plugin-export`):
+The entire export is a plugin (`topos-plugin-export`):
 
 ```
-myapp-plugin-export/
+topos-plugin-export/
 ├── pyproject.toml
-├── myapp_export/
+├── topos_export/
 │   ├── __init__.py
 │   ├── plugin.py            # ExportPlugin(BasePlugin)
 │   ├── hookimpls.py         # hook implementations
@@ -517,9 +517,9 @@ myapp-plugin-export/
 ```
 
 ```toml
-# myapp-plugin-export/pyproject.toml
-[project.entry-points."myapp.plugins"]
-export = "myapp_export.plugin:ExportPlugin"
+# topos-plugin-export/pyproject.toml
+[project.entry-points."topos.plugins"]
+export = "topos_export.plugin:ExportPlugin"
 ```
 
 ### 4.5 write-book-template directory structure
@@ -564,7 +564,7 @@ On export the plugin produces:
 
 Mapping DB -> filesystem:
 
-| MyApp (DB) | write-book-template (filesystem) |
+| Topos (DB) | write-book-template (filesystem) |
 |----------------|----------------------------------|
 | `Book.title` | project folder name, `config/metadata.yaml` -> `title` |
 | `Book.subtitle` | `config/metadata.yaml` -> `subtitle` |
@@ -579,7 +579,7 @@ Mapping DB -> filesystem:
 
 ### 4.6 Offline/local-first
 
-MyApp has to work completely offline:
+Topos has to work completely offline:
 
 - SQLite as the default DB (no external DB required)
 - All assets local on the filesystem
@@ -591,7 +591,7 @@ MyApp has to work completely offline:
 Full-data backup as a ZIP:
 
 ```
-myapp-backup-2026-03-26/
+topos-backup-2026-03-26/
 ├── books/
 │   ├── {book-id-1}/
 │   │   ├── book.json          # book metadata
@@ -614,7 +614,7 @@ Importing a backup restores the entire state. Independent of the export plugin (
 | Layer | License | Content |
 |-------|---------|---------|
 | PluginForge | MIT (free) | Framework, usable by anyone |
-| MyApp core | MIT (free) | UI, editor, Book/Chapter CRUD, backup |
+| Topos core | MIT (free) | UI, editor, Book/Chapter CRUD, backup |
 | plugin-export | MIT (free) | EPUB, PDF, project structure |
 | Community plugins | MIT (free) | Developed by the community |
 | All other plugins | MIT (free) | Audiobook, children's books, KDP, translation, grammar |
@@ -662,7 +662,7 @@ class KinderbuchPlugin(BasePlugin):
 
 ### 5.3 Plugin licensing (offline)
 
-Licensing is MyApp-specific (not part of PluginForge) and lives in `backend/app/licensing.py`. The check runs via a `pre_activate` callback on the PluginManager:
+Licensing is Topos-specific (not part of PluginForge) and lives in `backend/app/licensing.py`. The check runs via a `pre_activate` callback on the PluginManager:
 
 ```python
 manager = PluginManager(
@@ -782,11 +782,11 @@ For plugins that go beyond simple manifest declarations (e.g. interactive previe
 Hook specs are versioned. Plugins declare which API version they support:
 
 ```python
-# myapp/hookspecs.py - version 1
+# topos/hookspecs.py - version 1
 import pluggy
-hookspec = pluggy.HookspecMarker("myapp.plugins")
+hookspec = pluggy.HookspecMarker("topos.plugins")
 
-class MyAppHookSpec:
+class ToposHookSpec:
     @hookspec
     def export_formats(self) -> list[dict]:
         """Return list of supported export formats."""
@@ -808,7 +808,7 @@ Feature details and open items see `docs/ROADMAP.md` (with IDs for prompt refere
 
 ## 8. Scope
 
-### What MyApp is
+### What Topos is
 
 - A web UI for writing books
 - Built on PluginForge (reusable plugin framework)
@@ -841,7 +841,7 @@ Feature details and open items see `docs/ROADMAP.md` (with IDs for prompt refere
 | Manuskript | Yes | No | Yes | No | Proprietary |
 | Obsidian | No | No | Yes | Yes (community) | No |
 | VS Code | Yes | Yes | Yes | Yes (extensions) | No |
-| **MyApp** | **Yes** | **Yes** | **Yes** | **Yes (PluginForge)** | **write-book-template** |
+| **Topos** | **Yes** | **Yes** | **Yes** | **Yes (PluginForge)** | **write-book-template** |
 
 No other authoring tool combines open source, a web UI, offline capability, a real plugin framework on top of pluggy, and a standardized Pandoc-compatible project structure.
 
@@ -853,7 +853,7 @@ No other authoring tool combines open source, a web UI, offline capability, a re
 
 2. **Frontend plugin loading:** dynamic loading of React components at runtime (module federation, importmaps) or static bundling at build time?
 
-3. **PluginForge scope frontend:** should PluginForge also have an npm counterpart for frontend plugin loading, or does that stay MyApp-specific?
+3. **PluginForge scope frontend:** should PluginForge also have an npm counterpart for frontend plugin loading, or does that stay Topos-specific?
 
 4. **Plugin DB migrations:** Alembic with multiple `versions` folders (one per plugin) or a central folder with a plugin prefix?
 

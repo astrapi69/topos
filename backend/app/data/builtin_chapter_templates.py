@@ -1,4 +1,4 @@
-"""Builtin chapter templates shipped with MyApp (TM-04).
+"""Builtin chapter templates shipped with Topos (TM-04).
 
 Parallel to ``builtin_templates.py`` but for individual reusable
 chapters. ``seed_builtin_chapter_templates`` is called once at

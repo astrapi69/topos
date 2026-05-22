@@ -71,7 +71,7 @@ jobs:
   #     fail-fast: false
   #     matrix:
   #       plugin:
-  #         - myapp-plugin-<your-plugin-name>
+  #         - topos-plugin-<your-plugin-name>
   #   steps:
   #     - uses: actions/checkout@v5
   #     - uses: actions/setup-python@v6

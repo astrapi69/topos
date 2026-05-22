@@ -1,8 +1,8 @@
 site_name: Adaptive Learner
 site_description: Project skeleton template documentation
-site_url: https://astrapi69.github.io/myapp/
+site_url: https://astrapi69.github.io/topos/
 repo_url: https://github.com/astrapi69/pluginforge-app-template
-repo_name: astrapi69/myapp
+repo_name: astrapi69/topos
 docs_dir: docs/help
 theme:
   name: material

@@ -34,7 +34,7 @@ router = APIRouter()
 class ConnectionManager:
     """Topic-based WebSocket connection manager.
 
-    Thread-safe for the single-process asyncio model that MyApp
+    Thread-safe for the single-process asyncio model that Topos
     uses (all access happens on the event loop). For multi-process
     deployments a Redis pub/sub layer would sit in front - but that's
     explicitly out of scope until needed.

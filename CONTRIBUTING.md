@@ -30,7 +30,7 @@ features should land as plugins, not core changes.
 
 ```bash
 git clone https://github.com/astrapi69/pluginforge-app-template.git
-cd myapp
+cd topos
 make install      # Poetry + npm + plugin path-deps
 make test         # baseline; should be green before you start
 make dev          # backend on :8000, frontend on :5173
@@ -62,13 +62,13 @@ core.
 ### Quickstart
 
 The smallest existing plugin to copy is
-[`plugins/myapp-plugin-getstarted/`](plugins/myapp-plugin-getstarted/).
+[`plugins/topos-plugin-getstarted/`](plugins/topos-plugin-getstarted/).
 Mirror its shape:
 
 ```
-plugins/myapp-plugin-yourname/
+plugins/topos-plugin-yourname/
   pyproject.toml                # name, version, pluginforge dep, entry point
-  myapp_yourname/
+  topos_yourname/
     __init__.py
     plugin.py                   # YourPlugin(BasePlugin)
     routes.py                   # FastAPI APIRouter (optional)
@@ -78,10 +78,10 @@ plugins/myapp-plugin-yourname/
 
 Steps:
 
-1. Copy the directory; rename `myapp-plugin-getstarted` and
-   `myapp_getstarted` to your plugin name.
+1. Copy the directory; rename `topos-plugin-getstarted` and
+   `topos_getstarted` to your plugin name.
 2. Edit `pyproject.toml`: package name, description, the
-   `[tool.poetry.plugins."myapp.plugins"]` entry point.
+   `[tool.poetry.plugins."topos.plugins"]` entry point.
 3. Implement `plugin.py` extending `BasePlugin` with `name`,
    `version`, `api_version = "1"`, `license_tier = "core"`.
    Override `activate()`, `get_routes()`,

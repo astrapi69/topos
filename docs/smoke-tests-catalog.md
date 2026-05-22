@@ -1,6 +1,6 @@
 <!--
 TODO: Adapt for your project. Current content is inherited from
-upstream (MyApp) and serves as structural reference only.
+upstream (Topos) and serves as structural reference only.
 The shape of this document (sections, headings, formatting
 conventions) is reusable; the specifics are not.
 -->
@@ -387,7 +387,7 @@ After issue creation, append `**Issue:** #<num>` under the test entry.
 **Last verified:** v0.22.0 audit covered 13 modals; non-wizard sweep open in backlog.
 
 ### CC-04: Production DB tripwire
-**Steps:** continuous; never write `myapp.db` outside `backend/` working copy.
+**Steps:** continuous; never write `topos.db` outside `backend/` working copy.
 **Severity:** Critical (data corruption vector)
 **Last verified:** Continuously.
 

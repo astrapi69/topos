@@ -19,7 +19,7 @@ from pathlib import Path
 BOOK_ID = "e2e-bgb-smoke"
 CHAPTER_ID = f"{BOOK_ID}-ch-1"
 
-MANIFEST = {"format": "myapp-backup", "version": 1}
+MANIFEST = {"format": "topos-backup", "version": 1}
 
 BOOK = {
     "id": BOOK_ID,

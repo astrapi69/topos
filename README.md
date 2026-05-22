@@ -31,7 +31,7 @@ make dev                  # backend on :8000, frontend on :5173
 - **SQLAlchemy 2.0** mapped columns + **Alembic** migrations
 - **Pydantic v2** schemas for request/response validation
 - **PluginForge** integration: hookspec discovery, entry-point loader, plugin-lifecycle management
-- **Layered configuration**: project YAML < user override (`~/.config/myapp/`) < env-vars (`MYAPP_*`)
+- **Layered configuration**: project YAML < user override (`~/.config/topos/`) < env-vars (`TOPOS_*`)
 - **Test isolation**: tmp-dir data dir + production marker tripwire + in-memory test DB
 - **i18n**: 8 languages (DE, EN, ES, FR, EL, PT, TR, JA) in `backend/config/i18n/*.yaml`
 - **Soft-delete + trash lifecycle** on EXAMPLE-DOMAIN entities (Book, Article, Comment)
@@ -49,7 +49,7 @@ make dev                  # backend on :8000, frontend on :5173
 ### Plugin system
 - **Zero plugins ship** — the loader is wired and ready
 - `plugins/README.md` documents the minimal plugin layout
-- Hook specs at `backend/app/hookspecs.py`; entry-point group `myapp.plugins`
+- Hook specs at `backend/app/hookspecs.py`; entry-point group `topos.plugins`
 
 ### Launcher
 - **Cross-OS PyInstaller launcher** under `launcher/` (Linux + macOS + Windows)

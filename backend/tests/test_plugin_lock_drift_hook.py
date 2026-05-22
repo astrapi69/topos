@@ -13,7 +13,7 @@ in milliseconds. The expensive-but-thorough drift detection — running
 The shape under test:
 
 - ``scripts/check_plugin_lock_paired.py`` is invoked by pre-commit
-  with each staged ``plugins/myapp-plugin-<name>/pyproject.toml``
+  with each staged ``plugins/topos-plugin-<name>/pyproject.toml``
   path as a positional argument.
 - The script consults ``git diff --cached --name-only`` to enumerate
   the staged set and asserts each hook-supplied pyproject path's
@@ -57,9 +57,9 @@ def isolated_git(tmp_path: Path) -> Path:
     work.mkdir()
     # Mirror the relevant subset of the repo: one plugin's pyproject +
     # poetry.lock. The script's path normalization expects paths
-    # rooted at "plugins/myapp-plugin-<name>/" so the fixture
+    # rooted at "plugins/topos-plugin-<name>/" so the fixture
     # creates that exact structure.
-    plugin_dir = work / "plugins" / "myapp-plugin-export"
+    plugin_dir = work / "plugins" / "topos-plugin-export"
     plugin_dir.mkdir(parents=True)
     pyproject = plugin_dir / "pyproject.toml"
     lock = plugin_dir / "poetry.lock"
@@ -69,7 +69,7 @@ def isolated_git(tmp_path: Path) -> Path:
     # modifications rather than new files.
     subprocess.run(["git", "init", "-q"], check=True, cwd=work)
     subprocess.run(
-        ["git", "config", "user.email", "test@myapp.local"],
+        ["git", "config", "user.email", "test@topos.local"],
         check=True,
         cwd=work,
     )
@@ -134,16 +134,16 @@ def test_non_plugin_path_passes(isolated_git: Path) -> None:
 
 def test_pyproject_with_paired_lock_passes(isolated_git: Path) -> None:
     """Both pyproject + lock staged → exit 0."""
-    _modify(isolated_git, "plugins/myapp-plugin-export/pyproject.toml")
-    _modify(isolated_git, "plugins/myapp-plugin-export/poetry.lock")
+    _modify(isolated_git, "plugins/topos-plugin-export/pyproject.toml")
+    _modify(isolated_git, "plugins/topos-plugin-export/poetry.lock")
     _stage(
         isolated_git,
-        "plugins/myapp-plugin-export/pyproject.toml",
-        "plugins/myapp-plugin-export/poetry.lock",
+        "plugins/topos-plugin-export/pyproject.toml",
+        "plugins/topos-plugin-export/poetry.lock",
     )
     result = _run_hook(
         isolated_git,
-        ["plugins/myapp-plugin-export/pyproject.toml"],
+        ["plugins/topos-plugin-export/pyproject.toml"],
     )
     assert result.returncode == 0, result.stderr
 
@@ -152,12 +152,12 @@ def test_pyproject_without_paired_lock_fails(
     isolated_git: Path,
 ) -> None:
     """pyproject staged, lock NOT staged → exit 1 with remediation hint."""
-    _modify(isolated_git, "plugins/myapp-plugin-export/pyproject.toml")
-    _stage(isolated_git, "plugins/myapp-plugin-export/pyproject.toml")
+    _modify(isolated_git, "plugins/topos-plugin-export/pyproject.toml")
+    _stage(isolated_git, "plugins/topos-plugin-export/pyproject.toml")
     # NOTE: lock NOT staged on purpose
     result = _run_hook(
         isolated_git,
-        ["plugins/myapp-plugin-export/pyproject.toml"],
+        ["plugins/topos-plugin-export/pyproject.toml"],
     )
     assert result.returncode == 1, (
         f"expected exit 1 (drift detected), got {result.returncode}.\n"
@@ -166,8 +166,8 @@ def test_pyproject_without_paired_lock_fails(
     # Failure message contract: must name the offending pyproject and
     # the expected lock path. Both are load-bearing for the hint
     # to be actionable.
-    assert "plugins/myapp-plugin-export/pyproject.toml" in result.stderr
-    assert "plugins/myapp-plugin-export/poetry.lock" in result.stderr
+    assert "plugins/topos-plugin-export/pyproject.toml" in result.stderr
+    assert "plugins/topos-plugin-export/poetry.lock" in result.stderr
     # Remediation hint contract: must point at the make target and
     # cite the v0.30.0 incident for context (so a contributor reading
     # the error knows what shape of bug it catches).
@@ -186,8 +186,8 @@ def test_lockfile_only_change_does_not_trigger(
     DID NOT match anything (so argv is empty) — which is what would
     happen for a lockfile-only commit. The hook must exit 0.
     """
-    _modify(isolated_git, "plugins/myapp-plugin-export/poetry.lock")
-    _stage(isolated_git, "plugins/myapp-plugin-export/poetry.lock")
+    _modify(isolated_git, "plugins/topos-plugin-export/poetry.lock")
+    _stage(isolated_git, "plugins/topos-plugin-export/poetry.lock")
     # No pyproject path in argv (the regex did not match):
     result = _run_hook(isolated_git, [])
     assert result.returncode == 0, result.stderr
@@ -215,7 +215,7 @@ def test_empty_staged_set_with_pyproject_in_argv_passes(
     # mode supplied it, but the staged set is empty.
     result = _run_hook(
         isolated_git,
-        ["plugins/myapp-plugin-export/pyproject.toml"],
+        ["plugins/topos-plugin-export/pyproject.toml"],
     )
     assert result.returncode == 0, (
         f"expected exit 0 (vacuous contract — no commit happening), "
@@ -231,7 +231,7 @@ def test_multiple_pyprojects_partial_pairing_fails(
     them lacks a paired lock, the hook fails and names every
     unpaired path."""
     # Add a second plugin to the fixture
-    plugin2 = isolated_git / "plugins" / "myapp-plugin-export-2"
+    plugin2 = isolated_git / "plugins" / "topos-plugin-export-2"
     plugin2.mkdir()
     (plugin2 / "pyproject.toml").write_text(
         "[tool.poetry]\nname = \"x2\"\n", encoding="utf-8"
@@ -241,8 +241,8 @@ def test_multiple_pyprojects_partial_pairing_fails(
     )
     _stage(
         isolated_git,
-        "plugins/myapp-plugin-export-2/pyproject.toml",
-        "plugins/myapp-plugin-export-2/poetry.lock",
+        "plugins/topos-plugin-export-2/pyproject.toml",
+        "plugins/topos-plugin-export-2/poetry.lock",
     )
     subprocess.run(
         ["git", "commit", "-q", "-m", "add second plugin"],
@@ -251,26 +251,26 @@ def test_multiple_pyprojects_partial_pairing_fails(
     )
     # Now stage: plugin-1 pyproject + plugin-1 lock (paired);
     # plugin-2 pyproject WITHOUT plugin-2 lock (unpaired).
-    _modify(isolated_git, "plugins/myapp-plugin-export/pyproject.toml")
-    _modify(isolated_git, "plugins/myapp-plugin-export/poetry.lock")
+    _modify(isolated_git, "plugins/topos-plugin-export/pyproject.toml")
+    _modify(isolated_git, "plugins/topos-plugin-export/poetry.lock")
     _modify(
         isolated_git,
-        "plugins/myapp-plugin-export-2/pyproject.toml",
+        "plugins/topos-plugin-export-2/pyproject.toml",
     )
     _stage(
         isolated_git,
-        "plugins/myapp-plugin-export/pyproject.toml",
-        "plugins/myapp-plugin-export/poetry.lock",
-        "plugins/myapp-plugin-export-2/pyproject.toml",
+        "plugins/topos-plugin-export/pyproject.toml",
+        "plugins/topos-plugin-export/poetry.lock",
+        "plugins/topos-plugin-export-2/pyproject.toml",
     )
     result = _run_hook(
         isolated_git,
         [
-            "plugins/myapp-plugin-export/pyproject.toml",
-            "plugins/myapp-plugin-export-2/pyproject.toml",
+            "plugins/topos-plugin-export/pyproject.toml",
+            "plugins/topos-plugin-export-2/pyproject.toml",
         ],
     )
     assert result.returncode == 1, result.stderr
     # Must name the unpaired plugin specifically:
-    assert "plugins/myapp-plugin-export-2/pyproject.toml" in result.stderr
-    assert "plugins/myapp-plugin-export-2/poetry.lock" in result.stderr
+    assert "plugins/topos-plugin-export-2/pyproject.toml" in result.stderr
+    assert "plugins/topos-plugin-export-2/poetry.lock" in result.stderr

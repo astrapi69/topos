@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-from myapp_launcher import manifest
+from topos_launcher import manifest
 
 
 def _patch_path(tmp_path: Path):
@@ -51,7 +51,7 @@ class TestWriteManifest:
 
     def test_creates_parent_dirs_and_writes(self, tmp_path: Path) -> None:
         target = tmp_path / "nested" / "install.json"
-        install_dir = tmp_path / "myapp"
+        install_dir = tmp_path / "topos"
         with patch.object(manifest, "manifest_path", return_value=target):
             manifest.write_manifest(install_dir, "0.16.0")
         assert target.is_file()
@@ -98,10 +98,10 @@ class TestCleanupPersistence:
 
     def test_write_and_read_roundtrip(self, tmp_path: Path) -> None:
         with self._patch_cleanup(tmp_path):
-            manifest.write_cleanup_pending(tmp_path / "myapp")
+            manifest.write_cleanup_pending(tmp_path / "topos")
             data = manifest.read_cleanup_pending()
             assert data is not None
-            assert data["install_dir"] == str(tmp_path / "myapp")
+            assert data["install_dir"] == str(tmp_path / "topos")
             assert all(v is False for v in data["steps"].values())
             assert "pending_since" in data
 

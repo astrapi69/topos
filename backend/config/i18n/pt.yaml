@@ -472,8 +472,8 @@ ui:
     ai_key_not_required: Nao necessaria
     ai_key_hint: A chave e armazenada localmente e enviada apenas ao servico indicado
       em 'Base URL'.
-    ai_api_key_external_note: A chave de API e lida de configuracao externa (~/.config/myapp/secrets.yaml
-      ou variavel de ambiente MYAPP_AI_API_KEY). Edita o ficheiro diretamente
+    ai_api_key_external_note: A chave de API e lida de configuracao externa (~/.config/topos/secrets.yaml
+      ou variavel de ambiente TOPOS_AI_API_KEY). Edita o ficheiro diretamente
       ou define a variavel para alterar a chave.
     ai_lmstudio_hint: Executando localmente, sem necessidade de chave API. Os modelos
       sao fornecidos pelo servidor LM Studio.

@@ -2,7 +2,7 @@
 
 ## Welches Format wird intern gespeichert?
 
-MyApp speichert Kapitelinhalte als TipTap-JSON. TipTap-JSON ist ein strukturiertes Dokumentenformat, das Absätze, Überschriften, Listen, Bilder und alle weiteren Elemente als verschachtelte Knoten abbildet. Beim Export wird dieses JSON-Format automatisch in Markdown konvertiert, das dann über manuscripta und Pandoc in das Zielformat (EPUB, PDF, DOCX) umgewandelt wird.
+Topos speichert Kapitelinhalte als TipTap-JSON. TipTap-JSON ist ein strukturiertes Dokumentenformat, das Absätze, Überschriften, Listen, Bilder und alle weiteren Elemente als verschachtelte Knoten abbildet. Beim Export wird dieses JSON-Format automatisch in Markdown konvertiert, das dann über manuscripta und Pandoc in das Zielformat (EPUB, PDF, DOCX) umgewandelt wird.
 
 ## Wie exportiere ich mein Buch?
 
@@ -10,7 +10,7 @@ MyApp speichert Kapitelinhalte als TipTap-JSON. TipTap-JSON ist ein strukturiert
 
 ## Kann ich ein bestehendes Projekt importieren?
 
-Ja. Auf dem Dashboard klicke "Projekt importieren" und wähle eine ZIP-Datei im write-book-template-Format. MyApp liest die Verzeichnisstruktur, Metadaten, Assets und die Kapitelreihenfolge automatisch ein.
+Ja. Auf dem Dashboard klicke "Projekt importieren" und wähle eine ZIP-Datei im write-book-template-Format. Topos liest die Verzeichnisstruktur, Metadaten, Assets und die Kapitelreihenfolge automatisch ein.
 
 ## Wie funktioniert das Backup?
 
@@ -22,11 +22,11 @@ Standardmäßig werden gelöschte Bücher in den Papierkorb verschoben (Soft-Del
 
 ## Was ist der Markdown-Modus?
 
-Im Editor kannst du zwischen WYSIWYG und Markdown umschalten. Im WYSIWYG-Modus arbeitest du visuell mit der Toolbar. Im Markdown-Modus siehst du den rohen Quelltext. Beim Umschalten konvertiert MyApp den Inhalt automatisch.
+Im Editor kannst du zwischen WYSIWYG und Markdown umschalten. Im WYSIWYG-Modus arbeitest du visuell mit der Toolbar. Im Markdown-Modus siehst du den rohen Quelltext. Beim Umschalten konvertiert Topos den Inhalt automatisch.
 
-## Funktioniert MyApp offline?
+## Funktioniert Topos offline?
 
-Ja. MyApp nutzt SQLite als lokale Datenbank und speichert alle Daten auf deinem Rechner. Schriftarten sind lokal eingebettet. Nur Plugins, die auf externe Dienste zugreifen, benötigen Internet: Grammar (LanguageTool), Translation (DeepL), Audiobook mit Cloud-Engines, und KI mit Cloud-Anbietern.
+Ja. Topos nutzt SQLite als lokale Datenbank und speichert alle Daten auf deinem Rechner. Schriftarten sind lokal eingebettet. Nur Plugins, die auf externe Dienste zugreifen, benötigen Internet: Grammar (LanguageTool), Translation (DeepL), Audiobook mit Cloud-Engines, und KI mit Cloud-Anbietern.
 
 ## Wie richte ich die KI-Funktionen ein?
 
@@ -42,7 +42,7 @@ Nutze die Suchleiste und die Filter-Dropdowns oben auf dem Dashboard. Du kannst 
 
 ## Was passiert wenn ich den Browser ohne Speichern schließe?
 
-MyApp speichert automatisch während du tippst. Zusätzlich werden ungespeicherte Änderungen lokal im Browser gesichert (IndexedDB). Wenn du ein Kapitel mit ungespeicherten Änderungen erneut öffnest, wird dir angeboten diese wiederherzustellen.
+Topos speichert automatisch während du tippst. Zusätzlich werden ungespeicherte Änderungen lokal im Browser gesichert (IndexedDB). Wenn du ein Kapitel mit ungespeicherten Änderungen erneut öffnest, wird dir angeboten diese wiederherzustellen.
 
 ## Welche Themes gibt es?
 

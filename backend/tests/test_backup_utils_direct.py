@@ -145,7 +145,7 @@ def test_import_assets_copies_images_and_records_db_rows(tmp_path, monkeypatch):
         (assets_dir / "readme.txt").write_text("skip me", encoding="utf-8")
 
         upload_root = tmp_path / "uploads"
-        monkeypatch.setenv("MYAPP_DATA_DIR", str(upload_root.parent))
+        monkeypatch.setenv("TOPOS_DATA_DIR", str(upload_root.parent))
 
         count = import_assets(db, book.id, assets_dir)
         db.commit()

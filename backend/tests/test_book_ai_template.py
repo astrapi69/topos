@@ -70,7 +70,7 @@ def test_export_returns_yaml_with_header_and_reference(client):
 
     text = resp.text
     assert text.startswith("#")
-    assert "MyApp Book Template" in text
+    assert "Topos Book Template" in text
     assert "chapter_summaries" in text  # book-specific header section
 
     body = "\n".join(line for line in text.splitlines() if not line.startswith("#"))

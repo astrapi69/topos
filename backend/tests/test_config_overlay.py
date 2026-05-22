@@ -37,7 +37,7 @@ def two_layer_dirs(tmp_path, monkeypatch):
 
     original = config_overlay.get_project_config_dir()
     config_overlay.set_project_config_dir(project_dir / "config")
-    monkeypatch.setenv("MYAPP_DATA_DIR", str(user_data))
+    monkeypatch.setenv("TOPOS_DATA_DIR", str(user_data))
     yield project_dir / "config", user_data
     config_overlay.set_project_config_dir(original)
 
@@ -241,7 +241,7 @@ def test_list_merged_plugin_names_unions_both_layers(two_layer_dirs):
 
 
 def test_get_user_config_dir_resolves_via_data_dir(two_layer_dirs):
-    """The resolver re-reads MYAPP_DATA_DIR on every call so test
+    """The resolver re-reads TOPOS_DATA_DIR on every call so test
     env-var overrides land even after module import (the same rule
     the v0.31.0 Phase 2 paths.py docstring spells out for
     get_upload_dir)."""

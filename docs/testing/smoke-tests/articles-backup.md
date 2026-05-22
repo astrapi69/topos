@@ -27,14 +27,14 @@ Manifest version 2.0 backup format adds an `articles/` segment alongside `books/
 2. Either dashboard → Backup button → download `.bgb` file.
 3. Inspect:
    ```bash
-   unzip -l ~/Downloads/myapp-backup-*.bgb | grep -E "articles|books|manifest"
-   unzip -p ~/Downloads/myapp-backup-*.bgb manifest.json | jq .
+   unzip -l ~/Downloads/topos-backup-*.bgb | grep -E "articles|books|manifest"
+   unzip -p ~/Downloads/topos-backup-*.bgb manifest.json | jq .
    ```
 
 **Expected manifest:**
 ```json
 {
-  "format": "myapp-backup",
+  "format": "topos-backup",
   "version": "2.0",
   "book_count": 2,
   "article_count": 3,
@@ -56,7 +56,7 @@ Manifest version 2.0 backup format adds an `articles/` segment alongside `books/
 2. Articles dashboard → Backup → download.
 3. Inspect:
    ```bash
-   unzip -l ~/Downloads/myapp-backup-*.bgb
+   unzip -l ~/Downloads/topos-backup-*.bgb
    ```
 
 **Expected:** `articles/` directory with N articles. `books/` directory exists but empty (materialised by `_require_books_dir` validator).
@@ -103,7 +103,7 @@ Hand-craft a `.bgb` with `manifest.json` `"version": "9.9"`.
 ```bash
 mkdir /tmp/fake-future
 cat > /tmp/fake-future/manifest.json << 'EOF'
-{"format": "myapp-backup", "version": "9.9", "book_count": 0, "article_count": 0}
+{"format": "topos-backup", "version": "9.9", "book_count": 0, "article_count": 0}
 EOF
 mkdir -p /tmp/fake-future/books
 cd /tmp/fake-future && zip -r /tmp/future.bgb . && cd -

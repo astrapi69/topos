@@ -1,14 +1,14 @@
 """Test harness bootstrap.
 
-CRITICAL: this module sets MYAPP_TEST=1, TEST_DATABASE_URL and
-MYAPP_DATA_DIR BEFORE any ``app.*`` import. Order matters:
+CRITICAL: this module sets TOPOS_TEST=1, TEST_DATABASE_URL and
+TOPOS_DATA_DIR BEFORE any ``app.*`` import. Order matters:
 
-- ``app/database.py`` reads ``MYAPP_TEST`` / ``TEST_DATABASE_URL``
+- ``app/database.py`` reads ``TOPOS_TEST`` / ``TEST_DATABASE_URL``
   at module import time to decide which URL to hand to SQLAlchemy.
   Without this, a test module importing ``app.database`` before the
   conftest could wire up the production DB; the autouse ``setup_db``
   fixture below would then drop its tables.
-- ``app/paths.py`` reads ``MYAPP_DATA_DIR`` lazily via
+- ``app/paths.py`` reads ``TOPOS_DATA_DIR`` lazily via
   ``get_data_dir()``, but seeding it here means every test sees
   the same tmp path even if they never call the helper directly.
 
@@ -16,7 +16,7 @@ A real data-loss incident in April 2026 (commit ``a4cf7cf``) triggered
 the addition of the session-scoped DB tripwire. The filesystem half of
 the same hardening landed in this session; the marker file written by
 ``app.paths.mark_data_dir_as_production`` lets the tripwire fail loud
-if a test ever points ``MYAPP_DATA_DIR`` at a path that contains
+if a test ever points ``TOPOS_DATA_DIR`` at a path that contains
 real data.
 """
 
@@ -33,7 +33,7 @@ from pathlib import Path
 # them:
 #   * ``app.yaml.example`` is missing → ``PluginManager`` defaults
 #     ``entry_point_group`` to ``"pluginforge.plugins"``,
-#     mismatching ``HookspecMarker("myapp.plugins")`` and
+#     mismatching ``HookspecMarker("topos.plugins")`` and
 #     crashing ``register_hookspecs`` with
 #     ``ValueError: did not find any 'pluginforge.plugins' hooks``.
 #   * Alembic env.py can't find ``script_location: migrations/`` →
@@ -88,7 +88,7 @@ if _THIS_CONFTEST.parent.parent.name == "mutants":
 
 # MUST run before any `from app.* import ...` statement in this file
 # or in any test module that pytest collects.
-os.environ["MYAPP_TEST"] = "1"
+os.environ["TOPOS_TEST"] = "1"
 os.environ.setdefault("TEST_DATABASE_URL", "sqlite:///:memory:")
 
 # Filesystem isolation: redirect every ``get_upload_dir()`` resolution
@@ -96,9 +96,9 @@ os.environ.setdefault("TEST_DATABASE_URL", "sqlite:///:memory:")
 # this to a tmp_path_factory-managed directory so pytest's own
 # cleanup runs at end of session; the env var here is set early so
 # any module-import-time path resolution still hits a tmp location.
-if "MYAPP_DATA_DIR" not in os.environ:
-    os.environ["MYAPP_DATA_DIR"] = tempfile.mkdtemp(
-        prefix="myapp-test-data-"
+if "TOPOS_DATA_DIR" not in os.environ:
+    os.environ["TOPOS_DATA_DIR"] = tempfile.mkdtemp(
+        prefix="topos-test-data-"
     )
 
 # 41+ test modules open a FastAPI TestClient, each of which triggers the
@@ -144,18 +144,18 @@ def _verify_test_isolation() -> None:
 
     Two tripwires:
 
-    1. DB: engine URL must not contain ``myapp.db``.
+    1. DB: engine URL must not contain ``topos.db``.
     2. Filesystem: the resolved data directory must not contain a
-       ``.myapp-production`` marker (written by the FastAPI
+       ``.topos-production`` marker (written by the FastAPI
        lifespan in non-test mode; see ``app.paths``).
 
     Hard fail here is the last line of defence against re-living the
     April 2026 data-loss incident.
     """
     url = str(engine.url)
-    assert "myapp.db" not in url, (
+    assert "topos.db" not in url, (
         f"FATAL: tests refuse to run against production DB: {url}. "
-        f"Fix: ensure MYAPP_TEST=1 is set before any app import."
+        f"Fix: ensure TOPOS_TEST=1 is set before any app import."
     )
     assert ":memory:" in url or "/tmp/" in url or url.endswith("test.db"), (
         f"FATAL: engine URL {url} does not look like a test DB. "
@@ -174,17 +174,17 @@ def _verify_test_isolation() -> None:
             "\n"
             "Tests must never access production data.\n"
             "Fix:\n"
-            "  - Set MYAPP_DATA_DIR explicitly to a test path,\n"
+            "  - Set TOPOS_DATA_DIR explicitly to a test path,\n"
             "  - or run make test from a clean environment.\n",
             returncode=2,
         )
 
     # Make sure the upload subtree exists for the rest of the run.
     get_upload_dir().mkdir(parents=True, exist_ok=True)
-    # Sanity: MYAPP_DATA_DIR points somewhere temporary.
-    resolved = Path(os.environ["MYAPP_DATA_DIR"]).resolve()
+    # Sanity: TOPOS_DATA_DIR points somewhere temporary.
+    resolved = Path(os.environ["TOPOS_DATA_DIR"]).resolve()
     assert "test" in resolved.name.lower() or resolved.parts[1:2] == ("tmp",), (
-        f"FATAL: MYAPP_DATA_DIR={resolved} does not look like a test "
+        f"FATAL: TOPOS_DATA_DIR={resolved} does not look like a test "
         f"path. Set it explicitly to a /tmp/... directory."
     )
 

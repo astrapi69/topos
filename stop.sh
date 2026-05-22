@@ -10,7 +10,7 @@ echo "Stopping Adaptive Learner..."
 docker compose -f docker-compose.prod.yml down 2>/dev/null || true
 
 # Stop native dev processes
-pkill -f "uvicorn.*myapp" 2>/dev/null || true
-pkill -f "vite.*myapp" 2>/dev/null || true
+pkill -f "uvicorn.*topos" 2>/dev/null || true
+pkill -f "vite.*topos" 2>/dev/null || true
 
 echo "Adaptive Learner stopped."

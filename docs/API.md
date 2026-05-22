@@ -1,13 +1,13 @@
 <!--
 TODO: Adapt for your project. Current content is inherited from
-upstream (MyApp) and serves as structural reference only.
+upstream (Topos) and serves as structural reference only.
 The shape of this document (sections, headings, formatting
 conventions) is reusable; the specifics are not.
 -->
 
 # API reference - high-level overview
 
-MyApp exposes two API layers: a core with CRUD endpoints for
+Topos exposes two API layers: a core with CRUD endpoints for
 books, chapters, assets and system functions, and one router per
 active plugin under that plugin's prefix.
 
@@ -111,7 +111,7 @@ Examples:
 
 ## Error handling
 
-All endpoints use the shared `MyAppError` hierarchy. The global
+All endpoints use the shared `ToposError` hierarchy. The global
 exception handler in `backend/app/main.py` maps to HTTP codes:
 
 - `NotFoundError` -> 404
@@ -120,6 +120,6 @@ exception handler in `backend/app/main.py` maps to HTTP codes:
 - `ExportError`, `PluginError` -> 500
 - `ExternalServiceError` -> 502 (Pandoc, LanguageTool, TTS backends)
 
-In debug mode (`MYAPP_DEBUG=true`) the response additionally
+In debug mode (`TOPOS_DEBUG=true`) the response additionally
 contains a `traceback` entry that the frontend embeds in the
 "Report issue" button.

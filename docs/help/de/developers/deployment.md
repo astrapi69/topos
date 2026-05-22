@@ -1,15 +1,15 @@
 # Deployment-Leitfaden
 
-Wie man MyApp im Produktivbetrieb betreibt. Operator-seitige Referenz: Docker Compose, Umgebungsvariablen, Persistenz und häufige Stolpersteine. Für Endbenutzer-Installation siehe die [Installer-Skripte](../install/cross-platform-installers.md); diese Seite ist für das darunterliegende Setup.
+Wie man Topos im Produktivbetrieb betreibt. Operator-seitige Referenz: Docker Compose, Umgebungsvariablen, Persistenz und häufige Stolpersteine. Für Endbenutzer-Installation siehe die [Installer-Skripte](../install/cross-platform-installers.md); diese Seite ist für das darunterliegende Setup.
 
 ## Was im Produktivbetrieb läuft
 
-MyApp liefert zwei Docker-Container hinter einem Port aus:
+Topos liefert zwei Docker-Container hinter einem Port aus:
 
 - **backend** — Python + FastAPI + SQLAlchemy + SQLite. Läuft Uvicorn mit 2 Workern. Health-Endpoint unter `/api/health`.
 - **frontend** — Vite-gebaute statische Dateien, ausgeliefert von nginx. Proxyt `/api/*` an das Backend im internen Docker-Netzwerk.
 
-Der Frontend-Container exponiert standardmäßig Port `7880` (übersteuern mit `MYAPP_PORT`). Der Backend-Container ist nur intern — Port 8000 sollte **nicht** ins öffentliche Internet exponiert werden.
+Der Frontend-Container exponiert standardmäßig Port `7880` (übersteuern mit `TOPOS_PORT`). Der Backend-Container ist nur intern — Port 8000 sollte **nicht** ins öffentliche Internet exponiert werden.
 
 Die Compose-Datei: `docker-compose.prod.yml`. Quelle: <https://github.com/astrapi69/pluginforge-app-template/blob/main/docker-compose.prod.yml>.
 
@@ -17,7 +17,7 @@ Die Compose-Datei: `docker-compose.prod.yml`. Quelle: <https://github.com/astrap
 
 ```bash
 git clone https://github.com/astrapi69/pluginforge-app-template.git
-cd myapp
+cd topos
 ./start.sh
 ```
 
@@ -27,46 +27,46 @@ cd myapp
 
 | Variable | Default | Zweck |
 |----------|---------|-------|
-| `MYAPP_PORT` | `7880` | Host-Port, an den das Frontend bindet. Ändern, wenn 7880 belegt ist oder wenn ein Reverse-Proxy auf einem anderen Port davorsteht. |
-| `MYAPP_DEBUG` | `false` | Bei `true` aktiviert `/api/test/reset` und die API-Docs unter `/api/docs` und liefert Stacktraces in 5xx-Antworten zurück. **Im Produktivbetrieb nicht aktivieren.** |
-| `MYAPP_SECRET_KEY` | (von `start.sh` generiert) | Für Lizenz-Signatur und CSRF-Schutz. Das Startup-Skript schreibt einen Zufallswert in `.env`, falls nicht gesetzt. |
-| `MYAPP_CREDENTIALS_SECRET` | (von `start.sh` generiert) | Fernet-verschlüsselt API-Keys + Service-Account-Dateien at-rest in der DB. Gleiche Auto-Generierung. |
-| `MYAPP_CORS_ORIGINS` | `http://localhost:7880` | Komma-separierte Liste erlaubter Origins. Den Reverse-Proxy-Hostname hinzufügen, wenn hinter einer Domain bereitgestellt wird. |
-| `MYAPP_DATA_DIR` | `/app/data` (im Container) | Container-seitiges Wurzelverzeichnis für Laufzeitdaten: SQLite-DB unter `<dir>/myapp.db`, Uploads unter `<dir>/uploads/`. Auf ein Docker-Named-Volume gemappt für Persistenz. |
-| `MYAPP_DB_PATH` | (wird nicht mehr berücksichtigt) | **Entfernt in v0.30.0** (DEP-DBPATH-01 Schritt 3). Die Variable hat keine Wirkung mehr auf die Pfad-Auflösung; ist sie weiterhin in der Umgebung gesetzt, wird beim Start eine einzelne Warnung mit dem ignorierten Wert geloggt. Stattdessen `MYAPP_DATA_DIR` setzen — die Datenbank liegt dann unter `<MYAPP_DATA_DIR>/myapp.db`. Verwerfungszyklus: Warnung v0.27.0, Präzedenz-Flip v0.28.0, Entfernung v0.30.0. |
+| `TOPOS_PORT` | `7880` | Host-Port, an den das Frontend bindet. Ändern, wenn 7880 belegt ist oder wenn ein Reverse-Proxy auf einem anderen Port davorsteht. |
+| `TOPOS_DEBUG` | `false` | Bei `true` aktiviert `/api/test/reset` und die API-Docs unter `/api/docs` und liefert Stacktraces in 5xx-Antworten zurück. **Im Produktivbetrieb nicht aktivieren.** |
+| `TOPOS_SECRET_KEY` | (von `start.sh` generiert) | Für Lizenz-Signatur und CSRF-Schutz. Das Startup-Skript schreibt einen Zufallswert in `.env`, falls nicht gesetzt. |
+| `TOPOS_CREDENTIALS_SECRET` | (von `start.sh` generiert) | Fernet-verschlüsselt API-Keys + Service-Account-Dateien at-rest in der DB. Gleiche Auto-Generierung. |
+| `TOPOS_CORS_ORIGINS` | `http://localhost:7880` | Komma-separierte Liste erlaubter Origins. Den Reverse-Proxy-Hostname hinzufügen, wenn hinter einer Domain bereitgestellt wird. |
+| `TOPOS_DATA_DIR` | `/app/data` (im Container) | Container-seitiges Wurzelverzeichnis für Laufzeitdaten: SQLite-DB unter `<dir>/topos.db`, Uploads unter `<dir>/uploads/`. Auf ein Docker-Named-Volume gemappt für Persistenz. |
+| `TOPOS_DB_PATH` | (wird nicht mehr berücksichtigt) | **Entfernt in v0.30.0** (DEP-DBPATH-01 Schritt 3). Die Variable hat keine Wirkung mehr auf die Pfad-Auflösung; ist sie weiterhin in der Umgebung gesetzt, wird beim Start eine einzelne Warnung mit dem ignorierten Wert geloggt. Stattdessen `TOPOS_DATA_DIR` setzen — die Datenbank liegt dann unter `<TOPOS_DATA_DIR>/topos.db`. Verwerfungszyklus: Warnung v0.27.0, Präzedenz-Flip v0.28.0, Entfernung v0.30.0. |
 
 Jede Variable mit einem Default ist optional. Das Startup-Skript generiert die zwei Secrets, falls sie nicht in `.env` stehen — ein frisches `./start.sh` funktioniert ohne Setup.
 
 ## Persistenz
 
-Produktivdaten leben in einem **Docker-Named-Volume**, `myapp-data`, gemountet auf `/app/data` im Backend-Container.
+Produktivdaten leben in einem **Docker-Named-Volume**, `topos-data`, gemountet auf `/app/data` im Backend-Container.
 
-- SQLite-DB: `/app/data/myapp.db` (+ `-wal`, `-shm`).
+- SQLite-DB: `/app/data/topos.db` (+ `-wal`, `-shm`).
 - Uploads (Cover-Bilder, Asset-Dateien): `/app/data/uploads/`.
 - Hörbuch-Persistenz (MP3s nach Export): `/app/data/uploads/{book_id}/audiobook/`.
 
 Das Volume überlebt Container-Rebuilds. Existenz prüfen:
 
 ```bash
-docker volume ls | grep myapp
+docker volume ls | grep topos
 ```
 
 Inhalt anschauen (Container nur kurzzeitig):
 
 ```bash
-docker run --rm -v myapp-data:/data alpine ls -la /data
+docker run --rm -v topos-data:/data alpine ls -la /data
 ```
 
 Volume sichern:
 
 ```bash
-docker run --rm -v myapp-data:/data -v "$PWD":/backup alpine tar czf /backup/myapp-data.tar.gz -C /data .
+docker run --rm -v topos-data:/data -v "$PWD":/backup alpine tar czf /backup/topos-data.tar.gz -C /data .
 ```
 
 Wiederherstellen:
 
 ```bash
-docker run --rm -v myapp-data:/data -v "$PWD":/backup alpine tar xzf /backup/myapp-data.tar.gz -C /data
+docker run --rm -v topos-data:/data -v "$PWD":/backup alpine tar xzf /backup/topos-data.tar.gz -C /data
 ```
 
 Das `.bgb`-Backup-Format aus der UI ist eine andere, App-Ebene-Sache — ein Pro-Buch-ZIP, das einen Volume-Verlust überlebt. Das Volume-Backup oben deckt alles ab: jedes Buch, jedes Asset, jede Hörbuch-MP3, plus Zustand wie installierte Plugins.
@@ -77,7 +77,7 @@ Das `.bgb`-Backup-Format aus der UI ist eine andere, App-Ebene-Sache — ein Pro
 ./stop.sh                                                # Container stoppen
 ./start.sh                                               # Container starten (oder neu starten)
 docker compose -f docker-compose.prod.yml restart        # Neu starten ohne Rebuild
-docker compose -f docker-compose.prod.yml down -v        # Stoppen + Volume LÖSCHEN (deinstalliert MyApp und ALLE Daten)
+docker compose -f docker-compose.prod.yml down -v        # Stoppen + Volume LÖSCHEN (deinstalliert Topos und ALLE Daten)
 ```
 
 Das `-v`-Flag entfernt das Named Volume. Ohne `-v` bleiben die Daten quer über `docker compose down` und über Image-Rebuilds erhalten. **`-v` nur verwenden, wenn du wirklich alle Bücher, Assets und Hörbuch-MP3s löschen willst.**
@@ -94,28 +94,28 @@ Das Backend loggt jeden API-Request (Uvicorn-Access-Log) und jeden Plugin-Lebens
 
 ## Reverse-Proxy
 
-Wenn MyApp hinter nginx / Caddy / Traefik / Apache läuft, zwei Punkte:
+Wenn Topos hinter nginx / Caddy / Traefik / Apache läuft, zwei Punkte:
 
-1. **`/api/*` an dasselbe Upstream weiterleiten** — der Frontend-Container proxyt `/api/*` schon intern, also kannst du entweder den Reverse-Proxy auf Port `7880` zeigen lassen (MyApp als Black Box) oder splitten (`/` auf Frontend-Container, `/api/*` direkt auf Backend-Container). Der Single-Port-Ansatz ist einfacher und passt zum Default-Deployment.
-2. **Den eigenen Hostname zu `MYAPP_CORS_ORIGINS` hinzufügen.** Sonst blockiert der Browser das Frontend mit einem CORS-Fehler beim Backend-Aufruf. Komma-separierte Liste, z. B. `MYAPP_CORS_ORIGINS=https://buecher.example.com,https://localhost:7880`.
+1. **`/api/*` an dasselbe Upstream weiterleiten** — der Frontend-Container proxyt `/api/*` schon intern, also kannst du entweder den Reverse-Proxy auf Port `7880` zeigen lassen (Topos als Black Box) oder splitten (`/` auf Frontend-Container, `/api/*` direkt auf Backend-Container). Der Single-Port-Ansatz ist einfacher und passt zum Default-Deployment.
+2. **Den eigenen Hostname zu `TOPOS_CORS_ORIGINS` hinzufügen.** Sonst blockiert der Browser das Frontend mit einem CORS-Fehler beim Backend-Aufruf. Komma-separierte Liste, z. B. `TOPOS_CORS_ORIGINS=https://buecher.example.com,https://localhost:7880`.
 
-HTTPS-Terminierung gehört auf den Reverse-Proxy. Die MyApp-Container handhaben kein TLS.
+HTTPS-Terminierung gehört auf den Reverse-Proxy. Die Topos-Container handhaben kein TLS.
 
 ## Backups
 
 Zwei sich ergänzende Mechanismen:
 
-- **App-Ebene `.bgb` pro Buch** — exportiert über die MyApp-UI (Einstellungen → Backup). Deckt ein einzelnes Buch ab, seine Kapitel, seine Assets, optional die Hörbuch-MP3s. Portabel zwischen MyApp-Instanzen.
-- **Volume-Ebene-Backup** — deckt den gesamten MyApp-Zustand ab inklusive jedes Buchs, Plugin-State und installierter Plugins. Der Tar-Befehl oben. Geeignet für nächtliche Cron-Jobs.
+- **App-Ebene `.bgb` pro Buch** — exportiert über die Topos-UI (Einstellungen → Backup). Deckt ein einzelnes Buch ab, seine Kapitel, seine Assets, optional die Hörbuch-MP3s. Portabel zwischen Topos-Instanzen.
+- **Volume-Ebene-Backup** — deckt den gesamten Topos-Zustand ab inklusive jedes Buchs, Plugin-State und installierter Plugins. Der Tar-Befehl oben. Geeignet für nächtliche Cron-Jobs.
 
-Das optionale [git-sync-Plugin](https://github.com/astrapi69/pluginforge-app-template/blob/main/plugins/myapp-plugin-git-sync) kann zusätzlich jedes Buch in ein eigenes Git-Repo pushen — Pro-Buch-Versionskontrolle + ein Off-Site-Backup-Ziel. Siehe die [Git-Backup-Hilfeseite](../git-backup/basics.md).
+Das optionale [git-sync-Plugin](https://github.com/astrapi69/pluginforge-app-template/blob/main/plugins/topos-plugin-git-sync) kann zusätzlich jedes Buch in ein eigenes Git-Repo pushen — Pro-Buch-Versionskontrolle + ein Off-Site-Backup-Ziel. Siehe die [Git-Backup-Hilfeseite](../git-backup/basics.md).
 
 ## Updates
 
-Auf einen neuen MyApp-Release aktualisieren:
+Auf einen neuen Topos-Release aktualisieren:
 
 ```bash
-cd ~/myapp
+cd ~/topos
 git pull origin main
 git checkout vX.Y.Z          # der neue Release-Tag
 ./stop.sh
@@ -128,9 +128,9 @@ Das Lock-Step-Versionierungs-Modell bedeutet, dass es **nie** ein Teil-Upgrade g
 
 ### Daten-Migrationen
 
-MyApp nutzt Alembic für Schema-Migrationen. Der FastAPI-Lifespan führt `alembic upgrade head` beim Start aus, sodass ein frisches `./start.sh` nach Pull eines neuen Tags ausstehende Migrationen anwendet. Die Migrationen sind idempotent und forward-only.
+Topos nutzt Alembic für Schema-Migrationen. Der FastAPI-Lifespan führt `alembic upgrade head` beim Start aus, sodass ein frisches `./start.sh` nach Pull eines neuen Tags ausstehende Migrationen anwendet. Die Migrationen sind idempotent und forward-only.
 
-Für die v0.25.0+-Dateisystem-Migration (Daten zogen aus dem Projektverzeichnis nach platformdirs / `MYAPP_DATA_DIR`) migriert der FastAPI-Lifespan beim ersten Start automatisch und schreibt einen `.migrated-YYYY-MM-DD`-Breadcrumb an jedem alten Pfad. Den Umzug bestätigen, bevor du die alten Dateien manuell löschst.
+Für die v0.25.0+-Dateisystem-Migration (Daten zogen aus dem Projektverzeichnis nach platformdirs / `TOPOS_DATA_DIR`) migriert der FastAPI-Lifespan beim ersten Start automatisch und schreibt einen `.migrated-YYYY-MM-DD`-Breadcrumb an jedem alten Pfad. Den Umzug bestätigen, bevor du die alten Dateien manuell löschst.
 
 ## Stolpersteine
 
@@ -143,9 +143,9 @@ docker compose -f docker-compose.prod.yml logs frontend | tail -30
 
 Häufigste Ursachen:
 
-- **Port 7880 belegt** durch einen anderen Dienst. `MYAPP_PORT=7881` (oder einen anderen freien Port) in `.env` setzen.
-- **`MYAPP_SECRET_KEY` fehlt** — `start.sh` sollte einen generieren; wenn das stillschweigend fehlschlug, prüfe, dass `.env` sowohl `MYAPP_SECRET_KEY=` als auch `MYAPP_CREDENTIALS_SECRET=` mit nicht-leeren Werten enthält.
-- **Festplatte voll** — das myapp-data-Volume braucht Platz für die SQLite-DB und Uploads. `df -h` und `docker system df` lohnen den Blick.
+- **Port 7880 belegt** durch einen anderen Dienst. `TOPOS_PORT=7881` (oder einen anderen freien Port) in `.env` setzen.
+- **`TOPOS_SECRET_KEY` fehlt** — `start.sh` sollte einen generieren; wenn das stillschweigend fehlschlug, prüfe, dass `.env` sowohl `TOPOS_SECRET_KEY=` als auch `TOPOS_CREDENTIALS_SECRET=` mit nicht-leeren Werten enthält.
+- **Festplatte voll** — das topos-data-Volume braucht Platz für die SQLite-DB und Uploads. `df -h` und `docker system df` lohnen den Blick.
 
 ### Backend-Health-Check schlägt fehl
 
@@ -156,7 +156,7 @@ docker compose -f docker-compose.prod.yml exec backend python -c "from app.datab
 docker compose -f docker-compose.prod.yml exec backend ls -la /app/data/
 ```
 
-Wenn `/app/data/myapp.db` existiert, aber der DB-Query fehlschlägt, kann die SQLite-Datei beschädigt sein. Stoppen, aus dem letzten Volume-Backup wiederherstellen, neu starten.
+Wenn `/app/data/topos.db` existiert, aber der DB-Query fehlschlägt, kann die SQLite-Datei beschädigt sein. Stoppen, aus dem letzten Volume-Backup wiederherstellen, neu starten.
 
 ### Plugin lädt nicht
 
@@ -168,6 +168,6 @@ Plugin-Discovery nutzt `importlib.metadata.entry_points()`. Ein Plugin, das beim
 
 ### CORS-Fehler in der Browser-Konsole
 
-Den Hostname zu `MYAPP_CORS_ORIGINS` hinzufügen. Der Default `http://localhost:7880` lässt nur das Frontend des lokalen Rechners durch. Hinter einem Reverse-Proxy auf `buecher.example.com`: `MYAPP_CORS_ORIGINS=https://buecher.example.com`.
+Den Hostname zu `TOPOS_CORS_ORIGINS` hinzufügen. Der Default `http://localhost:7880` lässt nur das Frontend des lokalen Rechners durch. Hinter einem Reverse-Proxy auf `buecher.example.com`: `TOPOS_CORS_ORIGINS=https://buecher.example.com`.
 
 > Zuletzt geprüft für v0.29.0 (2026-05-07).

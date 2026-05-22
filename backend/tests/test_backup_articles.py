@@ -241,14 +241,14 @@ def test_legacy_manifest_v1_restores_books_only_no_crash(tmp_path) -> None:
     """A backup with manifest version 1.0 + no ``articles/`` segment
     must restore cleanly with ``imported_articles == 0``. Defends the
     upgrade path where users restore old backups against a newer
-    MyApp."""
+    Topos."""
     # Build a synthetic v1.0 backup ZIP with one minimal book.
     backup_root = tmp_path / "legacy-backup"
     backup_root.mkdir()
     (backup_root / "manifest.json").write_text(
         json.dumps(
             {
-                "format": "myapp-backup",
+                "format": "topos-backup",
                 "version": "1.0",
                 "created_at": "2026-04-01T00:00:00+00:00",
                 "book_count": 1,
@@ -358,7 +358,7 @@ def _articles_only_bgb_bytes(article_id: str = "user-path-art-1") -> bytes:
         "updated_at": "2026-04-29T00:00:00+00:00",
     }
     manifest = {
-        "format": "myapp-backup",
+        "format": "topos-backup",
         "version": "2.0",
         "article_count": 1,
         "publication_count": 0,
@@ -431,7 +431,7 @@ def test_cio_detect_emits_no_book_json_warning_only_when_archive_is_empty(
     with zipfile.ZipFile(empty, "w") as zf:
         zf.writestr(
             "manifest.json",
-            json.dumps({"format": "myapp-backup", "version": "2.0"}),
+            json.dumps({"format": "topos-backup", "version": "2.0"}),
         )
     detected_empty = handler.detect(str(empty))
     assert "No book.json inside the backup." in detected_empty.warnings
@@ -521,7 +521,7 @@ def test_cio_articles_only_bgb_revives_soft_deleted_article() -> None:
         "created_at": "2026-04-29T00:00:00+00:00",
         "updated_at": "2026-04-29T00:00:00+00:00",
     }
-    manifest = {"format": "myapp-backup", "version": "2.0"}
+    manifest = {"format": "topos-backup", "version": "2.0"}
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("manifest.json", json.dumps(manifest))
         zf.writestr("books/", "")
@@ -592,7 +592,7 @@ def test_cio_single_book_with_articles_restores_both_segments() -> None:
             "updated_at": "2026-04-29T00:00:00+00:00",
         }
 
-    manifest = {"format": "myapp-backup", "version": "2.0"}
+    manifest = {"format": "topos-backup", "version": "2.0"}
     buf = BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("manifest.json", json.dumps(manifest))
@@ -673,7 +673,7 @@ def test_cio_multi_book_with_articles_restores_both_segments() -> None:
         "created_at": "2026-04-29T00:00:00+00:00",
         "updated_at": "2026-04-29T00:00:00+00:00",
     }
-    manifest = {"format": "myapp-backup", "version": "2.0"}
+    manifest = {"format": "topos-backup", "version": "2.0"}
     buf = BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("manifest.json", json.dumps(manifest))
@@ -734,7 +734,7 @@ def test_cio_legacy_v1_bgb_still_imports_books_through_http() -> None:
         "assets": [],
     }
     manifest = {
-        "format": "myapp-backup",
+        "format": "topos-backup",
         "version": "1.0",
         "book_count": 1,
         "includes_audiobook": False,
@@ -784,7 +784,7 @@ def test_forward_compat_unknown_manifest_version_logs_warning(tmp_path, monkeypa
         "chapters": [],
         "assets": [],
     }
-    manifest = {"format": "myapp-backup", "version": "9.9"}
+    manifest = {"format": "topos-backup", "version": "9.9"}
 
     bgb = tmp_path / "future.bgb"
     with zipfile.ZipFile(bgb, "w", zipfile.ZIP_DEFLATED) as zf:

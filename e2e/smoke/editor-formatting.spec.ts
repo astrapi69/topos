@@ -62,8 +62,8 @@ test.describe('A. Text entry and persistence', () => {
   test('type text and verify it appears in the editor', async ({page}) => {
     await openEditor(page, bookId)
     await focusEditor(page)
-    await page.keyboard.type('Hello MyApp')
-    await expect(page.locator('.ProseMirror')).toContainText('Hello MyApp')
+    await page.keyboard.type('Hello Topos')
+    await expect(page.locator('.ProseMirror')).toContainText('Hello Topos')
   })
 
   test('typed text persists after page reload', async ({page}) => {

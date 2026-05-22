@@ -57,10 +57,10 @@ def _t(key: str) -> str:
     """Backward-compat wrapper that delegates to the JSON-backed i18n.
 
     Pre-existing callers (``_t("show_details")`` etc.) continue to
-    work; new code should call :func:`myapp_launcher.i18n.t`
+    work; new code should call :func:`topos_launcher.i18n.t`
     directly so it can interpolate kwargs.
     """
-    from myapp_launcher import i18n
+    from topos_launcher import i18n
 
     return i18n.t(key)
 
@@ -85,7 +85,7 @@ def ask_copyable_url(url: str) -> None:
     """Popup a small window showing a URL the user can copy/paste."""
     _ensure_root()
     win = tk.Toplevel()
-    win.title("MyApp URL")
+    win.title("Topos URL")
     tk.Label(win, text="Copy this URL and paste into your browser:").pack(padx=16, pady=(16, 4))
     entry = tk.Entry(win, width=40)
     entry.insert(0, url)
@@ -426,7 +426,7 @@ def three_button_dialog(
 def welcome_dialog(*, guide_url: str, security_url: str | None = None) -> None:
     """First-ever-launch welcome screen.
 
-    Blocks until the user clicks "Continue". Shows what MyApp
+    Blocks until the user clicks "Continue". Shows what Topos
     needs (Docker Desktop, ~800 MB), what the first run looks like
     (~2 GB / 5-10 min), and a brief Docker trust statement so non-
     technical users understand the install is from a well-known
@@ -439,12 +439,12 @@ def welcome_dialog(*, guide_url: str, security_url: str | None = None) -> None:
     flips and they will encounter the Docker-missing dialog next if
     Docker is absent).
 
-    ``guide_url`` is the URL of the MyApp Docker installation
+    ``guide_url`` is the URL of the Topos Docker installation
     guide. ``security_url`` is the optional anchor link to the
     "Is Docker safe?" section of the same guide; when provided, a
     second link below the trust sentence opens that anchor.
     """
-    from myapp_launcher import i18n
+    from topos_launcher import i18n
 
     _ensure_root()
     win = tk.Toplevel()
@@ -522,7 +522,7 @@ def settings_dialog(current: dict) -> dict | None:
     are updated; any other keys in ``current`` pass through unchanged
     so forward-compatibility with future settings is automatic.
     """
-    from myapp_launcher import i18n
+    from topos_launcher import i18n
 
     _ensure_root()
     win = tk.Toplevel()
@@ -641,11 +641,11 @@ class StatusWindow:
 
     def __init__(self, on_close: callable | None = None) -> None:
         self._root = _ensure_root()
-        self._root.title("MyApp")
+        self._root.title("Topos")
         self._root.geometry("360x200")
         self._root.protocol("WM_DELETE_WINDOW", self._handle_close)
 
-        self._label = tk.Label(self._root, text="Starting MyApp...", font=("Segoe UI", 11))
+        self._label = tk.Label(self._root, text="Starting Topos...", font=("Segoe UI", 11))
         self._label.pack(pady=(24, 12))
 
         self._detail = tk.Label(self._root, text="", font=("Segoe UI", 9), fg="#555")
@@ -664,23 +664,23 @@ class StatusWindow:
         self._stop_cb: callable | None = None
 
     def set_starting(self, detail: str = "") -> None:
-        self._label.configure(text="Starting MyApp...")
+        self._label.configure(text="Starting Topos...")
         self._detail.configure(text=detail)
         self._button.configure(text="", state="disabled")
         self._root.update_idletasks()
 
     def set_running(self, port: int, on_stop: callable, on_settings: callable | None = None) -> None:
-        self._label.configure(text=f"MyApp is running on localhost:{port}")
+        self._label.configure(text=f"Topos is running on localhost:{port}")
         self._detail.configure(text="Browser opened. Close this window or click Stop to shut down.")
         self._stop_cb = on_stop
-        self._button.configure(text="Stop MyApp", state="normal", command=self._handle_stop)
+        self._button.configure(text="Stop Topos", state="normal", command=self._handle_stop)
         if on_settings is not None:
             self._secondary.configure(text="Settings", command=on_settings)
             self._secondary.pack(pady=(0, 16))
         self._root.update_idletasks()
 
     def set_stopping(self) -> None:
-        self._label.configure(text="Stopping MyApp...")
+        self._label.configure(text="Stopping Topos...")
         self._detail.configure(text="Waiting for docker compose down to finish.")
         self._button.configure(text="", state="disabled")
         self._root.update_idletasks()

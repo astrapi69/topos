@@ -1,6 +1,6 @@
 # Mitwirken
 
-Wie man MyApp für die Entwicklung einrichtet, Tests laufen lässt und eine Änderung ausliefert.
+Wie man Topos für die Entwicklung einrichtet, Tests laufen lässt und eine Änderung ausliefert.
 
 Diese Seite ist die öffentliche Version der internen Mitwirkenden-Regeln. Der vollständige Satz `.claude/rules/*.md` dokumentiert feinere Konventionen für KI-unterstützte Arbeit; externe Mitwirkende müssen sie nicht lesen, aber die wichtigsten Punkte aus `coding-standards.md` und `code-hygiene.md` sind hier zusammengefasst.
 
@@ -21,7 +21,7 @@ Benötigte Werkzeuge:
 
 ```bash
 git clone https://github.com/astrapi69/pluginforge-app-template.git
-cd myapp
+cd topos
 make install        # Poetry + npm + Plugins (einmalig)
 make dev            # Backend (8000) + Frontend (5173) parallel
 ```
@@ -77,7 +77,7 @@ Diese Regeln gelten für jede Änderung. Vollständige Fassungen liegen in `.cla
 - Docstrings für öffentliche Funktionen (Google-Stil).
 - Pydantic v2 für Schemas. Field-Validatoren statt manueller Prüfungen.
 - snake_case für Dateien / Funktionen / Variablen; PascalCase für Klassen.
-- Services werfen `MyAppError`-Unterklassen — **niemals** `HTTPException`. Der globale Exception-Handler mappt. (Siehe [Architektur](architecture.md#fehlerbehandlung).)
+- Services werfen `ToposError`-Unterklassen — **niemals** `HTTPException`. Der globale Exception-Handler mappt. (Siehe [Architektur](architecture.md#fehlerbehandlung).)
 - Kein nacktes `except Exception`. Spezifische Exceptions fangen und mit `exc_info=True` loggen.
 
 ### TypeScript
@@ -93,8 +93,8 @@ Diese Regeln gelten für jede Änderung. Vollständige Fassungen liegen in `.cla
 
 ### Naming
 
-- Plugin-Verzeichnisse: `myapp-plugin-{name}` (kebab-case).
-- Inneres Python-Paket: `myapp_{name}` (snake_case).
+- Plugin-Verzeichnisse: `topos-plugin-{name}` (kebab-case).
+- Inneres Python-Paket: `topos_{name}` (snake_case).
 - Events / Hooks: snake_case (`chapter_pre_save`, `export_execute`).
 - Kein I-Präfix für Interfaces. `Book`, nicht `IBook`.
 - Keine generischen Namen: `data`, `info`, `result`, `temp`, `item`, `obj`, `val`, `tmp`, `x` sind verboten. Stattdessen: `book_data`, `plugin_info`, `export_result`, `chapter_item`. Loop-Variablen (`i`, `j`) und Lambdas ausgenommen.
@@ -144,8 +144,8 @@ Dokumentierte Reihenfolge für neue Funktionen:
 
 Den vollen Ablauf siehe [Plugin-Entwickler-Leitfaden](plugins.md). Kurz:
 
-1. `plugins/myapp-plugin-{name}/`.
-2. `pyproject.toml` mit Entry Point: `[project.entry-points."myapp.plugins"]`.
+1. `plugins/topos-plugin-{name}/`.
+2. `pyproject.toml` mit Entry Point: `[project.entry-points."topos.plugins"]`.
 3. Plugin-Klasse erbt von `pluginforge.BasePlugin`, mit `name`, `version`, `depends_on`.
 4. YAML-Config: `backend/config/plugins/{name}.yaml`.
 5. Routen in `routes.py` (FastAPI) + Geschäftslogik in separaten Modulen.
@@ -161,7 +161,7 @@ Der Release-Workflow lebt in `release-workflow.md` — intern, aber öffentlich 
 1. Eine Datei zur Release-Zeit von Hand bearbeiten: `backend/pyproject.toml`. Bump nach SemVer.
 2. `make sync-versions` propagiert in alle Subsysteme (Frontend `package.json`, Launcher pyproject + Spec-Plist + `__init__.py`, alle 10 Plugin-pyprojects, `install.sh` und `install.ps1` aus Templates regeneriert).
 3. `make sync-versions-check` und `bash scripts/verify_version_pins.sh <version>` — beide müssen sauber sein.
-4. Pflicht-Pre-Tag-Kette: `make test`, `tsc --noEmit`, `vitest`, `playwright --project=smoke`, `ruff check`, `mypy app/`, `pre-commit run --all-files`, `pyinstaller myapp-launcher.spec --clean --noconfirm`. Alle grün.
+4. Pflicht-Pre-Tag-Kette: `make test`, `tsc --noEmit`, `vitest`, `playwright --project=smoke`, `ruff check`, `mypy app/`, `pre-commit run --all-files`, `pyinstaller topos-launcher.spec --clean --noconfirm`. Alle grün.
 5. `git tag -a vX.Y.Z -m "Release vX.Y.Z"` und Tag + main pushen.
 6. `gh release create vX.Y.Z --notes-file changelog/releases/vX.Y.Z.md`.
 7. Post-Release: ausgelieferte Items in `docs/roadmap-archive/YYYY-MM.md` archivieren, `docs/ROADMAP.md` `Latest release`-Zeile aktualisieren, `CLAUDE.md` `Version`-Zeile aktualisieren, Chat-Journal-Eintrag schreiben.

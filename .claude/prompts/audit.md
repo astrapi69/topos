@@ -1,12 +1,12 @@
-# MyApp — systematic audit prompt
+# Topos — systematic audit prompt
 
 Drop-in for any future audit pass. Copy-paste verbatim into a fresh
 Claude Code session at the repo root.
 
 ---
 
-Analyze the MyApp codebase at the working directory. Perform a systematic audit
-against the project's documented standards. MyApp is a Python 3.11+ / FastAPI
+Analyze the Topos codebase at the working directory. Perform a systematic audit
+against the project's documented standards. Topos is a Python 3.11+ / FastAPI
 / SQLAlchemy 2.0 / Pydantic v2 backend; React 18 / TypeScript strict / TipTap /
 Vite frontend; PluginForge-based plugin architecture; manuscripta export pipeline;
 local-first with three-layer secrets config.
@@ -53,7 +53,7 @@ If the convention itself is stale, flag it as Outdated under section 4.
 
 - Detect deprecated patterns, orphaned imports, unused variables, dead functions.
 - Verify error-handling architecture per `code-hygiene.md`: services raise typed
-  `MyAppError` subclasses (`NotFoundError` / `ValidationError` / `ConflictError`
+  `ToposError` subclasses (`NotFoundError` / `ValidationError` / `ConflictError`
   / `PayloadTooLargeError` / `ExternalServiceError`), NEVER `HTTPException`.
   Routers catch nothing; the global handler in `main.py` maps. Frontend catches
   throw `ApiError`, surface `.detail` to `notify.error`.
@@ -104,11 +104,11 @@ If the convention itself is stale, flag it as Outdated under section 4.
   `mutants/`, `coverage.xml`, `htmlcov/`, encrypted credential blobs.
 - Secrets: three-layer chain per `docs/configuration.md`. Project YAML
   (`backend/config/app.yaml`, defaults) < user override
-  (`~/.config/myapp/secrets.yaml`, gitignored) < env vars
-  (`MYAPP_*`). Verify no committed YAML carries a non-empty `api_key:`.
-- Environment vars: `MYAPP_PORT=7880` (NOT 8080), `MYAPP_DEBUG`,
-  `MYAPP_DB_PATH`, `MYAPP_CORS_ORIGINS`, `MYAPP_SECRET_KEY`,
-  `MYAPP_CREDENTIALS_SECRET`, `MYAPP_LICENSE_SECRET`, `MYAPP_TEST=1`
+  (`~/.config/topos/secrets.yaml`, gitignored) < env vars
+  (`TOPOS_*`). Verify no committed YAML carries a non-empty `api_key:`.
+- Environment vars: `TOPOS_PORT=7880` (NOT 8080), `TOPOS_DEBUG`,
+  `TOPOS_DB_PATH`, `TOPOS_CORS_ORIGINS`, `TOPOS_SECRET_KEY`,
+  `TOPOS_CREDENTIALS_SECRET`, `TOPOS_LICENSE_SECRET`, `TOPOS_TEST=1`
   for in-memory test DB. `.env.example` is the discovery surface.
 
 ### 4. Documentation and Structure
@@ -129,7 +129,7 @@ If the convention itself is stale, flag it as Outdated under section 4.
   count) live in ONE canonical location. Documentation references that location
   instead of inlining the number. Flag any duplication.
 - Project structure: 4-layer architecture under `backend/app/`,
-  `plugins/myapp-plugin-{name}/`,
+  `plugins/topos-plugin-{name}/`,
   `frontend/src/{pages,components,hooks,api,styles}/`, `e2e/{smoke,full}/`,
   `docs/{audits,explorations,help,journal}/`. Flag deviation.
 

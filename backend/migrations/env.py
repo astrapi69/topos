@@ -1,4 +1,4 @@
-"""Alembic environment configuration for MyApp."""
+"""Alembic environment configuration for Topos."""
 
 import logging
 from logging.config import fileConfig

@@ -1,6 +1,6 @@
 /* EXAMPLE-DOMAIN: This file demonstrates how the frontend connects
  * to the backend CRUD shape (inherited book / article / chapter
- * domain from MyApp). Adapt or replace for myapp's
+ * domain from Topos). Adapt or replace for topos's
  * actual domain when it solidifies.
  */
 

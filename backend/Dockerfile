@@ -9,7 +9,7 @@ WORKDIR /build
 COPY backend/pyproject.toml backend/poetry.lock* ./backend/
 
 # Copy local plugin packages (path dependencies in backend/pyproject.toml).
-# Glob picks up every plugins/myapp-plugin-* directory so new plugins do
+# Glob picks up every plugins/topos-plugin-* directory so new plugins do
 # not require a Dockerfile change. .dockerignore strips tests and caches.
 COPY plugins/ ./plugins/
 
@@ -21,12 +21,12 @@ RUN poetry config virtualenvs.create false && \
 
 # Reinstall local plugins as proper packages (not .pth path links).
 # Loop matches the COPY glob so any plugin in the tree is installed.
-RUN for pkg in ../plugins/myapp-plugin-*; do \
+RUN for pkg in ../plugins/topos-plugin-*; do \
         pip install --no-cache-dir --force-reinstall --no-deps "$pkg"; \
     done
 
 # Remove .pth files left by Poetry's editable installs
-RUN rm -f /usr/local/lib/python3.12/site-packages/myapp_plugin_*.pth
+RUN rm -f /usr/local/lib/python3.12/site-packages/topos_plugin_*.pth
 
 # Stage 2: Runtime - minimal image without Poetry, pip cache, or dev deps
 FROM python:3.12-slim
@@ -45,10 +45,10 @@ WORKDIR /app
 COPY backend/ .
 
 # Create non-root user and data directory
-RUN groupadd -r myapp && useradd -r -g myapp myapp && \
-    mkdir -p /app/data && chown -R myapp:myapp /app
+RUN groupadd -r topos && useradd -r -g topos topos && \
+    mkdir -p /app/data && chown -R topos:topos /app
 
-USER myapp
+USER topos
 
 EXPOSE 8000
 

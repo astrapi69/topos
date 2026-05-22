@@ -29,7 +29,7 @@ describe("useTheme", () => {
     })
 
     it("reads stored theme from localStorage", () => {
-      localStorage.setItem("myapp-theme", "dark")
+      localStorage.setItem("topos-theme", "dark")
       const {result} = renderHook(() => useTheme())
       expect(result.current.theme).toBe("dark")
     })
@@ -43,7 +43,7 @@ describe("useTheme", () => {
     })
 
     it("ignores invalid localStorage values", () => {
-      localStorage.setItem("myapp-theme", "sepia")
+      localStorage.setItem("topos-theme", "sepia")
       const {result} = renderHook(() => useTheme())
       expect(result.current.theme).toBe("light")
     })
@@ -57,7 +57,7 @@ describe("useTheme", () => {
     })
 
     it("toggles from dark to light", () => {
-      localStorage.setItem("myapp-theme", "dark")
+      localStorage.setItem("topos-theme", "dark")
       const {result} = renderHook(() => useTheme())
       act(() => result.current.toggle())
       expect(result.current.theme).toBe("light")
@@ -66,7 +66,7 @@ describe("useTheme", () => {
     it("persists toggled theme to localStorage", () => {
       const {result} = renderHook(() => useTheme())
       act(() => result.current.toggle())
-      expect(localStorage.getItem("myapp-theme")).toBe("dark")
+      expect(localStorage.getItem("topos-theme")).toBe("dark")
     })
 
     it("sets data-theme attribute on document element", () => {
@@ -83,13 +83,13 @@ describe("useTheme", () => {
     })
 
     it("reads stored palette from localStorage", () => {
-      localStorage.setItem("myapp-app-theme", "nord")
+      localStorage.setItem("topos-app-theme", "nord")
       const {result} = renderHook(() => useTheme())
       expect(result.current.appTheme).toBe("nord")
     })
 
     it("falls back to default for unknown stored palette", () => {
-      localStorage.setItem("myapp-app-theme", "nonexistent-theme")
+      localStorage.setItem("topos-app-theme", "nonexistent-theme")
       const {result} = renderHook(() => useTheme())
       expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
     })
@@ -103,7 +103,7 @@ describe("useTheme", () => {
     it("persists palette to localStorage", () => {
       const {result} = renderHook(() => useTheme())
       act(() => result.current.setAppTheme("nord"))
-      expect(localStorage.getItem("myapp-app-theme")).toBe("nord")
+      expect(localStorage.getItem("topos-app-theme")).toBe("nord")
     })
 
     it("sets data-app-theme attribute on document element", () => {

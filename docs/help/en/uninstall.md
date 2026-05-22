@@ -1,12 +1,12 @@
-# Uninstalling MyApp
+# Uninstalling Topos
 
-There are two ways to uninstall MyApp, depending on how you installed it.
+There are two ways to uninstall Topos, depending on how you installed it.
 
 ## Path A: Launcher (all platforms)
 
-If you installed MyApp using one of the launchers ([Windows](launcher-windows.md), [macOS](launcher-macos.md), or [Linux](launcher-linux.md)):
+If you installed Topos using one of the launchers ([Windows](launcher-windows.md), [macOS](launcher-macos.md), or [Linux](launcher-linux.md)):
 
-1. Open the MyApp launcher.
+1. Open the Topos launcher.
 2. Click **Uninstall**.
 3. Confirm when prompted.
 
@@ -21,7 +21,7 @@ To also remove Docker volumes and images, run the commands in the "What gets rem
 If you installed via `install.sh` or want a complete removal including Docker resources:
 
 ```bash
-cd ~/myapp
+cd ~/topos
 bash uninstall.sh
 ```
 
@@ -34,21 +34,21 @@ The uninstall script removes:
 | Component | Location | Command |
 |-----------|----------|---------|
 | Docker containers | Running stack | `docker compose -f docker-compose.prod.yml down` |
-| Docker volumes | Book data, database | `docker volume ls --filter name=myapp -q \| xargs docker volume rm` |
-| Docker images | Backend + frontend images | `docker images --filter reference='*myapp*' -q \| xargs docker image rm` |
+| Docker volumes | Book data, database | `docker volume ls --filter name=topos -q \| xargs docker volume rm` |
+| Docker images | Backend + frontend images | `docker images --filter reference='*topos*' -q \| xargs docker image rm` |
 | Launcher manifest | Platform config dir | See below |
-| Installation directory | `~/myapp` (default) | `rm -rf ~/myapp` |
+| Installation directory | `~/topos` (default) | `rm -rf ~/topos` |
 
 Launcher manifest locations:
-- Windows: `%APPDATA%\myapp\install.json`
-- macOS: `~/Library/Application Support/myapp/install.json`
-- Linux: `~/.config/myapp/install.json`
+- Windows: `%APPDATA%\topos\install.json`
+- macOS: `~/Library/Application Support/topos/install.json`
+- Linux: `~/.config/topos/install.json`
 
 ## Keeping your data
 
 If you want to keep your books before uninstalling:
 
-1. Open MyApp in the browser
+1. Open Topos in the browser
 2. Go to the Dashboard
 3. Use **Backup** to export each book as a `.bgb` file
 4. Save the `.bgb` files somewhere safe

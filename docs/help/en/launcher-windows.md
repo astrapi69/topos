@@ -1,8 +1,8 @@
 # Windows Launcher
 
-The Windows launcher is a small `myapp-launcher.exe` that starts MyApp with a double-click: no terminal, no `docker compose` commands. Docker Desktop still runs the actual app; the launcher just starts and stops it for you.
+The Windows launcher is a small `topos-launcher.exe` that starts Topos with a double-click: no terminal, no `docker compose` commands. Docker Desktop still runs the actual app; the launcher just starts and stops it for you.
 
-> **What the launcher does for you.** On first run, the launcher detects whether MyApp is already on disk. If it is not, the launcher offers to download and set up MyApp for you (see "First launch" below). The only thing you have to install yourself is Docker Desktop; Docker's licensing terms prohibit silent third-party installation. See the [Installation overview](installation.md) for the cross-platform picture.
+> **What the launcher does for you.** On first run, the launcher detects whether Topos is already on disk. If it is not, the launcher offers to download and set up Topos for you (see "First launch" below). The only thing you have to install yourself is Docker Desktop; Docker's licensing terms prohibit silent third-party installation. See the [Installation overview](installation.md) for the cross-platform picture.
 
 For macOS or Linux, see [macOS Launcher](launcher-macos.md) / [Linux Launcher](launcher-linux.md).
 
@@ -10,33 +10,33 @@ For macOS or Linux, see [macOS Launcher](launcher-macos.md) / [Linux Launcher](l
 
 ### 1. Install Docker Desktop
 
-See the [MyApp Docker installation guide](install/docker-desktop.md) for the full Windows walkthrough plus a "Is Docker safe to install?" section. After installation, start Docker Desktop and wait until the whale icon in the system tray turns from amber to blue.
+See the [Topos Docker installation guide](install/docker-desktop.md) for the full Windows walkthrough plus a "Is Docker safe to install?" section. After installation, start Docker Desktop and wait until the whale icon in the system tray turns from amber to blue.
 
-If you skip this step, the launcher detects the missing Docker on startup and shows a three-button dialog (open the Docker download page, open the MyApp Docker guide, or quit). You can run the launcher again after installing Docker.
+If you skip this step, the launcher detects the missing Docker on startup and shows a three-button dialog (open the Docker download page, open the Topos Docker guide, or quit). You can run the launcher again after installing Docker.
 
 ### 2. Download the launcher
 
-From the MyApp releases page, download two files attached to the release:
+From the Topos releases page, download two files attached to the release:
 
-- `myapp-launcher.exe`
-- `myapp-launcher.exe.sha256`
+- `topos-launcher.exe`
+- `topos-launcher.exe.sha256`
 
 Save them to any folder; the Desktop or `Downloads` are both fine.
 
 ### 3. Verify the download (optional but recommended)
 
-MyApp does not yet sign the launcher (see [Why is there a security warning?](#why-is-there-a-security-warning) below). To confirm the file you downloaded is the exact file published, open PowerShell where you saved the launcher and run:
+Topos does not yet sign the launcher (see [Why is there a security warning?](#why-is-there-a-security-warning) below). To confirm the file you downloaded is the exact file published, open PowerShell where you saved the launcher and run:
 
 ```powershell
-Get-FileHash -Algorithm SHA256 .\myapp-launcher.exe
-Get-Content .\myapp-launcher.exe.sha256
+Get-FileHash -Algorithm SHA256 .\topos-launcher.exe
+Get-Content .\topos-launcher.exe.sha256
 ```
 
 The hash printed by `Get-FileHash` should match the hex string in the `.sha256` file. If it does not, do not run the file and report it on [GitHub Issues](https://github.com/astrapi69/pluginforge-app-template/issues).
 
 ## First launch
 
-Double-click `myapp-launcher.exe`.
+Double-click `topos-launcher.exe`.
 
 ### The SmartScreen warning
 
@@ -54,43 +54,43 @@ See [Why is there a security warning?](#why-is-there-a-security-warning) below f
 The launcher's first job is to detect what is already in place.
 
 1. **Docker check.** The launcher confirms Docker Desktop is installed and running. If Docker Desktop is missing, a dialog with the install URL appears and the launcher exits. If Docker is installed but not running, a dialog asks you to start Docker Desktop and click Retry; the launcher tries up to three times.
-2. **MyApp check.** The launcher looks for an existing MyApp install via its manifest (`%APPDATA%\myapp\install.json`) or, on a clean machine, checks the default location `%USERPROFILE%\myapp`.
+2. **Topos check.** The launcher looks for an existing Topos install via its manifest (`%APPDATA%\topos\install.json`) or, on a clean machine, checks the default location `%USERPROFILE%\topos`.
    - **Already installed**: the launcher proceeds straight to step 3.
-   - **Not installed**: a welcome dialog appears: "MyApp is not installed on this computer yet". Three buttons: **Install** (the launcher downloads the latest release ZIP, extracts to a folder you pick, generates a fresh `.env`, and builds the Docker images - first build takes 3-5 minutes), **Open install guide** (opens the docs in your browser), or **Close**.
-3. **Start.** A small "Starting MyApp..." window appears while Docker brings up the containers.
-4. **Browser.** When MyApp is ready, your default browser opens at `http://localhost:7880` (or whatever port is configured in `.env`).
-5. **Status window.** The small window switches to "MyApp is running on localhost:7880" with a **Stop MyApp** button.
+   - **Not installed**: a welcome dialog appears: "Topos is not installed on this computer yet". Three buttons: **Install** (the launcher downloads the latest release ZIP, extracts to a folder you pick, generates a fresh `.env`, and builds the Docker images - first build takes 3-5 minutes), **Open install guide** (opens the docs in your browser), or **Close**.
+3. **Start.** A small "Starting Topos..." window appears while Docker brings up the containers.
+4. **Browser.** When Topos is ready, your default browser opens at `http://localhost:7880` (or whatever port is configured in `.env`).
+5. **Status window.** The small window switches to "Topos is running on localhost:7880" with a **Stop Topos** button.
 
-## Stopping MyApp
+## Stopping Topos
 
-Click **Stop MyApp** in the launcher window, or just close the window. The launcher runs `docker compose down` and exits. Docker Desktop keeps running; only the MyApp containers stop.
+Click **Stop Topos** in the launcher window, or just close the window. The launcher runs `docker compose down` and exits. Docker Desktop keeps running; only the Topos containers stop.
 
 ## Running a second time
 
-Double-click the launcher again. If MyApp is already running (for example because you minimized the launcher window and forgot), the launcher detects the running instance and just opens the browser at the correct URL without starting a second copy.
+Double-click the launcher again. If Topos is already running (for example because you minimized the launcher window and forgot), the launcher detects the running instance and just opens the browser at the correct URL without starting a second copy.
 
 ## Troubleshooting
 
 **"Docker Desktop is not running"**
 Open Docker Desktop from the Start menu. Wait until the whale icon in the taskbar is steady (not animating). Then click Retry in the launcher dialog.
 
-**"MyApp install not found"**
-The launcher cannot find `docker-compose.prod.yml` at the default or configured path. Click OK, then pick the folder where you cloned or unzipped MyApp. That folder typically contains `README.md`, `Makefile`, and the `docker-compose.prod.yml` file.
+**"Topos install not found"**
+The launcher cannot find `docker-compose.prod.yml` at the default or configured path. Click OK, then pick the folder where you cloned or unzipped Topos. That folder typically contains `README.md`, `Makefile`, and the `docker-compose.prod.yml` file.
 
 **"Port 7880 is in use"**
-Another program is already using the MyApp port. Options: stop the other program, or edit `.env` in your MyApp folder and set `MYAPP_PORT` to a different value (for example `7881`), then start the launcher again.
+Another program is already using the Topos port. Options: stop the other program, or edit `.env` in your Topos folder and set `TOPOS_PORT` to a different value (for example `7881`), then start the launcher again.
 
-**"MyApp did not start in time"**
+**"Topos did not start in time"**
 The first start of a fresh install needs to build Docker images, which can take several minutes. Click Retry to wait another 60 seconds. If it still fails, check the last log lines in the dialog and open Docker Desktop's container view to see what happened.
 
 **Activity log**
-Every launch writes to `%APPDATA%\myapp\install.log` (1 MB rotation, 1 backup). The legacy path `%APPDATA%\MyApp\launcher.log` is still written for backward compatibility. Attach the current log file to bug reports.
+Every launch writes to `%APPDATA%\topos\install.log` (1 MB rotation, 1 backup). The legacy path `%APPDATA%\Topos\launcher.log` is still written for backward compatibility. Attach the current log file to bug reports.
 
 ## Why is there a security warning?
 
 Windows shows the "unrecognized app" warning for any executable that is not signed with a paid Microsoft-recognized code-signing certificate. Certificates cost several hundred dollars per year and require ongoing maintenance. For the current user base we publish the launcher unsigned and supply a SHA256 checksum so you can verify the download independently.
 
-We plan to revisit code-signing when MyApp has a user base that justifies the cost and the maintenance burden. Until then, the "More info" -> "Run anyway" path is the intended flow. The source code for the launcher is in `launcher/` in the MyApp repository; you are welcome to inspect or build it yourself.
+We plan to revisit code-signing when Topos has a user base that justifies the cost and the maintenance burden. Until then, the "More info" -> "Run anyway" path is the intended flow. The source code for the launcher is in `launcher/` in the Topos repository; you are welcome to inspect or build it yourself.
 
 ## Uninstalling
 
@@ -98,7 +98,7 @@ See [Uninstall](uninstall.md) for the launcher UI path and the `uninstall.sh` sc
 
 Short version: click **Uninstall** inside the launcher window and confirm. The launcher removes the installation directory and its own manifest. Docker volumes (your book data) are preserved by default; add them explicitly if you want a complete wipe.
 
-If you only want to remove the launcher binary itself and keep MyApp installed, delete `myapp-launcher.exe` and optionally the config directory at `%APPDATA%\myapp\`.
+If you only want to remove the launcher binary itself and keep Topos installed, delete `topos-launcher.exe` and optionally the config directory at `%APPDATA%\topos\`.
 
 ## Related pages
 

@@ -8,7 +8,7 @@ set -e
 #  launcher manifest in a single command.
 #
 #  Usage:
-#    cd ~/myapp && bash uninstall.sh
+#    cd ~/topos && bash uninstall.sh
 # ============================================================
 
 RED='\033[0;31m'
@@ -56,7 +56,7 @@ fi
 
 # --- Step 2: Remove Docker volumes ---
 echo -e "${YELLOW}Removing Adaptive Learner Docker volumes...${NC}"
-VOLUMES=$(docker volume ls --filter name=myapp -q 2>/dev/null || true)
+VOLUMES=$(docker volume ls --filter name=topos -q 2>/dev/null || true)
 if [ -n "$VOLUMES" ]; then
     echo "$VOLUMES" | xargs docker volume rm 2>/dev/null || true
     echo -e "${GREEN}  Volumes removed.${NC}"
@@ -66,7 +66,7 @@ fi
 
 # --- Step 3: Remove Docker images ---
 echo -e "${YELLOW}Removing Adaptive Learner Docker images...${NC}"
-IMAGES=$(docker images --filter reference='*myapp*' -q 2>/dev/null || true)
+IMAGES=$(docker images --filter reference='*topos*' -q 2>/dev/null || true)
 if [ -n "$IMAGES" ]; then
     echo "$IMAGES" | xargs docker image rm --force 2>/dev/null || true
     echo -e "${GREEN}  Images removed.${NC}"
@@ -83,15 +83,15 @@ OS_TYPE="$(uname -s 2>/dev/null || echo "unknown")"
 case "$OS_TYPE" in
     MINGW*|MSYS*|CYGWIN*|Windows*)
         # Windows (Git Bash / MSYS2 / Cygwin)
-        MANIFEST_DIR="${APPDATA}/myapp"
+        MANIFEST_DIR="${APPDATA}/topos"
         ;;
     Darwin*)
         # macOS
-        MANIFEST_DIR="${HOME}/Library/Application Support/myapp"
+        MANIFEST_DIR="${HOME}/Library/Application Support/topos"
         ;;
     *)
         # Linux and other Unix
-        MANIFEST_DIR="${HOME}/.config/myapp"
+        MANIFEST_DIR="${HOME}/.config/topos"
         ;;
 esac
 
@@ -134,5 +134,5 @@ echo "    - Launcher manifest ($MANIFEST_REMOVED)"
 echo "    - Installation directory"
 echo ""
 echo "  To reinstall:"
-echo "    curl -fsSL https://raw.githubusercontent.com/astrapi69/myapp/main/install.sh | bash"
+echo "    curl -fsSL https://raw.githubusercontent.com/astrapi69/topos/main/install.sh | bash"
 echo ""

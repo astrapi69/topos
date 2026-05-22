@@ -45,7 +45,7 @@ The public call-for-reviewers lives at GitHub issue [#18](https://github.com/ast
 If you read one of the pending-review catalogs and find errors, the path is:
 
 1. Fork the repo at <https://github.com/astrapi69/pluginforge-app-template>.
-2. Edit the relevant `launcher/myapp_launcher/locales/{lang}.json` directly.
+2. Edit the relevant `launcher/topos_launcher/locales/{lang}.json` directly.
 3. Remove the `_meta` block when the entire catalog has been reviewed (keep it if your pass was partial — add a Notes column entry to this file noting the partial state).
 4. Open a PR. Tag it `i18n-{lang}` so the maintainer can route it.
 5. The launcher i18n parity test will catch:

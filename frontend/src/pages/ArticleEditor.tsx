@@ -1,6 +1,6 @@
 /* EXAMPLE-DOMAIN: This file demonstrates how the frontend connects
  * to the backend CRUD shape (inherited book / article / chapter
- * domain from MyApp). Adapt or replace for myapp's
+ * domain from Topos). Adapt or replace for topos's
  * actual domain when it solidifies.
  */
 
@@ -61,7 +61,7 @@ import { useTopics } from "../hooks/useTopics";
 import { notify } from "../utils/notify";
 import layout from "./ArticleEditor.module.css";
 
-/** Languages MyApp UI ships in. Mirrors backend/config/i18n/. */
+/** Languages Topos UI ships in. Mirrors backend/config/i18n/. */
 const SUPPORTED_LANGUAGES: { code: string; label: string }[] = [
     { code: "de", label: "Deutsch" },
     { code: "en", label: "English" },

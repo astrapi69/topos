@@ -1,6 +1,6 @@
 # KI-Vorlagen (Artikel + Bücher)
 
-Mit MyApps KI-Vorlagen füllst du die Metadaten-Felder eines
+Mit Toposs KI-Vorlagen füllst du die Metadaten-Felder eines
 Artikels oder Buches – SEO-Titel, Tags, Bildgenerierungs-Prompts,
 Backcover-Texte, Kapitel-Zusammenfassungen und mehr – ohne alles
 von Hand einzutippen. Dasselbe `.biblio.yaml`-Format treibt drei
@@ -19,14 +19,14 @@ passt.
 
 Du konfigurierst einen KI-Anbieter (Anthropic, OpenAI, Google,
 Mistral) unter Einstellungen → KI-Assistent und klickst „Mit KI
-füllen" im Artikel- oder Buch-Editor. MyApp ruft den Anbieter
+füllen" im Artikel- oder Buch-Editor. Topos ruft den Anbieter
 direkt auf, parst die YAML-Antwort und übernimmt die Felder. Der
 ergonomisch günstigste Weg; kostet, was der Anbieter pro Anfrage
 verrechnet.
 
 ### Arbeitsablauf B – Eigener lokaler Endpoint
 
-Richte MyApps KI-Einstellungen auf LM Studio, Ollama oder
+Richte Toposs KI-Einstellungen auf LM Studio, Ollama oder
 einen beliebigen OpenAI-kompatiblen lokalen Server. „Mit KI
 füllen" nutzt dann dein lokales Modell statt einer kostenpflicht-
 igen Cloud-API. Für die meisten lokalen Setups kein API-
@@ -39,7 +39,7 @@ Schlüssel nötig; die Latenz hängt von deiner Hardware ab. Siehe
 Exportiere eine leere (oder teilweise gefüllte) `.biblio.yaml`,
 füge sie in Claude.ai oder ChatGPT ein, hol die gefüllte Antwort
 zurück und lade sie über „Gefüllte Vorlage importieren" hoch.
-Keine KI-Konfiguration auf der MyApp-Seite nötig; funktion-
+Keine KI-Konfiguration auf der Topos-Seite nötig; funktion-
 iert mit jedem KI-Dienst, der YAML lesen und zurückgeben kann.
 
 ## Das Vorlagenformat
@@ -161,7 +161,7 @@ Kosten. Der Modellname kommt direkt aus deinen KI-Einstellungen.
 > $0.0125, und der Inline-Tabelle pro Eintrag darunter mit
 > einer Zeile pro Artikel.
 
-Wenn das konfigurierte Modell nicht in MyApps Preistabelle
+Wenn das konfigurierte Modell nicht in Toposs Preistabelle
 steht, erscheinen die Kosten als „—" mit dem Hinweis „Kosten
 unbekannt, weil das konfigurierte Modell nicht in der
 Preistabelle steht". Der Job läuft trotzdem; nur die Schätzung
@@ -175,7 +175,7 @@ aktuell verarbeiteten Eintrags. Klick darauf, um das volle Pro-
 Eintrag-Modal mit Gesamtsummen (Einträge / aktualisiert /
 Tokens / Kosten) und einer scrollbaren Liste aller Einträge zu
 öffnen, farblich nach Status sortiert (läuft / fertig /
-übersprungen / Fehler). Du kannst in anderen MyApp-Bereichen
+übersprungen / Fehler). Du kannst in anderen Topos-Bereichen
 weiterarbeiten, während der Job läuft.
 
 > Screenshot: das Bulk-KI-Füll-Dock in der unteren linken Ecke
@@ -193,7 +193,7 @@ aktualisieren, um alle aktualisierten Metadaten zu sehen, oder
 einzelne Datensätze öffnen, um die Füllung zu prüfen.
 
 Wenn du den Browser neu lädst, während ein Job läuft, verbindet
-sich MyApp über localStorage wieder mit demselben Job, und
+sich Topos über localStorage wieder mit demselben Job, und
 das Dock kommt zurück. Der Job läuft serverseitig weiter,
 unabhängig davon, ob dein Browser offen ist.
 
@@ -249,7 +249,7 @@ dein OS, starte es.
 
 ### 2. Modell herunterladen
 
-Der Home-Tab zeigt empfohlene Modelle. Wähl ein MyApp-
+Der Home-Tab zeigt empfohlene Modelle. Wähl ein Topos-
 freundliches – Llama 3.1 8B Instruct, Qwen 2.5 7B Instruct oder
 ein instruct-getuntes Modell im 4-8B-Bereich funktioniert gut
 für Metadaten-Generierung. Klick Download.
@@ -269,9 +269,9 @@ kompatible Base URL.
 > Server Status auf „Running on port 1234", und der API-
 > Endpoint-URL `http://localhost:1234/v1` im rechten Panel.
 
-### 4. MyApp konfigurieren
+### 4. Topos konfigurieren
 
-MyApp öffnen → Einstellungen → KI-Assistent. Wähl **LM
+Topos öffnen → Einstellungen → KI-Assistent. Wähl **LM
 Studio (lokal)** aus dem Anbieter-Dropdown. Die Base URL füllt
 sich automatisch zu `http://localhost:1234/v1`. Lass das Modell-
 Feld leer (LM Studio liefert was geladen ist) oder tippe den
@@ -281,7 +281,7 @@ Klick **Speichern**.
 
 ### 5. KI-Features nutzen
 
-Klick irgendwo in MyApp auf **Mit KI füllen**. Das lokale
+Klick irgendwo in Topos auf **Mit KI füllen**. Das lokale
 Modell antwortet; kein API-Schlüssel nötig, keine Kosten pro
 Anfrage, nach dem Modell-Download komplett offline.
 
@@ -322,7 +322,7 @@ OpenAI-kompatible Endpoint liegt unter `http://localhost:11434/v1`.
 > „Listening on 127.0.0.1:11434" und einer anschließenden
 > `ollama list`-Ausgabe, die das gezogene Modell bestätigt.
 
-### 3. MyApp konfigurieren
+### 3. Topos konfigurieren
 
 Einstellungen → KI-Assistent öffnen. Wähl **Eigener Endpoint
 (OpenAI-kompatibel)** aus dem Anbieter-Dropdown. Trag in Base
@@ -330,7 +330,7 @@ URL ein: `http://localhost:11434/v1`. Trag in Modell ein:
 `llama3.1:8b-instruct` (oder was du gezogen hast). API-Schlüssel
 leer lassen.
 
-> Screenshot: MyApp Einstellungen KI-Tab mit Anbieter auf
+> Screenshot: Topos Einstellungen KI-Tab mit Anbieter auf
 > „Eigener Endpoint (OpenAI-kompatibel)" gesetzt, Base-URL-Feld
 > mit `http://localhost:11434/v1`, Modell-Feld mit
 > `llama3.1:8b-instruct`, API-Schlüssel leer, Verbindung-testen-
@@ -354,7 +354,7 @@ die Pro-Datensatz- als auch die Massen-Abläufe.
 oben.
 
 **„Kosten unbekannt"-Hinweis in der Massen-Schätzung.** Das
-konfigurierte Modell steht nicht in MyApps Preistabelle. Der
+konfigurierte Modell steht nicht in Toposs Preistabelle. Der
 Job läuft normal; nur die USD-Schätzung fehlt. Füg dein Modell
 in `backend/app/ai/pricing.py` hinzu, wenn du eine lokale Kopie
 betreibst.

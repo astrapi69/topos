@@ -1,6 +1,6 @@
-# MyApp Help
+# Topos Help
 
-Welcome to the MyApp documentation. Everything you need to write, format, and export books.
+Welcome to the Topos documentation. Everything you need to write, format, and export books.
 
 ## Quick Start
 

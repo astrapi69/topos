@@ -161,7 +161,7 @@ def test_get_request_is_not_rate_limited() -> None:
 
 def test_delete_request_is_not_rate_limited() -> None:
     """DELETE bypasses; ASGI lets a body through optionally but
-    MyApp's DELETE endpoints don't use one."""
+    Topos's DELETE endpoints don't use one."""
     from fastapi.testclient import TestClient
 
     app = _build_app_with_cap(1024)
@@ -173,7 +173,7 @@ def test_delete_request_is_not_rate_limited() -> None:
 def test_error_response_is_json_with_detail_field() -> None:
     """The 413 body must be JSON with a 'detail' field so the
     frontend's ApiError class can render it consistently with other
-    MyAppError-style errors."""
+    ToposError-style errors."""
     from fastapi.testclient import TestClient
 
     app = _build_app_with_cap(64)

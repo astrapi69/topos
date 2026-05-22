@@ -1,25 +1,25 @@
 # macOS Launcher
 
-The macOS launcher is a `MyApp.app` bundle that starts MyApp with a double-click: no terminal, no `docker compose` commands. Docker Desktop still runs the actual app; the launcher just starts and stops it for you.
+The macOS launcher is a `Topos.app` bundle that starts Topos with a double-click: no terminal, no `docker compose` commands. Docker Desktop still runs the actual app; the launcher just starts and stops it for you.
 
 **This initial release is arm64 only.** Apple-silicon Macs (M1, M2, M3, M4 and later) are supported. Intel Macs are not covered by this binary; use `install.sh` from the terminal instead.
 
-> **What the launcher does for you.** On first run, the launcher detects whether MyApp is already on disk. If it is not, the launcher offers to download and set up MyApp for you (see "First launch" below). The only thing you have to install yourself is Docker Desktop; Docker's licensing terms prohibit silent third-party installation. See the [Installation overview](installation.md) for the cross-platform picture.
+> **What the launcher does for you.** On first run, the launcher detects whether Topos is already on disk. If it is not, the launcher offers to download and set up Topos for you (see "First launch" below). The only thing you have to install yourself is Docker Desktop; Docker's licensing terms prohibit silent third-party installation. See the [Installation overview](installation.md) for the cross-platform picture.
 
 ## One-time setup
 
 ### 1. Install Docker Desktop
 
-See the [MyApp Docker installation guide](install/docker-desktop.md) for the full macOS walkthrough plus a "Is Docker safe to install?" section. Start Docker Desktop after install and wait until the whale icon in the menu bar turns from amber to blue.
+See the [Topos Docker installation guide](install/docker-desktop.md) for the full macOS walkthrough plus a "Is Docker safe to install?" section. Start Docker Desktop after install and wait until the whale icon in the menu bar turns from amber to blue.
 
-If you skip this step, the launcher detects the missing Docker on startup and shows a three-button dialog (open the Docker download page, open the MyApp Docker guide, or quit). You can run the launcher again after installing Docker.
+If you skip this step, the launcher detects the missing Docker on startup and shows a three-button dialog (open the Docker download page, open the Topos Docker guide, or quit). You can run the launcher again after installing Docker.
 
 ### 2. Download the launcher
 
-From the MyApp releases page, download two files attached to the release:
+From the Topos releases page, download two files attached to the release:
 
-- `myapp-launcher-macos.zip`
-- `myapp-launcher-macos.zip.sha256`
+- `topos-launcher-macos.zip`
+- `topos-launcher-macos.zip.sha256`
 
 Save them anywhere; `~/Downloads` is fine.
 
@@ -28,15 +28,15 @@ Save them anywhere; `~/Downloads` is fine.
 The launcher is not signed with an Apple Developer ID (see [Why is there a security warning?](#why-is-there-a-security-warning) below). To confirm the ZIP you downloaded is the exact file published, open Terminal where you saved it and run:
 
 ```bash
-shasum -a 256 myapp-launcher-macos.zip
-cat myapp-launcher-macos.zip.sha256
+shasum -a 256 topos-launcher-macos.zip
+cat topos-launcher-macos.zip.sha256
 ```
 
 The hash printed by `shasum` should match the hex string in the `.sha256` file. If it does not, do not open the ZIP and report it on [GitHub Issues](https://github.com/astrapi69/pluginforge-app-template/issues).
 
 ### 4. Unzip and move the app
 
-Unzip `myapp-launcher-macos.zip`. The archive contains `MyApp.app`. Move it to `/Applications` if you want it reachable from Launchpad, or keep it in `~/Downloads`.
+Unzip `topos-launcher-macos.zip`. The archive contains `Topos.app`. Move it to `/Applications` if you want it reachable from Launchpad, or keep it in `~/Downloads`.
 
 ## First launch
 
@@ -46,11 +46,11 @@ The first launch is the one that triggers Gatekeeper. After that, double-clickin
 
 Because the launcher is unsigned, macOS shows:
 
-> **"MyApp" cannot be opened because the developer cannot be verified.**
+> **"Topos" cannot be opened because the developer cannot be verified.**
 
 To approve the launcher on first run:
 
-1. **Right-click** (or Control-click) `MyApp.app` in Finder.
+1. **Right-click** (or Control-click) `Topos.app` in Finder.
 2. Choose **Open** from the context menu.
 3. A dialog now offers an **Open** button (the double-click dialog does not). Click **Open**.
 
@@ -59,7 +59,7 @@ macOS remembers the approval for this exact binary. Double-clicking works normal
 If the "Open" option is missing (some macOS versions), the terminal fallback removes the quarantine attribute:
 
 ```bash
-xattr -d com.apple.quarantine /path/to/MyApp.app
+xattr -d com.apple.quarantine /path/to/Topos.app
 ```
 
 ### What happens after you click Open
@@ -67,47 +67,47 @@ xattr -d com.apple.quarantine /path/to/MyApp.app
 The launcher's first job is to detect what is already in place.
 
 1. **Docker check.** The launcher confirms Docker Desktop is installed and running. If Docker Desktop is missing, a dialog with the install URL appears and the launcher exits. If Docker is installed but not running, a dialog asks you to start Docker Desktop and click Retry; the launcher tries up to three times.
-2. **MyApp check.** The launcher looks for an existing MyApp install via its manifest (`~/Library/Application Support/myapp/install.json`) or, on a clean machine, checks the default location `~/myapp`.
+2. **Topos check.** The launcher looks for an existing Topos install via its manifest (`~/Library/Application Support/topos/install.json`) or, on a clean machine, checks the default location `~/topos`.
    - **Already installed**: the launcher proceeds straight to step 3.
-   - **Not installed**: a welcome dialog appears: "MyApp is not installed on this computer yet". Three buttons: **Install** (the launcher downloads the latest release ZIP, extracts to a folder you pick, generates a fresh `.env`, and builds the Docker images - first build takes 3-5 minutes), **Open install guide** (opens the docs in your browser), or **Close**.
-3. **Start.** A small "Starting MyApp..." window appears while Docker brings up the containers.
-4. **Browser.** When MyApp is ready, your default browser opens at `http://localhost:7880` (or whatever port is configured in `.env`).
-5. **Status window.** The small window switches to "MyApp is running on localhost:7880" with a **Stop MyApp** button.
+   - **Not installed**: a welcome dialog appears: "Topos is not installed on this computer yet". Three buttons: **Install** (the launcher downloads the latest release ZIP, extracts to a folder you pick, generates a fresh `.env`, and builds the Docker images - first build takes 3-5 minutes), **Open install guide** (opens the docs in your browser), or **Close**.
+3. **Start.** A small "Starting Topos..." window appears while Docker brings up the containers.
+4. **Browser.** When Topos is ready, your default browser opens at `http://localhost:7880` (or whatever port is configured in `.env`).
+5. **Status window.** The small window switches to "Topos is running on localhost:7880" with a **Stop Topos** button.
 
-## Stopping MyApp
+## Stopping Topos
 
-Click **Stop MyApp** in the launcher window, or just quit the app. The launcher runs `docker compose down` and exits. Docker Desktop keeps running; only the MyApp containers stop.
+Click **Stop Topos** in the launcher window, or just quit the app. The launcher runs `docker compose down` and exits. Docker Desktop keeps running; only the Topos containers stop.
 
 ## Running a second time
 
-Double-click `MyApp.app` again. If MyApp is already running (for example because you minimised the launcher window and forgot), the launcher detects the running instance and just opens the browser at the correct URL without starting a second copy.
+Double-click `Topos.app` again. If Topos is already running (for example because you minimised the launcher window and forgot), the launcher detects the running instance and just opens the browser at the correct URL without starting a second copy.
 
 ## Troubleshooting
 
 **"Docker Desktop is not running"**
 Open Docker Desktop from Applications or Launchpad. Wait until the whale icon in the menu bar is steady (not animating). Then click Retry in the launcher dialog.
 
-**"MyApp install not found"**
-The launcher cannot find `docker-compose.prod.yml` at the default or configured path. Click OK, then pick the folder where you cloned or unzipped MyApp. That folder typically contains `README.md`, `Makefile`, and the `docker-compose.prod.yml` file.
+**"Topos install not found"**
+The launcher cannot find `docker-compose.prod.yml` at the default or configured path. Click OK, then pick the folder where you cloned or unzipped Topos. That folder typically contains `README.md`, `Makefile`, and the `docker-compose.prod.yml` file.
 
 **"Port 7880 is in use"**
-Another program is already using the MyApp port. Options: stop the other program, or edit `.env` in your MyApp folder and set `MYAPP_PORT` to a different value (for example `7881`), then start the launcher again.
+Another program is already using the Topos port. Options: stop the other program, or edit `.env` in your Topos folder and set `TOPOS_PORT` to a different value (for example `7881`), then start the launcher again.
 
-**"MyApp did not start in time"**
+**"Topos did not start in time"**
 The first start of a fresh install needs to build Docker images, which can take several minutes. Click Retry to wait another 60 seconds. If it still fails, check the last log lines in the dialog and open Docker Desktop's container view to see what happened.
 
 **"This app was moved to the Trash after opening"**
 This can happen if Gatekeeper was not bypassed correctly. Restore the app from Trash, then follow the right-click -> Open flow in the [Gatekeeper section](#the-gatekeeper-prompt) above.
 
 **Activity log**
-Every launch writes to `~/Library/Application Support/myapp/install.log` (1 MB rotation, 1 backup). Attach this file to bug reports. See the [Activity log](#activity-log) section for details.
+Every launch writes to `~/Library/Application Support/topos/install.log` (1 MB rotation, 1 backup). Attach this file to bug reports. See the [Activity log](#activity-log) section for details.
 
 ## Activity log
 
 Every launcher action (install, uninstall, Docker operations, errors) is written to:
 
 ```
-~/Library/Application Support/myapp/install.log
+~/Library/Application Support/topos/install.log
 ```
 
 The log rotates at 1 MB with one backup (`install.log.1`). When reporting an issue on GitHub, attach the current log file or paste the last 50-100 lines; it usually shows exactly what failed.
@@ -116,7 +116,7 @@ The log rotates at 1 MB with one backup (`install.log.1`). When reporting an iss
 
 macOS shows the "developer cannot be verified" warning for any executable that is not signed and notarised with an Apple Developer ID. A Developer ID costs $99/year and notarisation requires ongoing maintenance. For the current user base we publish the launcher unsigned and supply a SHA256 checksum so you can verify the download independently.
 
-We plan to revisit code-signing when MyApp has a user base that justifies the cost and maintenance burden. Until then, the right-click -> Open path is the intended flow. The source code for the launcher is in `launcher/` in the MyApp repository; you are welcome to inspect or build it yourself.
+We plan to revisit code-signing when Topos has a user base that justifies the cost and maintenance burden. Until then, the right-click -> Open path is the intended flow. The source code for the launcher is in `launcher/` in the Topos repository; you are welcome to inspect or build it yourself.
 
 ## Uninstalling
 

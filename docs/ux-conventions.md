@@ -1,6 +1,6 @@
 <!--
 TODO: Adapt for your project. Current content is inherited from
-upstream (MyApp) and serves as structural reference only.
+upstream (Topos) and serves as structural reference only.
 The shape of this document (sections, headings, formatting
 conventions) is reusable; the specifics are not.
 -->
@@ -323,7 +323,7 @@ Format:
   a stack trace by default.
 - **Optional:** "Show details" disclosure for technical info
   (stack trace, exception class, request ID). Enabled when
-  `MYAPP_DEBUG=true` automatically; collapsible on
+  `TOPOS_DEBUG=true` automatically; collapsible on
   user request otherwise.
 - **"Report Issue" button** if the user can't recover. Adaptive Learner
   already wires this through `ApiError.toGitHubIssueUrl(...)`;

@@ -3,7 +3,7 @@
  *
  * Replaces the prior ad-hoc useState/useEffect transitions in
  * ``ImportWizardModal``. Forward-compatible target for other
- * complex MyApp flows (conflict resolution, plugin
+ * complex Topos flows (conflict resolution, plugin
  * activation, audiobook pipeline).
  *
  * State graph (top-level):

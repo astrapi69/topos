@@ -107,13 +107,13 @@ def compose_logs_tail(repo: Path, compose_file: str, lines: int = 20) -> str:
 
 
 def remove_volumes() -> tuple[bool, str]:
-    """Remove all Docker volumes whose name contains 'myapp'.
+    """Remove all Docker volumes whose name contains 'topos'.
 
     Dynamic lookup via ``docker volume ls --filter`` so we never
     hardcode volume names that vary by compose config.
     """
     try:
-        result = _run(["docker", "volume", "ls", "--filter", "name=myapp", "-q"])
+        result = _run(["docker", "volume", "ls", "--filter", "name=topos", "-q"])
     except (FileNotFoundError, subprocess.TimeoutExpired):
         return True, "docker not available, skipping"
     volumes = [v for v in (result.stdout or "").strip().splitlines() if v]
@@ -127,12 +127,12 @@ def remove_volumes() -> tuple[bool, str]:
 
 
 def remove_images() -> tuple[bool, str]:
-    """Remove all Docker images matching 'myapp'.
+    """Remove all Docker images matching 'topos'.
 
     Uses ``--force`` so running containers do not block removal.
     """
     try:
-        result = _run(["docker", "images", "--filter", "reference=*myapp*", "-q"])
+        result = _run(["docker", "images", "--filter", "reference=*topos*", "-q"])
     except (FileNotFoundError, subprocess.TimeoutExpired):
         return True, "docker not available, skipping"
     images = [i for i in (result.stdout or "").strip().splitlines() if i]

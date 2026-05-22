@@ -31,14 +31,14 @@ _SECRET_FIELDS: tuple[tuple[str, str], ...] = (("ai", "api_key"),)
 
 def _secrets_managed_externally() -> bool:
     """True when the user has migrated secrets to the override file
-    OR set the MYAPP_AI_API_KEY env-var. Frontend reads this
+    OR set the TOPOS_AI_API_KEY env-var. Frontend reads this
     flag to hide the API-key input; backend uses it to defensively
     strip the same field from PATCH bodies."""
     from app.main import _get_user_override_path
 
     if _get_user_override_path().exists():
         return True
-    if os.environ.get("MYAPP_AI_API_KEY"):
+    if os.environ.get("TOPOS_AI_API_KEY"):
         return True
     return False
 
@@ -287,9 +287,9 @@ def _collect_available_plugins(active: set[str]) -> set[str]:
     bundled_dir = _base_dir.parent / "plugins"
     if bundled_dir.exists():
         for d in bundled_dir.iterdir():
-            if d.is_dir() and d.name.startswith("myapp-plugin-"):
-                plugin_name = d.name.replace("myapp-plugin-", "")
-                pkg_dir = d / f"myapp_{plugin_name.replace('-', '_')}"
+            if d.is_dir() and d.name.startswith("topos-plugin-"):
+                plugin_name = d.name.replace("topos-plugin-", "")
+                pkg_dir = d / f"topos_{plugin_name.replace('-', '_')}"
                 if (pkg_dir / "plugin.py").exists():
                     available.add(plugin_name)
     return available

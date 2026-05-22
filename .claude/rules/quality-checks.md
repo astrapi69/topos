@@ -73,7 +73,7 @@ Current counts: see [docs/audits/current-coverage.md](docs/audits/current-covera
 
 **Example - new service:**
 ```python
-# plugins/myapp-plugin-export/tests/test_tiptap_to_md.py
+# plugins/topos-plugin-export/tests/test_tiptap_to_md.py
 
 def test_heading_conversion():
     """H2 node becomes ## in Markdown."""
@@ -285,9 +285,9 @@ dict_synonyms = "Struct,NamedStruct"
 
 **For plugins separately:**
 ```toml
-# plugins/myapp-plugin-export/pyproject.toml
+# plugins/topos-plugin-export/pyproject.toml
 [tool.mutmut]
-paths_to_mutate = "myapp_export/"
+paths_to_mutate = "topos_export/"
 tests_dir = "tests/"
 runner = "python -m pytest"
 ```
@@ -301,7 +301,7 @@ cd backend && poetry run mutmut run
 cd backend && poetry run mutmut run --paths-to-mutate app/services/
 
 # Just one plugin
-cd plugins/myapp-plugin-export && poetry run mutmut run
+cd plugins/topos-plugin-export && poetry run mutmut run
 
 # Show results
 poetry run mutmut results
@@ -326,8 +326,8 @@ poetry run mutmut html
 - Include `mutmut results` in the session summary when it was run.
 
 **Test the critical modules first:**
-1. `plugins/myapp-plugin-export/myapp_export/tiptap_to_md.py` - conversion logic
-2. `plugins/myapp-plugin-export/myapp_export/scaffolder.py` - project structure
+1. `plugins/topos-plugin-export/topos_export/tiptap_to_md.py` - conversion logic
+2. `plugins/topos-plugin-export/topos_export/scaffolder.py` - project structure
 3. `backend/app/services/` - core business logic
 4. `backend/app/licensing.py` - security-critical
 
@@ -429,7 +429,7 @@ mutmut-backend:
 	cd backend && poetry run mutmut run
 
 mutmut-export:
-	cd plugins/myapp-plugin-export && poetry run mutmut run
+	cd plugins/topos-plugin-export && poetry run mutmut run
 
 mutmut-results:
 	cd backend && poetry run mutmut results

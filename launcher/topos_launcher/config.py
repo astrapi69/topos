@@ -12,22 +12,22 @@ import re
 from pathlib import Path
 
 
-APP_NAME = "MyApp"
+APP_NAME = "Topos"
 DEFAULT_PORT = 7880
-DEFAULT_REPO_DIR_NAME = "myapp"
+DEFAULT_REPO_DIR_NAME = "topos"
 COMPOSE_FILENAME = "docker-compose.prod.yml"
 ENV_FILENAME = ".env"
 ENV_EXAMPLE_FILENAME = ".env.example"
 
-_PORT_LINE_RE = re.compile(r"^\s*MYAPP_PORT\s*=\s*(\d+)\s*$", re.MULTILINE)
+_PORT_LINE_RE = re.compile(r"^\s*TOPOS_PORT\s*=\s*(\d+)\s*$", re.MULTILINE)
 
 
 def appdata_dir(env: dict[str, str] | None = None) -> Path:
     """Return the user's per-app config directory.
 
-    On Windows this is ``%APPDATA%\\MyApp``. On non-Windows (used by
+    On Windows this is ``%APPDATA%\\Topos``. On non-Windows (used by
     tests running on CI or Linux devs), fall back to
-    ``~/.config/MyApp`` so the same code path exercises in unit tests.
+    ``~/.config/Topos`` so the same code path exercises in unit tests.
     """
     env = env if env is not None else dict(os.environ)
     appdata = env.get("APPDATA")
@@ -99,7 +99,7 @@ def is_valid_repo(repo: Path) -> bool:
 
 
 def read_port(repo: Path) -> int:
-    """Read ``MYAPP_PORT`` from ``.env`` in the repo; fall back to default.
+    """Read ``TOPOS_PORT`` from ``.env`` in the repo; fall back to default.
 
     Used so the launcher opens the browser on the user's configured port
     rather than hardcoding 7880.

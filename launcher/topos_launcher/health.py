@@ -1,4 +1,4 @@
-"""Health-check polling for the MyApp backend.
+"""Health-check polling for the Topos backend.
 
 Uses ``urllib`` from the standard library so the PyInstaller bundle stays
 dependency-free. Intentionally forgiving: any HTTP 200 with JSON

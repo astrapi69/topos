@@ -91,7 +91,7 @@ export default function ErrorReportDialog({open, onClose, errorMessage, apiError
                     </div>
 
                     <p style={{fontSize: "0.875rem", color: "var(--text-secondary)", margin: "0 0 16px"}}>
-                        {t("ui.error_report.intro", "MyApp hat einen Fehler erkannt und kann einen Bug-Report für den Entwickler vorbereiten.")}
+                        {t("ui.error_report.intro", "Topos hat einen Fehler erkannt und kann einen Bug-Report für den Entwickler vorbereiten.")}
                     </p>
 
                     {/* Checkboxes */}
@@ -235,7 +235,7 @@ function buildIssueBody(
     // Environment
     if (includeEnv) {
         const env = [
-            `- MyApp Version: ${__APP_VERSION__}`,
+            `- Topos Version: ${__APP_VERSION__}`,
             `- Browser: ${navigator.userAgent.split(" ").slice(-3).join(" ")}`,
             `- OS: ${navigator.platform}`,
             `- Route: ${window.location.pathname}`,
@@ -251,7 +251,7 @@ function buildIssueBody(
     // Reproduction steps
     sections.push("## Reproduktion\n1.\n2.\n3.");
 
-    sections.push("---\n*Dieser Report wurde automatisch von MyApp erstellt. Keine sensiblen Daten wurden inkludiert.*");
+    sections.push("---\n*Dieser Report wurde automatisch von Topos erstellt. Keine sensiblen Daten wurden inkludiert.*");
 
     return sections.join("\n\n");
 }

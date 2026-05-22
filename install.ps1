@@ -2,7 +2,7 @@
 # Downloads and starts the adaptive learning platform.
 #
 # Usage (in PowerShell):
-#   irm https://raw.githubusercontent.com/astrapi69/myapp/main/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/astrapi69/topos/main/install.ps1 | iex
 #
 # Or download and run, with the install.cmd wrapper if your
 # ExecutionPolicy is Restricted (typical for corporate Windows
@@ -15,9 +15,9 @@
 
 $ErrorActionPreference = "Stop"
 
-$Version = if ($env:MYAPP_VERSION) { $env:MYAPP_VERSION } else { "v0.0.0-template" }
-$Repo = "astrapi69/myapp"
-$InstallDir = if ($env:MYAPP_DIR) { $env:MYAPP_DIR } else { Join-Path $HOME "myapp" }
+$Version = if ($env:TOPOS_VERSION) { $env:TOPOS_VERSION } else { "v0.0.0-template" }
+$Repo = "astrapi69/topos"
+$InstallDir = if ($env:TOPOS_DIR) { $env:TOPOS_DIR } else { Join-Path $HOME "topos" }
 
 Write-Host ""
 Write-Host "  Adaptive Learner $Version" -ForegroundColor Blue
@@ -51,7 +51,7 @@ Write-Host "Docker and Docker Compose found." -ForegroundColor Green
 # Mirrors install.sh: existing install? back up .env, blow away the dir, re-clone.
 $BackupEnv = $null
 if (Test-Path (Join-Path $InstallDir ".git")) {
-    Write-Host "MyApp is already installed in $InstallDir" -ForegroundColor Yellow
+    Write-Host "Topos is already installed in $InstallDir" -ForegroundColor Yellow
     Write-Host "Updating to $Version..."
     $envPath = Join-Path $InstallDir ".env"
     if (Test-Path $envPath) {
@@ -62,7 +62,7 @@ if (Test-Path (Join-Path $InstallDir ".git")) {
     Remove-Item -Recurse -Force $InstallDir
 }
 
-Write-Host "Downloading MyApp $Version..." -ForegroundColor Blue
+Write-Host "Downloading Topos $Version..." -ForegroundColor Blue
 if (Get-Command git -ErrorAction SilentlyContinue) {
     git clone --depth 1 --branch $Version "https://github.com/$Repo.git" $InstallDir 2>$null
     if ($LASTEXITCODE -ne 0) {
@@ -99,17 +99,17 @@ if (-not (Test-Path ".env")) {
 }
 
 # --- Read port from .env ---
-$port = (Select-String -Path ".env" -Pattern "^MYAPP_PORT=" | Select-Object -First 1).Line -replace "^MYAPP_PORT=", ""
+$port = (Select-String -Path ".env" -Pattern "^TOPOS_PORT=" | Select-Object -First 1).Line -replace "^TOPOS_PORT=", ""
 if (-not $port) { $port = "7880" }
 
 # --- Build and start ---
 Write-Host ""
-Write-Host "Building and starting MyApp (this may take a few minutes the first time)..." -ForegroundColor Blue
+Write-Host "Building and starting Topos (this may take a few minutes the first time)..." -ForegroundColor Blue
 docker compose -f docker-compose.prod.yml up --build -d
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  MyApp is running!" -ForegroundColor Green
+Write-Host "  Topos is running!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Open: http://localhost:$port" -ForegroundColor Blue

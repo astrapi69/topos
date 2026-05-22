@@ -1,12 +1,12 @@
-"""Pydantic schemas, YAML serializer, and parser for MyApp
+"""Pydantic schemas, YAML serializer, and parser for Topos
 AI templates (``.biblio.yaml``).
 
 UNIVERSAL-AI-TEMPLATE-01 Session 1, commit 2/10.
 
-A MyApp AI template is a self-contained, self-explanatory
+A Topos AI template is a self-contained, self-explanatory
 YAML file describing one Article or Book and the metadata
 fields an AI assistant (or a human author) can fill in for it.
-The file is designed to travel without MyApp context: any
+The file is designed to travel without Topos context: any
 AI that reads YAML can understand from the file alone what
 goes where, because every fillable field carries a
 ``description`` and an ``example`` alongside its
@@ -154,11 +154,11 @@ _RULES_BLOCK = """\
 
 ARTICLE_HEADER = f"""\
 # ============================================================
-# MyApp Article Template (schema v{SCHEMA_VERSION})
+# Topos Article Template (schema v{SCHEMA_VERSION})
 # ============================================================
 #
-# MyApp is an open-source book and article authoring
-# platform. This file describes one MyApp Article and the
+# Topos is an open-source book and article authoring
+# platform. This file describes one Topos Article and the
 # metadata fields you can fill in for it.
 #
 {_RULES_BLOCK}
@@ -168,11 +168,11 @@ ARTICLE_HEADER = f"""\
 
 BOOK_HEADER = f"""\
 # ============================================================
-# MyApp Book Template (schema v{SCHEMA_VERSION})
+# Topos Book Template (schema v{SCHEMA_VERSION})
 # ============================================================
 #
-# MyApp is an open-source book and article authoring
-# platform. This file describes one MyApp Book and the
+# Topos is an open-source book and article authoring
+# platform. This file describes one Topos Book and the
 # metadata fields you can fill in for it.
 #
 {_RULES_BLOCK}
@@ -306,7 +306,7 @@ def apply_field(
     - Existing column populated + ``force=False``: skip.
     - Otherwise: write. JSON-list columns serialize via
       ``json.dumps`` so the on-disk text-as-list shape stays
-      consistent with the rest of MyApp's conventions."""
+      consistent with the rest of Topos's conventions."""
     if is_template_value_empty(new_value):
         return APPLY_SKIP_EMPTY
     existing = getattr(record, column_name)
@@ -471,7 +471,7 @@ def _article_field_specs() -> dict[str, dict[str, Any]]:
         },
         "topic": {
             "description": (
-                "Single primary topic (one word or short phrase). MyApp "
+                "Single primary topic (one word or short phrase). Topos "
                 "uses this to group articles by theme."
             ),
             "example": "Media Literacy",
@@ -674,7 +674,7 @@ def build_empty_book_template(language: str = "en") -> BookTemplate:
 
 def _decode_json_list(raw: str | None) -> list[Any]:
     """Decode a JSON-list-stored-as-text column back to a list.
-    Empty / NULL / malformed -> empty list (MyApp convention
+    Empty / NULL / malformed -> empty list (Topos convention
     for these columns; see lessons-learned)."""
     if not raw:
         return []

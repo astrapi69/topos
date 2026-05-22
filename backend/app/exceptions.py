@@ -1,12 +1,12 @@
 """Domain exception hierarchy.
 
 Per ``.claude/rules/code-hygiene.md``: services raise typed
-``MyAppError`` subclasses; the global handler in ``main.py`` maps them
+``ToposError`` subclasses; the global handler in ``main.py`` maps them
 to HTTP status codes. Routers stay thin; they catch nothing.
 """
 
 
-class MyAppError(Exception):
+class ToposError(Exception):
     """Base for domain errors. Each subclass pins its HTTP status."""
 
     status_code: int = 500
@@ -16,31 +16,31 @@ class MyAppError(Exception):
         super().__init__(detail)
 
 
-class NotFoundError(MyAppError):
+class NotFoundError(ToposError):
     """Resource lookup miss (-> HTTP 404)."""
 
     status_code = 404
 
 
-class ValidationError(MyAppError):
+class ValidationError(ToposError):
     """Domain validation failed (-> HTTP 400)."""
 
     status_code = 400
 
 
-class ConflictError(MyAppError):
+class ConflictError(ToposError):
     """Resource already exists or state conflict (-> HTTP 409)."""
 
     status_code = 409
 
 
-class PayloadTooLargeError(MyAppError):
+class PayloadTooLargeError(ToposError):
     """Upload exceeds size cap (-> HTTP 413)."""
 
     status_code = 413
 
 
-class ExternalServiceError(MyAppError):
+class ExternalServiceError(ToposError):
     """External dependency unreachable or returned an error (-> HTTP 502)."""
 
     status_code = 502

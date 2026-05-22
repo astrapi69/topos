@@ -149,7 +149,7 @@ export default function Editor({content, onSave, placeholder, contentKind = "boo
     const reviewEventSource = useRef<EventSource | null>(null);
     const [wordGoal, setWordGoal] = useState<number | null>(() => {
         if (!chapterId) return null;
-        const stored = localStorage.getItem(`myapp-word-goal-${chapterId}`);
+        const stored = localStorage.getItem(`topos-word-goal-${chapterId}`);
         return stored ? parseInt(stored, 10) : null;
     });
     const [editingGoal, setEditingGoal] = useState(false);
@@ -1291,10 +1291,10 @@ export default function Editor({content, onSave, placeholder, contentKind = "boo
                                 const val = parseInt(e.target.value, 10);
                                 if (val > 0) {
                                     setWordGoal(val);
-                                    localStorage.setItem(`myapp-word-goal-${chapterId}`, String(val));
+                                    localStorage.setItem(`topos-word-goal-${chapterId}`, String(val));
                                 } else {
                                     setWordGoal(null);
-                                    localStorage.removeItem(`myapp-word-goal-${chapterId}`);
+                                    localStorage.removeItem(`topos-word-goal-${chapterId}`);
                                 }
                                 setEditingGoal(false);
                             }}

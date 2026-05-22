@@ -50,7 +50,7 @@ if [ ! -f .env ]; then
     SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))" 2>/dev/null || \
              openssl rand -hex 32 2>/dev/null || \
              head -c 32 /dev/urandom | xxd -p 2>/dev/null || \
-             echo "myapp-$(date +%s)-$(shuf -i 1000-9999 -n 1)")
+             echo "topos-$(date +%s)-$(shuf -i 1000-9999 -n 1)")
 
     if [[ "$OSTYPE" == "darwin"* ]]; then
         sed -i '' "s/change-me-to-a-random-secret/$SECRET/" .env
@@ -62,7 +62,7 @@ if [ ! -f .env ]; then
 fi
 
 # --- Read port from .env ---
-PORT=$(grep -E '^MYAPP_PORT=' .env 2>/dev/null | cut -d= -f2 || echo "7880")
+PORT=$(grep -E '^TOPOS_PORT=' .env 2>/dev/null | cut -d= -f2 || echo "7880")
 PORT=${PORT:-7880}
 
 # --- Build and start ---

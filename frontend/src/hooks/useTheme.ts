@@ -5,7 +5,7 @@ import {DEFAULT_PALETTE, isKnownPalette} from "../themes/palettes";
 type Theme = "light" | "dark";
 
 function getInitialTheme(): Theme {
-    const stored = localStorage.getItem("myapp-theme");
+    const stored = localStorage.getItem("topos-theme");
     if (stored === "dark" || stored === "light") return stored;
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
     return "light";
@@ -15,7 +15,7 @@ function getInitialAppTheme(): string {
     // Guard against a stale localStorage value left over from a removed
     // or renamed palette. Unknown values fall back to the default so
     // the CSS always matches a real rule block.
-    const stored = localStorage.getItem("myapp-app-theme");
+    const stored = localStorage.getItem("topos-app-theme");
     if (stored && isKnownPalette(stored)) return stored;
     return DEFAULT_PALETTE;
 }
@@ -26,12 +26,12 @@ export function useTheme() {
 
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", theme);
-        localStorage.setItem("myapp-theme", theme);
+        localStorage.setItem("topos-theme", theme);
     }, [theme]);
 
     useEffect(() => {
         document.documentElement.setAttribute("data-app-theme", appTheme);
-        localStorage.setItem("myapp-app-theme", appTheme);
+        localStorage.setItem("topos-app-theme", appTheme);
     }, [appTheme]);
 
     const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Generate install.sh from install.sh.template, substituting
-# @@MYAPP_VERSION@@ with the version from backend/pyproject.toml.
+# @@TOPOS_VERSION@@ with the version from backend/pyproject.toml.
 #
 # Run during release-workflow Step 4. The committed install.sh is
 # the artifact users curl-pipe; the template is the editable source.
@@ -41,7 +41,7 @@ fi
 TAG="v$VERSION"
 
 # Generate by substituting placeholder
-generated=$(sed "s|@@MYAPP_VERSION@@|$TAG|g" "$TEMPLATE")
+generated=$(sed "s|@@TOPOS_VERSION@@|$TAG|g" "$TEMPLATE")
 
 if [[ "${1:-}" == "--check" ]]; then
     if [[ ! -f "$TARGET" ]]; then

@@ -1,8 +1,8 @@
-# UX Convention Document for MyApp
+# UX Convention Document for Topos
 
 ## Context
 
-MyApp has grown organically. UI patterns have emerged
+Topos has grown organically. UI patterns have emerged
 inconsistently: some buttons disabled when unavailable, some
 hidden, some left visible-but-broken. Empty states sometimes
 show "No data" plain text, sometimes show a Call-to-Action,
@@ -28,7 +28,7 @@ Single commit:
 
 Target: 60-90 minutes. ~400-600 lines.
 
-Document is opinionated, prescriptive, and includes MyApp-
+Document is opinionated, prescriptive, and includes Topos-
 specific examples. Not a generic UX guide.
 
 ---
@@ -38,12 +38,12 @@ specific examples. Not a generic UX guide.
 ### Section 1: Header
 
 ```markdown
-# MyApp UX Conventions
+# Topos UX Conventions
 
 Last updated: <today>
 Status: Living document — update when patterns evolve.
-Audience: MyApp contributors, plugin authors, AI assistants
-          generating MyApp UI code.
+Audience: Topos contributors, plugin authors, AI assistants
+          generating Topos UI code.
 ```
 
 ### Section 2: Core principles (the Why)
@@ -57,11 +57,11 @@ Examples to refine:
 - **Action paths over walls:** when a feature isn't usable
   yet, surface what the user CAN do to make it usable, not
   just the absence.
-- **Author-perspective prioritization:** MyApp is for
+- **Author-perspective prioritization:** Topos is for
   authors and self-publishers, not developers. UX trades off
   in favor of writing flow.
 - **Local-first transparency:** users own their data. Show what
-  MyApp stores, where, and what's pending sync.
+  Topos stores, where, and what's pending sync.
 - **Reversibility:** destructive actions confirmable; preferred
   to be undoable.
 - **Predictable consistency:** same action looks and behaves
@@ -229,7 +229,7 @@ Format:
   default)
 - Optional: "Show details" disclosure for technical info
 - "Report Issue" button if user can't recover (already
-  exists in MyApp — keep)
+  exists in Topos — keep)
 - Recovery actions if available ("Retry", "Skip", "Cancel")
 
 ### Section 7: Confirmations
@@ -272,7 +272,7 @@ mandatory but not visually marked with asterisk; the import/
 save button is disabled with tooltip when required fields
 are empty.
 
-This is a MyApp-specific choice; document it.
+This is a Topos-specific choice; document it.
 
 #### 8.3 Placeholders
 
@@ -373,11 +373,11 @@ text (accessibility).
 - Forms work without JavaScript for basic operations
 - Screen reader announces state changes (via live regions)
 
-### Section 14: MyApp-Specific Patterns
+### Section 14: Topos-Specific Patterns
 
 #### 14.1 Themes and dark mode
 
-MyApp has 6 theme variants. All UI must work in all of
+Topos has 6 theme variants. All UI must work in all of
 them. New components: tested in all themes before merge.
 
 #### 14.2 i18n
@@ -388,7 +388,7 @@ reviewed by natives over time.
 
 #### 14.3 Plugin UI
 
-Plugins extend MyApp UI in three ways:
+Plugins extend Topos UI in three ways:
 - Settings panels
 - Book metadata editor sections
 - Wizard steps
@@ -429,7 +429,7 @@ For any new UI work, check:
 
 Conventions to define later (flag don't decide):
 
-- Mobile-specific patterns (MyApp is desktop-first today)
+- Mobile-specific patterns (Topos is desktop-first today)
 - Onboarding flow patterns
 - In-app help/tooltips guidance
 - Drag-and-drop conventions
@@ -451,7 +451,7 @@ Conventions to define later (flag don't decide):
 - Existing UX guidance already exists in another doc — STOP,
   consolidate or extend
 - Document drifts past 800 lines — trim or split
-- Convention contradicts a recent intentional MyApp
+- Convention contradicts a recent intentional Topos
   decision (e.g., multi-tab metadata editor) — flag and
   resolve before committing
 
@@ -460,7 +460,7 @@ Conventions to define later (flag don't decide):
 ## Closing checklist
 
 - [ ] All 17 sections present
-- [ ] MyApp-specific examples used (not generic)
+- [ ] Topos-specific examples used (not generic)
 - [ ] User's recent decisions reflected (mandatory fields,
   tabs, etc.)
 - [ ] Anti-patterns explicit
@@ -472,6 +472,6 @@ Conventions to define later (flag don't decide):
 Report:
 - Document length (lines)
 - Major decisions documented
-- Sections that needed MyApp-specific clarification (vs
+- Sections that needed Topos-specific clarification (vs
   generic patterns)
 - Commit hash

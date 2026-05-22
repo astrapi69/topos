@@ -1,6 +1,6 @@
-# MyApp Hilfe
+# Topos Hilfe
 
-Willkommen in der MyApp-Dokumentation. Hier findest du alles was du brauchst um Bücher zu schreiben, zu formatieren und zu exportieren.
+Willkommen in der Topos-Dokumentation. Hier findest du alles was du brauchst um Bücher zu schreiben, zu formatieren und zu exportieren.
 
 ## Schnelleinstieg
 

@@ -1,5 +1,5 @@
 {
-  "name": "myapp-e2e",
+  "name": "topos-e2e",
   "private": true,
   "scripts": {
     "test": "playwright test",

@@ -1,11 +1,11 @@
 <!--
 TODO: Adapt for your project. Current content is inherited from
-upstream (MyApp) and serves as structural reference only.
+upstream (Topos) and serves as structural reference only.
 The shape of this document (sections, headings, formatting
 conventions) is reusable; the specifics are not.
 -->
 
-# MyApp Backlog
+# Topos Backlog
 
 Last updated: 2026-05-12 (Dependency audit + phased update landed: audit at docs/audits/dep-update-2026-05-12.md. Phases 1+2+4 shipped (8 commits): 15 backend low-risk patches + 4 frontend patches + 6 of 7 medium-risk packages. Phase 3 surfaced make lock-all-plugins is a no-op without pyproject changes; deferred plugin Pydantic alignment as PLUGIN-PYDANTIC-COORDINATED-BUMP-01 (P5). click 8.1.8 -> 8.3.3 blocked by gtts <8.2 upstream pin; filed as CLICK-V8-3-AWAIT-GTTS-01 (P5 BLOCKED). python-multipart 0.0.27 -> 0.0.28 needs paired plugin bump (medium-import also pins ^0.0.27); deferred. Net 5 new backlog entries: CRYPTOGRAPHY-V48-MIGRATION-01 (P3), MYPY-V2-MIGRATION-01 (P4), STARLETTE-V1-AWAIT-FASTAPI-01 (P5 BLOCKED), PLUGIN-PYDANTIC-COORDINATED-BUMP-01 (P5), CLICK-V8-3-AWAIT-GTTS-01 (P5 BLOCKED). ELEVENLABS 0.2.27 -> 2.x already covered by existing DEP-05.)
 Current version: v0.33.0
@@ -171,7 +171,7 @@ store.
   ``backend/config/i18n/REVIEW_STATUS.md`` documents the
   per-language status and the PR-based correction submission
   flow (parallel to the v0.30.0 launcher precedent in
-  ``launcher/myapp_launcher/locales/REVIEW_STATUS.md``).
+  ``launcher/topos_launcher/locales/REVIEW_STATUS.md``).
   Trigger: native-speaker contact for any of the six pending
   languages, OR pair with LAUNCHER-I18N-NATIVE-REVIEW-01's
   reviewer outreach.
@@ -205,7 +205,7 @@ store.
   wbt audit. Effort: M. Filed by ``MUTMUT-EXPAND-SCOPE-01``
   2026-05-14 audit.
 
-- **MYAPP-DATA-FIX-FRAMEWORK-01**: refactor the six
+- **TOPOS-DATA-FIX-FRAMEWORK-01**: refactor the six
   one-shot retro-fix scripts under `scripts/` into a generic
   framework. Existing scripts:
   `fix_medium_import_image_nodes.py`,
@@ -217,7 +217,7 @@ store.
   scope query (Article join ArticleImportSource), per-row
   predicate, per-row mutation, dry-run vs --apply, idempotent
   re-run reports zero changes. The same pattern is the
-  obvious target for any future MyApp data-fix work
+  obvious target for any future Topos data-fix work
   (book imports, asset migrations, etc.). Effort: M (extract
   base class + per-fix subclass + tests). Defer until a
   fifth one-shot is needed; ship the four as one-shots first
@@ -338,9 +338,9 @@ store.
 
 - **KDP-CATEGORIES-CATALOG-SYNC-01** (P3, IMPROVEMENT): sync the
   KDP plugin's 25-category catalog in
-  ``plugins/myapp-plugin-kdp/config/kdp.yaml`` with the
+  ``plugins/topos-plugin-kdp/config/kdp.yaml`` with the
   10-category subset hardcoded in
-  ``plugins/myapp-plugin-kdp/myapp_kdp/routes.py``.
+  ``plugins/topos-plugin-kdp/topos_kdp/routes.py``.
   Trigger: a scheduled Settings-Polish-Session OR a user report
   that the KDP categories shown in the UI don't match what the
   request handler accepts.
@@ -363,7 +363,7 @@ store.
 - **MYPY-V2-MIGRATION-01**: bump ``mypy`` from 1.20.2 to
   2.x. Major bump of the type checker. mypy 2.0 changed
   several inference defaults and dropped legacy
-  behaviours; MyApp's existing
+  behaviours; Topos's existing
   ``[tool.mypy.overrides]`` blocks in ``backend/pyproject.toml``
   + the test-infrastructure-audit-added CI gate
   (``lint-and-type-check`` job) mean a 2.x bump that
@@ -376,7 +376,7 @@ store.
 - **D-07**: Phase 2 follow-up — package-manager discoverability.
   After D-06 ships, submit a winget manifest to
   `microsoft/winget-pkgs` and create a Homebrew tap at
-  `astrapi69/homebrew-myapp`. Effort: ~2 hours of
+  `astrapi69/homebrew-topos`. Effort: ~2 hours of
   implementation, plus reviewer latency (winget-pkgs PR review
   can take days to weeks; do NOT couple to D-06 release timing).
   Trigger: D-06 shipped + first real user feedback to confirm
@@ -405,7 +405,7 @@ store.
   over old, relaunches). Linux/macOS simpler (`rename` + exec).
   Effort: 1-2 sessions. Defer: no concrete user demand and
   current safeguard already protects against installing a
-  stale MyApp.
+  stale Topos.
 
 (D-05 closed as won't-fix 2026-05-05; archived in
 [docs/roadmap-archive/2026-05.md](roadmap-archive/2026-05.md).)
@@ -415,7 +415,7 @@ store.
 ## P5 - Speculative / Nice-to-have
 
 - **COMIC-BOOK-PLUGIN-01** (P5): build a separate
-  `myapp-plugin-comics` to own `book_type == "comic_book"`.
+  `topos-plugin-comics` to own `book_type == "comic_book"`.
   The value is already reserved at the Pydantic schema layer
   (PB-PHASE4 Session 2) so the comics plugin can ship its own
   migration adding `panels` and `speech_bubbles` tables WITHOUT
@@ -594,11 +594,11 @@ store.
   rather than ``"medium"``. The schema already supports
   this via the ``imported_from String(50)`` column; no
   migration needed. Trigger: user demand for capturing
-  comments-on-my-articles in MyApp for archival.
+  comments-on-my-articles in Topos for archival.
   Surfaced 2026-05-12 after the user verified Medium's
   HTML export is "your data only" by design — replies
   others left on the user's articles are not included
-  in the export, and MyApp cannot import what
+  in the export, and Topos cannot import what
   Medium doesn't expose. The manual-entry workflow is
   the only forward-compatible path to archive incoming
   comments. Scope hint: editor sidebar gains an "Add
@@ -644,7 +644,7 @@ store.
 
 - **WALKER-HYPOTHESIS-01**: introduce Hypothesis
   property-based tests for the Medium-import walker
-  (``plugins/myapp-plugin-medium-import/myapp_medium_import/walker.py``).
+  (``plugins/topos-plugin-medium-import/topos_medium_import/walker.py``).
   Test-infrastructure audit 2026-05-12 finding 0.7
   (Hypothesis option): zero ``@given`` usages today; the
   walker's example-based + regression-pin coverage is
@@ -662,7 +662,7 @@ store.
 - **TESTCONTAINERS-EVAL-01**: evaluate Postgres-via-
   Testcontainers for backend integration tests.
   Test-infrastructure audit 2026-05-12 finding 0.7
-  (Testcontainers option): MyApp ships SQLite as
+  (Testcontainers option): Topos ships SQLite as
   default and intended production DB (CLAUDE.md); no bug
   history of SQLite-vs-Postgres divergence; adopting
   Testcontainers would add 5-30s startup per CI run for
@@ -701,7 +701,7 @@ store.
   the three pending-review launcher i18n catalogs (pt, tr, ja)
   shipped in v0.30.0. Each catalog carries a
   `_meta.review_status: "pending native speaker"` block;
-  `launcher/myapp_launcher/locales/REVIEW_STATUS.md`
+  `launcher/topos_launcher/locales/REVIEW_STATUS.md`
   documents the per-language status and the PR-based
   correction submission flow. The
   `test_pending_review_catalogs_carry_marker` parity test
@@ -729,7 +729,7 @@ store.
   headings catalog with autocomplete + validation against real
   codes (vs. the current Bug-9 MVP's free-text + 9-char
   alphanumeric format check).
-  Trigger: MyApp obtains a BISG license, OR a user requests
+  Trigger: Topos obtains a BISG license, OR a user requests
   autocomplete strongly enough to justify the license cost
   (~$590/year for the under-$1M-revenue tier as of 2026-05).
   Scope: ship the BISAC catalog as a JSON / SQLite resource
@@ -740,7 +740,7 @@ store.
   surface the human-readable subject heading next to the code
   in the UI.
   Defer reason: BISG license terms are incompatible with
-  MyApp's local-first + donation-based model in the v0.33.0
+  Topos's local-first + donation-based model in the v0.33.0
   state. The free-text + format-validation MVP (Bug 9 D3) is
   sufficient for the current user base — KDP best practice is
   ≤ 3 codes per book, and the format check catches the most

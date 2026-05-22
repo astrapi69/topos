@@ -49,11 +49,11 @@ describe("getDonationsConfig", () => {
     const config = getDonationsConfig({
       donations: {
         enabled: true,
-        landing_page_url: "https://myapp.app/support",
+        landing_page_url: "https://topos.app/support",
         channels: [],
       },
     });
-    expect(config!.landing_page_url).toBe("https://myapp.app/support");
+    expect(config!.landing_page_url).toBe("https://topos.app/support");
   });
 
   it("normalises empty-string landing_page_url to null", () => {
@@ -114,7 +114,7 @@ describe("SupportSection rendering", () => {
       <SupportSection
         config={{
           enabled: true,
-          landing_page_url: "https://myapp.app/support",
+          landing_page_url: "https://topos.app/support",
           channels,
         }}
       />,

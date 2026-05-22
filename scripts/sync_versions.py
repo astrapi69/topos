@@ -7,8 +7,8 @@ derived location:
 
 - ``frontend/package.json`` (top-level "version" key)
 - ``launcher/pyproject.toml`` (Poetry version)
-- ``launcher/myapp_launcher/__init__.py`` (``__version__`` literal)
-- ``launcher/myapp-launcher.spec`` (CFBundleVersion +
+- ``launcher/topos_launcher/__init__.py`` (``__version__`` literal)
+- ``launcher/topos-launcher.spec`` (CFBundleVersion +
   CFBundleShortVersionString plist entries; both get the same value)
 - ``plugins/*/pyproject.toml`` (every plugin)
 - Plugin ``__init__.py`` files that hold a ``__version__ = "..."``
@@ -146,7 +146,7 @@ def update_init_version_literal(
     return True
 
 
-_INSTALL_PLACEHOLDER = "@@MYAPP_VERSION@@"
+_INSTALL_PLACEHOLDER = "@@TOPOS_VERSION@@"
 
 # Generated installer artifacts. The template is the editable source;
 # the target is regenerated at release time. ``executable`` controls
@@ -170,7 +170,7 @@ _INSTALL_ARTIFACTS = (
 
 
 def _render_template(template_path: Path, canonical_version: str) -> str:
-    """Substitute ``@@MYAPP_VERSION@@`` -> ``v<canonical_version>``.
+    """Substitute ``@@TOPOS_VERSION@@`` -> ``v<canonical_version>``.
 
     Pure-Python so the same code path works on every platform. The
     earlier bash-only generator could resolve to either Git Bash or
@@ -254,12 +254,12 @@ def collect_targets() -> list[tuple[Path, str]]:
     targets.append((REPO / "launcher" / "pyproject.toml", "pyproject"))
     targets.append(
         (
-            REPO / "launcher" / "myapp_launcher" / "__init__.py",
+            REPO / "launcher" / "topos_launcher" / "__init__.py",
             "init_literal",
         )
     )
     targets.append(
-        (REPO / "launcher" / "myapp-launcher.spec", "spec")
+        (REPO / "launcher" / "topos-launcher.spec", "spec")
     )
 
     for plugin_pyproject in sorted(

@@ -12,10 +12,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from myapp_launcher import installer
+from topos_launcher import installer
 
 
-def _make_zip_bytes(files: dict[str, str], prefix: str = "myapp-0.16.0/") -> bytes:
+def _make_zip_bytes(files: dict[str, str], prefix: str = "topos-0.16.0/") -> bytes:
     """Create an in-memory ZIP with the given files under a prefix directory."""
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:
@@ -28,7 +28,7 @@ class TestReleaseZipUrl:
 
     def test_default_version(self) -> None:
         url = installer.release_zip_url()
-        assert f"/tags/v{installer.MYAPP_TARGET_VERSION}.zip" in url
+        assert f"/tags/v{installer.TOPOS_TARGET_VERSION}.zip" in url
 
     def test_explicit_version(self) -> None:
         url = installer.release_zip_url("1.2.3")
@@ -45,7 +45,7 @@ class TestDownloadRelease:
     def test_extracts_with_prefix_stripping(self, tmp_path: Path) -> None:
         """Files inside the ZIP's top-level dir land directly in target_dir."""
         zip_bytes = _make_zip_bytes({
-            "README.md": "# MyApp",
+            "README.md": "# Topos",
             "backend/pyproject.toml": "[tool.poetry]\nname = 'bib'",
             "docker-compose.prod.yml": "services:\n  backend:",
         })
@@ -54,7 +54,7 @@ class TestDownloadRelease:
         mock_resp.__enter__ = MagicMock(return_value=io.BytesIO(zip_bytes))
         mock_resp.__exit__ = MagicMock(return_value=False)
 
-        with patch("myapp_launcher.installer.urlopen", return_value=mock_resp):
+        with patch("topos_launcher.installer.urlopen", return_value=mock_resp):
             ok, detail = installer.download_release(tmp_path / "install")
         assert ok, detail
         assert (tmp_path / "install" / "README.md").is_file()
@@ -63,7 +63,7 @@ class TestDownloadRelease:
 
     def test_returns_false_on_network_error(self, tmp_path: Path) -> None:
         from urllib.error import URLError
-        with patch("myapp_launcher.installer.urlopen", side_effect=URLError("no network")):
+        with patch("topos_launcher.installer.urlopen", side_effect=URLError("no network")):
             ok, detail = installer.download_release(tmp_path / "install")
         assert not ok
         assert "Download failed" in detail
@@ -77,7 +77,7 @@ class TestDownloadRelease:
         mock_resp = MagicMock()
         mock_resp.__enter__ = MagicMock(return_value=io.BytesIO(empty_zip))
         mock_resp.__exit__ = MagicMock(return_value=False)
-        with patch("myapp_launcher.installer.urlopen", return_value=mock_resp):
+        with patch("topos_launcher.installer.urlopen", return_value=mock_resp):
             ok, detail = installer.download_release(tmp_path / "install")
         assert not ok
         assert "empty" in detail.lower()
@@ -85,7 +85,7 @@ class TestDownloadRelease:
     def test_cleans_up_temp_file_on_failure(self, tmp_path: Path) -> None:
         """Temp ZIP file is removed even on failure."""
         from urllib.error import URLError
-        with patch("myapp_launcher.installer.urlopen", side_effect=URLError("fail")):
+        with patch("topos_launcher.installer.urlopen", side_effect=URLError("fail")):
             installer.download_release(tmp_path / "install")
         # No .zip files should linger in the system temp dir from this call
         # (we can't check the exact temp path, but the function has a finally block)
@@ -120,7 +120,7 @@ class TestCreateEnvFile:
 class TestRemoveInstall:
 
     def test_removes_directory(self, tmp_path: Path) -> None:
-        install_dir = tmp_path / "myapp"
+        install_dir = tmp_path / "topos"
         install_dir.mkdir()
         (install_dir / "file.txt").write_text("data")
         ok, detail = installer.remove_install(install_dir)

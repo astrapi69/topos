@@ -467,7 +467,7 @@ ui:
     ai_key_hint: Der API-Schlüssel wird nur lokal gespeichert und nur an den in 'Base
       URL' angegebenen Dienst übertragen.
     ai_api_key_external_note: API-Schlüssel wird aus externer Konfiguration gelesen
-      (~/.config/myapp/secrets.yaml oder Umgebungsvariable MYAPP_AI_API_KEY).
+      (~/.config/topos/secrets.yaml oder Umgebungsvariable TOPOS_AI_API_KEY).
       Editiere die Datei direkt oder setze die Umgebungsvariable, um den Schlüssel
       zu ändern.
     ai_lmstudio_hint: Lokal laufend, kein API-Schlüssel nötig. Modelle werden vom

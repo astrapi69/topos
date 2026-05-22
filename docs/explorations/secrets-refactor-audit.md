@@ -8,7 +8,7 @@ project tree.
 ```
 project app.yaml (defaults, committed template)
     ↓ merged under
-~/.config/myapp/secrets.yaml (user override, gitignored)
+~/.config/topos/secrets.yaml (user override, gitignored)
     ↓ merged under
 env-vars (CI/Docker, highest priority)
 ```
@@ -19,12 +19,12 @@ env-vars (CI/Docker, highest priority)
 
 | Key path | File | Sensitive | Currently set | Env-var name proposal |
 |---|---|---|---|---|
-| `ai.api_key` | `backend/config/app.yaml` | yes | **real Anthropic key** (live) | `MYAPP_AI_API_KEY` |
+| `ai.api_key` | `backend/config/app.yaml` | yes | **real Anthropic key** (live) | `TOPOS_AI_API_KEY` |
 | `ai.api_key` | `backend/config/app.yaml.example` | template | `''` empty | n/a (template) |
-| `elevenlabs.api_key` | `backend/config/plugins/audiobook.yaml` | yes | `''` empty | `MYAPP_AUDIOBOOK_ELEVENLABS_API_KEY` |
-| `grammar.languagetool_api_key` | `backend/config/plugins/grammar.yaml` | yes | `""` empty | `MYAPP_GRAMMAR_LANGUAGETOOL_API_KEY` |
-| `grammar.languagetool_username` | `backend/config/plugins/grammar.yaml` | auth-paired | `""` empty | `MYAPP_GRAMMAR_LANGUAGETOOL_USERNAME` |
-| `translation.deepl_api_key` | `backend/config/plugins/translation.yaml` | yes | `""` empty | `MYAPP_TRANSLATION_DEEPL_API_KEY` |
+| `elevenlabs.api_key` | `backend/config/plugins/audiobook.yaml` | yes | `''` empty | `TOPOS_AUDIOBOOK_ELEVENLABS_API_KEY` |
+| `grammar.languagetool_api_key` | `backend/config/plugins/grammar.yaml` | yes | `""` empty | `TOPOS_GRAMMAR_LANGUAGETOOL_API_KEY` |
+| `grammar.languagetool_username` | `backend/config/plugins/grammar.yaml` | auth-paired | `""` empty | `TOPOS_GRAMMAR_LANGUAGETOOL_USERNAME` |
+| `translation.deepl_api_key` | `backend/config/plugins/translation.yaml` | yes | `""` empty | `TOPOS_TRANSLATION_DEEPL_API_KEY` |
 
 5 secret-keyed fields across 4 files. Only `ai.api_key` carries a
 real value on this dev box; the rest are empty templates (users
@@ -142,7 +142,7 @@ override. Documented in commit 2.
 
 1. Add `_get_user_override_path()` (XDG_CONFIG_HOME / APPDATA / ~/.config fallback).
 2. Add `_deep_merge(base, override)` — recursive dict merge, override wins. Lists are replaced (not merged).
-3. Add `_apply_env_overrides(config)` — single env var `MYAPP_AI_API_KEY` for now, mapped to `ai.api_key`. Note in code comment that the same pattern extends to plugin secrets in a follow-up.
+3. Add `_apply_env_overrides(config)` — single env var `TOPOS_AI_API_KEY` for now, mapped to `ai.api_key`. Note in code comment that the same pattern extends to plugin secrets in a follow-up.
 4. Modify `_load_app_config()` to chain: project → override → env.
 5. Add deprecation warning logged once on startup when project `app.yaml` contains a non-empty `ai.api_key` AND override file does not exist. Message includes file path + env-var alternative.
 6. New tests in `backend/tests/test_config_loader.py`:
@@ -161,7 +161,7 @@ override. Documented in commit 2.
 Backend:
 
 1. New flag in `GET /api/settings/app` response (or dedicated tiny endpoint):
-   `secrets_managed_externally: bool` — true when override file exists OR `MYAPP_AI_API_KEY` env var is set.
+   `secrets_managed_externally: bool` — true when override file exists OR `TOPOS_AI_API_KEY` env var is set.
 2. `update_app_settings` defense-in-depth: when flag true, strip `api_key` from `body.ai` before writing.
 
 Frontend:
@@ -177,9 +177,9 @@ Frontend:
 2. `CLAUDE.md` — section noting secrets must NEVER live in committed config files; AI-assisted edits avoid touching `ai.api_key` in `app.yaml`.
 3. `docs/configuration.md` — new file:
    - Three-layer chain explained
-   - Migration steps for existing users (move `ai.api_key` from `app.yaml` to `~/.config/myapp/secrets.yaml`)
+   - Migration steps for existing users (move `ai.api_key` from `app.yaml` to `~/.config/topos/secrets.yaml`)
    - Path conventions per OS (XDG / APPDATA)
-   - Env-var list (initially: `MYAPP_AI_API_KEY`)
+   - Env-var list (initially: `TOPOS_AI_API_KEY`)
    - Docker / CI usage example (env-var)
    - Debugging: how to verify which layer a value comes from
 
@@ -209,7 +209,7 @@ Even with UI hidden, a stale browser tab or a misbehaving plugin could POST `api
 
 ### Env-var coverage scope
 
-Phase 2 names ONE env var (`MYAPP_AI_API_KEY`). `MYAPP_SECRET_KEY` already exists for licensing in `main.py:67`. Naming convention `MYAPP_*` already established. Plugin secrets follow the dotted-path-uppercased-with-underscores rule when added later.
+Phase 2 names ONE env var (`TOPOS_AI_API_KEY`). `TOPOS_SECRET_KEY` already exists for licensing in `main.py:67`. Naming convention `TOPOS_*` already established. Plugin secrets follow the dotted-path-uppercased-with-underscores rule when added later.
 
 ---
 
@@ -242,13 +242,13 @@ mechanism (project < override < env-var) must be applied to
 PluginManager. Inventory of fields ready for migration:
 
 - `plugins/audiobook.yaml` `elevenlabs.api_key` → env-var
-  `MYAPP_AUDIOBOOK_ELEVENLABS_API_KEY`
+  `TOPOS_AUDIOBOOK_ELEVENLABS_API_KEY`
 - `plugins/grammar.yaml` `grammar.languagetool_api_key` +
   `languagetool_username` → env-vars
-  `MYAPP_GRAMMAR_LANGUAGETOOL_API_KEY` and
-  `MYAPP_GRAMMAR_LANGUAGETOOL_USERNAME`
+  `TOPOS_GRAMMAR_LANGUAGETOOL_API_KEY` and
+  `TOPOS_GRAMMAR_LANGUAGETOOL_USERNAME`
 - `plugins/translation.yaml` `translation.deepl_api_key` → env-var
-  `MYAPP_TRANSLATION_DEEPL_API_KEY`
+  `TOPOS_TRANSLATION_DEEPL_API_KEY`
 
 Suggested ROADMAP entry: **T-XX Plugin-Config Secrets Layering**.
 Estimate: 1-2 sessions, mirrors this refactor at PluginManager level.
@@ -326,7 +326,7 @@ view rather than re-loading the file independently.
 
 The same regression also broke 2 tests in `test_settings_api.py`
 because the `client` fixture did NOT monkeypatch
-`_get_user_override_path` or `MYAPP_AI_API_KEY`. When Aster
+`_get_user_override_path` or `TOPOS_AI_API_KEY`. When Aster
 created the real override file during the migration, the test
 suite picked it up and the
 `test_get_app_settings_externally_managed_flag_*` cases flipped

@@ -16,7 +16,7 @@ import threading
 import urllib.request
 from collections.abc import Callable
 
-logger = logging.getLogger("myapp_launcher.update_check")
+logger = logging.getLogger("topos_launcher.update_check")
 
 RELEASES_URL = "https://api.github.com/repos/astrapi69/pluginforge-app-template/releases/latest"
 TIMEOUT_SECONDS = 5.0
@@ -49,7 +49,7 @@ def fetch_latest_version() -> tuple[str, str] | None:
             RELEASES_URL,
             headers={
                 "Accept": "application/vnd.github+json",
-                "User-Agent": "myapp-launcher",
+                "User-Agent": "topos-launcher",
             },
         )
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
@@ -87,5 +87,5 @@ def check_for_update_async(
             except Exception as exc:  # noqa: BLE001
                 logger.warning("update notification callback raised: %s", exc)
 
-    thread = threading.Thread(target=_run, daemon=True, name="myapp-update-check")
+    thread = threading.Thread(target=_run, daemon=True, name="topos-update-check")
     thread.start()

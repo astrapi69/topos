@@ -1,10 +1,10 @@
 # Plugin-Entwicklerhandbuch
 
-Dieses Handbuch erklärt, wie Plugins für MyApp entwickelt werden. Plugins erweitern die Plattform mit neuen Funktionen, ohne den Kern zu verändern.
+Dieses Handbuch erklärt, wie Plugins für Topos entwickelt werden. Plugins erweitern die Plattform mit neuen Funktionen, ohne den Kern zu verändern.
 
 ## Architekturüberblick
 
-MyApp verwendet [PluginForge](https://github.com/astrapi69/pluginforge) (PyPI) als Plugin-Framework, basierend auf pluggy. Plugins sind eigenständige Python-Pakete, die über Entry Points entdeckt werden.
+Topos verwendet [PluginForge](https://github.com/astrapi69/pluginforge) (PyPI) als Plugin-Framework, basierend auf pluggy. Plugins sind eigenständige Python-Pakete, die über Entry Points entdeckt werden.
 
 ```
 Frontend (React) -> Backend (FastAPI) -> PluginForge -> Dein Plugin
@@ -19,8 +19,8 @@ Jedes Plugin kann:
 ## Verzeichnisstruktur
 
 ```
-plugins/myapp-plugin-{name}/
-  myapp_{name}/
+plugins/topos-plugin-{name}/
+  topos_{name}/
     __init__.py
     plugin.py          # Plugin-Klasse (erforderlich)
     routes.py          # FastAPI-Router (optional)
@@ -31,8 +31,8 @@ plugins/myapp-plugin-{name}/
 ```
 
 **Namenskonventionen:**
-- Plugin-Ordner: `myapp-plugin-{name}` (Kebab-Case)
-- Python-Paket: `myapp_{name}` (Snake-Case)
+- Plugin-Ordner: `topos-plugin-{name}` (Kebab-Case)
+- Python-Paket: `topos_{name}` (Snake-Case)
 - Plugin-Name im Code: `{name}` (Kleinbuchstaben, z.B. "help", "export", "grammar")
 
 ## Minimales Plugin
@@ -41,32 +41,32 @@ plugins/myapp-plugin-{name}/
 
 ```toml
 [tool.poetry]
-name = "myapp-plugin-meinplugin"
+name = "topos-plugin-meinplugin"
 version = "1.0.0"
-description = "Mein eigenes MyApp-Plugin"
+description = "Mein eigenes Topos-Plugin"
 authors = ["Dein Name"]
 license = "MIT"
-packages = [{include = "myapp_meinplugin"}]
+packages = [{include = "topos_meinplugin"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
 pluginforge = "^0.10.0"
 fastapi = "^0.135.0"
 
-[tool.poetry.plugins."myapp.plugins"]
-meinplugin = "myapp_meinplugin.plugin:MeinPlugin"
+[tool.poetry.plugins."topos.plugins"]
+meinplugin = "topos_meinplugin.plugin:MeinPlugin"
 ```
 
-Der Entry Point `[tool.poetry.plugins."myapp.plugins"]` ist der Mechanismus, über den PluginForge das Plugin entdeckt.
+Der Entry Point `[tool.poetry.plugins."topos.plugins"]` ist der Mechanismus, über den PluginForge das Plugin entdeckt.
 
 ### Plugin im Backend registrieren
 
-Für **gebündelte Plugins** (jedes Plugin, das innerhalb des MyApp-Repositorys unter `plugins/` ausgeliefert wird) muss zusätzlich ein Path-Dependency-Eintrag in `backend/pyproject.toml` angelegt werden, damit das Backend-Poetry-Environment das Plugin installiert und dessen Entry Points auffindbar werden:
+Für **gebündelte Plugins** (jedes Plugin, das innerhalb des Topos-Repositorys unter `plugins/` ausgeliefert wird) muss zusätzlich ein Path-Dependency-Eintrag in `backend/pyproject.toml` angelegt werden, damit das Backend-Poetry-Environment das Plugin installiert und dessen Entry Points auffindbar werden:
 
 ```toml
 [tool.poetry.dependencies]
 # ...vorhandene Einträge...
-myapp-plugin-myplugin = {path = "../plugins/myapp-plugin-myplugin", develop = true}
+topos-plugin-myplugin = {path = "../plugins/topos-plugin-myplugin", develop = true}
 ```
 
 Anschließend `poetry lock` und `poetry install` im Verzeichnis `backend/` ausführen. **Wenn dieser Schritt vergessen wird, ist das Plugin in CI unsichtbar** (lokal funktioniert es für alle, deren venv die dist-info aus einer früheren Installation noch enthält, aber frische Checkouts und der CI-Runner laden nur, was in `pyproject.toml` deklariert ist). ZIP-distribuierte Drittanbieter-Plugins sind ausgenommen, weil sie zur Laufzeit über `sys.path` installiert werden, nicht zur Setup-Zeit.
@@ -82,7 +82,7 @@ class MeinPlugin(BasePlugin):
     name = "meinplugin"
     version = "1.0.0"
     api_version = "1"
-    license_tier = "core"           # In MyApp ist "core" der einzige verwendete Wert; alle Plugins sind frei nutzbar.
+    license_tier = "core"           # In Topos ist "core" der einzige verwendete Wert; alle Plugins sind frei nutzbar.
     depends_on: list[str] = []      # z.B. ["export"] wenn Export-Plugin benötigt
 
     def activate(self) -> None:
@@ -232,7 +232,7 @@ Plugins von Drittanbietern werden als ZIP-Dateien verteilt und über Einstellung
 ```
 meinplugin.zip
   plugin.yaml          # Erforderlich: Plugin-Metadaten
-  myapp_meinplugin/
+  topos_meinplugin/
     __init__.py
     plugin.py
     routes.py
@@ -248,7 +248,7 @@ display_name:
   de: "Mein Plugin"
   en: "My Plugin"
 version: "1.0.0"
-package: myapp_meinplugin
+package: topos_meinplugin
 entry_class: MeinPlugin
 ```
 
@@ -258,7 +258,7 @@ Plugin-Namen müssen dem Muster entsprechen: `[a-z][a-z0-9_-]{1,48}[a-z0-9]` (3-
 
 ## Tests
 
-Plugin-Tests liegen unter `plugins/myapp-plugin-{name}/tests/`.
+Plugin-Tests liegen unter `plugins/topos-plugin-{name}/tests/`.
 
 ```bash
 # Tests für ein bestimmtes Plugin
@@ -270,7 +270,7 @@ make test-plugins
 
 ## Abhängigkeiten
 
-Benötigt dein Plugin eine Abhängigkeit, die nicht im Core ist, deklariere sie in deiner `pyproject.toml`. Für ZIP-verteilte Plugins müssen Abhängigkeiten gebündelt oder bereits in der MyApp-Umgebung verfügbar sein.
+Benötigt dein Plugin eine Abhängigkeit, die nicht im Core ist, deklariere sie in deiner `pyproject.toml`. Für ZIP-verteilte Plugins müssen Abhängigkeiten gebündelt oder bereits in der Topos-Umgebung verfügbar sein.
 
 Füge KEINE neuen Abhängigkeiten zum Core hinzu, ohne zu fragen. Aktueller Stack:
 - Backend: FastAPI, SQLAlchemy, Pydantic v2, pluginforge, PyYAML, httpx
@@ -330,17 +330,17 @@ Wenn ein Plugin den Import eines neuen Formats oder einer neuen *Quelle* unterst
 
 ```toml
 [tool.poetry.dependencies]
-myapp-plugin-export = {path = "../myapp-plugin-export", develop = true}
+topos-plugin-export = {path = "../topos-plugin-export", develop = true}
 ```
 
 `poetry install` im Plugin-Verzeichnis bindet das andere Plugin in die venv. Imports funktionieren wie bei einem PyPI-Paket.
 
-**PGS-01 Beispiel.** `plugin-git-sync` deklariert `myapp-plugin-export` als Path-Dep. Phase 1 nutzt die Abhängigkeit zur Laufzeit noch nicht — sie ist Gerüst für PGS-02 (Export-to-Repo), das per `from myapp_export.tiptap_to_md import tiptap_to_markdown` Bücher zurück ins Git-Repo serialisieren wird. Die Deklaration kommt früh, damit die Architektur sichtbar ist, bevor der Code folgt.
+**PGS-01 Beispiel.** `plugin-git-sync` deklariert `topos-plugin-export` als Path-Dep. Phase 1 nutzt die Abhängigkeit zur Laufzeit noch nicht — sie ist Gerüst für PGS-02 (Export-to-Repo), das per `from topos_export.tiptap_to_md import tiptap_to_markdown` Bücher zurück ins Git-Repo serialisieren wird. Die Deklaration kommt früh, damit die Architektur sichtbar ist, bevor der Code folgt.
 
-**Beim PyPI-Release.** Ein Path-Dep löst bei `pip install myapp-plugin-git-sync` außerhalb des Monorepos nicht auf. Der Publish-Schritt muss ihn auf einen Versions-Pin umstellen:
+**Beim PyPI-Release.** Ein Path-Dep löst bei `pip install topos-plugin-git-sync` außerhalb des Monorepos nicht auf. Der Publish-Schritt muss ihn auf einen Versions-Pin umstellen:
 
 ```toml
-myapp-plugin-export = ">=1.0.0,<2.0.0"
+topos-plugin-export = ">=1.0.0,<2.0.0"
 ```
 
 Das passiert beim PyPI-Release, nicht während der Entwicklung.
@@ -349,12 +349,12 @@ Das passiert beim PyPI-Release, nicht während der Entwicklung.
 
 ### Muster 4: PluginForge-Activation -> Core-Registry-Bridge
 
-**Problem.** PluginForge erkennt Plugins per Entry-Points; MyApps Core-Registries (`ImportPlugin`, `RemoteSourceHandler`, Hookspecs, ...) haben eigene `register(...)`-Funktionen. Etwas muss "PluginForge hat das Plugin geladen" und "MyApp kennt seine Handler" verbinden.
+**Problem.** PluginForge erkennt Plugins per Entry-Points; Toposs Core-Registries (`ImportPlugin`, `RemoteSourceHandler`, Hookspecs, ...) haben eigene `register(...)`-Funktionen. Etwas muss "PluginForge hat das Plugin geladen" und "Topos kennt seine Handler" verbinden.
 
 **Lösung.** Der `activate()`-Hook des Plugins importiert die Core-Registrierungsfunktion deferred und ruft sie auf:
 
 ```python
-# plugins/myapp-plugin-git-sync/myapp_git_sync/plugin.py
+# plugins/topos-plugin-git-sync/topos_git_sync/plugin.py
 from pluginforge import BasePlugin
 
 class GitSyncPlugin(BasePlugin):
@@ -364,7 +364,7 @@ class GitSyncPlugin(BasePlugin):
     license_tier = "core"
 
     def activate(self) -> None:
-        from myapp_git_sync.handlers.git_handler import GitImportHandler
+        from topos_git_sync.handlers.git_handler import GitImportHandler
         from .registration import register_git_handler
 
         register_git_handler(GitImportHandler())
@@ -378,7 +378,7 @@ def register_git_handler(handler: object) -> None:
     register_remote_handler(handler)  # type: ignore[arg-type]
 ```
 
-**Warum deferred Imports.** Ein Import von `app.*` auf Modul-Ebene koppelt das Plugin-Modul an das voll geladene MyApp-Backend. Das bricht Plugin-Unit-Tests, die nur die Handler-Logik testen wollen. Verlagern in `activate()` (das erst im App-Lifespan feuert) hält das Plugin-Modul eigenständig importierbar.
+**Warum deferred Imports.** Ein Import von `app.*` auf Modul-Ebene koppelt das Plugin-Modul an das voll geladene Topos-Backend. Das bricht Plugin-Unit-Tests, die nur die Handler-Logik testen wollen. Verlagern in `activate()` (das erst im App-Lifespan feuert) hält das Plugin-Modul eigenständig importierbar.
 
 **Timing.** PluginForge ruft `activate()` während `manager.discover_plugins()` im App-Lifespan auf, vor dem ersten HTTP-Request. Wenn eine Route feuert, sind alle Registrierungen bereits passiert.
 
@@ -398,7 +398,7 @@ Drei häufige Shapes:
 |-------|----------|-----------------|----------|
 | Neues Format | `ImportPlugin` | `app.import_plugins.register` | `WbtImportHandler` (Core, CIO-02) |
 | Neue Quelle | `RemoteSourceHandler` | `app.import_plugins.register_remote_handler` | `GitImportHandler` (PGS-01) |
-| Neues Core-Verhalten | Pluggy `@hookimpl` | `MyAppHookSpec` (siehe `backend/app/hookspecs.py`) | `plugin-grammar` (content_pre_import) |
+| Neues Core-Verhalten | Pluggy `@hookimpl` | `ToposHookSpec` (siehe `backend/app/hookspecs.py`) | `plugin-grammar` (content_pre_import) |
 
 Eins wählen. Wenn deine Arbeit wirklich zwei umfasst (z. B. Format-Plugin + Hookspec), beides — PluginForge erlaubt das.
 
@@ -407,10 +407,10 @@ Eins wählen. Wenn deine Arbeit wirklich zwei umfasst (z. B. Format-Plugin + Hoo
 Layout identisch zu den anderen 10 Plugins:
 
 ```
-plugins/myapp-plugin-<name>/
+plugins/topos-plugin-<name>/
 ├── pyproject.toml
 ├── README.md
-├── myapp_<name>/
+├── topos_<name>/
 │   ├── __init__.py
 │   ├── plugin.py           # BasePlugin-Subclass, activate()-Hook
 │   └── handlers/
@@ -447,7 +447,7 @@ Siehe englische Version oben (Code identisch). Deferred Imports sind tragend. Im
 
 Drei Ebenen, jede in eigener Datei:
 
-- **Plugin-Ebene** (`plugins/myapp-plugin-<name>/tests/test_<kind>_handler.py`): Unit-Tests der Handler-Klasse. Externe Services mocken (GitPython, HTTP-Clients, ...). Kein App-Load.
+- **Plugin-Ebene** (`plugins/topos-plugin-<name>/tests/test_<kind>_handler.py`): Unit-Tests der Handler-Klasse. Externe Services mocken (GitPython, HTTP-Clients, ...). Kein App-Load.
 - **Endpoint-Ebene** (`backend/tests/test_import_<kind>_endpoint.py`): `TestClient(app)`, trifft `POST /api/import/detect/<kind>`, mockt die externe Dependency des Handlers, damit die Plugin-Endpoint-Handler-Kette ohne Netzwerk getestet wird. `scope="module"` am `client`-Fixture, um Lifespan-State-Akkumulation zu begrenzen (siehe RecursionError-Notiz in `.claude/rules/lessons-learned.md`).
 - **Plugin-Smoke** (gleiche Datei, 1-2 Tests): `list_remote_handlers()` (oder Aequivalent) muss deinen Handler nach Lifespan enthalten. Regressions-Guard gegen "Plugin nicht in `app.yaml` enabled-Liste".
 
@@ -502,7 +502,7 @@ Jeden Diff neben dieser Anleitung studieren.
 
 ## Bidirektionale Sync-Patterns (aus PGS-02..05)
 
-PGS-01 brachte Bücher *in* MyApp hinein. Phasen 2-5 schließen den Round-Trip — Buch neu scaffolden und zurück zum Remote pushen. Vier Patterns, die jedes Plugin trifft, das externen State verändert.
+PGS-01 brachte Bücher *in* Topos hinein. Phasen 2-5 schließen den Round-Trip — Buch neu scaffolden und zurück zum Remote pushen. Vier Patterns, die jedes Plugin trifft, das externen State verändert.
 
 ### Muster 5: Per-Buch-Lock für Cross-Subsystem-Operationen
 
@@ -566,7 +566,7 @@ Nach Return ist die URL auf Platte wieder original. Regression-Test (`test_commi
 
 **Wann nutzen.** Immer wenn ein Secret in ein Config-Feld als temporärer Auth-Carrier eingebettet wird.
 
-**Per-Buch-Credential-Helper.** PGS-02-FU-01 fügte `app.services.git_credentials` hinzu, sodass mehrere Subsysteme einen einzigen Per-Buch-PAT-Slot teilen. Wenn du Credentials für ein neues Subsystem am selben Buch brauchst, diesen Helper wiederverwenden statt parallelen Store bauen. Encrypted-at-rest via Fernet mit Schlüssel aus `MYAPP_CREDENTIALS_SECRET`.
+**Per-Buch-Credential-Helper.** PGS-02-FU-01 fügte `app.services.git_credentials` hinzu, sodass mehrere Subsysteme einen einzigen Per-Buch-PAT-Slot teilen. Wenn du Credentials für ein neues Subsystem am selben Buch brauchst, diesen Helper wiederverwenden statt parallelen Store bauen. Encrypted-at-rest via Fernet mit Schlüssel aus `TOPOS_CREDENTIALS_SECRET`.
 
 ### Muster 8: Fehlertolerante Lazy-Imports für Side-Effects
 
@@ -577,7 +577,7 @@ Nach Return ist die URL auf Platte wieder original. Regression-Test (`test_commi
 ```python
 def _write_md_side_file(json_path: Path) -> None:
     try:
-        from myapp_export.tiptap_to_md import tiptap_to_markdown  # lazy
+        from topos_export.tiptap_to_md import tiptap_to_markdown  # lazy
     except Exception:
         logger.exception("Markdown side-file: import failed; skipping.")
         return

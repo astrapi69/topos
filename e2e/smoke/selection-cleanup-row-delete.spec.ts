@@ -14,8 +14,8 @@
  *   5. Before the fix: BulkActionBar stays visible referencing an
  *      orphan id.
  *   6. After the fix: selection.remove(id) drops the count to 0,
- *      the bar unmounts (MyApp's convention is hide-when-empty,
- *      see lessons-learned "MyApp's bar-visibility convention
+ *      the bar unmounts (Topos's convention is hide-when-empty,
+ *      see lessons-learned "Topos's bar-visibility convention
  *      at count===0").
  *
  * Two assertions per surface (Articles + Books):

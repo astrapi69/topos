@@ -1,4 +1,4 @@
-"""Core handler for MyApp's native ``.bgb`` backup archives.
+"""Core handler for Topos's native ``.bgb`` backup archives.
 
 Wraps the existing restore machinery in
 ``app.services.backup.backup_import`` so the old
@@ -34,7 +34,7 @@ from app.models import Asset, Book, BookImportSource, Chapter
 
 
 class BgbImportHandler:
-    """ImportPlugin for ``.bgb`` MyApp backup archives."""
+    """ImportPlugin for ``.bgb`` Topos backup archives."""
 
     format_name = "bgb"
 
@@ -65,7 +65,7 @@ class BgbImportHandler:
         # the wizard. Surface the count so the UI can confirm what
         # will be restored alongside the books. The "no book.json"
         # warning is only meaningful when nothing at all is in the
-        # archive; an articles-only .bgb is a valid MyApp backup.
+        # archive; an articles-only .bgb is a valid Topos backup.
         if not blobs and article_count == 0:
             warnings.append("No book.json inside the backup.")
 
@@ -250,7 +250,7 @@ class BgbImportHandler:
                 _restore_book_from_dir,
             )
 
-            tmp_dir = Path(tempfile.mkdtemp(prefix="myapp_bgb_multi_"))
+            tmp_dir = Path(tempfile.mkdtemp(prefix="topos_bgb_multi_"))
             try:
                 with zipfile.ZipFile(path, "r") as zf:
                     zf.extractall(tmp_dir)
@@ -344,16 +344,16 @@ def _validate_manifest(zf: zipfile.ZipFile, warnings: list[str]) -> None:
     names = zf.namelist()
     manifest_name = next((n for n in names if n.endswith("manifest.json")), None)
     if manifest_name is None:
-        warnings.append("No manifest.json found; file may not be a MyApp backup.")
+        warnings.append("No manifest.json found; file may not be a Topos backup.")
         return
     try:
         data = json.loads(zf.read(manifest_name).decode("utf-8"))
     except (json.JSONDecodeError, UnicodeDecodeError):
         warnings.append("manifest.json is not valid JSON.")
         return
-    if data.get("format") != "myapp-backup":
+    if data.get("format") != "topos-backup":
         warnings.append(
-            f"Unexpected manifest format: {data.get('format')!r} (expected myapp-backup)."
+            f"Unexpected manifest format: {data.get('format')!r} (expected topos-backup)."
         )
 
 
@@ -494,7 +494,7 @@ def _restore_single_book_and_articles(session: Session, bgb_path: Path) -> tuple
         _restore_book_from_dir,
     )
 
-    tmp_dir = Path(tempfile.mkdtemp(prefix="myapp_bgb_handler_"))
+    tmp_dir = Path(tempfile.mkdtemp(prefix="topos_bgb_handler_"))
     try:
         with zipfile.ZipFile(bgb_path, "r") as zf:
             zf.extractall(tmp_dir)

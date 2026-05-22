@@ -22,7 +22,7 @@ Wenn du Kapitel oder eine Backpage-Beschreibung brauchst, willst du ein Buch, ke
 
 1. Im Dashboard auf **Artikel** in der Kopfzeile klicken. Die Artikelliste öffnet sich.
 2. **Neuer Artikel** klicken (oder den Empty-State-CTA beim ersten Aufruf).
-3. MyApp legt einen Entwurf an und öffnet sofort den Editor. Deine Änderungen werden mit 1-Sekunden-Verzögerung automatisch gespeichert; die Kopfzeile zeigt während des Tippens "Speichert…" / "Gespeichert".
+3. Topos legt einen Entwurf an und öffnet sofort den Editor. Deine Änderungen werden mit 1-Sekunden-Verzögerung automatisch gespeichert; die Kopfzeile zeigt während des Tippens "Speichert…" / "Gespeichert".
 
 ## Der Editor
 
@@ -59,7 +59,7 @@ Die Filter-Pills auf der Listenseite engen auf einen Status ein. Die Standard-An
 
 ## Artikel löschen
 
-Der **Löschen**-Button in der Sidebar (rot, unten im Metadaten-Bereich) entfernt den Artikel. Ein Bestätigungsdialog lässt dich anerkennen, dass die Aktion nicht rückgängig gemacht werden kann — MyApp legt Artikel derzeit nicht in einen Papierkorb (das ist ein Phase-2-Polish-Punkt, parallel zum Buch-Papierkorb).
+Der **Löschen**-Button in der Sidebar (rot, unten im Metadaten-Bereich) entfernt den Artikel. Ein Bestätigungsdialog lässt dich anerkennen, dass die Aktion nicht rückgängig gemacht werden kann — Topos legt Artikel derzeit nicht in einen Papierkorb (das ist ein Phase-2-Polish-Punkt, parallel zum Buch-Papierkorb).
 
 ## Publikationen (AR-02 Phase 2)
 
@@ -72,14 +72,14 @@ Eine Publikation verfolgt ein einzelnes Stück Inhalt auf einer Plattform: die H
 3. Plattform aus dem Dropdown wählen. Das Formular füllt sich mit den Pflicht- + optionalen Feldern dieser Plattform.
 4. Daten ausfüllen (z.B. Medium braucht Titel + Tags; X braucht Body) und absenden.
 
-Die Publikation startet im Status **Geplant**. MyApp kontaktiert keine Plattform-API — es speichert nur, was du veröffentlichen willst.
+Die Publikation startet im Status **Geplant**. Topos kontaktiert keine Plattform-API — es speichert nur, was du veröffentlichen willst.
 
 ### Lebenszyklus
 
 - **Geplant** — angelegt, noch nicht live.
 - **Eingeplant** — hat ein scheduled_at-Datum; noch nicht live.
-- **Veröffentlicht** — du hast es als veröffentlicht markiert nachdem der Artikel auf der Plattform online war. MyApp snappt den TipTap-Content für Drift-Detection.
-- **Nicht synchron** — der Artikel-Content hat sich seit der Markierung geändert. MyApp flaggt die Publikation, damit du nicht vergisst, die Live-Version zu aktualisieren.
+- **Veröffentlicht** — du hast es als veröffentlicht markiert nachdem der Artikel auf der Plattform online war. Topos snappt den TipTap-Content für Drift-Detection.
+- **Nicht synchron** — der Artikel-Content hat sich seit der Markierung geändert. Topos flaggt die Publikation, damit du nicht vergisst, die Live-Version zu aktualisieren.
 - **Archiviert** — historisch, nicht mehr aktiv.
 
 ### Als veröffentlicht markieren
@@ -87,20 +87,20 @@ Die Publikation startet im Status **Geplant**. MyApp kontaktiert keine Plattform
 Wenn du den Artikel auf Medium (oder einer anderen Plattform) eingefügt hast und die Live-URL steht:
 
 1. **Als veröffentlicht** auf der Zeile klicken.
-2. Optional die Live-URL angeben (MyApp speichert sie unter `platform_metadata.published_url`).
+2. Optional die Live-URL angeben (Topos speichert sie unter `platform_metadata.published_url`).
 
-MyApp snappt das aktuelle `content_json` als Baseline für Drift-Detection.
+Topos snappt das aktuelle `content_json` als Baseline für Drift-Detection.
 
 ### Drift-Detection
 
-Jedes Mal wenn du den Artikel nach Markierung als **Veröffentlicht** editierst, vergleicht MyApp beim nächsten View den Snapshot gegen den aktuellen Entwurf. Abweichung kippt die Publikation auf **Nicht synchron** mit Warn-Banner.
+Jedes Mal wenn du den Artikel nach Markierung als **Veröffentlicht** editierst, vergleicht Topos beim nächsten View den Snapshot gegen den aktuellen Entwurf. Abweichung kippt die Publikation auf **Nicht synchron** mit Warn-Banner.
 
 ### Live bestätigen
 
 Wenn du die Live-Version aktualisiert hast (oder akzeptierst, dass der lokale Entwurf die neue Baseline ist):
 
 1. **Live bestätigen** auf der out-of-sync-Zeile klicken.
-2. MyApp re-snappt den Artikel und löscht den out-of-sync-Status.
+2. Topos re-snappt den Artikel und löscht den out-of-sync-Status.
 
 ### Promo-Posts
 
@@ -121,4 +121,4 @@ SEO-Titel und SEO-Beschreibung fallen bei leerem Wert zur Veröffentlichung auf 
 - Tag-Taxonomie (Tags sind Freitext, kein Autocomplete artikelübergreifend).
 - Papierkorb + Wiederherstellung für Artikel.
 
-Wenn dein Cross-Posting-Workflow eine Friction zeigt, die MyApp lösen kann, log sie in `docs/journal/article-workflow-observations.md`, damit der Fall konkret ist bevor Phase-3-Prioritäten gesetzt werden.
+Wenn dein Cross-Posting-Workflow eine Friction zeigt, die Topos lösen kann, log sie in `docs/journal/article-workflow-observations.md`, damit der Fall konkret ist bevor Phase-3-Prioritäten gesetzt werden.

@@ -8,14 +8,14 @@ plugin packages ship with the skeleton.
 ## Adding a plugin
 
 A plugin is a separate Python package that declares an entry point
-under the group `myapp.plugins`.
+under the group `topos.plugins`.
 
 Minimal layout:
 
 ```
-plugins/myapp-plugin-<name>/
+plugins/topos-plugin-<name>/
 ├── pyproject.toml
-├── myapp_<name>/
+├── topos_<name>/
 │   ├── __init__.py
 │   ├── plugin.py        # <Name>Plugin(BasePlugin) with hook impls
 │   └── routes.py        # optional FastAPI router
@@ -32,25 +32,25 @@ from pluginforge import BasePlugin
 class HelloPlugin(BasePlugin):
     name = "hello"
     version = "0.1.0"
-    target_application = "myapp"   # required: host passes app_id="myapp" and rejects plugins without a match
+    target_application = "topos"   # required: host passes app_id="topos" and rejects plugins without a match
 ```
 
 Plugins under v0.9.0 with the hard-filter engaged MUST declare
-`target_application = "myapp"` (or whatever the host's app_id is
+`target_application = "topos"` (or whatever the host's app_id is
 after the CUSTOMIZE.md rename). Plugins without it are rejected
 during registration with `missing_target_application`.
 
 `pyproject.toml` entry-point declaration:
 
 ```toml
-[tool.poetry.plugins."myapp.plugins"]
-<name> = "myapp_<name>.plugin:<Name>Plugin"
+[tool.poetry.plugins."topos.plugins"]
+<name> = "topos_<name>.plugin:<Name>Plugin"
 ```
 
 Register the path-dep in `backend/pyproject.toml`:
 
 ```toml
-myapp-plugin-<name> = {path = "../plugins/myapp-plugin-<name>", develop = true}
+topos-plugin-<name> = {path = "../plugins/topos-plugin-<name>", develop = true}
 ```
 
 Enable in `backend/config/app.yaml`:

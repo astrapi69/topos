@@ -1,6 +1,6 @@
 # Contributing
 
-How to set up MyApp for development, run tests, and ship a change.
+How to set up Topos for development, run tests, and ship a change.
 
 This page is the public version of the internal contributor rules. The full set of `.claude/rules/*.md` files documents finer-grained conventions for AI-assisted work; external contributors do not need to read them, but the highlights of `coding-standards.md` and `code-hygiene.md` are summarized here.
 
@@ -21,7 +21,7 @@ Required tools:
 
 ```bash
 git clone https://github.com/astrapi69/pluginforge-app-template.git
-cd myapp
+cd topos
 make install        # Poetry + npm + plugins (one-time)
 make dev            # backend (8000) + frontend (5173) in parallel
 ```
@@ -77,7 +77,7 @@ These are the rules every change is expected to follow. The full versions live i
 - Docstrings for public functions (Google style).
 - Pydantic v2 for schemas. Field validators instead of manual checks.
 - snake_case files / functions / variables; PascalCase classes.
-- Services throw `MyAppError` subclasses — **never** `HTTPException`. The global exception handler maps. (See [Architecture](architecture.md#error-handling).)
+- Services throw `ToposError` subclasses — **never** `HTTPException`. The global exception handler maps. (See [Architecture](architecture.md#error-handling).)
 - No bare `except Exception`. Catch specific exceptions and log with `exc_info=True`.
 
 ### TypeScript
@@ -93,8 +93,8 @@ These are the rules every change is expected to follow. The full versions live i
 
 ### Naming
 
-- Plugin folders: `myapp-plugin-{name}` (kebab-case).
-- Python package inside a plugin: `myapp_{name}` (snake_case).
+- Plugin folders: `topos-plugin-{name}` (kebab-case).
+- Python package inside a plugin: `topos_{name}` (snake_case).
 - Events / hooks: snake_case (`chapter_pre_save`, `export_execute`).
 - No I-prefix for interfaces. `Book`, not `IBook`.
 - No generic names: `data`, `info`, `result`, `temp`, `item`, `obj`, `val`, `tmp`, `x` are forbidden. Use `book_data`, `plugin_info`, `export_result`, `chapter_item`. Loop variables (`i`, `j`) and lambdas excepted.
@@ -144,8 +144,8 @@ The order documented for new features:
 
 See the [Plugin Developer Guide](plugins.md) for the full flow. In short:
 
-1. `plugins/myapp-plugin-{name}/`.
-2. `pyproject.toml` with the entry point: `[project.entry-points."myapp.plugins"]`.
+1. `plugins/topos-plugin-{name}/`.
+2. `pyproject.toml` with the entry point: `[project.entry-points."topos.plugins"]`.
 3. Plugin class subclassing `pluginforge.BasePlugin` with `name`, `version`, `depends_on`.
 4. YAML config: `backend/config/plugins/{name}.yaml`.
 5. Routes in `routes.py` (FastAPI) + business logic in separate modules.
@@ -161,7 +161,7 @@ The release workflow is `release-workflow.md` — internal but public-readable. 
 1. Hand-edit one file at release time: `backend/pyproject.toml`. Bump per SemVer.
 2. `make sync-versions` propagates to all subsystems (frontend `package.json`, launcher pyproject + spec plist + `__init__.py`, all 10 plugin pyprojects, `install.sh` and `install.ps1` regenerated from templates).
 3. `make sync-versions-check` and `bash scripts/verify_version_pins.sh <version>` — both must be clean.
-4. Mandatory pre-tag chain: `make test`, `tsc --noEmit`, `vitest`, `playwright --project=smoke`, `ruff check`, `mypy app/`, `pre-commit run --all-files`, `pyinstaller myapp-launcher.spec --clean --noconfirm`. All green.
+4. Mandatory pre-tag chain: `make test`, `tsc --noEmit`, `vitest`, `playwright --project=smoke`, `ruff check`, `mypy app/`, `pre-commit run --all-files`, `pyinstaller topos-launcher.spec --clean --noconfirm`. All green.
 5. `git tag -a vX.Y.Z -m "Release vX.Y.Z"` and push tag + main.
 6. `gh release create vX.Y.Z --notes-file changelog/releases/vX.Y.Z.md`.
 7. Post-release: archive shipped items in `docs/roadmap-archive/YYYY-MM.md`, update `docs/ROADMAP.md` `Latest release` line, update `CLAUDE.md` `Version` line, write the chat journal entry.

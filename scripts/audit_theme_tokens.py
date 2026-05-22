@@ -7,7 +7,7 @@ in ``--enforce`` mode.
 
 Why this exists
 ---------------
-MyApp ships 5 palettes (`classic`, `cool-modern`, `nord`,
+Topos ships 5 palettes (`classic`, `cool-modern`, `nord`,
 `notebook`, `studio`) × light + dark = 10 theme variants. Every
 CSS custom property referenced via ``var(--token, #fallback)``
 silently falls through to the hex value when ``--token`` is not

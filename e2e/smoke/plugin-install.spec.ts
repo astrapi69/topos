@@ -20,13 +20,13 @@ const API = 'http://localhost:8000/api'
  *
  * Uses raw ZIP byte construction (local file headers + central directory)
  * to avoid adding a dependency. The ZIP contains:
- * - myapp-plugin-{name}/plugin.yaml
- * - myapp-plugin-{name}/{pkg}/__init__.py
- * - myapp-plugin-{name}/{pkg}/plugin.py
+ * - topos-plugin-{name}/plugin.yaml
+ * - topos-plugin-{name}/{pkg}/__init__.py
+ * - topos-plugin-{name}/{pkg}/plugin.py
  */
 function buildPluginZip(pluginName: string, version: string = '1.0.0'): Buffer {
   const pkgName = pluginName.replace(/-/g, '_')
-  const topDir = `myapp-plugin-${pluginName}`
+  const topDir = `topos-plugin-${pluginName}`
 
   const yamlContent = [
     'plugin:',

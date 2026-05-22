@@ -55,11 +55,11 @@ export function toWizardError(
 /** Build the clipboard payload for the Copy details button. */
 export function formatDetails(error: WizardError): string {
     const lines: string[] = [];
-    lines.push(`# MyApp import error`);
+    lines.push(`# Topos import error`);
     lines.push("");
     lines.push(`**Failed at:** ${error.context}`);
     lines.push(`**Message:** ${error.message}`);
-    lines.push(`**MyApp version:** ${__APP_VERSION__}`);
+    lines.push(`**Topos version:** ${__APP_VERSION__}`);
     lines.push(
         `**Browser:** ${
             typeof navigator !== "undefined"
@@ -100,7 +100,7 @@ export function formatDetails(error: WizardError): string {
 
 /** Pre-fill a GitHub Issues URL with the formatted details. */
 export function buildGithubIssueUrl(error: WizardError): string {
-    const repo = "astrapi69/myapp";
+    const repo = "astrapi69/topos";
     const title = encodeURIComponent(
         `[Import] ${error.context}: ${error.message.slice(0, 80)}`,
     );

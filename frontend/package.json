@@ -1,5 +1,6 @@
 {
-  "name": "pluginforge-app-template-frontend",
+  "name": "topos-frontend",
+  "description": "Topos frontend. Personal inventory tracker for physical storage with hierarchical categories.",
   "private": true,
   "version": "0.1.0",
   "license": "MIT",

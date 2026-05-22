@@ -21,7 +21,7 @@ export async function verifyBackendVersion(): Promise<void> {
     if (!backendVersion) return;
     if (backendVersion !== __APP_VERSION__) {
       console.warn(
-        `[myapp] frontend/backend version mismatch: frontend=${__APP_VERSION__} backend=${backendVersion}. ` +
+        `[topos] frontend/backend version mismatch: frontend=${__APP_VERSION__} backend=${backendVersion}. ` +
           "Rebuild whichever half is stale (frontend: npm run build; backend: restart uvicorn).",
       );
     }

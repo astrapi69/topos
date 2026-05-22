@@ -29,7 +29,7 @@ parser must understand its specific shape (described in Section 8).
 1. **Template repository** — `https://github.com/astrapi69/pluginforge-app-template`
    - Read `README.md`, `CUSTOMIZE.md`, `CLAUDE.md`, and the files under
      `.claude/rules/` before touching any code.
-   - The template uses placeholder `myapp`/`MyApp`/`MYAPP` everywhere. Section 4
+   - The template uses placeholder `topos`/`Topos`/`TOPOS` everywhere. Section 4
      of this prompt is the global rename plan.
 2. **Sibling projects** for pattern reference:
    - `https://github.com/astrapi69/adaptive-learner` — the reference downstream
@@ -106,7 +106,7 @@ revision.
 
 ## Phase 2: Global rename sweep
 
-**Goal:** Replace all `myapp`/`MyApp`/`MYAPP` placeholders with
+**Goal:** Replace all `topos`/`Topos`/`TOPOS` placeholders with
 `topos`/`Topos`/`TOPOS`. Update package metadata names.
 
 **Steps:**
@@ -114,7 +114,7 @@ revision.
 1. **Dry-run inventory** to confirm the scope:
 
    ```bash
-   grep -rln "myapp\|MyApp\|MYAPP" \
+   grep -rln "topos\|Topos\|TOPOS" \
        --include="*.py" --include="*.ts" --include="*.tsx" \
        --include="*.yaml" --include="*.yml" --include="*.json" \
        --include="*.toml" --include="*.md" --include="*.sh" \
@@ -135,22 +135,22 @@ revision.
        -not -path "./.git/*" -not -path "*/node_modules/*" \
        -not -path "*/__pycache__/*" \
        -exec sed -i \
-           -e 's/MYAPP/TOPOS/g' \
-           -e 's/MyApp/Topos/g' \
-           -e 's/myapp/topos/g' \
+           -e 's/TOPOS/TOPOS/g' \
+           -e 's/Topos/Topos/g' \
+           -e 's/topos/topos/g' \
            {} +
    ```
 
 3. **Rename placeholder-bearing files/directories:**
 
    ```bash
-   git mv launcher/myapp_launcher launcher/topos_launcher
-   git mv launcher/myapp-launcher.spec launcher/topos-launcher.spec
-   git mv launcher/myapp.ico launcher/topos.ico
-   mv backend/.myapp-production backend/.topos-production 2>/dev/null || true
+   git mv launcher/topos_launcher launcher/topos_launcher
+   git mv launcher/topos-launcher.spec launcher/topos-launcher.spec
+   git mv launcher/topos.ico launcher/topos.ico
+   mv backend/.topos-production backend/.topos-production 2>/dev/null || true
    ```
 
-4. **Set package metadata names** (these are NOT the `myapp` placeholder, they
+4. **Set package metadata names** (these are NOT the `topos` placeholder, they
    were the template's own publish names):
    - `backend/pyproject.toml`:
      - `name = "topos"`
@@ -166,7 +166,7 @@ revision.
 5. **Verify no placeholder remnants:**
 
    ```bash
-   grep -rn "myapp\|MyApp\|MYAPP" --exclude-dir=.git --exclude-dir=node_modules . || echo "clean"
+   grep -rn "topos\|Topos\|TOPOS" --exclude-dir=.git --exclude-dir=node_modules . || echo "clean"
    ```
 
    The expected output is `clean`. If anything remains (e.g. inside a binary
@@ -179,7 +179,7 @@ revision.
 - `backend/app/main.py` has `app_id="topos"`.
 
 **Commit message:**
-`refactor: rename myapp placeholder to topos across the tree`
+`refactor: rename topos placeholder to topos across the tree`
 
 ---
 
@@ -915,7 +915,7 @@ Set these via `gh repo edit` (or instruct the user to set them):
 
 ```bash
 # 1. No placeholder text anywhere in functional files
-grep -rn "myapp\|MyApp\|MYAPP\|EXAMPLE-DOMAIN" \
+grep -rn "topos\|Topos\|TOPOS\|EXAMPLE-DOMAIN" \
     --exclude-dir=.git --exclude-dir=node_modules \
     --exclude="*.ico" --exclude="*.png" --exclude="*.jpg" . \
     && echo "FAIL: placeholders remain" || echo "OK"

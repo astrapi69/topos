@@ -1,6 +1,6 @@
-# Support MyApp
+# Support Topos
 
-MyApp is an open-source book authoring platform, built by a single developer in the open. There is no tracking, no cloud backend, no ads, and no data collection. Your books stay on your device.
+Topos is an open-source book authoring platform, built by a single developer in the open. There is no tracking, no cloud backend, no ads, and no data collection. Your books stay on your device.
 
 If the app helps you write and you want to keep the project going, donations are the one monetization path the project currently uses. All plugins stay free during this development phase (see `docs/explorations/monetization.md`).
 
@@ -46,11 +46,11 @@ Four channels are active. Pick whichever fits you; we do not promote one over an
 - Legal advice on privacy compliance (GDPR, plugin distribution)
 - Tooling: code-signing certificates (future), CI minutes beyond free tiers, design and UX review
 
-No one takes a salary from donations right now. MyApp is a side project and donations keep it moving instead of stalling.
+No one takes a salary from donations right now. Topos is a side project and donations keep it moving instead of stalling.
 
 ### Do I receive a donation receipt?
 
-Each platform sends a confirmation of your payment. MyApp itself is not a registered non-profit, so donations are **not tax-deductible**. If you need a tax receipt for a corporate donation, please open an issue and we can discuss a case-by-case invoice path.
+Each platform sends a confirmation of your payment. Topos itself is not a registered non-profit, so donations are **not tax-deductible**. If you need a tax receipt for a corporate donation, please open an issue and we can discuss a case-by-case invoice path.
 
 ### What is the difference between recurring and one-time donations?
 
@@ -59,7 +59,7 @@ Each platform sends a confirmation of your payment. MyApp itself is not a regist
 
 ### Can I change or cancel a recurring donation?
 
-Yes, through the platform you used to start it. Each platform has a dashboard where you can change the amount or cancel with a single click. MyApp does not process any payments directly and has no way to see or modify your subscription.
+Yes, through the platform you used to start it. Each platform has a dashboard where you can change the amount or cancel with a single click. Topos does not process any payments directly and has no way to see or modify your subscription.
 
 ### Are donations anonymous?
 
@@ -81,11 +81,11 @@ Plenty of ways, and all of them matter:
 - File bug reports with clear reproduction steps
 - Contribute plugins or improvements under the existing MIT licence
 - Translate the UI or documentation (we ship 8 languages and appreciate every fix)
-- Share MyApp with other authors if you find it useful
+- Share Topos with other authors if you find it useful
 
 ## Contact
 
 - GitHub issues: [github.com/astrapi69/pluginforge-app-template/issues](https://github.com/astrapi69/pluginforge-app-template/issues)
 - Project email: via the GitHub profile [github.com/astrapi69](https://github.com/astrapi69)
 
-Thanks for reading. If you choose to donate, it is genuinely appreciated. If you do not, please keep using MyApp anyway; the project exists for the authors, not for the income.
+Thanks for reading. If you choose to donate, it is genuinely appreciated. If you do not, please keep using Topos anyway; the project exists for the authors, not for the income.

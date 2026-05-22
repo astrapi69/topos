@@ -15,7 +15,7 @@ def test_config_bootstrap_copies_example(tmp_path):
     config_dir.mkdir()
 
     example = config_dir / "app.yaml.example"
-    example.write_text(yaml.dump({"app": {"name": "MyApp"}, "ai": {"enabled": False}}))
+    example.write_text(yaml.dump({"app": {"name": "Topos"}, "ai": {"enabled": False}}))
 
     target = config_dir / "app.yaml"
     assert not target.exists()
@@ -26,7 +26,7 @@ def test_config_bootstrap_copies_example(tmp_path):
 
     assert target.exists()
     data = yaml.safe_load(target.read_text())
-    assert data["app"]["name"] == "MyApp"
+    assert data["app"]["name"] == "Topos"
     assert data["ai"]["enabled"] is False
 
 
@@ -36,7 +36,7 @@ def test_config_bootstrap_does_not_overwrite(tmp_path):
     config_dir.mkdir()
 
     example = config_dir / "app.yaml.example"
-    example.write_text(yaml.dump({"app": {"name": "MyApp"}}))
+    example.write_text(yaml.dump({"app": {"name": "Topos"}}))
 
     target = config_dir / "app.yaml"
     target.write_text(yaml.dump({"app": {"name": "My Custom Config"}}))

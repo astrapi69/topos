@@ -1,5 +1,5 @@
 /**
- * Support MyApp section rendered inside the Settings page.
+ * Support Topos section rendered inside the Settings page.
  *
  * Corresponds to S-01 in the donation UX strategy (docs/explorations/donations-ux.md):
  * a permanent, discoverable link surface. No popups, no nags. The section
@@ -54,10 +54,10 @@ export default function SupportSection({config}: Props) {
     return (
       <section className={styles.section}>
         <h2 className={styles.heading}>
-          <Heart size={18} aria-hidden /> {t("ui.donations.section_title", "MyApp unterstützen")}
+          <Heart size={18} aria-hidden /> {t("ui.donations.section_title", "Topos unterstützen")}
         </h2>
         <p className={styles.intro}>
-          {t("ui.donations.intro", "MyApp entsteht als Open-Source-Projekt...")}
+          {t("ui.donations.intro", "Topos entsteht als Open-Source-Projekt...")}
         </p>
         <a
           href={config.landing_page_url}
@@ -75,10 +75,10 @@ export default function SupportSection({config}: Props) {
   return (
     <section className={styles.section} data-testid="support-section">
       <h2 className={styles.heading}>
-        <Heart size={18} aria-hidden /> {t("ui.donations.section_title", "MyApp unterstützen")}
+        <Heart size={18} aria-hidden /> {t("ui.donations.section_title", "Topos unterstützen")}
       </h2>
       <p className={styles.intro}>
-        {t("ui.donations.intro", "MyApp entsteht als Open-Source-Projekt...")}
+        {t("ui.donations.intro", "Topos entsteht als Open-Source-Projekt...")}
       </p>
       <div className={styles.channelGrid}>
         {config.channels.map((channel) => (

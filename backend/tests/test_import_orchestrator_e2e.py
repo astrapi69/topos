@@ -33,7 +33,7 @@ def _bgb_bytes(book_id: str = "e2e-1", title: str = "E2E Book") -> bytes:
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         zf.writestr(
             "manifest.json",
-            json.dumps({"format": "myapp-backup", "version": 1}),
+            json.dumps({"format": "topos-backup", "version": 1}),
         )
         zf.writestr(
             f"books/{book_id}/book.json",

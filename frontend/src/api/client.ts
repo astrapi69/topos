@@ -2667,7 +2667,7 @@ export interface GitSyncMappingStatus {
 
 export interface GitSyncCommitRequest {
     /** Optional commit subject; backend defaults to
-     *  ``"Sync from MyApp at <utc-iso>"`` when null. */
+     *  ``"Sync from Topos at <utc-iso>"`` when null. */
     message?: string | null
     /** Push to remote after committing. Currently 501; wired now
      *  so the form can carry the toggle without a future API

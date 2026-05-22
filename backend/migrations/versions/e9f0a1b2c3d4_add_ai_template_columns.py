@@ -18,7 +18,7 @@ Columns:
   ``[{section_hint, prompt}]``. Empty list when the user has
   not yet generated section-level prompts. Same
   JSON-list-stored-as-text precedent as ``articles.tags`` and
-  ``books.keywords`` — MyApp stores typed lists as JSON
+  ``books.keywords`` — Topos stores typed lists as JSON
   strings rather than using the SQLAlchemy JSON type so the
   diff/version-history paths and the bgb-backup serializer
   treat them identically.
@@ -35,7 +35,7 @@ Columns:
   whitespace-normalized case-insensitive title fallback).
 
 NOTE FOR REVIEWERS / CONTRIBUTORS: after pulling this
-migration, delete ``backend/myapp.db`` before running
+migration, delete ``backend/topos.db`` before running
 ``make test``. The conftest fixture calls
 ``Base.metadata.create_all`` with the new schema while the
 on-disk DB still pins ``alembic_version`` to the previous

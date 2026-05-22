@@ -19,20 +19,20 @@ You now have an independent repo. Discard the upstream `.git` to avoid accidenta
 
 ## Step 2: Global rename
 
-Replace the placeholder `myapp` with your app name everywhere. The template uses **four** consistent variants:
+Replace the placeholder `topos` with your app name everywhere. The template uses **four** consistent variants:
 
 | Variant | Where it appears | Replace with |
 |---------|------------------|--------------|
-| `myapp` | snake/kebab — env vars, paths, configs, package roots | `yourapp` |
-| `MyApp` | PascalCase — class names, UI strings | `YourApp` |
-| `MYAPP` | UPPER — env var names, constants | `YOURAPP` |
+| `topos` | snake/kebab — env vars, paths, configs, package roots | `yourapp` |
+| `Topos` | PascalCase — class names, UI strings | `YourApp` |
+| `TOPOS` | UPPER — env var names, constants | `YOURAPP` |
 | (none) | `pluginforge-app-template` in `backend/pyproject.toml` & `frontend/package.json` `name` fields — your PyPI/npm publish name | `yourapp` (or `@scope/yourapp`) |
 
 Recommended sweep:
 
 ```bash
 # Inventory first (dry-run):
-grep -rln "myapp\|MyApp\|MYAPP" --include="*.py" --include="*.ts" \
+grep -rln "topos\|Topos\|TOPOS" --include="*.py" --include="*.ts" \
     --include="*.tsx" --include="*.yaml" --include="*.yml" \
     --include="*.json" --include="*.toml" --include="*.md" \
     --include="*.sh" --include="*.cmd" --include="*.ps1" \
@@ -49,24 +49,24 @@ find . -type f \
     -not -path "./.git/*" -not -path "*/node_modules/*" \
     -not -path "*/__pycache__/*" \
     -exec sed -i \
-        -e 's/MYAPP/YOURAPP/g' \
-        -e 's/MyApp/YourApp/g' \
-        -e 's/myapp/yourapp/g' \
+        -e 's/TOPOS/YOURAPP/g' \
+        -e 's/Topos/YourApp/g' \
+        -e 's/topos/yourapp/g' \
         {} +
 ```
 
 Then rename the directories and files that carry the placeholder in their names:
 
 ```bash
-git mv launcher/myapp_launcher launcher/yourapp_launcher
-git mv launcher/myapp-launcher.spec launcher/yourapp-launcher.spec
-git mv launcher/myapp.ico launcher/yourapp.ico
-mv backend/.myapp-production backend/.yourapp-production 2>/dev/null || true
+git mv launcher/topos_launcher launcher/yourapp_launcher
+git mv launcher/topos-launcher.spec launcher/yourapp-launcher.spec
+git mv launcher/topos.ico launcher/yourapp.ico
+mv backend/.topos-production backend/.yourapp-production 2>/dev/null || true
 ```
 
-> The sed sweep also rewrites `app_id="myapp"` in `backend/app/main.py` and any `target_application = "myapp"` declarations on your plugin classes; no separate step needed. PluginForge v0.9.0 runs the host in hard-filter mode: plugins without a `target_application` matching the host's `app_id` are rejected at registration.
+> The sed sweep also rewrites `app_id="topos"` in `backend/app/main.py` and any `target_application = "topos"` declarations on your plugin classes; no separate step needed. PluginForge v0.9.0 runs the host in hard-filter mode: plugins without a `target_application` matching the host's `app_id` are rejected at registration.
 
-Finally update the package-metadata names (these are NOT `myapp`-prefixed — they identify the template on PyPI/npm):
+Finally update the package-metadata names (these are NOT `topos`-prefixed — they identify the template on PyPI/npm):
 
 - `backend/pyproject.toml` → `name = "yourapp"`, description, authors
 - `frontend/package.json` → `"name": "yourapp-frontend"`, description, author

@@ -47,7 +47,7 @@ export default function GetStarted() {
     const [steps, setSteps] = useState<GuideStep[]>([]);
     const [currentStep, setCurrentStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState<Set<string>>(() => {
-        const stored = localStorage.getItem("myapp-onboarding");
+        const stored = localStorage.getItem("topos-onboarding");
         return stored ? new Set(JSON.parse(stored)) : new Set();
     });
     const [expandedHelp, setExpandedHelp] = useState(false);
@@ -67,7 +67,7 @@ export default function GetStarted() {
         api.getStarted.guide("de").then((data) => {
             setSteps(data);
             // Start at first incomplete step
-            const stored = localStorage.getItem("myapp-onboarding");
+            const stored = localStorage.getItem("topos-onboarding");
             const done = stored ? new Set(JSON.parse(stored)) : new Set();
             const firstIncomplete = data.findIndex((s) => !done.has(s.id));
             if (firstIncomplete >= 0) setCurrentStep(firstIncomplete);
@@ -78,7 +78,7 @@ export default function GetStarted() {
         setCompletedSteps((prev) => {
             const next = new Set(prev);
             next.add(id);
-            localStorage.setItem("myapp-onboarding", JSON.stringify([...next]));
+            localStorage.setItem("topos-onboarding", JSON.stringify([...next]));
             return next;
         });
     };
@@ -175,14 +175,14 @@ export default function GetStarted() {
                             {t("ui.get_started.congratulations", "Glueckwunsch!")}
                         </h2>
                         <p style={{color: "var(--text-secondary)", marginTop: 8}}>
-                            {t("ui.get_started.all_done", "Du kennst jetzt alle wichtigen Funktionen von MyApp.")}
+                            {t("ui.get_started.all_done", "Du kennst jetzt alle wichtigen Funktionen von Topos.")}
                         </p>
                         <div style={{display: "flex", gap: 12, marginTop: 16}}>
                             <button className="btn btn-primary" onClick={() => navigate("/")}>
                                 {t("ui.get_started.to_dashboard", "Zum Dashboard")}
                             </button>
                             <button className="btn btn-ghost" onClick={() => {
-                                localStorage.removeItem("myapp-onboarding");
+                                localStorage.removeItem("topos-onboarding");
                                 setCompletedSteps(new Set());
                                 setCurrentStep(0);
                             }}>

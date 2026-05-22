@@ -6,7 +6,7 @@
  *
  * Pins the prefer-original_published_at-over-updated_at rule that
  * makes imported Medium articles show their canonical Medium publish
- * date instead of the MyApp import timestamp. See the matching
+ * date instead of the Topos import timestamp. See the matching
  * backend computed-field tests in test_articles.py.
  */
 import { describe, expect, it, vi } from "vitest";

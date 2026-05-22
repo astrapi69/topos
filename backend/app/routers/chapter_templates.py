@@ -200,7 +200,7 @@ def export_chapter_template(template_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Chapter template not found")
 
     payload = {
-        "format": "myapp-chapter-template",
+        "format": "topos-chapter-template",
         "format_version": "1.0",
         "name": template.name,
         "description": template.description,
@@ -225,7 +225,7 @@ def export_chapter_template(template_id: str, db: Session = Depends(get_db)):
 async def import_chapter_template(file: UploadFile, db: Session = Depends(get_db)):
     """Create a chapter template from a previously-exported JSON file.
 
-    The uploaded file MUST carry ``format: "myapp-chapter-template"``
+    The uploaded file MUST carry ``format: "topos-chapter-template"``
     plus the four template fields (``name``, ``description``,
     ``chapter_type``, ``content``). ``language`` defaults to ``"en"`` when
     absent. Existing-name collisions return 409 (same as create).
@@ -237,10 +237,10 @@ async def import_chapter_template(file: UploadFile, db: Session = Depends(get_db
         raise HTTPException(status_code=400, detail="File is not valid JSON") from exc
     if not isinstance(data, dict):
         raise HTTPException(status_code=400, detail="JSON root must be an object")
-    if data.get("format") != "myapp-chapter-template":
+    if data.get("format") != "topos-chapter-template":
         raise HTTPException(
             status_code=400,
-            detail="Not a MyApp chapter template (missing or wrong 'format' marker)",
+            detail="Not a Topos chapter template (missing or wrong 'format' marker)",
         )
 
     name = (data.get("name") or "").strip()

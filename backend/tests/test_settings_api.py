@@ -72,8 +72,8 @@ def client(temp_base, monkeypatch):
 
     Also redirects the user-override path resolution to ``temp_base``
     so the secrets-refactor flag (T-XX) does not see the developer's
-    real ``~/.config/myapp/secrets.yaml`` while the suite runs.
-    Same for ``MYAPP_AI_API_KEY`` env-var.
+    real ``~/.config/topos/secrets.yaml`` while the suite runs.
+    Same for ``TOPOS_AI_API_KEY`` env-var.
     """
     from app import main as main_module
 
@@ -84,14 +84,14 @@ def client(temp_base, monkeypatch):
     settings_module._base_dir = temp_base
     settings_module._manager = None
     config_overlay.set_project_config_dir(temp_base / "config")
-    monkeypatch.setenv("MYAPP_DATA_DIR", str(temp_base))
+    monkeypatch.setenv("TOPOS_DATA_DIR", str(temp_base))
 
     monkeypatch.setattr(
         main_module,
         "_get_user_override_path",
         lambda: temp_base / "secrets-not-present.yaml",
     )
-    monkeypatch.delenv("MYAPP_AI_API_KEY", raising=False)
+    monkeypatch.delenv("TOPOS_AI_API_KEY", raising=False)
 
     yield TestClient(app)
 
@@ -185,8 +185,8 @@ def test_get_app_settings_externally_managed_flag_false_by_default(client):
 
 
 def test_get_app_settings_externally_managed_flag_true_with_env(client, monkeypatch):
-    """Setting MYAPP_AI_API_KEY flips the flag to True."""
-    monkeypatch.setenv("MYAPP_AI_API_KEY", "from-env")
+    """Setting TOPOS_AI_API_KEY flips the flag to True."""
+    monkeypatch.setenv("TOPOS_AI_API_KEY", "from-env")
     resp = client.get("/api/settings/app")
     assert resp.status_code == 200
     assert resp.json()["_secrets_managed_externally"] is True
@@ -202,7 +202,7 @@ def test_patch_strips_ai_api_key_when_externally_managed(client, temp_base, monk
     reliable cross-test for module-level loggers (same pattern as
     test_config_loader.py corrupt-override case).
     """
-    monkeypatch.setenv("MYAPP_AI_API_KEY", "from-env")
+    monkeypatch.setenv("TOPOS_AI_API_KEY", "from-env")
 
     captured: list[str] = []
     original_warning = settings_module.logger.warning
@@ -576,7 +576,7 @@ def test_add_pen_name_sets_real_name_when_empty(tmp_path, monkeypatch):
 
     original_project_cfg = config_overlay.get_project_config_dir()
     config_overlay.set_project_config_dir(tmp_path / "config")
-    monkeypatch.setenv("MYAPP_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("TOPOS_DATA_DIR", str(tmp_path))
     try:
         c = TestClient(app)
         resp = c.post("/api/settings/author/pen-name", json={"name": "First"})

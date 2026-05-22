@@ -81,23 +81,23 @@ jobs:
       - name: Regenerate placeholder icon
         run: poetry run python scripts/make_icon.py
 
-      - name: Build myapp-launcher.exe
-        run: poetry run pyinstaller myapp-launcher.spec --clean --noconfirm
+      - name: Build topos-launcher.exe
+        run: poetry run pyinstaller topos-launcher.spec --clean --noconfirm
 
       - name: Compute SHA256 checksum
         run: |
-          $hash = (Get-FileHash -Algorithm SHA256 dist\myapp-launcher.exe).Hash.ToLower()
-          "$hash  myapp-launcher.exe" | Out-File -Encoding utf8 -NoNewline dist\myapp-launcher.exe.sha256
+          $hash = (Get-FileHash -Algorithm SHA256 dist\topos-launcher.exe).Hash.ToLower()
+          "$hash  topos-launcher.exe" | Out-File -Encoding utf8 -NoNewline dist\topos-launcher.exe.sha256
           Write-Host "SHA256: $hash"
 
       - name: Upload smoke artifact (push / PR / dispatch)
         if: github.event_name != 'release'
         uses: actions/upload-artifact@v6
         with:
-          name: myapp-launcher-windows
+          name: topos-launcher-windows
           path: |
-            launcher/dist/myapp-launcher.exe
-            launcher/dist/myapp-launcher.exe.sha256
+            launcher/dist/topos-launcher.exe
+            launcher/dist/topos-launcher.exe.sha256
           if-no-files-found: error
           retention-days: 14
 
@@ -106,6 +106,6 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            launcher/dist/myapp-launcher.exe
-            launcher/dist/myapp-launcher.exe.sha256
+            launcher/dist/topos-launcher.exe
+            launcher/dist/topos-launcher.exe.sha256
           fail_on_unmatched_files: true

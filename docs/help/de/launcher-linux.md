@@ -1,8 +1,8 @@
 # Linux-Launcher
 
-Der Linux-Launcher ist ein `myapp-launcher-linux`-ELF-Binary, das MyApp per Klick startet: keine `docker compose`-Kommandos, keine offenen Terminal-Sitzungen. Docker führt die Anwendung weiterhin aus, der Launcher startet und stoppt sie nur für dich.
+Der Linux-Launcher ist ein `topos-launcher-linux`-ELF-Binary, das Topos per Klick startet: keine `docker compose`-Kommandos, keine offenen Terminal-Sitzungen. Docker führt die Anwendung weiterhin aus, der Launcher startet und stoppt sie nur für dich.
 
-> **Was der Launcher für dich erledigt.** Beim ersten Start erkennt der Launcher, ob MyApp bereits auf der Festplatte liegt. Wenn nicht, bietet er an, MyApp für dich herunterzuladen und einzurichten (siehe "Erster Start" unten). Du musst nur Docker selbst installieren; Docker-Lizenzbedingungen verbieten eine stille Drittanbieter-Installation. Plattformübergreifender Überblick: [Installations-Übersicht](installation.md).
+> **Was der Launcher für dich erledigt.** Beim ersten Start erkennt der Launcher, ob Topos bereits auf der Festplatte liegt. Wenn nicht, bietet er an, Topos für dich herunterzuladen und einzurichten (siehe "Erster Start" unten). Du musst nur Docker selbst installieren; Docker-Lizenzbedingungen verbieten eine stille Drittanbieter-Installation. Plattformübergreifender Überblick: [Installations-Übersicht](installation.md).
 
 ## Systemanforderungen
 
@@ -14,7 +14,7 @@ Der Linux-Launcher ist ein `myapp-launcher-linux`-ELF-Binary, das MyApp per Klic
 
 ### 1. Docker installieren
 
-Den vollständigen Überblick inklusive Abschnitt „Ist Docker sicher zu installieren?" findest du in der [MyApp-Anleitung zur Docker-Installation](install/docker-desktop.md). Auf Linux sind zwei Wege üblich:
+Den vollständigen Überblick inklusive Abschnitt „Ist Docker sicher zu installieren?" findest du in der [Topos-Anleitung zur Docker-Installation](install/docker-desktop.md). Auf Linux sind zwei Wege üblich:
 
 - **Docker Engine** (nativ, empfohlen für Server und minimale Desktops): [docs.docker.com/engine/install](https://docs.docker.com/engine/install/). Nach der Installation den eigenen Benutzer in die Gruppe `docker` aufnehmen und ab- und wieder anmelden:
 
@@ -34,8 +34,8 @@ docker info
 
 Von der Releases-Seite zwei an das Release angehängte Dateien laden:
 
-- `myapp-launcher-linux`
-- `myapp-launcher-linux.sha256`
+- `topos-launcher-linux`
+- `topos-launcher-linux.sha256`
 
 Speicherort beliebig; `~/Downloads` ist in Ordnung.
 
@@ -44,8 +44,8 @@ Speicherort beliebig; `~/Downloads` ist in Ordnung.
 Der Launcher ist nicht signiert. Um zu bestätigen, dass das Binary exakt die veröffentlichte Datei ist, im Terminal im Download-Ordner:
 
 ```bash
-sha256sum myapp-launcher-linux
-cat myapp-launcher-linux.sha256
+sha256sum topos-launcher-linux
+cat topos-launcher-linux.sha256
 ```
 
 Der Hash von `sha256sum` muss mit der Hex-Zeichenkette in der `.sha256`-Datei übereinstimmen. Wenn nicht, das Binary **nicht** ausführen und das Ganze auf [GitHub Issues](https://github.com/astrapi69/pluginforge-app-template/issues) melden.
@@ -53,7 +53,7 @@ Der Hash von `sha256sum` muss mit der Hex-Zeichenkette in der `.sha256`-Datei ü
 ### 4. Launcher ausführbar machen
 
 ```bash
-chmod +x myapp-launcher-linux
+chmod +x topos-launcher-linux
 ```
 
 Optional in einen Ordner im `PATH` verschieben (zum Beispiel `~/bin` oder `~/.local/bin`), um den Launcher aus jedem Verzeichnis heraus starten zu können.
@@ -63,7 +63,7 @@ Optional in einen Ordner im `PATH` verschieben (zum Beispiel `~/bin` oder `~/.lo
 Launcher aus dem Terminal starten:
 
 ```bash
-./myapp-launcher-linux
+./topos-launcher-linux
 ```
 
 Oder, wenn die Desktop-Umgebung das Starten von Binarys aus dem Dateimanager unterstützt, Rechtsklick auf die Datei und "Ausführen" oder "Öffnen" wählen (GNOME Files: in den Einstellungen "Ausführbare Textdateien: Nachfragen" aktivieren).
@@ -73,20 +73,20 @@ Oder, wenn die Desktop-Umgebung das Starten von Binarys aus dem Dateimanager unt
 Die erste Aufgabe des Launchers ist die Erkennung des aktuellen Zustands.
 
 1. **Docker-Prüfung.** Der Launcher bestätigt, dass Docker installiert und ohne `sudo` erreichbar ist. Fehlt Docker, erscheint ein Dialog mit Installations-URL und der Launcher beendet sich. Ist Docker installiert, aber nicht gestartet (oder der Benutzer noch nicht in der Gruppe `docker`), bittet ein Dialog um den Start und einen Klick auf Wiederholen; der Launcher versucht es bis zu drei Mal.
-2. **MyApp-Prüfung.** Der Launcher sucht eine bestehende MyApp-Installation über die Manifest-Datei (`~/.config/myapp/install.json`) oder, auf einem frischen Rechner, am Standardort `~/myapp`.
+2. **Topos-Prüfung.** Der Launcher sucht eine bestehende Topos-Installation über die Manifest-Datei (`~/.config/topos/install.json`) oder, auf einem frischen Rechner, am Standardort `~/topos`.
    - **Bereits installiert**: der Launcher fährt direkt mit Schritt 3 fort.
-   - **Nicht installiert**: ein Willkommensdialog erscheint: "MyApp ist auf diesem Rechner noch nicht installiert". Drei Schaltflächen: **Installieren** (der Launcher lädt die neueste Release-ZIP herunter, entpackt sie in einen von dir gewählten Ordner, generiert eine frische `.env` und baut die Docker-Images - der erste Build dauert 3-5 Minuten), **Installationsanleitung öffnen** (öffnet die Doku im Browser), oder **Schließen**.
-3. **Start.** Ein kleines Fenster mit "MyApp startet..." erscheint, während Docker die Container hochfährt.
-4. **Browser.** Sobald MyApp bereit ist, öffnet sich der Standard-Browser auf `http://localhost:7880` (bzw. dem in `.env` konfigurierten Port).
-5. **Statusfenster.** Das kleine Fenster wechselt zu "MyApp läuft auf localhost:7880" mit der Schaltfläche **MyApp stoppen**.
+   - **Nicht installiert**: ein Willkommensdialog erscheint: "Topos ist auf diesem Rechner noch nicht installiert". Drei Schaltflächen: **Installieren** (der Launcher lädt die neueste Release-ZIP herunter, entpackt sie in einen von dir gewählten Ordner, generiert eine frische `.env` und baut die Docker-Images - der erste Build dauert 3-5 Minuten), **Installationsanleitung öffnen** (öffnet die Doku im Browser), oder **Schließen**.
+3. **Start.** Ein kleines Fenster mit "Topos startet..." erscheint, während Docker die Container hochfährt.
+4. **Browser.** Sobald Topos bereit ist, öffnet sich der Standard-Browser auf `http://localhost:7880` (bzw. dem in `.env` konfigurierten Port).
+5. **Statusfenster.** Das kleine Fenster wechselt zu "Topos läuft auf localhost:7880" mit der Schaltfläche **Topos stoppen**.
 
-## MyApp stoppen
+## Topos stoppen
 
-In der Launcher-Leiste auf **MyApp stoppen** klicken oder das Fenster einfach schließen. Der Launcher führt `docker compose down` aus und beendet sich. Docker läuft im Hintergrund weiter; nur die MyApp-Container werden gestoppt.
+In der Launcher-Leiste auf **Topos stoppen** klicken oder das Fenster einfach schließen. Der Launcher führt `docker compose down` aus und beendet sich. Docker läuft im Hintergrund weiter; nur die Topos-Container werden gestoppt.
 
 ## Zweiter Start
 
-Launcher erneut starten. Wenn MyApp bereits läuft (etwa weil das Fenster minimiert war), erkennt der Launcher die laufende Instanz und öffnet einfach den Browser auf der richtigen URL, ohne eine zweite Kopie zu starten.
+Launcher erneut starten. Wenn Topos bereits läuft (etwa weil das Fenster minimiert war), erkennt der Launcher die laufende Instanz und öffnet einfach den Browser auf der richtigen URL, ohne eine zweite Kopie zu starten.
 
 ## Fehlerbehebung
 
@@ -99,34 +99,34 @@ docker info
 
 Falls das mit einem Berechtigungsfehler fehlschlägt, bist du noch nicht in der Gruppe `docker`. Nach `sudo usermod -aG docker "$USER"` musst du dich komplett aus der Sitzung abmelden (nicht nur das Terminal schließen) und wieder anmelden. Unter Wayland ist manchmal ein kompletter Neustart nötig, damit der Gruppenwechsel greift.
 
-**"MyApp-Installation nicht gefunden"**
-Der Launcher findet `docker-compose.prod.yml` nicht unter dem Default- oder konfigurierten Pfad. OK klicken, dann den Ordner wählen, in dem MyApp liegt. Der Ordner enthält typischerweise `README.md`, `Makefile` und `docker-compose.prod.yml`.
+**"Topos-Installation nicht gefunden"**
+Der Launcher findet `docker-compose.prod.yml` nicht unter dem Default- oder konfigurierten Pfad. OK klicken, dann den Ordner wählen, in dem Topos liegt. Der Ordner enthält typischerweise `README.md`, `Makefile` und `docker-compose.prod.yml`.
 
 **"Port 7880 ist belegt"**
-Ein anderes Programm nutzt den Port. Optionen: das andere Programm stoppen oder in der `.env` des MyApp-Ordners `MYAPP_PORT` auf einen anderen Wert setzen (zum Beispiel `7881`) und den Launcher neu starten.
+Ein anderes Programm nutzt den Port. Optionen: das andere Programm stoppen oder in der `.env` des Topos-Ordners `TOPOS_PORT` auf einen anderen Wert setzen (zum Beispiel `7881`) und den Launcher neu starten.
 
-**"MyApp ist nicht rechtzeitig gestartet"**
+**"Topos ist nicht rechtzeitig gestartet"**
 Der erste Start einer frischen Installation baut die Docker-Images, was einige Minuten dauern kann. Wiederholen klicken, um weitere 60 Sekunden zu warten. Falls es weiter scheitert, die letzten Log-Zeilen im Dialog prüfen und ausführen:
 
 ```bash
-docker compose -f ~/myapp/docker-compose.prod.yml logs --tail=100
+docker compose -f ~/topos/docker-compose.prod.yml logs --tail=100
 ```
 
-**"./myapp-launcher-linux: cannot execute: required file not found"**
-Das Binary braucht glibc 2.35 oder neuer. Du bist auf einer älteren Distribution. Die Distribution aktualisieren oder MyApp stattdessen über `install.sh` aus dem Repository installieren.
+**"./topos-launcher-linux: cannot execute: required file not found"**
+Das Binary braucht glibc 2.35 oder neuer. Du bist auf einer älteren Distribution. Die Distribution aktualisieren oder Topos stattdessen über `install.sh` aus dem Repository installieren.
 
 **"error while loading shared libraries: libtk..."**
 Tk ist nicht installiert. Das Tk-Paket deiner Distribution installieren (`python3-tk` auf Debian/Ubuntu, `tk` auf Arch, `python3-tkinter` auf Fedora). Ein AppImage mit gebündeltem Tk ist als D-03a vorgemerkt und hängt davon ab, wie oft dieses Problem auftritt.
 
 **Aktivitätslog**
-Jeder Start schreibt nach `~/.config/myapp/install.log` (1 MB Rotation, 1 Backup). Diese Datei Fehlerberichten beilegen. Siehe Abschnitt [Aktivitätslog](#aktivitatslog) für Details.
+Jeder Start schreibt nach `~/.config/topos/install.log` (1 MB Rotation, 1 Backup). Diese Datei Fehlerberichten beilegen. Siehe Abschnitt [Aktivitätslog](#aktivitatslog) für Details.
 
 ## Aktivitätslog
 
 Jede Launcher-Aktion (Installation, Deinstallation, Docker-Operationen, Fehler) wird geschrieben nach:
 
 ```
-~/.config/myapp/install.log
+~/.config/topos/install.log
 ```
 
 Das Log rotiert bei 1 MB mit einem Backup (`install.log.1`). Bei einer Fehlermeldung auf GitHub die aktuelle Log-Datei anhängen oder die letzten 50-100 Zeilen einfügen; der Fehler steht meistens direkt drin.

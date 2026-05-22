@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "pluginforge-app-template"
+name = "topos"
 version = "0.1.0"
-description = "Full-stack application template built on PluginForge. FastAPI + React + TypeScript + SQLite + PyInstaller launcher. Plugin-driven architecture with CI, tests, i18n, and cross-OS distribution out of the box."
+description = "Personal inventory tracker for folders, boxes, and what's inside them."
 authors = ["Asterios Raptis"]
 license = "MIT"
 package-mode = false

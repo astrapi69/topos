@@ -101,7 +101,7 @@ def test_export_returns_yaml_with_header_and_reference(client):
 
     text = resp.text
     assert text.startswith("#")  # header block leads
-    assert "MyApp Article Template" in text
+    assert "Topos Article Template" in text
     assert "RULES FOR AI ASSISTANTS" in text
 
     # Strip the header for clean YAML parsing.

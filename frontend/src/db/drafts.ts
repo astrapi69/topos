@@ -18,18 +18,18 @@ export interface ChapterDraft {
   savedAt: number       // Date.now() timestamp
 }
 
-class MyAppDB extends Dexie {
+class ToposDB extends Dexie {
   drafts!: Table<ChapterDraft, string>
 
   constructor() {
-    super("myapp")
+    super("topos")
     this.version(1).stores({
       drafts: "chapterId, bookId, savedAt",
     })
   }
 }
 
-export const db = new MyAppDB()
+export const db = new ToposDB()
 
 /** Simple string hash for content comparison (not cryptographic). */
 export function hashContent(content: string): string {

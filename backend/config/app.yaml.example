@@ -57,7 +57,7 @@ plugins:
   config_dir: config/plugins
   disabled: []
   enabled: []
-  entry_point_group: myapp.plugins
+  entry_point_group: topos.plugins
 ui:
   logo: assets/logo.svg
   subtitle: ''

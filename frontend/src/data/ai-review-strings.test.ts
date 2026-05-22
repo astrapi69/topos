@@ -13,7 +13,7 @@ describe("reviewString", () => {
     expect(reviewString("en", "status_preparing")).toBe("Preparing review...")
   })
 
-  it("covers all 8 supported MyApp UI languages", () => {
+  it("covers all 8 supported Topos UI languages", () => {
     for (const lang of ["de", "en", "es", "fr", "el", "pt", "tr", "ja"]) {
       expect(reviewString(lang, "non_prose_warning").length).toBeGreaterThan(0)
       expect(reviewString(lang, "status_preparing").length).toBeGreaterThan(0)

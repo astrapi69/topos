@@ -36,8 +36,8 @@ export function AiAssistantSettings({config, onSave, saving}: {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [config]);
 
-    // True when secrets are managed via ~/.config/myapp/secrets.yaml
-    // or MYAPP_AI_API_KEY env-var. Backend strips api_key from
+    // True when secrets are managed via ~/.config/topos/secrets.yaml
+    // or TOPOS_AI_API_KEY env-var. Backend strips api_key from
     // PATCH bodies in this case as defense-in-depth; we drop it here
     // so the frontend never sends it in the first place.
     const secretsExternal = Boolean(
@@ -156,7 +156,7 @@ export function AiAssistantSettings({config, onSave, saving}: {
                                 }}>
                                     {t(
                                         "ui.settings.ai_api_key_external_note",
-                                        "API-Schlüssel wird aus externer Konfiguration gelesen (~/.config/myapp/secrets.yaml oder Umgebungsvariable MYAPP_AI_API_KEY). Editiere die Datei direkt oder setze die Umgebungsvariable, um den Schlüssel zu ändern.",
+                                        "API-Schlüssel wird aus externer Konfiguration gelesen (~/.config/topos/secrets.yaml oder Umgebungsvariable TOPOS_AI_API_KEY). Editiere die Datei direkt oder setze die Umgebungsvariable, um den Schlüssel zu ändern.",
                                     )}
                                 </div>
                             </div>

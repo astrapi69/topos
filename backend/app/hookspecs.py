@@ -1,4 +1,4 @@
-"""MyApp hook specifications.
+"""Topos hook specifications.
 
 Defines the hooks that plugins can implement.
 Uses pluggy's HookspecMarker for type-safe hook dispatch.
@@ -9,11 +9,11 @@ from typing import Any
 
 import pluggy
 
-hookspec = pluggy.HookspecMarker("myapp.plugins")
+hookspec = pluggy.HookspecMarker("topos.plugins")
 
 
-class MyAppHookSpec:
-    """Hook specifications for the MyApp application."""
+class ToposHookSpec:
+    """Hook specifications for the Topos application."""
 
     @hookspec
     def export_formats(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]

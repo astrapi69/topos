@@ -1,4 +1,4 @@
-"""MyApp installer: download release ZIP and extract to target dir.
+"""Topos installer: download release ZIP and extract to target dir.
 
 Uses stdlib only (``urllib.request``, ``zipfile``, ``tempfile``) so the
 PyInstaller bundle stays small. No git dependency.
@@ -25,13 +25,13 @@ from pathlib import Path
 from urllib.error import URLError
 from urllib.request import urlopen
 
-logger = logging.getLogger("myapp_launcher.installer")
+logger = logging.getLogger("topos_launcher.installer")
 
-GITHUB_REPO = "astrapi69/myapp"
+GITHUB_REPO = "astrapi69/topos"
 
-# The MyApp version this launcher was built for. Updated during
+# The Topos version this launcher was built for. Updated during
 # the release workflow (Step 4) alongside the other version strings.
-# Target MyApp version this launcher should download for fresh
+# Target Topos version this launcher should download for fresh
 # installs. Source-of-truth: backend/pyproject.toml.
 #
 # In a built (PyInstaller) launcher binary, this value is baked in at
@@ -41,7 +41,7 @@ GITHUB_REPO = "astrapi69/myapp"
 # never ships in a release artifact - it exists only so pytest works
 # without invoking PyInstaller first.
 try:
-    from ._build_info import MYAPP_TARGET_VERSION  # type: ignore
+    from ._build_info import TOPOS_TARGET_VERSION  # type: ignore
 except ImportError:
     import tomllib as _tomllib
     from pathlib import Path as _Path
@@ -52,40 +52,40 @@ except ImportError:
     )
     try:
         with _backend_pyproject.open("rb") as _f:
-            MYAPP_TARGET_VERSION = _tomllib.load(_f)["tool"]["poetry"]["version"]
+            TOPOS_TARGET_VERSION = _tomllib.load(_f)["tool"]["poetry"]["version"]
     except (OSError, KeyError, _tomllib.TOMLDecodeError) as _exc:
         logger.warning(
             "Could not read target version from %s: %s. Using sentinel.",
             _backend_pyproject,
             _exc,
         )
-        MYAPP_TARGET_VERSION = "0.0.0+unknown"
+        TOPOS_TARGET_VERSION = "0.0.0+unknown"
 
 
 def release_zip_url(version: str | None = None) -> str:
     """GitHub archive URL for a tagged release."""
-    ver = version or MYAPP_TARGET_VERSION
+    ver = version or TOPOS_TARGET_VERSION
     tag = ver if ver.startswith("v") else f"v{ver}"
     return f"https://github.com/{GITHUB_REPO}/archive/refs/tags/{tag}.zip"
 
 
 def download_release(target_dir: Path, version: str | None = None) -> tuple[bool, str]:
-    """Download and extract a MyApp release to ``target_dir``.
+    """Download and extract a Topos release to ``target_dir``.
 
     The ZIP from GitHub contains a single top-level directory named
-    ``myapp-{version}/``. We strip that prefix so files land
+    ``topos-{version}/``. We strip that prefix so files land
     directly inside ``target_dir``.
 
     Returns ``(True, "ok")`` on success, ``(False, detail)`` on failure.
     """
-    ver = version or MYAPP_TARGET_VERSION
+    ver = version or TOPOS_TARGET_VERSION
     url = release_zip_url(ver)
     logger.info("Downloading %s", url)
 
     tmp_zip = None
     try:
         # Download to temp file (atomic: only use the file if download completes)
-        tmp_fd, tmp_zip_path = tempfile.mkstemp(suffix=".zip", prefix="myapp-")
+        tmp_fd, tmp_zip_path = tempfile.mkstemp(suffix=".zip", prefix="topos-")
         tmp_zip = Path(tmp_zip_path)
         try:
             import os
@@ -102,7 +102,7 @@ def download_release(target_dir: Path, version: str | None = None) -> tuple[bool
         # Extract with top-level directory stripping
         target_dir.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(tmp_zip, "r") as zf:
-            # Find the common prefix (e.g. "myapp-0.16.0/")
+            # Find the common prefix (e.g. "topos-0.16.0/")
             names = zf.namelist()
             if not names:
                 return False, "ZIP archive is empty."
@@ -157,7 +157,7 @@ def create_env_file(repo_dir: Path) -> tuple[bool, str]:
 
 
 def remove_install(install_dir: Path) -> tuple[bool, str]:
-    """Remove the MyApp installation directory.
+    """Remove the Topos installation directory.
 
     Returns ``(True, "ok")`` on success. On Windows, locked files
     (Docker, running processes) cause ``(False, detail)`` with the

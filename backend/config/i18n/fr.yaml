@@ -484,7 +484,7 @@ ui:
     ai_key_hint: La cle est stockee localement et envoyee uniquement au service indique
       dans 'Base URL'.
     ai_api_key_external_note: La cle API est lue depuis une configuration externe
-      (~/.config/myapp/secrets.yaml ou variable d'environnement MYAPP_AI_API_KEY).
+      (~/.config/topos/secrets.yaml ou variable d'environnement TOPOS_AI_API_KEY).
       Modifie le fichier directement ou definis la variable pour changer la cle.
     ai_lmstudio_hint: Fonctionne localement, pas de cle API necessaire. Les modeles
       sont fournis par le serveur LM Studio.

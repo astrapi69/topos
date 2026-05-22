@@ -1,8 +1,8 @@
 # Linux Launcher
 
-The Linux launcher is a `myapp-launcher-linux` ELF binary that starts MyApp with a click: no `docker compose` commands, no terminal session kept open. Docker still runs the actual app; the launcher just starts and stops it for you.
+The Linux launcher is a `topos-launcher-linux` ELF binary that starts Topos with a click: no `docker compose` commands, no terminal session kept open. Docker still runs the actual app; the launcher just starts and stops it for you.
 
-> **What the launcher does for you.** On first run, the launcher detects whether MyApp is already on disk. If it is not, the launcher offers to download and set up MyApp for you (see "First launch" below). The only thing you have to install yourself is Docker; Docker's licensing terms prohibit silent third-party installation. See the [Installation overview](installation.md) for the cross-platform picture.
+> **What the launcher does for you.** On first run, the launcher detects whether Topos is already on disk. If it is not, the launcher offers to download and set up Topos for you (see "First launch" below). The only thing you have to install yourself is Docker; Docker's licensing terms prohibit silent third-party installation. See the [Installation overview](installation.md) for the cross-platform picture.
 
 ## System requirements
 
@@ -14,7 +14,7 @@ The Linux launcher is a `myapp-launcher-linux` ELF binary that starts MyApp with
 
 ### 1. Install Docker
 
-See the [MyApp Docker installation guide](install/docker-desktop.md) for the full picture plus a "Is Docker safe to install?" section. On Linux, two routes are common:
+See the [Topos Docker installation guide](install/docker-desktop.md) for the full picture plus a "Is Docker safe to install?" section. On Linux, two routes are common:
 
 - **Docker Engine** (native, recommended for servers and minimal desktops): [docs.docker.com/engine/install](https://docs.docker.com/engine/install/). After install, add your user to the `docker` group and log out/back in:
 
@@ -32,10 +32,10 @@ docker info
 
 ### 2. Download the launcher
 
-From the MyApp releases page, download two files attached to the release:
+From the Topos releases page, download two files attached to the release:
 
-- `myapp-launcher-linux`
-- `myapp-launcher-linux.sha256`
+- `topos-launcher-linux`
+- `topos-launcher-linux.sha256`
 
 Save them anywhere; `~/Downloads` is fine.
 
@@ -44,8 +44,8 @@ Save them anywhere; `~/Downloads` is fine.
 The launcher is not signed. To confirm the binary you downloaded is the exact file published, open a terminal where you saved it and run:
 
 ```bash
-sha256sum myapp-launcher-linux
-cat myapp-launcher-linux.sha256
+sha256sum topos-launcher-linux
+cat topos-launcher-linux.sha256
 ```
 
 The hash from `sha256sum` should match the hex string in the `.sha256` file. If it does not, do not run the binary and report it on [GitHub Issues](https://github.com/astrapi69/pluginforge-app-template/issues).
@@ -53,7 +53,7 @@ The hash from `sha256sum` should match the hex string in the `.sha256` file. If 
 ### 4. Make the launcher executable
 
 ```bash
-chmod +x myapp-launcher-linux
+chmod +x topos-launcher-linux
 ```
 
 Optionally move it somewhere on your `PATH` (for example `~/bin` or `~/.local/bin`) if you want to call it from any directory.
@@ -63,7 +63,7 @@ Optionally move it somewhere on your `PATH` (for example `~/bin` or `~/.local/bi
 Run the launcher from a terminal:
 
 ```bash
-./myapp-launcher-linux
+./topos-launcher-linux
 ```
 
 Or, if your desktop environment supports launching executables from a file manager, right-click the file and choose "Run" or "Open" (GNOME Files users: enable "Executable Text Files: Ask what to do" in Preferences).
@@ -73,20 +73,20 @@ Or, if your desktop environment supports launching executables from a file manag
 The launcher's first job is to detect what is already in place.
 
 1. **Docker check.** The launcher confirms Docker is installed and reachable without `sudo`. If Docker is missing, a dialog with the install URL appears and the launcher exits. If Docker is installed but not running (or the user is not yet in the `docker` group), a dialog asks you to start Docker and click Retry; the launcher tries up to three times.
-2. **MyApp check.** The launcher looks for an existing MyApp install via its manifest (`~/.config/myapp/install.json`) or, on a clean machine, checks the default location `~/myapp`.
+2. **Topos check.** The launcher looks for an existing Topos install via its manifest (`~/.config/topos/install.json`) or, on a clean machine, checks the default location `~/topos`.
    - **Already installed**: the launcher proceeds straight to step 3.
-   - **Not installed**: a welcome dialog appears: "MyApp is not installed on this computer yet". Three buttons: **Install** (the launcher downloads the latest release ZIP, extracts to a folder you pick, generates a fresh `.env`, and builds the Docker images - first build takes 3-5 minutes), **Open install guide** (opens the docs in your browser), or **Close**.
-3. **Start.** A small "Starting MyApp..." window appears while Docker brings up the containers.
-4. **Browser.** When MyApp is ready, your default browser opens at `http://localhost:7880` (or whatever port is configured in `.env`).
-5. **Status window.** The small window switches to "MyApp is running on localhost:7880" with a **Stop MyApp** button.
+   - **Not installed**: a welcome dialog appears: "Topos is not installed on this computer yet". Three buttons: **Install** (the launcher downloads the latest release ZIP, extracts to a folder you pick, generates a fresh `.env`, and builds the Docker images - first build takes 3-5 minutes), **Open install guide** (opens the docs in your browser), or **Close**.
+3. **Start.** A small "Starting Topos..." window appears while Docker brings up the containers.
+4. **Browser.** When Topos is ready, your default browser opens at `http://localhost:7880` (or whatever port is configured in `.env`).
+5. **Status window.** The small window switches to "Topos is running on localhost:7880" with a **Stop Topos** button.
 
-## Stopping MyApp
+## Stopping Topos
 
-Click **Stop MyApp** in the launcher window, or just close it. The launcher runs `docker compose down` and exits. Docker keeps running in the background; only the MyApp containers stop.
+Click **Stop Topos** in the launcher window, or just close it. The launcher runs `docker compose down` and exits. Docker keeps running in the background; only the Topos containers stop.
 
 ## Running a second time
 
-Run the launcher again. If MyApp is already running (for example because you minimised the launcher window and forgot), the launcher detects the running instance and just opens the browser at the correct URL without starting a second copy.
+Run the launcher again. If Topos is already running (for example because you minimised the launcher window and forgot), the launcher detects the running instance and just opens the browser at the correct URL without starting a second copy.
 
 ## Troubleshooting
 
@@ -99,34 +99,34 @@ docker info
 
 If that fails with a permission error, you are not in the `docker` group yet. After `sudo usermod -aG docker "$USER"` you have to log out of your session completely (not just close the terminal) and log back in. On Wayland, a full reboot is sometimes the only way to get the group change picked up.
 
-**"MyApp install not found"**
-The launcher cannot find `docker-compose.prod.yml` at the default or configured path. Click OK, then pick the folder where you cloned or unzipped MyApp. That folder typically contains `README.md`, `Makefile`, and the `docker-compose.prod.yml` file.
+**"Topos install not found"**
+The launcher cannot find `docker-compose.prod.yml` at the default or configured path. Click OK, then pick the folder where you cloned or unzipped Topos. That folder typically contains `README.md`, `Makefile`, and the `docker-compose.prod.yml` file.
 
 **"Port 7880 is in use"**
-Another program is already using the MyApp port. Options: stop the other program, or edit `.env` in your MyApp folder and set `MYAPP_PORT` to a different value (for example `7881`), then start the launcher again.
+Another program is already using the Topos port. Options: stop the other program, or edit `.env` in your Topos folder and set `TOPOS_PORT` to a different value (for example `7881`), then start the launcher again.
 
-**"MyApp did not start in time"**
+**"Topos did not start in time"**
 The first start of a fresh install needs to build Docker images, which can take several minutes. Click Retry to wait another 60 seconds. If it still fails, check the last log lines in the dialog and run:
 
 ```bash
-docker compose -f ~/myapp/docker-compose.prod.yml logs --tail=100
+docker compose -f ~/topos/docker-compose.prod.yml logs --tail=100
 ```
 
-**"./myapp-launcher-linux: cannot execute: required file not found"**
-The binary needs glibc 2.35 or newer. You are on an older distribution. Upgrade the distribution, or install MyApp via `install.sh` from the repository instead of the launcher.
+**"./topos-launcher-linux: cannot execute: required file not found"**
+The binary needs glibc 2.35 or newer. You are on an older distribution. Upgrade the distribution, or install Topos via `install.sh` from the repository instead of the launcher.
 
 **"error while loading shared libraries: libtk..."**
 Tk is not installed. Install the Tk package for your distribution (`python3-tk` on Debian/Ubuntu, `tk` on Arch, `python3-tkinter` on Fedora). An AppImage that bundles Tk is tracked as D-03a and depends on how often this issue surfaces.
 
 **Activity log**
-Every launch writes to `~/.config/myapp/install.log` (1 MB rotation, 1 backup). Attach this file to bug reports. See the [Activity log](#activity-log) section for details.
+Every launch writes to `~/.config/topos/install.log` (1 MB rotation, 1 backup). Attach this file to bug reports. See the [Activity log](#activity-log) section for details.
 
 ## Activity log
 
 Every launcher action (install, uninstall, Docker operations, errors) is written to:
 
 ```
-~/.config/myapp/install.log
+~/.config/topos/install.log
 ```
 
 The log rotates at 1 MB with one backup (`install.log.1`). When reporting an issue on GitHub, attach the current log file or paste the last 50-100 lines; it usually shows exactly what failed.

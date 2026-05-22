@@ -7,22 +7,22 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from myapp_launcher import config
+from topos_launcher import config
 
 
 class TestAppdataDir:
 
     def test_uses_appdata_on_windows_env(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path)}
-        assert config.appdata_dir(env) == tmp_path / "MyApp"
+        assert config.appdata_dir(env) == tmp_path / "Topos"
 
     def test_falls_back_to_home_config_when_appdata_missing(self, tmp_path: Path) -> None:
         env = {"HOME": str(tmp_path)}
-        assert config.appdata_dir(env) == tmp_path / ".config" / "MyApp"
+        assert config.appdata_dir(env) == tmp_path / ".config" / "Topos"
 
     def test_lockfile_and_logfile_are_under_appdata(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path)}
-        base = tmp_path / "MyApp"
+        base = tmp_path / "Topos"
         assert config.lockfile_path(env) == base / "launcher.lock"
         assert config.logfile_path(env) == base / "launcher.log"
         assert config.launcher_config_path(env) == base / "launcher.json"
@@ -32,11 +32,11 @@ class TestDefaultRepoPath:
 
     def test_uses_userprofile_on_windows(self, tmp_path: Path) -> None:
         env = {"USERPROFILE": str(tmp_path)}
-        assert config.default_repo_path(env) == tmp_path / "myapp"
+        assert config.default_repo_path(env) == tmp_path / "topos"
 
     def test_falls_back_to_home_when_userprofile_missing(self, tmp_path: Path) -> None:
         env = {"HOME": str(tmp_path)}
-        assert config.default_repo_path(env) == tmp_path / "myapp"
+        assert config.default_repo_path(env) == tmp_path / "topos"
 
 
 class TestLoadSaveLauncherConfig:
@@ -47,8 +47,8 @@ class TestLoadSaveLauncherConfig:
 
     def test_roundtrip(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path)}
-        config.save_launcher_config({"repo_path": "C:\\myapp"}, env)
-        assert config.load_launcher_config(env) == {"repo_path": "C:\\myapp"}
+        config.save_launcher_config({"repo_path": "C:\\topos"}, env)
+        assert config.load_launcher_config(env) == {"repo_path": "C:\\topos"}
 
     def test_load_returns_empty_dict_on_parse_error(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path)}
@@ -62,13 +62,13 @@ class TestResolveRepoPath:
 
     def test_uses_configured_path_when_present(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path), "USERPROFILE": "/somewhere/else"}
-        configured = tmp_path / "custom" / "myapp"
+        configured = tmp_path / "custom" / "topos"
         config.save_launcher_config({"repo_path": str(configured)}, env)
         assert config.resolve_repo_path(env) == configured
 
     def test_falls_back_to_default_when_not_configured(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path), "USERPROFILE": str(tmp_path)}
-        assert config.resolve_repo_path(env) == tmp_path / "myapp"
+        assert config.resolve_repo_path(env) == tmp_path / "topos"
 
 
 class TestIsValidRepo:
@@ -110,19 +110,19 @@ class TestReadPort:
         assert config.read_port(tmp_path) == config.DEFAULT_PORT
 
     def test_reads_configured_port(self, tmp_path: Path) -> None:
-        (tmp_path / ".env").write_text("MYAPP_PORT=9090\nOTHER=x\n", encoding="utf-8")
+        (tmp_path / ".env").write_text("TOPOS_PORT=9090\nOTHER=x\n", encoding="utf-8")
         assert config.read_port(tmp_path) == 9090
 
     def test_tolerates_whitespace_around_port(self, tmp_path: Path) -> None:
-        (tmp_path / ".env").write_text("  MYAPP_PORT = 8080  \n", encoding="utf-8")
+        (tmp_path / ".env").write_text("  TOPOS_PORT = 8080  \n", encoding="utf-8")
         assert config.read_port(tmp_path) == 8080
 
     def test_falls_back_on_non_numeric(self, tmp_path: Path) -> None:
-        (tmp_path / ".env").write_text("MYAPP_PORT=abc\n", encoding="utf-8")
+        (tmp_path / ".env").write_text("TOPOS_PORT=abc\n", encoding="utf-8")
         assert config.read_port(tmp_path) == config.DEFAULT_PORT
 
     def test_falls_back_on_out_of_range(self, tmp_path: Path) -> None:
-        (tmp_path / ".env").write_text("MYAPP_PORT=70000\n", encoding="utf-8")
+        (tmp_path / ".env").write_text("TOPOS_PORT=70000\n", encoding="utf-8")
         assert config.read_port(tmp_path) == config.DEFAULT_PORT
 
     def test_falls_back_on_missing_key(self, tmp_path: Path) -> None:

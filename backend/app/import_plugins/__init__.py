@@ -1,4 +1,4 @@
-"""Plugin-based import system for MyApp.
+"""Plugin-based import system for Topos.
 
 Defines the contract every import format handler implements
 (see :mod:`app.import_plugins.protocol`) and a registry for

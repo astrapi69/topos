@@ -4,7 +4,7 @@
 **Commits:** 294e8fa (loader), ad4301a (UI gating), f2bf783 (docs), e35ecc8 (AI client routing fix)
 **Reference:** [docs/configuration.md](../../configuration.md), [docs/explorations/secrets-refactor-audit.md](../../explorations/secrets-refactor-audit.md)
 
-Three-layer config: project `app.yaml` < `~/.config/myapp/secrets.yaml` < env-vars.
+Three-layer config: project `app.yaml` < `~/.config/topos/secrets.yaml` < env-vars.
 
 ## Prerequisites
 
@@ -16,12 +16,12 @@ Three-layer config: project `app.yaml` < `~/.config/myapp/secrets.yaml` < env-va
 
 1. Create override file:
    ```bash
-   mkdir -p ~/.config/myapp
-   cat > ~/.config/myapp/secrets.yaml << 'EOF'
+   mkdir -p ~/.config/topos
+   cat > ~/.config/topos/secrets.yaml << 'EOF'
    ai:
      api_key: <paste-real-key>
    EOF
-   chmod 600 ~/.config/myapp/secrets.yaml
+   chmod 600 ~/.config/topos/secrets.yaml
    ```
 
 2. Empty the project key (keep field, blank value):
@@ -50,21 +50,21 @@ Three-layer config: project `app.yaml` < `~/.config/myapp/secrets.yaml` < env-va
 
 ## Flow 2 — Deprecation warning
 
-1. Put a non-empty key back in `app.yaml` `ai.api_key: sk-...` AND delete `~/.config/myapp/secrets.yaml`.
-2. Unset env-var: `unset MYAPP_AI_API_KEY`.
+1. Put a non-empty key back in `app.yaml` `ai.api_key: sk-...` AND delete `~/.config/topos/secrets.yaml`.
+2. Unset env-var: `unset TOPOS_AI_API_KEY`.
 3. Restart backend.
 4. **Expected:** WARNING in log naming the file path + migration hint, e.g.:
    ```
    WARNING: Secrets found in /.../backend/config/app.yaml (ai.api_key).
-   ... Move secrets to /home/.../config/myapp/secrets.yaml or set
-   MYAPP_AI_API_KEY. See docs/configuration.md for details.
+   ... Move secrets to /home/.../config/topos/secrets.yaml or set
+   TOPOS_AI_API_KEY. See docs/configuration.md for details.
    ```
 
 ## Flow 3 — Env-var precedence
 
 1. Override file exists with `ai.api_key: from-override`.
 2. `app.yaml` carries `ai.api_key: from-project`.
-3. `export MYAPP_AI_API_KEY=from-env` then restart backend.
+3. `export TOPOS_AI_API_KEY=from-env` then restart backend.
 4. Trigger AI feature.
 5. **Expected:** request uses `from-env` (highest priority).
 
@@ -86,7 +86,7 @@ Three-layer config: project `app.yaml` < `~/.config/myapp/secrets.yaml` < env-va
 
 ## Flow 5 — AiSetupWizard externally-managed branch
 
-1. Override active. Clear `myapp-ai-setup-dismissed` from localStorage.
+1. Override active. Clear `topos-ai-setup-dismissed` from localStorage.
 2. Edit `app.yaml`: `ai.enabled: false`. Restart backend.
 3. Reload frontend → wizard opens.
 4. Step 0: pick provider (any).
@@ -98,7 +98,7 @@ Three-layer config: project `app.yaml` < `~/.config/myapp/secrets.yaml` < env-va
 
 1. Corrupt the override file:
    ```bash
-   echo "this is: : : not valid yaml :" > ~/.config/myapp/secrets.yaml
+   echo "this is: : : not valid yaml :" > ~/.config/topos/secrets.yaml
    ```
 2. Restart backend.
 3. **Expected:** backend starts successfully. Log shows WARNING:

@@ -1,13 +1,13 @@
 # Plattformübergreifende Installer-Skripte
 
-MyApp liefert vier Installer-Einstiegspunkte aus, die alle dasselbe tun — MyApp herunterladen, Docker-Image bauen, App auf `http://localhost:7880` starten. Wähle den Einstiegspunkt, den dein Betriebssystem versteht.
+Topos liefert vier Installer-Einstiegspunkte aus, die alle dasselbe tun — Topos herunterladen, Docker-Image bauen, App auf `http://localhost:7880` starten. Wähle den Einstiegspunkt, den dein Betriebssystem versteht.
 
 ## Schnellübersicht
 
 | Plattform | Einstiegspunkt | Befehl |
 |----------|----------------|--------|
-| Linux / macOS (Terminal) | `install.sh` | `curl -fsSL https://raw.githubusercontent.com/astrapi69/myapp/main/install.sh \| bash` |
-| Windows (PowerShell) | `install.ps1` | `irm https://raw.githubusercontent.com/astrapi69/myapp/main/install.ps1 \| iex` |
+| Linux / macOS (Terminal) | `install.sh` | `curl -fsSL https://raw.githubusercontent.com/astrapi69/topos/main/install.sh \| bash` |
+| Windows (PowerShell) | `install.ps1` | `irm https://raw.githubusercontent.com/astrapi69/topos/main/install.ps1 \| iex` |
 | macOS (Finder-Doppelklick) | `install.command` | Repo klonen oder herunterladen, im Finder auf `install.command` doppelklicken |
 | Windows (Doppelklick) | `install.cmd` | Repo klonen oder herunterladen, auf `install.cmd` doppelklicken |
 
@@ -16,18 +16,18 @@ MyApp liefert vier Installer-Einstiegspunkte aus, die alle dasselbe tun — MyAp
 Alle vier Einstiegspunkte führen dieselben fünf Schritte aus:
 
 1. Docker (und Docker Compose) prüfen. Abbruch mit Download-Link, falls nicht installiert.
-2. MyApp-Repo am gepinnten Release-Tag klonen (oder Tarball herunterladen, wenn `git` fehlt).
-3. `MYAPP_SECRET_KEY` und `MYAPP_CREDENTIALS_SECRET` generieren, falls nicht vorhanden.
+2. Topos-Repo am gepinnten Release-Tag klonen (oder Tarball herunterladen, wenn `git` fehlt).
+3. `TOPOS_SECRET_KEY` und `TOPOS_CREDENTIALS_SECRET` generieren, falls nicht vorhanden.
 4. `.env`-Datei im Installationsverzeichnis schreiben.
 5. `docker compose up -d` ausführen und auf den Health-Endpoint warten.
 
-Standard-Installationsverzeichnis: `~/myapp` (Linux/macOS) bzw. `%USERPROFILE%\myapp` (Windows). Übersteuern via Umgebungsvariable `MYAPP_DIR`. Version übersteuern via `MYAPP_VERSION=vX.Y.Z`.
+Standard-Installationsverzeichnis: `~/topos` (Linux/macOS) bzw. `%USERPROFILE%\topos` (Windows). Übersteuern via Umgebungsvariable `TOPOS_DIR`. Version übersteuern via `TOPOS_VERSION=vX.Y.Z`.
 
 ## Voraussetzungen
 
 - **Docker Desktop** (Windows, macOS) oder **Docker Engine + Compose-Plugin** (Linux). Siehe die [Docker-Desktop-Installationsanleitung](docker-desktop.md).
 - **~5 GB Speicherplatz** für das Docker-Image und deine Daten.
-- **Internetzugang** zum Herunterladen von MyApp und der Basis-Images.
+- **Internetzugang** zum Herunterladen von Topos und der Basis-Images.
 
 Du brauchst **kein** Python, Node, Poetry, npm oder andere Tools. Alles läuft im Docker-Container.
 
@@ -36,7 +36,7 @@ Du brauchst **kein** Python, Node, Poetry, npm oder andere Tools. Alles läuft i
 Der ursprüngliche Einstiegspunkt. Einzeiler:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/astrapi69/myapp/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/astrapi69/topos/main/install.sh | bash
 ```
 
 Das Skript wird zur Release-Zeit aus `install.sh.template` generiert; die fertige Datei ist im Repo eingecheckt, damit die curl-Pipe-URL direkt funktioniert. Vorher lesen ist erlaubt und empfohlen: `curl -fsSL ... -o install.sh`, prüfen, dann `bash install.sh`.
@@ -46,7 +46,7 @@ Das Skript wird zur Release-Zeit aus `install.sh.template` generiert; die fertig
 PowerShell-Spiegel von `install.sh`, generiert aus `install.ps1.template` via `make sync-versions`. Dieselben fünf Schritte, in PowerShell:
 
 ```powershell
-irm https://raw.githubusercontent.com/astrapi69/myapp/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/astrapi69/topos/main/install.ps1 | iex
 ```
 
 `irm` (`Invoke-RestMethod`) lädt das Skript herunter; `iex` (`Invoke-Expression`) führt es aus. Wie bei curl-Pipe: erst herunterladen und prüfen, wenn du willst (`irm ... -OutFile install.ps1`).
@@ -55,7 +55,7 @@ irm https://raw.githubusercontent.com/astrapi69/myapp/main/install.ps1 | iex
 
 Ein 10-zeiliger Wrapper um `install.sh`, der die Installation ohne Terminal startet. Finder behandelt `.command`-Dateien als ausführbar. Nach dem Klonen oder Herunterladen des Repos:
 
-1. Finder öffnen, ins MyApp-Verzeichnis navigieren.
+1. Finder öffnen, ins Topos-Verzeichnis navigieren.
 2. Doppelklick auf `install.command`.
 3. Beim ersten Start die Gatekeeper-Warnung bestätigen (Rechtsklick → Öffnen ist der dokumentierte Umweg).
 
@@ -82,7 +82,7 @@ Die Wrapper sind Komfort. Der zugrundeliegende Ablauf ist nur:
 
 ```bash
 git clone https://github.com/astrapi69/pluginforge-app-template.git
-cd myapp
+cd topos
 ./start.sh
 ```
 
@@ -93,11 +93,11 @@ cd myapp
 Nach der Installation:
 
 ```bash
-cd ~/myapp && ./stop.sh         # Stoppen
-cd ~/myapp && ./start.sh        # Neu starten
-cd ~/myapp && ./stop.sh && cd ~ && rm -rf ~/myapp  # Vollständige Deinstallation
+cd ~/topos && ./stop.sh         # Stoppen
+cd ~/topos && ./start.sh        # Neu starten
+cd ~/topos && ./stop.sh && cd ~ && rm -rf ~/topos  # Vollständige Deinstallation
 ```
 
-Der MyApp-Launcher (die Binärdatei aus den GitHub Releases) verpackt denselben Lebenszyklus in eine Tray-Icon-UI; siehe [Windows-Launcher](../launcher-windows.md), [macOS-Launcher](../launcher-macos.md), [Linux-Launcher](../launcher-linux.md).
+Der Topos-Launcher (die Binärdatei aus den GitHub Releases) verpackt denselben Lebenszyklus in eine Tray-Icon-UI; siehe [Windows-Launcher](../launcher-windows.md), [macOS-Launcher](../launcher-macos.md), [Linux-Launcher](../launcher-linux.md).
 
 > Zuletzt geprüft für v0.29.0 (2026-05-07).

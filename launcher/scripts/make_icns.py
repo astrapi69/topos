@@ -1,4 +1,4 @@
-"""Convert myapp.ico to myapp.icns for the macOS .app bundle.
+"""Convert topos.ico to topos.icns for the macOS .app bundle.
 
 macOS-only step: creates a .iconset directory with the standard
 Retina-aware size set, then invokes `iconutil` to produce the .icns.
@@ -25,8 +25,8 @@ from PIL import Image
 
 def main() -> int:
     here = Path(__file__).parent.parent
-    ico_path = here / "myapp.ico"
-    icns_path = here / "myapp.icns"
+    ico_path = here / "topos.ico"
+    icns_path = here / "topos.icns"
     iconset = here / "icon.iconset"
 
     if not ico_path.is_file():

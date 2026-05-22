@@ -29,11 +29,11 @@ backend/*.db-wal
 backend/htmlcov
 
 # Backend production data that may exist in dev tree (Phase 2 XDG
-# migration moves these to ~/.local/share/myapp/ on backend
+# migration moves these to ~/.local/share/topos/ on backend
 # start; they MUST NOT be shipped into the Docker image where they
 # would either bloat the layer or leak real user data).
 backend/uploads/
-backend/.myapp-production
+backend/.topos-production
 backend/.migration-complete
 
 # Plugin dev artifacts

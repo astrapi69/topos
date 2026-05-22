@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# MyApp pre-push hook.
+# Topos pre-push hook.
 #
 # Runs `pre-commit run --all-files` against the backend when a TAG
 # is being pushed. Skipped for branch pushes - those are CI's job.

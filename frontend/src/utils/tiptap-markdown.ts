@@ -9,7 +9,7 @@
  * Two converters are exposed:
  *
  *  - ``editorToMarkdown(editor)`` — full TipTap-doc → Markdown
- *    walk. Handles every node type the MyApp editor emits
+ *    walk. Handles every node type the Topos editor emits
  *    (doc, paragraph, heading, lists, blockquote, codeBlock,
  *    imageFigure / image, horizontalRule, text with marks). Used
  *    by the WYSIWYG↔Markdown toggle and by the Copy action's

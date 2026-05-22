@@ -1,6 +1,6 @@
 # Release workflow
 
-The permanent workflow for MyApp releases. Claude Code reads
+The permanent workflow for Topos releases. Claude Code reads
 this file automatically when a release is due.
 
 Prompt triggers: "release new version", "new release", "deploy new version"
@@ -107,7 +107,7 @@ docs: changelog for v0.X.0
 
 ## Step 4: Bump version
 
-MyApp ships in lock-step. ALL components carry the same
+Topos ships in lock-step. ALL components carry the same
 version string at every release. Only ONE file is hand-edited;
 everything else is propagated by tooling.
 
@@ -129,8 +129,8 @@ make sync-versions
 This single command updates:
 - `frontend/package.json`
 - `launcher/pyproject.toml`
-- `launcher/myapp_launcher/__init__.py` (`__version__` literal)
-- `launcher/myapp-launcher.spec` (CFBundleVersion +
+- `launcher/topos_launcher/__init__.py` (`__version__` literal)
+- `launcher/topos-launcher.spec` (CFBundleVersion +
   CFBundleShortVersionString, both same value)
 - All 10 `plugins/*/pyproject.toml`
 - `install.sh` (regenerated from `install.sh.template` via
@@ -172,12 +172,12 @@ git push origin main --tags
 |---|---|---|
 | `backend/app/__init__.py:__version__` | `backend/pyproject.toml` | tomllib parse at module import |
 | `install.sh` | `install.sh.template` + `backend/pyproject.toml` | release-time substitution via `scripts/generate_install_sh.sh` (called by `sync-versions`) |
-| `launcher/myapp_launcher/installer.py:MYAPP_TARGET_VERSION` | `backend/pyproject.toml` | PyInstaller build-time injection via `myapp-launcher.spec` writing `_build_info.py` |
-| `launcher/myapp_launcher/__init__.py:__version__` | `backend/pyproject.toml` | `make sync-versions` literal substitution (literal kept for frozen-binary compatibility) |
-| `launcher/myapp-launcher.spec` CFBundle plist fields | `backend/pyproject.toml` | `make sync-versions` literal substitution |
+| `launcher/topos_launcher/installer.py:TOPOS_TARGET_VERSION` | `backend/pyproject.toml` | PyInstaller build-time injection via `topos-launcher.spec` writing `_build_info.py` |
+| `launcher/topos_launcher/__init__.py:__version__` | `backend/pyproject.toml` | `make sync-versions` literal substitution (literal kept for frozen-binary compatibility) |
+| `launcher/topos-launcher.spec` CFBundle plist fields | `backend/pyproject.toml` | `make sync-versions` literal substitution |
 | `launcher/pyproject.toml:version` | `backend/pyproject.toml` | `make sync-versions` |
 | `plugins/*/pyproject.toml:version` | `backend/pyproject.toml` | `make sync-versions` (lock-step; per-plugin independent versions deferred to a future Core-vs-Third-Party decision) |
-| `plugins/myapp-plugin-git-sync/myapp_git_sync/__init__.py:__version__` | own pyproject | `importlib.metadata.version` |
+| `plugins/topos-plugin-git-sync/topos_git_sync/__init__.py:__version__` | own pyproject | `importlib.metadata.version` |
 | `frontend/src/components/*` `__APP_VERSION__` | `frontend/package.json` | Vite `define` build-time literal |
 
 If a hardcoded version literal appears anywhere in the "DO NOT
@@ -190,9 +190,9 @@ new literals.
 - [ ] `docs/CONCEPT.md` (if the version is mentioned in prose)
 - [ ] `README.md` (if the version is mentioned in prose)
 
-### External MyApp-owned dependencies
+### External Topos-owned dependencies
 
-Two libraries that the MyApp project also maintains are
+Two libraries that the Topos project also maintains are
 pinned via the standard Poetry mechanism, NOT under
 `make sync-versions` automation. They have independent release
 lifecycles:
@@ -200,12 +200,12 @@ lifecycles:
 - `manuscripta` (book-rendering pipeline)
 - `pluginforge` (plugin framework)
 
-At each MyApp release, manually verify both:
+At each Topos release, manually verify both:
 
 - [ ] `manuscripta` pin in `backend/pyproject.toml` and every
       `plugins/*/pyproject.toml` matches the latest released
       `manuscripta` on PyPI (or whichever version you intend
-      to ship with this MyApp release)
+      to ship with this Topos release)
 - [ ] `pluginforge` pin in `backend/pyproject.toml` and every
       `plugins/*/pyproject.toml` matches the latest released
       `pluginforge`
@@ -223,13 +223,13 @@ grep -rn "manuscripta\|pluginforge" \
 The current deferral from `make sync-versions` rests on an
 assumption of low drift (verified 2026-05-04: both pinned at
 their latest PyPI release). If you find these drifting more
-than once between MyApp releases, bring them under
+than once between Topos releases, bring them under
 `sync-versions` automation. Concrete repeated drift overrides
 the deferral.
 
 ### Other release-time considerations
 
-The `make sync-versions` step covers all MyApp-internal
+The `make sync-versions` step covers all Topos-internal
 versions. The external-dep block above is the only manual
 checkpoint at release time.
 
@@ -303,7 +303,7 @@ make verify-docs-discipline
 # launcher/ or its embedded version - catches PyInstaller spec
 # errors that only surface when the spec is exec'd by
 # pyinstaller, NOT when it is imported as Python).
-cd launcher && poetry run pyinstaller myapp-launcher.spec --clean --noconfirm
+cd launcher && poetry run pyinstaller topos-launcher.spec --clean --noconfirm
 ```
 
 ALL must be green. On a red test:
@@ -323,7 +323,7 @@ cd backend && poetry build
 cd frontend && npm run build
 
 # Docker (if active)
-docker build -t myapp:test .
+docker build -t topos:test .
 ```
 
 On a build error: stop, report, fix, restart.
@@ -361,7 +361,7 @@ inconsistent or incomplete release pages.
 Then with the gh CLI (preferred):
 ```bash
 gh release create v0.X.0 \
-  --title "MyApp v0.X.0" \
+  --title "Topos v0.X.0" \
   --notes-file changelog/releases/v0.X.0.md
 ```
 
@@ -369,7 +369,7 @@ If the gh CLI is not available: print instructions for manual
 creation on GitHub:
 - URL: https://github.com/astrapi69/pluginforge-app-template/releases/new
 - Tag: select v0.X.0
-- Title: MyApp v0.X.0
+- Title: Topos v0.X.0
 - Notes: paste the contents of changelog/releases/v0.X.0.md
 - Click "Publish release"
 
@@ -380,9 +380,9 @@ creation on GitHub:
 If Docker images are published:
 
 ```bash
-docker build -t myapp:v0.X.0 -t myapp:latest .
-docker push myapp:v0.X.0
-docker push myapp:latest
+docker build -t topos:v0.X.0 -t topos:latest .
+docker push topos:v0.X.0
+docker push topos:latest
 ```
 
 If not active: skip this step and note it in the release log.
@@ -395,7 +395,7 @@ When the help system with MkDocs is set up:
 
 - A GitHub Action triggers automatically on push to main
 - No manual step
-- Verify: https://astrapi69.github.io/myapp/ shows the new content
+- Verify: https://astrapi69.github.io/topos/ shows the new content
 - Check the action status: `gh run list --workflow=docs.yml --limit=1`
 
 On a failed deploy: pull the error from the action logs and fix it,
@@ -437,7 +437,7 @@ as "done". Missing items block the release.
 - [ ] changelog/releases/v0.X.0.md created for the GitHub release
 - [ ] Version updated in all pyproject.toml and package.json
 - [ ] Version updated in __version__ and other Python modules
-- [ ] manuscripta and other MyApp deps at the current version
+- [ ] manuscripta and other Topos deps at the current version
 - [ ] `make test` green
 - [ ] Frontend `tsc --noEmit` clean
 - [ ] `npm run test` (Vitest) green
@@ -448,7 +448,7 @@ as "done". Missing items block the release.
 - [ ] `make verify-docs-discipline` clean (MANDATORY since v0.30.0+: aggregates `verify-mkdocs-nav` + `check-mkdocs-orphans`; addresses the v0.30.0 docs+i18n drift audit findings)
 - [ ] Backend `poetry build` successful (skipped iff `package-mode = false`)
 - [ ] Frontend `npm run build` successful
-- [ ] `cd launcher && poetry run pyinstaller myapp-launcher.spec --clean --noconfirm` succeeds (MANDATORY for any release touching launcher/ or its embedded version)
+- [ ] `cd launcher && poetry run pyinstaller topos-launcher.spec --clean --noconfirm` succeeds (MANDATORY for any release touching launcher/ or its embedded version)
 - [ ] Docker build successful (if active)
 - [ ] Git tag created and pushed
 - [ ] GitHub release published
@@ -482,7 +482,7 @@ that can be fixed after the release. Note it in the chat journal.
 
 ### Docker push fails
 
-Check the login: `docker login`. Check the tag: `docker images | grep myapp`.
+Check the login: `docker login`. Check the tag: `docker images | grep topos`.
 On a registry problem: the release is still valid; retry the push
 when the registry is available again.
 
@@ -501,7 +501,7 @@ already pulled it.
 
 ## Versioning convention
 
-MyApp follows Semantic Versioning 2.0.0:
+Topos follows Semantic Versioning 2.0.0:
 
 - **Major (X.0.0)**: breaking changes in the API or fundamental
   architectural changes. Rare in the 0.x phase.

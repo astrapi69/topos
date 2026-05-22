@@ -1,6 +1,6 @@
 /* EXAMPLE-DOMAIN: This file demonstrates how the frontend connects
  * to the backend CRUD shape (inherited book / article / chapter
- * domain from MyApp). Adapt or replace for myapp's
+ * domain from Topos). Adapt or replace for topos's
  * actual domain when it solidifies.
  */
 
@@ -614,7 +614,7 @@ export default function ArticleList() {
                         data-testid="article-list-dashboard"
                     >
                         <BookOpen size={28} strokeWidth={1.5} />
-                        <h1 className={layout.logoText}>MyApp</h1>
+                        <h1 className={layout.logoText}>Topos</h1>
                     </div>
                     <div className={layout.headerActions}>
                         <button

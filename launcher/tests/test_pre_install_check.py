@@ -5,8 +5,8 @@
 
 The safeguard lives in ``__main__._check_launcher_target_stale``.
 It runs at the top of ``_install_or_welcome`` (before the welcome
-dialog) on a fresh machine. If GitHub reports a MyApp release
-newer than the launcher's embedded ``MYAPP_TARGET_VERSION``,
+dialog) on a fresh machine. If GitHub reports a Topos release
+newer than the launcher's embedded ``TOPOS_TARGET_VERSION``,
 a 3-button dialog is shown:
 
 - "Open download page" (primary): browser opens, install aborts
@@ -24,13 +24,13 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
-from myapp_launcher import __main__ as launcher_main
-from myapp_launcher import installer
+from topos_launcher import __main__ as launcher_main
+from topos_launcher import installer
 
 
 def _patch_target(monkeypatch, target: str) -> None:
-    """Pin MYAPP_TARGET_VERSION for the duration of the test."""
-    monkeypatch.setattr(installer, "MYAPP_TARGET_VERSION", target)
+    """Pin TOPOS_TARGET_VERSION for the duration of the test."""
+    monkeypatch.setattr(installer, "TOPOS_TARGET_VERSION", target)
 
 
 class TestCheckLauncherTargetStale:
@@ -44,10 +44,10 @@ class TestCheckLauncherTargetStale:
         """
         _patch_target(monkeypatch, "0.17.0")
         with patch(
-            "myapp_launcher.update_check.fetch_latest_version",
+            "topos_launcher.update_check.fetch_latest_version",
             return_value=("v0.25.0", "https://example/release/v0.25.0"),
         ), patch(
-            "myapp_launcher.ui.three_button_dialog",
+            "topos_launcher.ui.three_button_dialog",
             return_value="primary",
         ), patch(
             "webbrowser.open"
@@ -68,10 +68,10 @@ class TestCheckLauncherTargetStale:
         """
         _patch_target(monkeypatch, "0.17.0")
         with patch(
-            "myapp_launcher.update_check.fetch_latest_version",
+            "topos_launcher.update_check.fetch_latest_version",
             return_value=("v0.25.0", "https://example/release/v0.25.0"),
         ), patch(
-            "myapp_launcher.ui.three_button_dialog",
+            "topos_launcher.ui.three_button_dialog",
             return_value="secondary",
         ), patch(
             "webbrowser.open"
@@ -88,10 +88,10 @@ class TestCheckLauncherTargetStale:
         """
         _patch_target(monkeypatch, "0.17.0")
         with patch(
-            "myapp_launcher.update_check.fetch_latest_version",
+            "topos_launcher.update_check.fetch_latest_version",
             return_value=("v0.25.0", "https://example/release/v0.25.0"),
         ), patch(
-            "myapp_launcher.ui.three_button_dialog",
+            "topos_launcher.ui.three_button_dialog",
             return_value="cancel",
         ), patch(
             "webbrowser.open"
@@ -107,10 +107,10 @@ class TestCheckLauncherTargetStale:
         """
         _patch_target(monkeypatch, "0.25.0")
         with patch(
-            "myapp_launcher.update_check.fetch_latest_version",
+            "topos_launcher.update_check.fetch_latest_version",
             return_value=("v0.25.0", "https://example/release/v0.25.0"),
         ), patch(
-            "myapp_launcher.ui.three_button_dialog",
+            "topos_launcher.ui.three_button_dialog",
         ) as mock_dialog:
             result = launcher_main._check_launcher_target_stale()
         assert result is True
@@ -124,10 +124,10 @@ class TestCheckLauncherTargetStale:
         """
         _patch_target(monkeypatch, "0.17.0")
         with patch(
-            "myapp_launcher.update_check.fetch_latest_version",
+            "topos_launcher.update_check.fetch_latest_version",
             return_value=None,
         ), patch(
-            "myapp_launcher.ui.three_button_dialog",
+            "topos_launcher.ui.three_button_dialog",
         ) as mock_dialog:
             result = launcher_main._check_launcher_target_stale()
         assert result is True

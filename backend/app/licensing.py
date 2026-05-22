@@ -3,8 +3,8 @@
 License keys are Base64-encoded JSON payloads signed with HMAC-SHA256.
 Validation is offline - no license server needed.
 
-Key format: MYAPP-PLUGINNAME-vVERSION-<base64 payload>.<base64 signature>
-Example:    MYAPP-AUDIOBOOK-v1-eyJwbH....<sig>
+Key format: TOPOS-PLUGINNAME-vVERSION-<base64 payload>.<base64 signature>
+Example:    TOPOS-AUDIOBOOK-v1-eyJwbH....<sig>
 
 Payload JSON:
 {
@@ -116,7 +116,7 @@ class LicenseValidator:
         signature = self._sign(payload_b64)
         sig_b64 = base64.urlsafe_b64encode(signature).decode()
 
-        prefix = f"MYAPP-{payload.plugin.upper()}-v{payload.version}"
+        prefix = f"TOPOS-{payload.plugin.upper()}-v{payload.version}"
         return f"{prefix}-{payload_b64}.{sig_b64}"
 
     def validate_license(
@@ -237,4 +237,4 @@ def create_plugin_key(
 
 def get_license_secret() -> str:
     """Get the license signing secret from environment or default."""
-    return os.getenv("MYAPP_LICENSE_SECRET", "pluginforge-default-key")
+    return os.getenv("TOPOS_LICENSE_SECRET", "pluginforge-default-key")

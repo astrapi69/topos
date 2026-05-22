@@ -30,8 +30,8 @@ export default function App() {
 
     // AI setup wizard state — shows on first run when AI is not configured
     const [showAiWizard, setShowAiWizard] = useState(false);
-    // True when ai.api_key comes from ~/.config/myapp/secrets.yaml or
-    // MYAPP_AI_API_KEY env-var. Backend reports this via the
+    // True when ai.api_key comes from ~/.config/topos/secrets.yaml or
+    // TOPOS_AI_API_KEY env-var. Backend reports this via the
     // ``_secrets_managed_externally`` meta-flag on the app-config payload.
     // Wizard hides the API-key input + skips its validation in that case.
     const [secretsExternal, setSecretsExternal] = useState(false);
@@ -69,8 +69,8 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        window.addEventListener("myapp:open-error-report", handleOpenReport);
-        return () => window.removeEventListener("myapp:open-error-report", handleOpenReport);
+        window.addEventListener("topos:open-error-report", handleOpenReport);
+        return () => window.removeEventListener("topos:open-error-report", handleOpenReport);
     }, [handleOpenReport]);
 
     return (

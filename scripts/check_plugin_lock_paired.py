@@ -3,7 +3,7 @@
 
 Sub-task 2 of PLUGIN-LOCKFILE-DRIFT-01. Catches the operational
 mistake that produced the v0.30.0 release CI red-on-main: editing
-``plugins/myapp-plugin-<name>/pyproject.toml`` without running
+``plugins/topos-plugin-<name>/pyproject.toml`` without running
 ``poetry lock`` in the same plugin directory before committing.
 
 The shape — `make test` green but per-plugin CI red — is documented
@@ -14,7 +14,7 @@ own ``poetry.lock`` lags. CI runs `poetry install --no-interaction`
 per plugin and aborts when the lockfile is stale.
 
 Pre-commit framework invokes this hook with each staged
-``plugins/myapp-plugin-<name>/pyproject.toml`` path as a
+``plugins/topos-plugin-<name>/pyproject.toml`` path as a
 positional argument (scoped via ``files:`` regex in
 ``.pre-commit-config.yaml``). For each such path, the hook checks
 whether the corresponding ``poetry.lock`` in the same plugin
@@ -44,7 +44,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_PYPROJECT_RE = re.compile(
-    r"^plugins/myapp-plugin-[^/]+/pyproject\.toml$"
+    r"^plugins/topos-plugin-[^/]+/pyproject\.toml$"
 )
 
 

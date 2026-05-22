@@ -1,4 +1,4 @@
-# MyApp Tester Onboarding
+# Topos Tester Onboarding
 
 Goal: get from zero to running your first test session in 30
 minutes.
@@ -35,7 +35,7 @@ start, but `make build` and Vite 8 tooling fail. See
 
 ```bash
 git clone https://github.com/astrapi69/pluginforge-app-template.git
-cd myapp
+cd topos
 make install
 ```
 
@@ -68,7 +68,7 @@ This starts:
 - **Frontend** at `http://localhost:5173` (Vite dev server)
 
 Open `http://localhost:5173` in your browser. The dashboard should
-load. If it shows "Welcome to MyApp", setup is correct.
+load. If it shows "Welcome to Topos", setup is correct.
 
 ### Stop / restart
 
@@ -91,7 +91,7 @@ make dev-down   # stop
 ### Fresh installation
 
 A first-time `make dev` boots with an empty database
-(`backend/myapp.db` is created on first request). Use the UI
+(`backend/topos.db` is created on first request). Use the UI
 to create your test data:
 
 1. Click **New Book** — fill title + author, save.
@@ -110,15 +110,15 @@ test leaves you in a broken state:
 make stop
 # Default platformdirs location (Linux/macOS); v0.25.0+ moved
 # data here from the project tree. Adjust for Windows
-# (%LOCALAPPDATA%\myapp\) or for a custom MYAPP_DATA_DIR.
-rm "$HOME/.local/share/myapp/myapp.db" \
-   "$HOME/.local/share/myapp/myapp.db-wal" \
-   "$HOME/.local/share/myapp/myapp.db-shm" 2>/dev/null
+# (%LOCALAPPDATA%\topos\) or for a custom TOPOS_DATA_DIR.
+rm "$HOME/.local/share/topos/topos.db" \
+   "$HOME/.local/share/topos/topos.db-wal" \
+   "$HOME/.local/share/topos/topos.db-shm" 2>/dev/null
 make dev
 ```
 
 The database is recreated on next request. Note: this also wipes
-your test fixtures. The `.myapp-production` marker file in
+your test fixtures. The `.topos-production` marker file in
 that directory is the test-isolation tripwire — leave it alone.
 
 ### Test fixtures via API
@@ -210,7 +210,7 @@ per session under `docs/testing/sessions/YYYY-MM-DD-session-N-{topic}.md`.
 
 Title format: `[Bug][severity] Short description`. Body must include:
 
-- **MyApp version** (e.g., `v0.29.0` or commit hash)
+- **Topos version** (e.g., `v0.29.0` or commit hash)
 - **Reproduction steps** (numbered list)
 - **Actual outcome**
 - **Expected outcome**

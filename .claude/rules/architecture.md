@@ -16,23 +16,23 @@ New features ALWAYS belong in a plugin, unless they touch the core (Book/Chapter
 | Repo | Purpose | License |
 |------|---------|---------|
 | `pluginforge` | Application-agnostic plugin framework (PyPI) | MIT |
-| `myapp` | Book authoring platform, uses PluginForge | MIT (all plugins free during development) |
+| `topos` | Book authoring platform, uses PluginForge | MIT (all plugins free during development) |
 
-PluginForge is EXTERNAL. Changes to PluginForge are a separate repo and a separate release cycle. MyApp pins `pluginforge ^0.10.0`.
+PluginForge is EXTERNAL. Changes to PluginForge are a separate repo and a separate release cycle. Topos pins `pluginforge ^0.10.0`.
 
 ## Backend (Python/FastAPI)
 
 ### Structure per plugin
 
 ```
-plugins/myapp-plugin-{name}/
-  myapp_{name}/
+plugins/topos-plugin-{name}/
+  topos_{name}/
     plugin.py          # {Name}Plugin(BasePlugin), hook implementations
     routes.py          # FastAPI router (delegates to service functions)
     {module}.py        # business logic (no FastAPI code here)
   tests/
     test_{name}.py     # pytest tests
-  pyproject.toml       # entry point: [project.entry-points."myapp.plugins"]
+  pyproject.toml       # entry point: [project.entry-points."topos.plugins"]
 ```
 
 ### Rules
@@ -60,11 +60,11 @@ Third-party plugins are installed as a ZIP through Settings > Plugins:
 
 ### Licensing
 
-- MyApp-specific, NOT part of PluginForge.
+- Topos-specific, NOT part of PluginForge.
 - Code in backend/app/licensing.py.
 - HMAC-SHA256 signed license keys, offline-validatable.
 - Licenses in config/licenses.json, managed through the Settings UI.
-- Format: MYAPP-{PLUGIN}-v{N}-{base64 payload}.{base64 signature}
+- Format: TOPOS-{PLUGIN}-v{N}-{base64 payload}.{base64 signature}
 
 ## Frontend (React/TypeScript)
 
@@ -160,18 +160,18 @@ Unidirectional. No direct DB access from routers. No frontend code in the backen
 Frontend       ApiError (status + detail) -> toast for the user
 API client     HTTP error -> converted to ApiError
 Router         Thin, catches nothing. Global exception handler maps.
-Service        Throws MyAppError subclasses (NotFoundError, ExportError, ...)
+Service        Throws ToposError subclasses (NotFoundError, ExportError, ...)
 Plugin         Throws PluginError(plugin_name, message)
 External       ExternalServiceError(service, message) for Pandoc/TTS/LanguageTool
 ```
 
-Services NEVER throw HTTPException, routers catch NOTHING. The global exception handler in main.py maps MyAppError subclasses to HTTP status codes. See code-hygiene.md "Error handling architecture" for details.
+Services NEVER throw HTTPException, routers catch NOTHING. The global exception handler in main.py maps ToposError subclasses to HTTP status codes. See code-hygiene.md "Error handling architecture" for details.
 
 ## Plugin package versions
 
 Plugin versions are independent of the app version. A plugin is bumped only when the plugin itself changed, not on every app release. Concretely:
 
-- No forced bump of every `plugins/myapp-plugin-*/pyproject.toml` on an app release
+- No forced bump of every `plugins/topos-plugin-*/pyproject.toml` on an app release
 - Plugin versions stay at `1.0.0` until there is a real reason to raise them (new hook version, breaking change in the plugin API, ...)
 - The app version bump only touches `backend/pyproject.toml`, `frontend/package.json` and optionally `backend/app/__init__.py`
 - Plugin changes are recorded in the app CHANGELOG, but the plugin version string stays unchanged

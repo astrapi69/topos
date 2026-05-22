@@ -60,7 +60,7 @@ describe("ErrorReportDialog", () => {
     renderDialog()
     expect(screen.getByText("Issue-Report erstellen")).toBeTruthy()
     expect(
-      screen.getByText(/MyApp hat einen Fehler erkannt/),
+      screen.getByText(/Topos hat einen Fehler erkannt/),
     ).toBeTruthy()
   })
 

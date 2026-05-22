@@ -49,7 +49,7 @@ test.describe('Content safety', () => {
         return hash.toString(36)
       }
 
-      const req = indexedDB.open('myapp', 1)
+      const req = indexedDB.open('topos', 1)
       await new Promise((resolve, reject) => {
         req.onsuccess = () => resolve(null)
         req.onerror = () => reject(req.error)

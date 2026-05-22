@@ -4,18 +4,18 @@
 
 ## Installation
 
-MyApp runs as a set of Docker containers on your own machine. Your books, settings, and exports stay local; nothing is uploaded to a service.
+Topos runs as a set of Docker containers on your own machine. Your books, settings, and exports stay local; nothing is uploaded to a service.
 
 ### Prerequisites
 
-You need [Docker](https://docs.docker.com/get-docker/) installed and running before you can start MyApp. Docker Desktop (Windows, macOS) or Docker Engine with Compose (Linux) both work.
+You need [Docker](https://docs.docker.com/get-docker/) installed and running before you can start Topos. Docker Desktop (Windows, macOS) or Docker Engine with Compose (Linux) both work.
 
 ### Quick install (recommended)
 
-The one-line installer downloads MyApp to `~/myapp`, builds the Docker images, and starts the app.
+The one-line installer downloads Topos to `~/topos`, builds the Docker images, and starts the app.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/astrapi69/myapp/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/astrapi69/topos/main/install.sh | bash
 ```
 
 When the installer finishes, open [http://localhost:7880](http://localhost:7880) in your browser.
@@ -26,34 +26,34 @@ If you prefer to clone the repository yourself:
 
 ```bash
 git clone https://github.com/astrapi69/pluginforge-app-template.git
-cd myapp
+cd topos
 ./start.sh
 ```
 
 `start.sh` builds the images on first run, then launches the same Docker stack the one-liner uses. The app is reachable at [http://localhost:7880](http://localhost:7880).
 
-## Running MyApp
+## Running Topos
 
-Once installed, MyApp is controlled with two scripts in the install directory.
+Once installed, Topos is controlled with two scripts in the install directory.
 
 | Action  | Command                            |
 | ------- | ---------------------------------- |
-| Stop    | `cd ~/myapp && ./stop.sh`      |
-| Start   | `cd ~/myapp && ./start.sh`     |
+| Stop    | `cd ~/topos && ./stop.sh`      |
+| Start   | `cd ~/topos && ./start.sh`     |
 | Restart | `./stop.sh && ./start.sh`          |
 
 Stopping the app keeps your data on disk; starting it again brings everything back as it was.
 
 ## Uninstalling
 
-To remove MyApp and all local data:
+To remove Topos and all local data:
 
 ```bash
-cd ~/myapp && ./stop.sh
-cd ~ && rm -rf ~/myapp
+cd ~/topos && ./stop.sh
+cd ~ && rm -rf ~/topos
 ```
 
-This stops the containers and deletes the install directory, including the SQLite database, uploaded assets, and any exports stored under `~/myapp`. Make a backup first if you want to keep your books (Dashboard > **Backup**).
+This stops the containers and deletes the install directory, including the SQLite database, uploaded assets, and any exports stored under `~/topos`. Make a backup first if you want to keep your books (Dashboard > **Backup**).
 
 ## Optional: PDF export with Pandoc
 
@@ -61,11 +61,11 @@ EPUB, Word, HTML, and Markdown exports work out of the box. PDF export needs [Pa
 
 ## For developers
 
-Working on MyApp itself uses a different setup based on `make install` (Poetry + npm + plugins) and `make dev` (FastAPI on port 8000, Vite on port 5173). The `make prod` target runs the same Docker stack as `./start.sh`. See the [README](https://github.com/astrapi69/pluginforge-app-template#development) and [CLAUDE.md](https://github.com/astrapi69/pluginforge-app-template/blob/main/CLAUDE.md) for the full development guide.
+Working on Topos itself uses a different setup based on `make install` (Poetry + npm + plugins) and `make dev` (FastAPI on port 8000, Vite on port 5173). The `make prod` target runs the same Docker stack as `./start.sh`. See the [README](https://github.com/astrapi69/pluginforge-app-template#development) and [CLAUDE.md](https://github.com/astrapi69/pluginforge-app-template/blob/main/CLAUDE.md) for the full development guide.
 
 ## First start
 
-When you open [http://localhost:7880](http://localhost:7880) for the first time the database is empty. MyApp uses SQLite as a local database; all data lives on your machine, no external server is required. From Settings you can change language and theme. Six themes (Warm Literary, Cool Modern, Nord, Classic, Studio, Notebook) are available, each with light and dark variants - see the Themes page for details.
+When you open [http://localhost:7880](http://localhost:7880) for the first time the database is empty. Topos uses SQLite as a local database; all data lives on your machine, no external server is required. From Settings you can change language and theme. Six themes (Warm Literary, Cool Modern, Nord, Classic, Studio, Notebook) are available, each with light and dark variants - see the Themes page for details.
 
 ## Dashboard: filter, sort, trash
 
@@ -85,6 +85,6 @@ After creating the book you are sent straight to the editor. The sidebar lets yo
 
 ## Importing existing projects
 
-If you already have a book project in write-book-template format, you can import it directly. On the Dashboard, click **Import** and select the corresponding ZIP file. MyApp reads the chapter structure, metadata (title, author, ISBN, language) and assets (images, cover) automatically and creates the book with everything intact.
+If you already have a book project in write-book-template format, you can import it directly. On the Dashboard, click **Import** and select the corresponding ZIP file. Topos reads the chapter structure, metadata (title, author, ISBN, language) and assets (images, cover) automatically and creates the book with everything intact.
 
 Backups can be restored the same way. A backup (.bgb file) contains the entire state of all books. From the Dashboard you export the current state via **Backup** and restore it via **Restore**.

@@ -107,7 +107,7 @@ export interface BulkFillItem {
 
 const BulkAiFillJobContext = createContext<BulkAiFillJobContextValue | null>(null)
 
-const STORAGE_KEY = "myapp.bulk_ai_fill_job"
+const STORAGE_KEY = "topos.bulk_ai_fill_job"
 
 interface PersistedJob {
     jobId: string

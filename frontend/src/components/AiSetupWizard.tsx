@@ -2,7 +2,7 @@
  * First-run AI provider setup wizard.
  *
  * Shows on the Dashboard when AI is not yet configured (ai.enabled === false
- * and no "myapp-ai-setup-dismissed" flag in localStorage). Three steps:
+ * and no "topos-ai-setup-dismissed" flag in localStorage). Three steps:
  * 1. Pick a provider
  * 2. Enter API key + model
  * 3. Test connection
@@ -19,13 +19,13 @@ import {notify} from "../utils/notify"
 import {api} from "../api/client"
 import {AI_PROVIDER_PRESETS, AI_PROVIDER_IDS, getProviderPreset} from "../utils/aiProviders"
 
-const DISMISSED_KEY = "myapp-ai-setup-dismissed"
+const DISMISSED_KEY = "topos-ai-setup-dismissed"
 
 interface Props {
   open: boolean
   onClose: () => void
   /** True when the backend reports ai.api_key comes from
-   *  ~/.config/myapp/secrets.yaml or MYAPP_AI_API_KEY.
+   *  ~/.config/topos/secrets.yaml or TOPOS_AI_API_KEY.
    *  Wizard hides the API-key input + skips its validation; the
    *  user has already configured the key out-of-band, the wizard
    *  must not block them from completing setup. */
@@ -179,7 +179,7 @@ export default function AiSetupWizard({open, onClose, secretsManagedExternally =
                   }}>
                     {t(
                       "ui.settings.ai_api_key_external_note",
-                      "API-Schlüssel wird aus externer Konfiguration gelesen (~/.config/myapp/secrets.yaml oder Umgebungsvariable MYAPP_AI_API_KEY). Editiere die Datei direkt oder setze die Umgebungsvariable, um den Schlüssel zu ändern.",
+                      "API-Schlüssel wird aus externer Konfiguration gelesen (~/.config/topos/secrets.yaml oder Umgebungsvariable TOPOS_AI_API_KEY). Editiere die Datei direkt oder setze die Umgebungsvariable, um den Schlüssel zu ändern.",
                     )}
                   </div>
                 </div>

@@ -1,11 +1,11 @@
-"""Install manifest for tracking MyApp installation state.
+"""Install manifest for tracking Topos installation state.
 
 The manifest is a small JSON file stored in the platform-specific user
-config directory (``platformdirs.user_config_dir("myapp")``):
+config directory (``platformdirs.user_config_dir("topos")``):
 
-- Linux:   ``~/.config/myapp/install.json``
-- macOS:   ``~/Library/Application Support/myapp/install.json``
-- Windows: ``%APPDATA%\\myapp\\install.json``
+- Linux:   ``~/.config/topos/install.json``
+- macOS:   ``~/Library/Application Support/topos/install.json``
+- Windows: ``%APPDATA%\\topos\\install.json``
 
 Written by the launcher after a successful install and read on every
 startup to determine whether to show the install UI or the main UI.
@@ -21,7 +21,7 @@ from typing import Any
 
 from platformdirs import user_config_dir
 
-APP_NAME = "myapp"
+APP_NAME = "topos"
 MANIFEST_FILENAME = "install.json"
 
 

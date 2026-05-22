@@ -92,5 +92,5 @@ specialised (AI-fill cost projections, comment moderation
 language, template field-class semantics) and was deferred to
 ship v0.31.0 on schedule rather than holding the release on six
 native-speaker contacts. The launcher precedent
-(`launcher/myapp_launcher/locales/REVIEW_STATUS.md`) covers
+(`launcher/topos_launcher/locales/REVIEW_STATUS.md`) covers
 the analogous situation for the launcher itself.

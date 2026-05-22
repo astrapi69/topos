@@ -9,7 +9,7 @@ don't apply rather than leaving them blank.
 # Test Session: {YYYY-MM-DD} — {Session topic}
 
 **Tester:** {name}
-**MyApp version:** v{X.Y.Z} (commit `{hash}`)
+**Topos version:** v{X.Y.Z} (commit `{hash}`)
 **Environment:** {OS} / {browser version} / Node {version} / Python {version}
 **Date:** {YYYY-MM-DD}
 **Duration:** {HH:MM}-{HH:MM} ({hours} h)

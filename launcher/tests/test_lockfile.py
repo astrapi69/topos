@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
-from myapp_launcher import lockfile
+from topos_launcher import lockfile
 
 
 class TestReadWriteClear:
@@ -55,13 +55,13 @@ class TestAnotherInstanceAlive:
     def test_true_when_other_pid_is_alive(self, tmp_path: Path) -> None:
         path = tmp_path / "launcher.lock"
         lockfile.write_lock(path, pid=99999)
-        with patch("myapp_launcher.lockfile.pid_is_alive", return_value=True):
+        with patch("topos_launcher.lockfile.pid_is_alive", return_value=True):
             assert lockfile.another_instance_alive(path) is True
 
     def test_false_when_other_pid_is_dead(self, tmp_path: Path) -> None:
         path = tmp_path / "launcher.lock"
         lockfile.write_lock(path, pid=99999)
-        with patch("myapp_launcher.lockfile.pid_is_alive", return_value=False):
+        with patch("topos_launcher.lockfile.pid_is_alive", return_value=False):
             assert lockfile.another_instance_alive(path) is False
 
 

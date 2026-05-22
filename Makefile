@@ -25,7 +25,7 @@ dev: ## Start backend + frontend (backend first, then frontend)
 			echo "         Run 'make fix-watchers' for the persistent fix."; \
 		fi; \
 	fi
-	@echo "Starting MyApp..."
+	@echo "Starting Topos..."
 	@cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8000 &
 	@echo "Waiting for backend..."
 	@for i in 1 2 3 4 5 6 7 8 9 10; do \
@@ -35,11 +35,11 @@ dev: ## Start backend + frontend (backend first, then frontend)
 	@echo "Backend ready. Starting frontend..."
 	@cd frontend && npm run dev
 
-DEV_LOG_DIR ?= /tmp/myapp-logs
+DEV_LOG_DIR ?= /tmp/topos-logs
 
 dev-bg: ## Start in background, logs to $(DEV_LOG_DIR) (stop with: make dev-down)
 	@mkdir -p $(DEV_LOG_DIR)
-	@echo "Starting MyApp (background)..."
+	@echo "Starting Topos (background)..."
 	@echo "  Backend  log: $(DEV_LOG_DIR)/backend.log"
 	@echo "  Frontend log: $(DEV_LOG_DIR)/frontend.log"
 	@# `setsid` puts each child in its own session so it survives the
@@ -97,13 +97,13 @@ stop: dev-down ## Alias for dev-down (stop dev servers)
 restart: dev-down dev ## Stop and restart dev servers (use after a hung session)
 
 fix-watchers: ## Persist Linux inotify limits for vite dev (sudo required, runs once)
-	@echo "MyApp: persist inotify limits for vite dev mode."
+	@echo "Topos: persist inotify limits for vite dev mode."
 	@echo "Sudo prompt is for the sysctl write to /etc/sysctl.d/."
 	@echo ""
-	@echo "fs.inotify.max_user_watches=524288" | sudo tee /etc/sysctl.d/99-myapp-watchers.conf > /dev/null
-	@echo "fs.inotify.max_user_instances=512" | sudo tee -a /etc/sysctl.d/99-myapp-watchers.conf > /dev/null
+	@echo "fs.inotify.max_user_watches=524288" | sudo tee /etc/sysctl.d/99-topos-watchers.conf > /dev/null
+	@echo "fs.inotify.max_user_instances=512" | sudo tee -a /etc/sysctl.d/99-topos-watchers.conf > /dev/null
 	@sudo sysctl --system > /dev/null
-	@echo "Wrote /etc/sysctl.d/99-myapp-watchers.conf and applied:"
+	@echo "Wrote /etc/sysctl.d/99-topos-watchers.conf and applied:"
 	@echo "  fs.inotify.max_user_watches    = $$(cat /proc/sys/fs/inotify/max_user_watches)"
 	@echo "  fs.inotify.max_user_instances  = $$(cat /proc/sys/fs/inotify/max_user_instances)"
 	@echo "Persistent across reboots."
@@ -128,7 +128,7 @@ install-e2e:
 	cd e2e && npm install && npx playwright install chromium
 
 install-plugins:
-	@for dir in plugins/myapp-plugin-*; do \
+	@for dir in plugins/topos-plugin-*; do \
 		if [ -f "$$dir/pyproject.toml" ]; then \
 			echo "Installing $$dir..."; \
 			cd "$$dir" && poetry install && cd ../..; \
@@ -152,13 +152,13 @@ test-backend: ## Run backend tests
 	cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -v
 
 # Plugin test targets: skeleton ships zero plugins. When you add a
-# plugin under plugins/myapp-plugin-<name>/, follow the
+# plugin under plugins/topos-plugin-<name>/, follow the
 # pattern below and wire it into `test-plugins`.
 #
 # test-plugins: test-plugin-<name>  ## Run all plugin tests
 #
 # test-plugin-<name>:
-#	cd plugins/myapp-plugin-<name> && \
+#	cd plugins/topos-plugin-<name> && \
 #		poetry env use python3.12 -q 2>/dev/null; \
 #		poetry run pytest tests/ -v
 
@@ -298,16 +298,16 @@ verify-docs-discipline: verify-mkdocs-nav check-mkdocs-orphans ## All docs-disci
 # bumps in every plugin's pyproject. Catches the divergence before push.
 
 lock-all-plugins: ## Re-lock every plugin's poetry.lock (after a shared-dep pin bump)
-	@for d in plugins/myapp-plugin-*/; do \
+	@for d in plugins/topos-plugin-*/; do \
 		echo ""; echo "=== $$(basename $$d) ==="; \
 		cd "$$d" && poetry lock && cd - >/dev/null; \
 	done
 	@echo ""
-	@echo "Re-locked $$(ls -d plugins/myapp-plugin-*/ | wc -l) plugin(s)."
+	@echo "Re-locked $$(ls -d plugins/topos-plugin-*/ | wc -l) plugin(s)."
 
 verify-plugin-locks: ## Detect drift between each plugin's pyproject.toml and its poetry.lock
 	@drift=0; \
-	for d in plugins/myapp-plugin-*/; do \
+	for d in plugins/topos-plugin-*/; do \
 		name=$$(basename $$d); \
 		out=$$(cd "$$d" && poetry install --dry-run --no-interaction --no-ansi 2>&1 | head -3); \
 		if echo "$$out" | grep -q "changed significantly"; then \
