@@ -42,6 +42,11 @@ from app.routers import (
     plugin_install,
     settings,
 )
+from app.secrets_store import (
+    apply_env_overrides,
+    ensure_secrets_template,
+    warn_if_world_readable,
+)
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -101,9 +106,13 @@ def _load_override_file(path: Path) -> dict[str, Any]:
 
 
 def _load_app_config() -> dict[str, Any]:
-    """Read app.yaml + user overlay + secrets override.
+    """Read app.yaml + user overlay + secrets.yaml + env vars.
 
-    Higher layers win. Lists REPLACE; dicts deep-merge.
+    Four-layer merge with higher layers winning. Lists REPLACE; dicts
+    deep-merge. Env-var overrides come from
+    ``app.secrets_store._ENV_SECRET_OVERRIDES`` (seeded with
+    ``TOPOS_SECRET_KEY -> secret_key``; plugins extend it via
+    ``register_plugin_secret_override``).
     """
     from app import config_overlay
 
@@ -116,12 +125,21 @@ def _load_app_config() -> dict[str, Any]:
     override = _load_override_file(_get_user_override_path())
     merged = _deep_merge(project, user_overlay)
     merged = _deep_merge(merged, override)
-    return merged
+    return apply_env_overrides(merged)
 
 
 _startup_config = _load_app_config()
-_license_secret = SECRET_KEY or _startup_config.get("licensing", {}).get(
-    "secret_key", "pluginforge-default-key"
+# secret_key resolution chain (highest priority first):
+#   1. TOPOS_SECRET_KEY env var (applied in _load_app_config via
+#      apply_env_overrides; lands at the top-level ``secret_key`` key)
+#   2. ``secret_key`` at the top level of ~/.config/topos/secrets.yaml
+#   3. ``licensing.secret_key`` in backend/config/app.yaml (legacy
+#      nesting kept for backward compatibility)
+#   4. Hardcoded ``pluginforge-default-key`` fallback
+_license_secret = (
+    _startup_config.get("secret_key")
+    or _startup_config.get("licensing", {}).get("secret_key")
+    or "pluginforge-default-key"
 )
 _license_file = _startup_config.get("licensing", {}).get("store_path", "config/licenses.json")
 license_validator = LicenseValidator(_license_secret)
@@ -208,6 +226,16 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Topos (debug=%s)", DEBUG)
     from app.data_dir_migration import migrate_data_dir_if_needed
     from app.paths import mark_data_dir_as_production
+
+    # Secrets bootstrap: scaffold the user-home template on first
+    # start and warn if existing permissions are too open. Skip in
+    # test mode so the suite never touches the operator's real config.
+    if os.environ.get("TOPOS_TEST") != "1":
+        secrets_path = _get_user_override_path()
+        logger.info("Config directory: %s", secrets_path.parent)
+        if ensure_secrets_template(secrets_path):
+            logger.info("Secrets template created at %s", secrets_path)
+        warn_if_world_readable(secrets_path)
 
     migrate_data_dir_if_needed()
     mark_data_dir_as_production()
