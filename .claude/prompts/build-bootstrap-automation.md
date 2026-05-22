@@ -51,15 +51,15 @@ A script under `scripts/bootstrap/` in this repo:
 scripts/bootstrap/
 ├── bootstrap-app.sh        # CLI entrypoint
 ├── bootstrap.py            # Python implementation (sh thin wrapper)
-├── templates/              # Jinja2 templates for generated files
-│   ├── models/entity.py.j2
-│   ├── schemas/entity.py.j2
-│   ├── services/entity.py.j2
-│   ├── routers/entity.py.j2
-│   ├── README.md.j2
-│   ├── README-de.md.j2
-│   ├── CONCEPT.md.j2
-│   ├── ROADMAP.md.j2
+├── templates/              # string.Template files for generated files
+│   ├── models/entity.py.tpl
+│   ├── schemas/entity.py.tpl
+│   ├── services/entity.py.tpl
+│   ├── routers/entity.py.tpl
+│   ├── README.md.tpl
+│   ├── README-de.md.tpl
+│   ├── CONCEPT.md.tpl
+│   ├── ROADMAP.md.tpl
 │   └── ...
 ├── example-manifest.yaml   # the Topos manifest reverse-engineered
 ├── DESIGN.md               # the design doc (write this FIRST)
@@ -71,12 +71,17 @@ CLI:
 ```bash
 scripts/bootstrap/bootstrap-app.sh \
     --manifest path/to/entities.yaml \
+    --target-dir path/to/new/app \
     [--dry-run] \
-    [--target-dir .]
+    [--skip-migration]
 ```
 
-Pick bash + Python stdlib + Jinja2 (already in the template's
-MkDocs venv). Do not add new top-level deps.
+`--target-dir` is mandatory; there is no default. The script
+must refuse to run when `--target-dir` resolves to the template
+repo root itself (see Constraints).
+
+Pick bash + Python stdlib only (string.Template for templating).
+Do not add new top-level deps.
 
 ## Manifest schema (sketch; refine in DESIGN.md before coding)
 
@@ -147,6 +152,13 @@ checks.
    lives in Topos commit `3c01a29` - copy it verbatim). Wipe
    `backend/migrations/versions/*.py`, run
    `alembic revision --autogenerate -m "initial <app.name> schema"`.
+   When `--skip-migration` is passed, skip the
+   `alembic revision --autogenerate` step and write a
+   `.bootstrap-migration-pending` stamp file at the target root
+   so the user knows to run it manually. Default behavior
+   attempts autogenerate with `sqlite:///bootstrap-tmp.db` as a
+   fallback DB URL if no `MYAPP_DATABASE_URL` (or the
+   per-app-renamed equivalent) is set in the environment.
 4. **Phase 4**: per entity, generate
    `backend/app/services/<plural>.py` (list / get / create /
    update / delete + extra_endpoints) and
@@ -166,16 +178,35 @@ checks.
    per page (renders without crash).
 6. **Phase 7**: render `README.md`, `README-de.md`,
    `docs/CONCEPT.md`, `docs/ROADMAP.md`, `docs/configuration.md`
-   from Jinja2 templates filled from the manifest. The
+   from string.Template files filled from the manifest. The
    templates are derived from the Topos versions at HEAD; strip
    Topos-specific narrative ("file folders, archive boxes"),
    leave the structural skeleton.
 7. **Phase 8 sanity sweep**: run every check from Topos's
-   Phase 8 commit message - placeholders, # TEMPLATE: markers,
-   em-dashes, backend boots, backend pytest, plugin pytest if
-   plugins/ has anything, frontend build, Vitest, pre-commit,
-   tsc --noEmit. Exit non-zero with an actionable report on any
-   failure.
+   Phase 8 commit message (`df61224`). Exit non-zero with an
+   actionable report on any failure. The full 10-check list:
+   1. Placeholders clean: `grep -r` finds no `myapp`, `MyApp`,
+      `MYAPP`, or `EXAMPLE-DOMAIN` in any file the bootstrap
+      sed-ed.
+   2. `# TEMPLATE:` markers clean: no surviving `# TEMPLATE:`
+      / `// TEMPLATE:` markers in generated files.
+   3. Em-dashes (U+2014) clean across every file the bootstrap
+      generated or sed-ed. `.claude/rules/*.md` is exempt
+      (template lineage).
+   4. Backend boots: import `app.main:app`, assert
+      `app.title == <app.pascal_name>` and `app.version` matches
+      `backend/pyproject.toml`.
+   5. Backend pytest green: `cd backend && poetry run pytest`.
+   6. Plugin pytest green: iterate `plugins/*/`, run pytest in
+      each. Skip cleanly if `plugins/` is empty.
+   7. Frontend build green: `cd frontend && npm run build`.
+   8. Frontend Vitest green: `cd frontend && npm run test`.
+   9. Pre-commit green: `pre-commit run --all-files`.
+   10. Frontend type check green: `cd frontend && npx tsc
+       --noEmit`.
+   (Playwright e2e is a bonus check in Topos's gate; do not
+   require it here since the journey spec is intentionally
+   left to a later session per the NO list.)
 8. **Em-dash sweep**: replace U+2014 with hyphens in every file
    the script generated or sed-ed. Do not touch
    `.claude/rules/*.md` (template-lineage stays per the Topos
@@ -211,7 +242,7 @@ Write an integration test that:
 
 1. Copies the template to a tmp dir
 2. Runs `bootstrap-app.sh --manifest example-manifest.yaml`
-3. Confirms the resulting tree passes Topos's 9-check Phase 8
+3. Confirms the resulting tree passes Topos's 10-check Phase 8
    sweep (re-implemented in the test, not invoked via Topos)
 4. Confirms `make test` is green from a fresh `make install` in
    the resulting tree
@@ -224,7 +255,12 @@ Run it locally to confirm.
 ## Constraints to preserve (verbatim from Topos's hard rules)
 
 - No new template-repo top-level dependencies. Bash + Python
-  stdlib + Jinja2.
+  stdlib only (string.Template for templating).
+- The script must detect and refuse to run when `--target-dir`
+  resolves to the template repo root (presence of
+  `scripts/bootstrap/` + `CUSTOMIZE.md` + a `.git` whose
+  `origin` remote matches the template repo). Never bootstrap
+  the template into itself.
 - The script must be idempotent: re-running it on an
   already-bootstrapped tree is a clean no-op or a clear
   "already bootstrapped" error, not corruption.
@@ -252,7 +288,7 @@ Run it locally to confirm.
    - The template file list + what each renders
    - The phase-by-phase plan
    - Idempotency strategy
-   - The exact 9-check verification list
+   - The exact 10-check verification list
 4. Show the design to the user. Get sign-off.
 5. Implement bottom-up: templates first, then bootstrap.py,
    then bootstrap-app.sh wrapper.
