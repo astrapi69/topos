@@ -4,7 +4,127 @@ ui:
   app:
     name: Topos
     description: Persönliche Inventarverwaltung
+
 topos:
   app:
     name: Topos
     description: Persönliche Inventarverwaltung
+  nav:
+    dashboard: Übersicht
+    containers: Container
+    categories: Kategorien
+    actions: Aktionen
+    import: Import
+    settings: Einstellungen
+  common:
+    actions: Aktionen
+    back: Zurück
+    cancel: Abbrechen
+    delete: Löschen
+    edit: Bearbeiten
+    loading: Lädt...
+    save: Speichern
+    saving: Speichere...
+  filter:
+    all: Alle
+    owner: Eigentümer
+    type: Typ
+    search: Suche
+    search_placeholder: Bezeichnung oder Ort
+  container:
+    label: Bezeichnung
+    location: Ort
+    external_id: Nr.
+    type_label: Typ
+    owner: Eigentümer
+    description: Beschreibung
+    size_group: Größengruppe
+    type:
+      folder: Ordner
+      box: Box
+  owner:
+    self: Ich
+    parents: Eltern
+    shared: Geteilt
+  priority:
+    none: Keine
+    low: Niedrig
+    medium: Mittel
+    high: Hoch
+    very_high: Sehr hoch
+  action:
+    status:
+      open: Offen
+      done: Erledigt
+      archived: Archiviert
+  item:
+    container: Container
+    content: Inhalt
+    priority: Priorität
+    category: Kategorie
+    notes: Notizen
+  page:
+    dashboard:
+      title: Übersicht
+      items: Einträge
+      categories: Kategorien
+      open_actions: Offene Aktionen
+      search: Suche
+      search_placeholder: Suche im Inhalt, in Notizen, in Kategorien...
+      searching: Suche...
+    containers:
+      title: Container
+      empty: Keine Container gefunden.
+    container_detail:
+      no_id: Kein Container ausgewählt.
+      missing: Container nicht gefunden
+      items: Einträge
+      new_item: Neuer Eintrag
+      empty: Keine Einträge in diesem Container.
+    item_editor:
+      new_title: Neuer Eintrag
+      edit_title: Eintrag bearbeiten
+      container_required: Container ist erforderlich.
+      content_required: Inhalt ist erforderlich.
+    categories:
+      title: Kategorien
+      uncategorized: Ohne Kategorie
+      no_items: Keine Einträge.
+      empty: Noch keine Kategorien.
+    actions:
+      title: Offene Aktionen
+      empty: Keine offenen Aktionen.
+      no_container: Ohne Container
+      missing_item: Eintrag nicht geladen
+      mark_done: Erledigt
+    import:
+      title: Excel-Import
+      description: >-
+        Lade eine Ordner-Ordnung.xlsx (oder kompatible Datei) hoch.
+        Der Importer ist idempotent.
+      drop_hint: Datei hierher ziehen oder auswählen
+      prune_missing: Fehlende Einträge aus der DB entfernen
+      upload: Hochladen
+      uploading: Wird hochgeladen...
+      report_title: Importbericht
+    settings:
+      title: Einstellungen
+      language: Sprache
+      theme: Erscheinungsbild
+      theme_current: Theme
+      cache: Lokaler Cache
+      cache_description: >-
+        Leert den IndexedDB-Cache und holt die Daten neu vom Server.
+      reset: Cache zurücksetzen
+      resetting: Wird zurückgesetzt...
+      reset_ok: Cache zurückgesetzt.
+  import:
+    report:
+      containers_created: Container neu
+      containers_updated: Container aktualisiert
+      items_created: Einträge neu
+      items_updated: Einträge aktualisiert
+      items_pruned: Einträge entfernt
+      actions_created: Aktionen neu
+      categories_created: Kategorien neu
+      warnings: Warnungen

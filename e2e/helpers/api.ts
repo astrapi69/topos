@@ -1,6 +1,6 @@
 /**
- * Direct API calls for test setup/teardown.
- * Bypasses the UI for fast data creation.
+ * Direct API helpers for e2e test setup / teardown.
+ * Bypasses the UI for fast data manipulation.
  */
 
 const API = "http://localhost:8000/api";
@@ -17,51 +17,16 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     return res.json();
 }
 
+/** Wipe every Topos table via direct DELETE calls. The bootstrap
+ *  does not ship a /test/reset endpoint, so we list containers (and
+ *  let cascade delete handle items + actions) plus categories. */
 export async function resetDb(): Promise<void> {
-    await request("/test/reset", {method: "DELETE"});
-}
-
-export async function createBook(title: string, author: string = "E2E Autor"): Promise<{id: string; title: string}> {
-    return request("/books", {
-        method: "POST",
-        body: JSON.stringify({title, author}),
-    });
-}
-
-export async function createChapter(
-    bookId: string,
-    title: string,
-    content: string = "",
-    chapterType: string = "chapter",
-): Promise<{id: string; title: string}> {
-    return request(`/books/${bookId}/chapters`, {
-        method: "POST",
-        body: JSON.stringify({title, content, chapter_type: chapterType}),
-    });
-}
-
-export async function deleteBook(id: string): Promise<void> {
-    await request(`/books/${id}`, {method: "DELETE"});
-}
-
-export async function getBooks(): Promise<{id: string; title: string}[]> {
-    return request("/books");
-}
-
-export async function createArticle(
-    title: string,
-    language: string = "en",
-): Promise<{id: string; title: string}> {
-    return request("/articles", {
-        method: "POST",
-        body: JSON.stringify({title, language}),
-    });
-}
-
-export async function deleteArticle(id: string): Promise<void> {
-    await request(`/articles/${id}`, {method: "DELETE"});
-}
-
-export async function getArticles(): Promise<{id: string; title: string}[]> {
-    return request("/articles");
+    const containers = await request<Array<{id: number}>>("/containers");
+    for (const c of containers) {
+        await request(`/containers/${c.id}`, {method: "DELETE"});
+    }
+    const categories = await request<Array<{id: number}>>("/categories");
+    for (const cat of categories) {
+        await request(`/categories/${cat.id}`, {method: "DELETE"});
+    }
 }

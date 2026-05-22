@@ -1,17 +1,131 @@
-# Topos i18n catalog (EN).
-#
-# Phase 3 bootstrap: minimal placeholder catalog. Phase 6 of the
-# bootstrap repopulates this file with the full Topos UI string set
-# once the React pages are scaffolded.
-#
-# The ``ui`` namespace is the i18n parity reference; the ``topos``
-# namespace mirrors the few keys callers of the bootstrap reference.
+# Topos i18n catalog (EN). Phase 6 of the bootstrap populates the
+# full UI string set referenced by the frontend pages.
 
 ui:
   app:
     name: Topos
     description: Personal inventory tracker
+
 topos:
   app:
     name: Topos
     description: Personal inventory tracker
+  nav:
+    dashboard: Dashboard
+    containers: Containers
+    categories: Categories
+    actions: Actions
+    import: Import
+    settings: Settings
+  common:
+    actions: Actions
+    back: Back
+    cancel: Cancel
+    delete: Delete
+    edit: Edit
+    loading: Loading...
+    save: Save
+    saving: Saving...
+  filter:
+    all: All
+    owner: Owner
+    type: Type
+    search: Search
+    search_placeholder: Label or location
+  container:
+    label: Label
+    location: Location
+    external_id: No.
+    type_label: Type
+    owner: Owner
+    description: Description
+    size_group: Size group
+    type:
+      folder: Folder
+      box: Box
+  owner:
+    self: Mine
+    parents: Parents
+    shared: Shared
+  priority:
+    none: None
+    low: Low
+    medium: Medium
+    high: High
+    very_high: Very high
+  action:
+    status:
+      open: Open
+      done: Done
+      archived: Archived
+  item:
+    container: Container
+    content: Content
+    priority: Priority
+    category: Category
+    notes: Notes
+  page:
+    dashboard:
+      title: Overview
+      items: Items
+      categories: Categories
+      open_actions: Open actions
+      search: Search
+      search_placeholder: Search content, notes, or categories...
+      searching: Searching...
+    containers:
+      title: Containers
+      empty: No containers found.
+    container_detail:
+      no_id: No container selected.
+      missing: Container not found
+      items: Items
+      new_item: New item
+      empty: No items in this container.
+    item_editor:
+      new_title: New item
+      edit_title: Edit item
+      container_required: Container is required.
+      content_required: Content is required.
+    categories:
+      title: Categories
+      uncategorized: Uncategorized
+      no_items: No items.
+      empty: No categories yet.
+    actions:
+      title: Open actions
+      empty: No open actions.
+      no_container: Without container
+      missing_item: Item not loaded
+      mark_done: Done
+    import:
+      title: Excel import
+      description: >-
+        Upload an Ordner-Ordnung.xlsx (or compatible workbook). The
+        importer is idempotent.
+      drop_hint: Drop file here or pick one
+      prune_missing: Remove items missing from the source
+      upload: Upload
+      uploading: Uploading...
+      report_title: Import report
+    settings:
+      title: Settings
+      language: Language
+      theme: Appearance
+      theme_current: Theme
+      cache: Local cache
+      cache_description: >-
+        Clear the IndexedDB cache and refetch from the server.
+      reset: Reset cache
+      resetting: Resetting...
+      reset_ok: Cache reset.
+  import:
+    report:
+      containers_created: Containers created
+      containers_updated: Containers updated
+      items_created: Items created
+      items_updated: Items updated
+      items_pruned: Items removed
+      actions_created: Actions created
+      categories_created: Categories created
+      warnings: Warnings
