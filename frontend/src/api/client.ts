@@ -235,6 +235,19 @@ export interface AppConfig {
     _secrets_managed_externally?: boolean;
 }
 
+export type SecretSourceKind =
+    | "env"
+    | "secrets_yaml"
+    | "app_yaml"
+    | "auto_generated";
+
+export interface SecretSource {
+    source: SecretSourceKind;
+    path: string | null;
+    envVar: string;
+    secretsYamlPath: string;
+}
+
 // --- api namespace ---
 
 export const api = {
@@ -303,6 +316,7 @@ export const api = {
     },
     settings: {
         getApp: () => request<AppConfig>("/settings/app"),
+        getSecretSource: () => request<SecretSource>("/settings/secret-source"),
     },
     health: () =>
         request<{status: string; version: string; debug: boolean}>("/health"),

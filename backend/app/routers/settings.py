@@ -99,6 +99,44 @@ class AddPenNameRequest(BaseModel):
     name: str
 
 
+class SecretKeySourceResponse(BaseModel):
+    """Where the running app's ``secret_key`` came from.
+
+    ``source`` is one of ``env`` / ``secrets_yaml`` / ``app_yaml`` /
+    ``auto_generated``. ``path`` is the absolute path of the secrets
+    file when ``source == "secrets_yaml"``; ``null`` otherwise. The
+    Settings page renders an info card from this payload.
+    """
+
+    source: str
+    path: str | None
+    env_var: str
+    secrets_yaml_path: str
+
+
+@router.get("/secret-source", response_model=SecretKeySourceResponse)
+def get_secret_source() -> SecretKeySourceResponse:
+    """Report the resolved ``secret_key`` source for the Settings UI.
+
+    Topos does not expose a UI button to write the secret key; it is
+    file-managed or env-var-managed only. The frontend renders a
+    static info card whose label depends on this payload's ``source``.
+    """
+    from app.main import _get_user_override_path
+    from app.secrets_store import get_secret_key_source
+
+    secrets_path = _get_user_override_path()
+    source, path = get_secret_key_source(
+        env_var_name="TOPOS_SECRET_KEY", secrets_yaml_path=secrets_path
+    )
+    return SecretKeySourceResponse(
+        source=source,
+        path=str(path) if path is not None else None,
+        env_var="TOPOS_SECRET_KEY",
+        secrets_yaml_path=str(secrets_path),
+    )
+
+
 @router.post("/author/pen-name")
 def add_pen_name(body: AddPenNameRequest) -> dict[str, Any]:
     """Add a pen name to the user's author profile.

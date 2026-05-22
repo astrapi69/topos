@@ -12,7 +12,15 @@ vi.mock("../api/client", () => ({
         categories: {list: vi.fn().mockResolvedValue([])},
         actions: {list: vi.fn().mockResolvedValue([])},
         i18n: {get: vi.fn().mockResolvedValue({})},
-        settings: {getApp: vi.fn().mockResolvedValue({})},
+        settings: {
+            getApp: vi.fn().mockResolvedValue({}),
+            getSecretSource: vi.fn().mockResolvedValue({
+                source: "app_yaml",
+                path: null,
+                envVar: "TOPOS_SECRET_KEY",
+                secretsYamlPath: "/tmp/.config/topos/secrets.yaml",
+            }),
+        },
     },
     ApiError: class extends Error {},
 }));

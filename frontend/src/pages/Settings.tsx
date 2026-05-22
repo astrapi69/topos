@@ -5,9 +5,10 @@
  * later iteration.
  */
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 import NavBar from "../components/NavBar";
+import {api, type SecretSource} from "../api/client";
 import {db} from "../db/schema";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
@@ -20,6 +21,22 @@ export default function Settings() {
     const {theme, toggle} = useTheme();
     const [resetting, setResetting] = useState(false);
     const [resetStatus, setResetStatus] = useState<string | null>(null);
+    const [secretSource, setSecretSource] = useState<SecretSource | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        api.settings
+            .getSecretSource()
+            .then((src) => {
+                if (!cancelled) setSecretSource(src);
+            })
+            .catch(() => {
+                /* PWA mode (no backend) or transient failure - hide the card. */
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     async function handleResetCache() {
         setResetting(true);
@@ -73,6 +90,35 @@ export default function Settings() {
                         {t("topos.page.settings.theme_current", "Theme")}: {theme}
                     </button>
                 </section>
+
+                {secretSource && (
+                    <section style={{marginBottom: "1.5rem"}}>
+                        <h2>{t("topos.page.settings.secret_key", "Anwendungsschlüssel")}</h2>
+                        <p data-testid="settings-secret-source-label">
+                            {t(
+                                `topos.page.settings.secret_key_source_${secretSource.source}`,
+                                `Key from: ${secretSource.source}`,
+                            )}
+                        </p>
+                        {(secretSource.source === "secrets_yaml" ||
+                            secretSource.source === "env") && (
+                            <p
+                                data-testid="settings-secret-source-hint"
+                                style={{color: "#666", fontSize: "0.875rem"}}
+                            >
+                                {t(
+                                    "topos.page.settings.secret_key_external_hint",
+                                    "Dieser Schlüssel wird in {path} konfiguriert. Bearbeiten Sie die Datei, um ihn zu ändern.",
+                                ).replace(
+                                    "{path}",
+                                    secretSource.source === "env"
+                                        ? `$${secretSource.envVar}`
+                                        : secretSource.path ?? secretSource.secretsYamlPath,
+                                )}
+                            </p>
+                        )}
+                    </section>
+                )}
 
                 <section>
                     <h2>{t("topos.page.settings.cache", "Lokaler Cache")}</h2>
