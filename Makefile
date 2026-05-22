@@ -147,7 +147,7 @@ test-frontend: ## Run frontend unit tests (Vitest)
 test-backend: ## Run backend tests
 	@echo ""
 	@echo "=== Backend Tests ==="
-	cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -v
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -v
 
 # Plugin test targets: skeleton ships zero plugins. When you add a
 # plugin under plugins/topos-plugin-<name>/, follow the
@@ -169,7 +169,7 @@ test-coverage: test-coverage-backend test-coverage-frontend ## Run ALL tests wit
 test-coverage-backend: ## Backend coverage report (htmlcov/)
 	@echo ""
 	@echo "=== Backend Coverage ==="
-	cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ --cov=app --cov-report=html --cov-report=term
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ --cov=app --cov-report=html --cov-report=term
 
 test-coverage-frontend: ## Frontend coverage report (coverage/)
 	@echo ""
