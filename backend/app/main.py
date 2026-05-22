@@ -33,7 +33,15 @@ from app.middleware.body_size_limit import (
     BodySizeLimitMiddleware,
     _resolve_max_bytes_from_config,
 )
-from app.routers import licenses, plugin_install, settings
+from app.routers import (
+    actions,
+    categories,
+    containers,
+    items,
+    licenses,
+    plugin_install,
+    settings,
+)
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -245,12 +253,10 @@ app.include_router(licenses.router, prefix="/api")
 app.include_router(settings.router, prefix="/api")
 app.include_router(plugin_install.router, prefix="/api")
 
-# Phase 4: wire topos routers here
-# from app.routers import containers, items, categories, actions
-# app.include_router(containers.router, prefix="/api")
-# app.include_router(items.router, prefix="/api")
-# app.include_router(categories.router, prefix="/api")
-# app.include_router(actions.router, prefix="/api")
+app.include_router(containers.router, prefix="/api")
+app.include_router(items.router, prefix="/api")
+app.include_router(categories.router, prefix="/api")
+app.include_router(actions.router, prefix="/api")
 
 
 @app.exception_handler(ToposError)
