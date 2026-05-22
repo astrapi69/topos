@@ -1,189 +1,164 @@
-<!--
-TODO: Adapt for your project. Current content is inherited from
-upstream (Topos) and serves as structural reference only.
-The shape of this document (sections, headings, formatting
-conventions) is reusable; the specifics are not.
--->
-
 # Configuration
 
-Topos uses a three-layer config chain so secrets stay out of
-the project tree.
+Topos uses a four-layer config chain so secrets stay out of the
+project tree.
 
 ```
-┌─────────────────────────────────────────┐
-│ env-vars (CI/Docker, highest priority)  │
-│ TOPOS_AI_API_KEY                    │
-└─────────────────────────────────────────┘
-                  ↑ overrides
-┌─────────────────────────────────────────┐
-│ user override file (gitignored)         │
-│ ~/.config/topos/secrets.yaml        │
-└─────────────────────────────────────────┘
-                  ↑ overrides
-┌─────────────────────────────────────────┐
-│ project app.yaml (committed template)   │
-│ backend/config/app.yaml                 │
-└─────────────────────────────────────────┘
++-------------------------------------------------------+
+|  4. env vars (highest priority)                       |
+|     TOPOS_SECRET_KEY                                  |
+|     ...plus any TOPOS_PLUGIN_<NAME>_<KEY> a plugin    |
+|     registered with secrets_store.                    |
++-------------------------------------------------------+
+                       ^ overrides
++-------------------------------------------------------+
+|  3. user secrets (gitignored)                         |
+|     ~/.config/topos/secrets.yaml                      |
++-------------------------------------------------------+
+                       ^ overrides
++-------------------------------------------------------+
+|  2. user overlay (Settings-UI writes)                 |
+|     <data_dir>/config/app.yaml                        |
++-------------------------------------------------------+
+                       ^ overrides
++-------------------------------------------------------+
+|  1. project defaults (committed)                      |
+|     backend/config/app.yaml                           |
++-------------------------------------------------------+
 ```
 
-Override-wins semantics: a value in the override file replaces the
-same key in `app.yaml`; an env-var replaces both. Lists are
-**replaced**, not merged.
-
----
+Override-wins semantics: a value in a higher layer replaces the same
+key from any lower layer. Lists are **replaced**, not merged.
 
 ## Where to put what
 
-| Layer | Examples | Lives in |
+| Layer | Examples | Location |
 |---|---|---|
-| Project `app.yaml` | non-secret defaults: `app.name`, `app.default_language`, `editor.autosave_debounce_ms`, `plugins.enabled`, etc. | committed to git |
-| User override | secrets the user controls: `ai.api_key`. Anything else they want to override on this machine. | `~/.config/topos/secrets.yaml` (Linux/macOS), `%APPDATA%/topos/secrets.yaml` (Windows) |
-| Env-var | CI/Docker secrets injected by the orchestrator | environment |
+| Project defaults | `app.name`, `app.default_language`, `app.max_upload_mb`, `plugins.enabled`, `ui.theme` | `backend/config/app.yaml` (committed) |
+| User overlay | UI-driven Settings writes (theme picks, language picks, plugin enable/disable) | `<data_dir>/config/app.yaml` (auto-created, see `app.config_overlay`) |
+| User secrets | `secret_key`, plugin credentials | `~/.config/topos/secrets.yaml` (auto-created template, never committed) |
+| Env vars | CI / Docker / 12-factor secrets | `TOPOS_SECRET_KEY`, `TOPOS_PLUGIN_*` |
 
-**Rule of thumb:** anything sensitive belongs in the override file
-or env-var. Nothing sensitive belongs in `app.yaml` (which is
-gitignored locally but can leak via screen-shares, backups, or
-accidental `git add -f`).
+The Settings page renders an info card showing which layer the
+`secret_key` actually came from, so an operator can tell at a glance
+whether the file or an env var is in effect.
 
----
+## ~/.config/topos/secrets.yaml
 
-## Path resolution per OS
-
-### Linux / macOS
-
-Default: `~/.config/topos/secrets.yaml`.
-
-Set `XDG_CONFIG_HOME` to relocate (XDG-conformant):
-
-```bash
-export XDG_CONFIG_HOME=/srv/configs
-# Topos now reads /srv/configs/topos/secrets.yaml
-```
-
-### Windows
-
-Default: `%APPDATA%/topos/secrets.yaml`.
-
-Falls back to `~/AppData/Roaming/topos/secrets.yaml` when
-`%APPDATA%` is unset.
-
----
-
-## Migration: move existing `ai.api_key` out of `app.yaml`
-
-Your current `backend/config/app.yaml` may carry `ai.api_key`
-inline (legacy from earlier installations). Migrate in three
-steps:
-
-```bash
-# 1. Pick the destination directory.
-mkdir -p ~/.config/topos
-
-# 2. Create the override file (paste your key).
-cat > ~/.config/topos/secrets.yaml << 'EOF'
-ai:
-  api_key: sk-ant-api03-your-real-key-here
-EOF
-
-# 3. Empty the api_key in app.yaml. The backend logs a deprecation
-# warning while a non-empty key sits there alongside no override;
-# emptying silences it.
-# Edit backend/config/app.yaml: set ai.api_key: "".
-
-# 4. Restart the backend.
-make dev-down && make dev
-```
-
-Result: backend reads the merged config, sees the override-
-supplied key, never falls back to `app.yaml`. The Settings tab and
-AiSetupWizard hide the API-key input automatically (via the
-`_secrets_managed_externally` flag) and show an info-note
-explaining where the key lives.
-
----
-
-## Env-var list
-
-| Env-var | Maps to | Notes |
-|---|---|---|
-| `TOPOS_AI_API_KEY` | `ai.api_key` | Beats both project and override |
-| `TOPOS_DEBUG` | `DEBUG` constant in `main.py` | `true`/`1`/`yes` to enable |
-| `TOPOS_CORS_ORIGINS` | CORS allowed origins | comma-separated |
-| `TOPOS_SECRET_KEY` | licensing HMAC | leave default in dev |
-
-Plugin-yaml secrets (audiobook, grammar, translation) are NOT yet
-covered by this mechanism — they load via PluginManager and need a
-parallel refactor (T-XX Plugin-Config Secrets Layering, deferred).
-For now, those keys live in their respective `backend/config/plugins/*.yaml`
-files; the Settings UI for each plugin still writes back there.
-
----
-
-## Docker / CI usage
+Topos writes a commented template to this path the first time the
+backend starts. Every value is a comment; the file is a no-op for
+the loader until you uncomment a line.
 
 ```yaml
-# docker-compose.prod.yml (example excerpt)
-services:
-  backend:
-    image: topos:0.24.0
-    environment:
-      TOPOS_AI_API_KEY: ${TOPOS_AI_API_KEY}
-      TOPOS_DEBUG: "false"
-    volumes:
-      - ./config:/app/backend/config
+# Topos - Secrets
+# This file is never committed to git.
+# Values configured here are loaded at startup and take precedence
+# over defaults in app.yaml. Environment variables override this file.
+#
+# Uncomment and fill in your values below.
+
+# secret_key: "generate-with-python3 -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+
+# Plugin secrets (extend as needed):
+# plugins:
+#   excel_import:
+#     some_credential: "..."
+#   sync:
+#     remote_url: "https://..."
+#     auth_token: "..."
 ```
 
-Inject `TOPOS_AI_API_KEY` from CI secrets (GitHub Actions
-secrets, GitLab CI variables, Vault, etc.). The committed
-`app.yaml` keeps `ai.api_key: ""` so the env-var wins on merge.
+The template path is XDG-conformant:
 
----
+| Platform | Path |
+|---|---|
+| Linux / BSD (or any POSIX with `XDG_CONFIG_HOME` set) | `$XDG_CONFIG_HOME/topos/secrets.yaml` |
+| Linux / BSD (default) | `~/.config/topos/secrets.yaml` |
+| macOS | `~/.config/topos/secrets.yaml` (same XDG path; Topos does not yet honor `Library/Application Support`) |
+| Windows | `%APPDATA%/topos/secrets.yaml` |
 
-## Debugging: which layer wins?
+### File permissions
 
-A quick way to verify what the backend sees at runtime:
+`ensure_secrets_template` writes the template with `0o600` (owner
+read+write only) on POSIX. On every startup `warn_if_world_readable`
+re-checks the bits and logs a WARNING if any group or other bits are
+set, with the recommended `chmod 600` remediation.
+
+### Top-level `secret_key`
+
+Today the only first-class secret consumed by Topos itself is
+`secret_key`. Topos uses it as the HMAC signing key for premium
+plugin licenses; the licensing infrastructure ships dormant
+(`LICENSING_ENABLED = False`), so the secret is reserved for future
+work. Set it now if you want stability across restarts when
+licensing is activated:
+
+```yaml
+secret_key: "your-fernet-or-hmac-key-here"
+```
+
+Or via env:
 
 ```bash
-curl http://localhost:8000/api/settings/app | jq '.ai.api_key, ._secrets_managed_externally'
+export TOPOS_SECRET_KEY="..."
 ```
 
-- `_secrets_managed_externally: true` → override file or env-var is
-  active. The Settings UI hides the API-key input.
-- `_secrets_managed_externally: false` → only project `app.yaml`
-  in play.
+### Plugin secrets
 
-To confirm WHICH layer supplied a value:
+Plugins extend the env-override layer at runtime by calling
+`app.secrets_store.register_plugin_secret_override(config_path,
+env_var)` from their `activate()` hook. The dotted config_path lands
+the resolved value at the matching path inside the merged config
+dict, which the plugin can read via its standard PluginForge
+`plugin_config` argument or by re-reading `app.main._load_app_config()`.
+
+Example: a future sync plugin needs an auth token. In `activate()`:
+
+```python
+from app.secrets_store import register_plugin_secret_override
+
+register_plugin_secret_override("plugins.sync.auth_token", "TOPOS_SYNC_TOKEN")
+```
+
+Operator config (highest priority first):
 
 ```bash
-# Project value
-yq '.ai.api_key' backend/config/app.yaml
-
-# Override value
-yq '.ai.api_key' ~/.config/topos/secrets.yaml
-
-# Env-var value
-echo "$TOPOS_AI_API_KEY"
+export TOPOS_SYNC_TOKEN="..."        # env (wins)
 ```
 
-Whichever is non-empty AND highest in the chain wins.
-
----
-
-## Deprecation warning
-
-When `app.yaml` carries a non-empty `ai.api_key` AND no override
-file exists AND `TOPOS_AI_API_KEY` is unset, the backend logs
-a one-shot WARNING at startup:
-
-```
-WARNING: Secrets found in /path/to/backend/config/app.yaml (ai.api_key).
-This file is gitignored but may be committed accidentally, end up
-in backups, or appear in screen-shares. Move secrets to
-/home/.../.config/topos/secrets.yaml or set TOPOS_AI_API_KEY.
-See docs/configuration.md for details.
+```yaml
+# ~/.config/topos/secrets.yaml
+plugins:
+  sync:
+    auth_token: "..."
 ```
 
-The warning is informational. Existing installations with hardcoded
-keys keep working unchanged; this is a migration nudge, not a
-breaking change.
+The plugin sees `merged["plugins"]["sync"]["auth_token"]` resolved
+from either source.
+
+## Resolution chain in code
+
+`app.main._load_app_config()` assembles the merge:
+
+1. `backend/config/app.yaml` (project defaults).
+2. `app.config_overlay._read_yaml(_user_app_path())` (user overlay).
+3. `_load_override_file(_get_user_override_path())`
+   (`~/.config/topos/secrets.yaml`).
+4. `app.secrets_store.apply_env_overrides(...)` (env vars).
+
+Each later step deep-merges over the previous one. The env layer is
+keyed by `_ENV_SECRET_OVERRIDES`, which `register_plugin_secret_override`
+extends at runtime.
+
+## Diagnosing where a value came from
+
+The Settings page reads `GET /api/settings/secret-source` and
+displays one of:
+
+- `Key from: environment` (env var set)
+- `Key from: secrets.yaml` (file present, key non-empty)
+- `Key from: app.yaml (default)` (falls back to the project default)
+- `Key from: auto-generated` (reserved for future Fernet-on-the-fly)
+
+When the source is `secrets_yaml` or `env`, the page also shows the
+exact path or env-var name so the operator can edit the right thing.

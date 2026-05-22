@@ -126,7 +126,7 @@ pluginforge-app-template/
 - CSS: custom properties, dark mode via `[data-theme="dark"]`
 - Commits: English, conventional (feat/fix/refactor/docs)
 - E2E: `data-testid` selectors only
-- Secrets NEVER in committed config files. Three-layer chain: project `backend/config/app.yaml` (defaults) < `~/.config/topos/secrets.yaml` (user override, gitignored) < env-vars (`TOPOS_*`).
+- Secrets NEVER in committed config files. Four-layer chain: project `backend/config/app.yaml` < user overlay (`<data_dir>/config/app.yaml`) < `~/.config/topos/secrets.yaml` (gitignored, auto-templated at 0o600) < env-vars. Env-overrides are keyed by `app.secrets_store._ENV_SECRET_OVERRIDES`; plugins extend the map via `register_plugin_secret_override(config_path, env_var)` from their `activate()`. The Settings page renders the resolved source label via `GET /api/settings/secret-source`. Full doc in [docs/configuration.md](docs/configuration.md).
 
 ## Tests
 

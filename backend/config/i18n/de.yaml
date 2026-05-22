@@ -118,6 +118,14 @@ topos:
       reset: Cache zurücksetzen
       resetting: Wird zurückgesetzt...
       reset_ok: Cache zurückgesetzt.
+      secret_key: Anwendungsschlüssel
+      secret_key_source_env: "Schlüssel aus: Umgebungsvariable"
+      secret_key_source_secrets_yaml: "Schlüssel aus: secrets.yaml"
+      secret_key_source_app_yaml: "Schlüssel aus: app.yaml (Standard)"
+      secret_key_source_auto_generated: "Schlüssel aus: automatisch generiert"
+      secret_key_external_hint: >-
+        Dieser Schlüssel wird in {path} konfiguriert. Bearbeiten Sie die
+        Datei, um ihn zu ändern.
   import:
     report:
       containers_created: Container neu

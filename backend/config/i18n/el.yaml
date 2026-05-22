@@ -119,6 +119,13 @@ topos:
       reset: Reset cache
       resetting: Resetting...
       reset_ok: Cache reset.
+      secret_key: Application secret key
+      secret_key_source_env: "Key from: environment"
+      secret_key_source_secrets_yaml: "Key from: secrets.yaml"
+      secret_key_source_app_yaml: "Key from: app.yaml (default)"
+      secret_key_source_auto_generated: "Key from: auto-generated"
+      secret_key_external_hint: >-
+        This key is configured in {path}. Edit the file to change it.
   import:
     report:
       containers_created: Containers created
