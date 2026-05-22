@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""audit_module_state.py — inventory ``@lru_cache`` /
+"""audit_module_state.py - inventory ``@lru_cache`` /
 ``@functools.lru_cache`` / ``@cache`` / ``@cached_property``
 decorators in ``backend/app/`` and flag any not in the audited
 allowlist.
@@ -54,7 +54,7 @@ Each allowlisted entry MUST include:
 
 Add to the allowlist when you ship a new cache AND have already
 verified the test-isolation safety. Don't add a row pre-emptively
-hoping the audit is correct — the whole point is that the script
+hoping the audit is correct - the whole point is that the script
 forces the human verification step.
 
 Stdlib-only (re + pathlib + argparse).
@@ -101,7 +101,7 @@ ALLOWLIST: list[tuple[str, str, str]] = [
 def find_function_name_after(text: str, decorator_end: int) -> str | None:
     """Return the name of the next ``def`` (or property assignment)
     following the decorator at byte offset ``decorator_end``. None if
-    no def follows within 5 non-empty lines (defensive — a chained
+    no def follows within 5 non-empty lines (defensive - a chained
     decorator stack is allowed)."""
     lines_after = text[decorator_end:].splitlines()
     non_empty_seen = 0

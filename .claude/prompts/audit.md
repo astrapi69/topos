@@ -1,4 +1,4 @@
-# Topos — systematic audit prompt
+# Topos - systematic audit prompt
 
 Drop-in for any future audit pass. Copy-paste verbatim into a fresh
 Claude Code session at the repo root.
@@ -19,11 +19,11 @@ Before flagging anything, consult:
 - `.claude/rules/architecture.md` (4-layer architecture, plugin shape, UI strategy)
 - `.claude/rules/coding-standards.md` (naming, function design, tests, dependencies)
 - `.claude/rules/code-hygiene.md` (error handling architecture, API conventions)
-- `.claude/rules/lessons-learned.md` (known pitfalls — TipTap, import, export)
+- `.claude/rules/lessons-learned.md` (known pitfalls - TipTap, import, export)
 - `.claude/rules/quality-checks.md` (test pyramid, coverage targets, mutation testing)
 - `docs/ROADMAP.md` (current phase, open items, BLOCKED markers)
 - `docs/backlog.md` (top priorities, "Blocked or waiting" table, recently closed)
-- `docs/audits/current-coverage.md` (canonical test counts — do NOT recompute
+- `docs/audits/current-coverage.md` (canonical test counts - do NOT recompute
   unless the audit is producing fresh numbers)
 
 If a flagged finding contradicts a documented convention, cite the rule file.
@@ -38,7 +38,7 @@ If the convention itself is stale, flag it as Outdated under section 4.
   `frontend/src/**/*.test.*` (Vitest, happy-dom). E2E: `e2e/smoke/` + `e2e/full/`
   (Playwright, data-testid only).
 - Identify outdated, redundant, or unreachable tests. Distinguish
-  `pytest.mark.skipif` (intentional environment gates — e.g. PANDOC_AVAILABLE,
+  `pytest.mark.skipif` (intentional environment gates - e.g. PANDOC_AVAILABLE,
   `_is_memory`) from `test.skip` (real bugs).
 - Verify coverage of critical execution paths against the targets in
   `quality-checks.md` ("Coverage targets per module type"): services HIGH (>= 80%),
@@ -89,7 +89,7 @@ If the convention itself is stale, flag it as Outdated under section 4.
   no beta/RC/alpha; minimum 2 weeks since release for major bumps; LTS over
   Current for Node.js.
 - BLOCKED items: cross-check against `docs/backlog.md` "Blocked or waiting"
-  table. Run `make check-blockers` if available — surfaces upstream-resolved
+  table. Run `make check-blockers` if available - surfaces upstream-resolved
   blockers automatically (DEP-02 npm publish, DEP-09 vite-plugin-pwa peer-dep,
   DEP-05 paid-API gate, AR-* validation thresholds).
 - Docker: `backend/Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml`,
@@ -142,16 +142,16 @@ If the convention itself is stale, flag it as Outdated under section 4.
   (drift / EOL / superseded), `Improvement` (cleanup or alignment), `Info`
   (intentional / dormant / blocked-on-upstream).
 - **Priority** values:
-  - **P0** — deadline pressure or production bug, this session.
-  - **P1** — rule violation in active code, this session if mechanical.
-  - **P2** — drift / cleanup, queue for release-prep or next focused session.
-  - **P3** — nice-to-have, intentional, or blocked-on-upstream.
+  - **P0** - deadline pressure or production bug, this session.
+  - **P1** - rule violation in active code, this session if mechanical.
+  - **P2** - drift / cleanup, queue for release-prep or next focused session.
+  - **P3** - nice-to-have, intentional, or blocked-on-upstream.
 - Reference rule files when citing a violation:
   `[code-hygiene.md "Error handling architecture"]`.
 - Use `[TBD]` for context that cannot be verified in the current session
   (e.g. paid-API behaviour, hardware-only smoke tests, real-user metrics).
 - For BLOCKED upstream items, copy the unblock condition from
-  `docs/backlog.md` "Blocked or waiting" verbatim — do not paraphrase.
+  `docs/backlog.md` "Blocked or waiting" verbatim - do not paraphrase.
 
 ## After the audit
 

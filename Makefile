@@ -6,11 +6,9 @@
        test-coverage-plugin-audiobook test-coverage-plugin-export test-coverage-plugin-grammar test-coverage-plugin-kdp test-coverage-plugin-kinderbuch test-coverage-plugin-ms-tools test-coverage-plugin-translation test-coverage-plugin-help test-coverage-plugin-getstarted \
        mutmut-backend mutmut-export mutmut-ms-tools mutmut-results \
        check-types check-types-backend check-types-frontend \
-       check-blockers archive-task archive-task-dry install-hooks \
+       archive-task archive-task-dry install-hooks \
        sync-versions sync-versions-dry sync-versions-check \
        generate-trial-key \
-       docs-install docs-build docs-serve \
-       sync-mkdocs-nav verify-mkdocs-nav check-mkdocs-orphans verify-docs-discipline \
        lock-all-plugins verify-plugin-locks \
        clean prod prod-down prod-logs help
 
@@ -192,12 +190,9 @@ mutmut-backend: ## Run mutation testing on backend
 mutmut-results: ## Show mutation testing results
 	@echo "=== Backend ===" && cd backend && poetry run mutmut results 2>/dev/null || true
 
-# --- Blocker Status ---
+# --- Roadmap archival ---
 
-check-blockers: ## Ping upstream sources for every BLOCKED item in docs/backlog.md
-	@bash scripts/check-blockers.sh
-
-archive-task: ## Move completed [x] tasks out of ROADMAP/backlog into docs/roadmap-archive/YYYY-MM.md (interactive)
+archive-task: ## Move completed [x] tasks out of ROADMAP into docs/roadmap-archive/YYYY-MM.md (interactive)
 	@python3 scripts/archive_completed_task.py
 
 archive-task-dry: ## Same as archive-task but writes nothing (preview)
@@ -265,31 +260,6 @@ prod-down: ## Stop production
 
 prod-logs: ## Show production logs
 	docker compose -f docker-compose.prod.yml logs -f
-
-# --- Documentation (MkDocs) ---
-
-docs-install: ## Install MkDocs dependencies (separate venv in docs/)
-	cd docs && poetry install
-
-docs-build: ## Build static documentation site
-	cd docs && poetry run python ../scripts/generate_mkdocs_nav.py
-	cd docs && poetry run mkdocs build -f ../mkdocs.yml
-
-docs-serve: ## Serve documentation locally (hot-reload)
-	cd docs && poetry run python ../scripts/generate_mkdocs_nav.py
-	cd docs && poetry run mkdocs serve -f ../mkdocs.yml
-
-sync-mkdocs-nav: ## Regenerate mkdocs.yml nav blocks from docs/help/_meta.yaml
-	cd docs && poetry run python ../scripts/generate_mkdocs_nav.py
-
-verify-mkdocs-nav: ## Check mkdocs.yml is in sync with docs/help/_meta.yaml (CI-friendly)
-	cd docs && poetry run python ../scripts/generate_mkdocs_nav.py --check
-
-check-mkdocs-orphans: ## Adversarial check: fail if mkdocs reports orphan pages
-	bash scripts/check_mkdocs_orphans.sh
-
-verify-docs-discipline: verify-mkdocs-nav check-mkdocs-orphans ## All docs-discipline gates (mandatory in pre-tag chain)
-	@echo "All docs-discipline checks passed."
 
 # --- Plugin lockfile discipline (PLUGIN-LOCKFILE-DRIFT-01) ---
 # `make test` installs plugins from the backend's combined poetry.lock

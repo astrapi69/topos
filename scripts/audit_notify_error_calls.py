@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""audit_notify_error_calls.py — classify every ``notify.error(...)``
+"""audit_notify_error_calls.py - classify every ``notify.error(...)``
 call in ``frontend/src/`` and enforce that error-handler callsites
 pass the caught error as the second argument.
 
@@ -9,7 +9,7 @@ Why this exists
 apiError?)``. When the second argument is an ``ApiError``, the
 toast renders a "Issue melden" button that opens an
 ``ErrorReportDialog`` prefilled with endpoint, status, stacktrace,
-and environment context — the load-bearing piece of Topos's
+and environment context - the load-bearing piece of Topos's
 "every error must be actionable as a GitHub issue" promise
 from ``.claude/rules/code-hygiene.md`` "Error reporting".
 
@@ -35,7 +35,7 @@ For each ``notify.error(...)`` call:
 - **A_HAS_VAR**: 1 argument, the catch variable name appears
   *inside* the args (e.g. ``notify.error(describeError(err))``),
   but is not passed as the dedicated 2nd argument. Also a cleanup
-  target — passing ``err`` alongside the message means the toast
+  target - passing ``err`` alongside the message means the toast
   can show the rich error UI even if the message was extracted
   via a helper.
 

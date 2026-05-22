@@ -6,9 +6,9 @@
 
 - [x] Repository bootstrapped from
       [pluginforge-app-template](https://github.com/astrapi69/pluginforge-app-template)
-- [x] Global rename: `myapp` -> `topos`, env vars `TOPOS_*`
+- [x] Global rename: template placeholder -> topos, env vars `TOPOS_*`
 - [x] Topos domain (Container, Item, Category, Action) replaces
-      the template's EXAMPLE-DOMAIN (~250 files deleted)
+      the template's example domain (~250 files deleted)
 - [x] CRUD services + 26 endpoints across four routers
 - [x] Excel-import plugin (`topos-plugin-excel-import`):
       parses `Ordner-Ordnung.xlsx`, idempotent on `external_id`,

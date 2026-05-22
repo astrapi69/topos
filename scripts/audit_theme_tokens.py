@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""audit_theme_tokens.py — cross-check every ``var(--token, #fallback)``
+"""audit_theme_tokens.py - cross-check every ``var(--token, #fallback)``
 callsite in ``frontend/src/`` against the per-palette CSS variable
 definitions in ``frontend/src/styles/global.css``. Report tokens
 missing from one or more palette × mode combinations and exit 1
@@ -98,7 +98,7 @@ SELECTORS[("default", "dark")] = '[data-theme="dark"] {'
 def extract_block(text: str, selector: str) -> str | None:
     """Return the contents of the first CSS block whose opening
     line ends with ``selector`` (which itself ends with ``{``).
-    Brace-balanced — string literals are not expected to appear in
+    Brace-balanced - string literals are not expected to appear in
     a CSS rule body. Returns None if not found."""
     for m in re.finditer(re.escape(selector), text):
         i = m.end() - 1  # at the '{' itself

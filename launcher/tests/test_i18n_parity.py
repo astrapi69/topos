@@ -103,7 +103,7 @@ def test_placeholder_parity_with_en(lang: str) -> None:
             f"{lang}.json key {key!r} has placeholder set "
             f"{lang_placeholders} but EN reference has "
             f"{en_placeholders}. Drift breaks str.format(**kwargs) "
-            f"at runtime — fix the translation to include the same "
+            f"at runtime - fix the translation to include the same "
             f"{{name}} tokens as EN, or fix EN if the placeholder "
             f"itself was a mistake."
         )

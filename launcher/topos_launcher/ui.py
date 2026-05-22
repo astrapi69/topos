@@ -314,7 +314,7 @@ class _ErrorDialog:
         # Transient confirmation via the window title so we do not spawn a
         # second modal for a one-click action.
         original = self._win.title()
-        self._win.title(f"{original}  —  {_t('copied')}")
+        self._win.title(f"{original}  -  {_t('copied')}")
         self._win.after(1500, lambda: self._win.title(original))
 
     def _handle_action(self, value: str) -> None:

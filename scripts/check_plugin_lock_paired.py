@@ -6,7 +6,7 @@ mistake that produced the v0.30.0 release CI red-on-main: editing
 ``plugins/topos-plugin-<name>/pyproject.toml`` without running
 ``poetry lock`` in the same plugin directory before committing.
 
-The shape — `make test` green but per-plugin CI red — is documented
+The shape - `make test` green but per-plugin CI red - is documented
 in `.claude/rules/lessons-learned.md` "Two installation paths
 diverge: `make test` vs per-plugin CI". The backend's combined
 ``poetry.lock`` can satisfy a path-dep install while each plugin's
@@ -29,10 +29,10 @@ the pyproject-staging direction. Lockfile-only changes (e.g. as a
 follow-up commit after `poetry lock`) are valid and do not trigger.
 
 Exits:
-  0 — every staged plugin pyproject is paired with its lockfile,
+  0 - every staged plugin pyproject is paired with its lockfile,
       OR no plugin pyproject is staged
-  1 — at least one plugin pyproject is staged without its lock
-  2 — git command failed (defensive; hook can't operate)
+  1 - at least one plugin pyproject is staged without its lock
+  2 - git command failed (defensive; hook can't operate)
 """
 
 from __future__ import annotations
@@ -90,12 +90,12 @@ def main(argv: list[str]) -> int:
 
     staged = _staged_files()
     if not staged:
-        # No commit is happening — argv was supplied by something
+        # No commit is happening - argv was supplied by something
         # other than a real `git commit` (e.g. `pre-commit run
         # --all-files` running in CI's "Run hooks on all files"
         # step, which passes every matching file as argv but does
-        # NOT stage anything). The hook's contract — "a staged
-        # plugin pyproject must be paired with its staged lock" —
+        # NOT stage anything). The hook's contract - "a staged
+        # plugin pyproject must be paired with its staged lock" -
         # is vacuous when nothing is staged. Skip silently.
         return 0
 
@@ -104,7 +104,7 @@ def main(argv: list[str]) -> int:
     for arg in argv:
         path = _normalize(arg)
         if not PLUGIN_PYPROJECT_RE.match(path):
-            # Not a plugin pyproject (defensive — the files: regex
+            # Not a plugin pyproject (defensive - the files: regex
             # should already exclude these).
             continue
         plugin_dir = path.rsplit("/", 1)[0]

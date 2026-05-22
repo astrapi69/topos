@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""archive_completed_task.py — move completed [x] tasks out of the
+"""archive_completed_task.py - move completed [x] tasks out of the
 active ROADMAP / backlog files into the monthly archive bucket.
 
 The active files (``docs/ROADMAP.md`` + ``docs/backlog.md``) hold
@@ -297,7 +297,7 @@ def apply_archival(
     in_memory[block.source] = src_text
 
     # Backlog pointer cleanup runs against the latest in-memory backlog
-    # text, not the on-disk one — a multi-block run that already mutated
+    # text, not the on-disk one - a multi-block run that already mutated
     # backlog must see those edits.
     if block.source != BACKLOG:
         bl_text = in_memory.get(BACKLOG, BACKLOG.read_text(encoding="utf-8"))
