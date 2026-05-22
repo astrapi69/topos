@@ -232,7 +232,6 @@ export interface AppConfig {
     app?: Record<string, unknown>;
     plugins?: Record<string, unknown>;
     ui?: Record<string, unknown>;
-    _secrets_managed_externally?: boolean;
 }
 
 export type SecretSourceKind =

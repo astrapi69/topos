@@ -68,9 +68,8 @@ def client(temp_base, monkeypatch):
     existing single-file seed remains the source of truth.
 
     Also redirects the user-override path resolution to ``temp_base``
-    so the secrets-refactor flag (T-XX) does not see the developer's
-    real ``~/.config/topos/secrets.yaml`` while the suite runs.
-    Same for ``TOPOS_AI_API_KEY`` env-var.
+    so the secrets-loading layer does not see the developer's real
+    ``~/.config/topos/secrets.yaml`` while the suite runs.
     """
     from app import main as main_module
 
@@ -88,7 +87,6 @@ def client(temp_base, monkeypatch):
         "_get_user_override_path",
         lambda: temp_base / "secrets-not-present.yaml",
     )
-    monkeypatch.delenv("TOPOS_AI_API_KEY", raising=False)
 
     yield TestClient(app)
 
@@ -112,14 +110,12 @@ def test_get_app_settings(client):
 
 
 def test_get_app_settings_missing_file(client, temp_base):
-    """Returns the flag-only payload when app.yaml does not exist."""
+    """Returns an empty payload when app.yaml does not exist."""
     (temp_base / "config" / "app.yaml").unlink()
 
     resp = client.get("/api/settings/app")
     assert resp.status_code == 200
-    # _secrets_managed_externally meta-field is always emitted by the
-    # endpoint so the frontend has a deterministic flag to read.
-    assert resp.json() == {"_secrets_managed_externally": False}
+    assert resp.json() == {}
 
 
 # --- PATCH /api/settings/app ---
@@ -172,73 +168,6 @@ def test_update_empty_body(client):
     resp = client.patch("/api/settings/app", json={})
     assert resp.status_code == 200
     assert resp.json()["app"]["language"] == "de"
-
-
-def test_get_app_settings_externally_managed_flag_false_by_default(client):
-    """Without override file or env-var, the flag is False."""
-    resp = client.get("/api/settings/app")
-    assert resp.status_code == 200
-    assert resp.json()["_secrets_managed_externally"] is False
-
-
-def test_get_app_settings_externally_managed_flag_true_with_env(client, monkeypatch):
-    """Setting TOPOS_AI_API_KEY flips the flag to True."""
-    monkeypatch.setenv("TOPOS_AI_API_KEY", "from-env")
-    resp = client.get("/api/settings/app")
-    assert resp.status_code == 200
-    assert resp.json()["_secrets_managed_externally"] is True
-
-
-def test_patch_strips_ai_api_key_when_externally_managed(client, temp_base, monkeypatch):
-    """When override is active, the PATCH body's ai.api_key is
-    stripped + a WARNING is logged. Other ai fields in the same
-    PATCH still apply.
-
-    Spies on ``settings_module.logger.warning`` directly because the
-    suite reconfigures loggers across tests and ``caplog`` is not
-    reliable cross-test for module-level loggers (same pattern as
-    test_config_loader.py corrupt-override case).
-    """
-    monkeypatch.setenv("TOPOS_AI_API_KEY", "from-env")
-
-    captured: list[str] = []
-    original_warning = settings_module.logger.warning
-
-    def spy(msg, *args, **kwargs):
-        captured.append(msg % args if args else msg)
-        return original_warning(msg, *args, **kwargs)
-
-    monkeypatch.setattr(settings_module.logger, "warning", spy)
-
-    resp = client.patch(
-        "/api/settings/app",
-        json={"ai": {"provider": "openai", "api_key": "should-be-stripped"}},
-    )
-    assert resp.status_code == 200
-    # ai.provider applied, ai.api_key NOT written.
-    written = resp.json()
-    assert written["ai"]["provider"] == "openai"
-    assert (
-        "api_key" not in written.get("ai", {})
-        or written["ai"].get("api_key", "") != "should-be-stripped"
-    )
-    # On-disk verification: api_key absent or unchanged from baseline.
-    with open(temp_base / "config" / "app.yaml") as f:
-        on_disk = yaml.safe_load(f)
-    assert on_disk["ai"].get("api_key", "") != "should-be-stripped"
-    # Warning logged with the parent.child path so the dev sees
-    # which UI surface still ships the field.
-    assert any("ai" in m and "api_key" in m and "Stripped" in m for m in captured), captured
-
-
-def test_patch_preserves_api_key_when_not_externally_managed(client):
-    """Without override, ai.api_key flows through to disk as before."""
-    resp = client.patch(
-        "/api/settings/app",
-        json={"ai": {"provider": "anthropic", "api_key": "from-ui"}},
-    )
-    assert resp.status_code == 200
-    assert resp.json()["ai"]["api_key"] == "from-ui"
 
 
 # --- GET /api/settings/plugins ---
