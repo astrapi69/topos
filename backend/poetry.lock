@@ -887,6 +887,18 @@ requests = ">=2.20"
 websockets = ">=11.0"
 
 [[package]]
+name = "et-xmlfile"
+version = "2.0.0"
+description = "An implementation of lxml.xmlfile for the standard library"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "et_xmlfile-2.0.0-py3-none-any.whl", hash = "sha256:7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa"},
+    {file = "et_xmlfile-2.0.0.tar.gz", hash = "sha256:dab3f4764309081ce75662649be815c4c9081e88f0837825f90fd28317d4da54"},
+]
+
+[[package]]
 name = "executing"
 version = "2.2.1"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -2201,6 +2213,21 @@ files = [
     {file = "nodeenv-1.10.0-py2.py3-none-any.whl", hash = "sha256:5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827"},
     {file = "nodeenv-1.10.0.tar.gz", hash = "sha256:996c191ad80897d076bdfba80a41994c2b47c68e224c542b48feba42ba00f8bb"},
 ]
+
+[[package]]
+name = "openpyxl"
+version = "3.1.5"
+description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "openpyxl-3.1.5-py2.py3-none-any.whl", hash = "sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2"},
+    {file = "openpyxl-3.1.5.tar.gz", hash = "sha256:cf0e3cf56142039133628b5acffe8ef0c12bc902d2aadd3e0fe5878dc08d1050"},
+]
+
+[package.dependencies]
+et-xmlfile = "*"
 
 [[package]]
 name = "packageurl-python"
@@ -7260,6 +7287,27 @@ files = [
 ]
 
 [[package]]
+name = "topos-plugin-excel-import"
+version = "0.1.0"
+description = "Import an Ordner-Ordnung.xlsx file (or any compatible Topos seed Excel) into the Topos database."
+optional = false
+python-versions = "^3.11"
+groups = ["main"]
+files = []
+develop = true
+
+[package.dependencies]
+fastapi = "^0.136.0"
+openpyxl = "^3.1.2"
+pluginforge = "^0.10.0"
+pydantic = "^2.13.0"
+sqlalchemy = "^2.0.49"
+
+[package.source]
+type = "directory"
+url = "../plugins/topos-plugin-excel-import"
+
+[[package]]
 name = "traitlets"
 version = "5.15.0"
 description = "Traitlets Python configuration system"
@@ -7795,4 +7843,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "c2b1f47e8496b14205a264d5987ea2ed44028d1ee43e6776457086b434d59ec3"
+content-hash = "105c35e1a2668389d8f68abe43c553b49b3d21656cde857fa5bc24b4fd8593fd"

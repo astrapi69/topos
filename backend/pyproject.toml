@@ -25,6 +25,7 @@ cryptography = "^48.0.0"
 ruamel-yaml = "^0.19.0"
 gitpython = "^3.1.40"
 edge-tts = "^7.2.8"
+topos-plugin-excel-import = {path = "../plugins/topos-plugin-excel-import", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.0"
@@ -82,26 +83,10 @@ ignore_missing_imports = true
 # Mutation-testing scope. Adapt per project: list the modules
 # worth mutating and the matching test files. Keep narrow on
 # laptop-class CI; widen on dedicated hardware.
-paths_to_mutate = ["app/import_plugins/", "app/services/"]
+paths_to_mutate = ["app/services/"]
 tests_dir = [
-    "tests/test_import_plugins_protocol.py",
-    "tests/test_import_duplicate_flows.py",
-    "tests/test_import_staging_gc.py",
-    "tests/test_bgb_handler.py",
-    "tests/test_markdown_handler.py",
-    "tests/test_markdown_folder_handler.py",
-    "tests/test_office_handlers.py",
-    "tests/test_backup_articles.py",
-    "tests/test_overrides_yaml_loader.py",
-    "tests/test_backup_compare.py",
-    "tests/test_backup_history.py",
-    "tests/test_backup_utils.py",
-    "tests/test_backup_utils_direct.py",
-    "tests/test_covers.py",
-    "tests/test_credential_store.py",
-    "tests/test_import_backup_parity.py",
-    "tests/test_reclassify_endpoints.py",
-    "tests/test_platform_schema.py",
+    "tests/routers",
+    "tests/models",
 ]
 do_not_mutate = ["app/main.py", "app/database.py"]
 

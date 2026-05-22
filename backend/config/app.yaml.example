@@ -29,7 +29,8 @@ app:
 plugins:
   config_dir: config/plugins
   disabled: []
-  enabled: []
+  enabled:
+    - excel_import
   entry_point_group: topos.plugins
 
 licensing:
