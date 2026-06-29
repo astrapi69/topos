@@ -4,8 +4,8 @@
  * item delete round out item management.
  */
 
-import {useMemo, useState} from "react";
-import {useParams, Link, useNavigate} from "react-router-dom";
+import {useEffect, useMemo, useState} from "react";
+import {useParams, Link, useNavigate, useLocation} from "react-router-dom";
 
 import NavBar from "../components/NavBar";
 import {useActions, useContainer, useItems} from "../hooks/useTopos";
@@ -39,6 +39,20 @@ export default function ContainerDetail() {
     const [edit, setEdit] = useState<EditState | null>(null);
     const [saving, setSaving] = useState(false);
     const [expanded, setExpanded] = useState<Set<number>>(new Set());
+    const {hash} = useLocation();
+
+    // Scroll-to-item when arriving from search via a "#item-<id>" hash.
+    useEffect(() => {
+        if (!hash.startsWith("#item-")) return;
+        if (items.data.length === 0) return;
+        const el = document.getElementById(hash.slice(1));
+        if (el) {
+            el.scrollIntoView({behavior: "smooth", block: "center"});
+            el.classList.add("ring-2", "ring-blue-500");
+            const timer = setTimeout(() => el.classList.remove("ring-2", "ring-blue-500"), 1600);
+            return () => clearTimeout(timer);
+        }
+    }, [hash, items.data]);
 
     const actionsByItem = useMemo(() => {
         const map = new Map<number, ActionRow[]>();
@@ -365,6 +379,7 @@ export default function ContainerDetail() {
                                 return (
                                     <tr
                                         key={item.id}
+                                        id={`item-${item.id}`}
                                         data-testid={`item-row-${item.id}`}
                                         style={{borderBottom: "1px solid var(--border)"}}
                                     >

@@ -14,6 +14,7 @@ import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
+import {rebuildSearchIndex} from "../search/buildIndex";
 import {btnPrimary} from "../ui/classes";
 import type {ImportReport} from "../types/topos";
 
@@ -50,6 +51,7 @@ export default function Import() {
             const result = await api.importExcel(file, {pruneMissing});
             setReport(result);
             await refreshAll();
+            await rebuildSearchIndex();
             notify.success(
                 t("topos.toast.import_done", "Import abgeschlossen"),
             );

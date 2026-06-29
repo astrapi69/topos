@@ -72,8 +72,10 @@ topos:
       categories: Categories
       open_actions: Open actions
       search: Search
-      search_placeholder: Search content, notes, or categories...
+      search_placeholder: Search containers, items, actions...
       searching: Searching...
+      no_results: No results
+      result_count: "{count} results"
     containers:
       title: Containers
       empty: No containers found.

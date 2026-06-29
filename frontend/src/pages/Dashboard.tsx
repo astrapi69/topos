@@ -1,20 +1,21 @@
 /**
  * Dashboard landing page.
  *
- * Shows total counts for the four entities plus a global
- * full-text search input that routes hits into ContainerDetail
- * via the item's container.
+ * Shows total counts for the four entities plus a global client-side
+ * full-text search (MiniSearch over the Dexie cache) that routes hits to
+ * the relevant detail view.
  */
 
-import {useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
+import {Clock, FileText, Folder} from "lucide-react";
 
 import NavBar from "../components/NavBar";
-import {api} from "../api/client";
 import {useActions, useCategories, useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
-import {btnPrimary, input, link, muted} from "../ui/classes";
-import type {Item} from "../types/topos";
+import {rebuildSearchIndex} from "../search/buildIndex";
+import {useSearch, type SearchResult} from "../search/useSearch";
+import {input, muted} from "../ui/classes";
 
 export default function Dashboard() {
     const {t} = useI18n();
@@ -25,24 +26,46 @@ export default function Dashboard() {
     const navigate = useNavigate();
 
     const [searchTerm, setSearchTerm] = useState("");
-    const [searchResults, setSearchResults] = useState<Item[]>([]);
-    const [searching, setSearching] = useState(false);
+    const results = useSearch(searchTerm);
 
-    async function handleSearch(e: React.FormEvent) {
-        e.preventDefault();
-        const q = searchTerm.trim();
-        if (q.length === 0) {
-            setSearchResults([]);
-            return;
+    // Keep the search index in sync with the cached data. Rebuilding is
+    // cheap (hundreds of docs) and only happens when the cache changes.
+    useEffect(() => {
+        void rebuildSearchIndex();
+    }, [containers.data, items.data, openActions.data]);
+
+    const containerById = useMemo(
+        () => new Map(containers.data.map((c) => [c.id, c])),
+        [containers.data],
+    );
+    const itemById = useMemo(() => new Map(items.data.map((i) => [i.id, i])), [items.data]);
+
+    function subtitleFor(r: SearchResult): string {
+        if (r.type === "item") {
+            const label = r.containerId != null ? containerById.get(r.containerId)?.label : undefined;
+            return [label, r.secondary].filter(Boolean).join(" · ");
         }
-        setSearching(true);
-        try {
-            const rows = await api.items.search(q);
-            setSearchResults(rows);
-        } finally {
-            setSearching(false);
+        if (r.type === "action") {
+            const content = r.itemId != null ? itemById.get(r.itemId)?.content : undefined;
+            const status = r.secondary ? t(`topos.action.status.${r.secondary}`, r.secondary) : "";
+            return [content, status].filter(Boolean).join(" · ");
         }
+        return r.secondary;
     }
+
+    function goTo(r: SearchResult): void {
+        if (r.type === "container") navigate(`/containers/${r.refId}`);
+        else if (r.type === "item" && r.containerId != null) navigate(`/containers/${r.containerId}#item-${r.refId}`);
+        else navigate("/actions");
+    }
+
+    function iconFor(type: SearchResult["type"]) {
+        if (type === "container") return <Folder size={16} aria-hidden />;
+        if (type === "item") return <FileText size={16} aria-hidden />;
+        return <Clock size={16} aria-hidden />;
+    }
+
+    const trimmed = searchTerm.trim();
 
     return (
         <>
@@ -84,42 +107,56 @@ export default function Dashboard() {
 
                 <section style={{marginBottom: "1.5rem"}}>
                     <h2>{t("topos.page.dashboard.search", "Suche")}</h2>
-                    <form onSubmit={handleSearch} style={{display: "flex", gap: "0.5rem"}}>
-                        <input
-                            type="text"
-                            className={input}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder={t(
-                                "topos.page.dashboard.search_placeholder",
-                                "Suche im Inhalt, in Notizen, in Kategorien...",
+                    <input
+                        type="search"
+                        className={`${input} w-full max-w-xl`}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder={t(
+                            "topos.page.dashboard.search_placeholder",
+                            "Container, Einträge, Aktionen durchsuchen...",
+                        )}
+                        data-testid="dashboard-search-input"
+                    />
+
+                    {trimmed.length > 0 && (
+                        <div data-testid="dashboard-search-count" className={`${muted} mt-2 text-sm`}>
+                            {t("topos.page.dashboard.result_count", "{count} Ergebnisse").replace(
+                                "{count}",
+                                String(results.length),
                             )}
-                            data-testid="dashboard-search-input"
-                            style={{flex: 1, padding: "0.5rem"}}
-                        />
-                        <button
-                            type="submit"
-                            className={btnPrimary}
-                            data-testid="dashboard-search-submit"
-                            disabled={searching}
-                        >
-                            {searching
-                                ? t("topos.page.dashboard.searching", "Suche...")
-                                : t("topos.page.dashboard.search", "Suchen")}
-                        </button>
-                    </form>
-                    {searchResults.length > 0 && (
-                        <ul data-testid="dashboard-search-results" style={{marginTop: "0.75rem"}}>
-                            {searchResults.map((item) => (
-                                <li key={item.id}>
+                        </div>
+                    )}
+
+                    {trimmed.length > 0 && results.length === 0 && (
+                        <p data-testid="dashboard-search-empty" className={`${muted} mt-2`}>
+                            {t("topos.page.dashboard.no_results", "Keine Treffer")}
+                        </p>
+                    )}
+
+                    {results.length > 0 && (
+                        <ul data-testid="dashboard-search-results" className="mt-2 max-w-xl">
+                            {results.map((r) => (
+                                <li key={r.id}>
                                     <button
                                         type="button"
-                                        onClick={() => navigate(`/containers/${item.containerId}`)}
-                                        data-testid={`search-hit-${item.id}`}
-                                        className={`${link} bg-transparent border-0 cursor-pointer text-left`}
-                                        style={{padding: "0.25rem 0"}}
+                                        onClick={() => goTo(r)}
+                                        data-testid={`search-hit-${r.type}-${r.refId}`}
+                                        className="flex w-full items-center gap-3 rounded px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                                     >
-                                        {item.content}
+                                        <span className="text-gray-500 dark:text-gray-400 shrink-0">
+                                            {iconFor(r.type)}
+                                        </span>
+                                        <span className="min-w-0">
+                                            <span className="block truncate text-gray-900 dark:text-gray-100">
+                                                {r.displayTitle}
+                                            </span>
+                                            {subtitleFor(r) && (
+                                                <span className="block truncate text-sm text-gray-500 dark:text-gray-400">
+                                                    {subtitleFor(r)}
+                                                </span>
+                                            )}
+                                        </span>
                                     </button>
                                 </li>
                             ))}
@@ -146,16 +183,8 @@ function Stat({
         <Link
             to={href}
             data-testid={testId}
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                padding: "1rem 1.25rem",
-                border: "1px solid var(--border)",
-                borderRadius: 6,
-                textDecoration: "none",
-                color: "inherit",
-                minWidth: 140,
-            }}
+            className="flex flex-col rounded border border-gray-300 dark:border-gray-700 no-underline text-inherit"
+            style={{padding: "1rem 1.25rem", minWidth: 140}}
         >
             <span className={muted} style={{fontSize: "0.875rem"}}>{label}</span>
             <span style={{fontSize: "2rem", fontWeight: 600}}>{value}</span>
