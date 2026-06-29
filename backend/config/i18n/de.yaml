@@ -197,3 +197,8 @@ topos:
     delete_container_title: Container löschen?
     delete_container_message: Der Container "{label}" wird dauerhaft gelöscht.
     delete_container_items_warning: "Achtung: {count} zugehörige Einträge werden ebenfalls gelöscht."
+
+pwa:
+  update_available: Neue Version verfügbar
+  update_action: Aktualisieren
+  install_app: App installieren

@@ -4,6 +4,7 @@ import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import {DialogProvider} from "./components/AppDialog";
+import PwaPrompts from "./components/PwaPrompts";
 import {I18nProvider} from "./hooks/useI18n";
 import {useTheme} from "./hooks/useTheme";
 import {rebuildSearchIndex} from "./search/buildIndex";
@@ -50,6 +51,7 @@ export default function App() {
                     pauseOnHover
                     theme="colored"
                 />
+                <PwaPrompts />
             </DialogProvider>
         </I18nProvider>
     );

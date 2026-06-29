@@ -197,3 +197,8 @@ topos:
     delete_container_title: Delete container?
     delete_container_message: The container "{label}" will be permanently deleted.
     delete_container_items_warning: "Warning: {count} contained items will also be deleted."
+
+pwa:
+  update_available: New version available
+  update_action: Update
+  install_app: Install app
