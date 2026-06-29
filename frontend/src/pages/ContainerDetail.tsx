@@ -13,6 +13,7 @@ import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
+import {btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
 import type {ActionRow, ContainerType, Owner} from "../types/topos";
 
 interface EditState {
@@ -173,7 +174,7 @@ export default function ContainerDetail() {
         <>
             <NavBar />
             <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
-                <Link to="/containers" data-testid="container-detail-back">
+                <Link to="/containers" className={link} data-testid="container-detail-back">
                     {t("topos.common.back", "Zurück")}
                 </Link>
                 <header style={{display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem"}}>
@@ -185,14 +186,14 @@ export default function ContainerDetail() {
                     </h1>
                     {container && !editing && (
                         <div style={{display: "flex", gap: "0.5rem"}}>
-                            <button type="button" data-testid="container-detail-edit" onClick={openEdit}>
+                            <button type="button" className={btn} data-testid="container-detail-edit" onClick={openEdit}>
                                 {t("topos.common.edit", "Bearbeiten")}
                             </button>
                             <button
                                 type="button"
+                                className={btnDanger}
                                 data-testid="container-detail-delete"
                                 onClick={handleDeleteContainer}
-                                style={{color: "var(--danger)"}}
                             >
                                 {t("topos.common.delete", "Löschen")}
                             </button>
@@ -200,7 +201,7 @@ export default function ContainerDetail() {
                     )}
                 </header>
                 {error && (
-                    <p data-testid="container-detail-error" style={{color: "var(--danger)"}}>
+                    <p data-testid="container-detail-error" className={danger}>
                         {error.message}
                     </p>
                 )}
@@ -222,6 +223,7 @@ export default function ContainerDetail() {
                     >
                         <EditField label={t("topos.container.type_label", "Typ")}>
                             <select
+                                className={input}
                                 data-testid="container-edit-type"
                                 value={edit.type}
                                 onChange={(e) => setEdit({...edit, type: e.target.value as ContainerType})}
@@ -232,6 +234,7 @@ export default function ContainerDetail() {
                         </EditField>
                         <EditField label={t("topos.container.owner", "Eigentümer")}>
                             <select
+                                className={input}
                                 data-testid="container-edit-owner"
                                 value={edit.owner}
                                 onChange={(e) => setEdit({...edit, owner: e.target.value as Owner})}
@@ -244,6 +247,7 @@ export default function ContainerDetail() {
                         <EditField label={t("topos.container.label", "Bezeichnung")}>
                             <input
                                 type="text"
+                                className={input}
                                 data-testid="container-edit-label"
                                 value={edit.label}
                                 onChange={(e) => setEdit({...edit, label: e.target.value})}
@@ -252,6 +256,7 @@ export default function ContainerDetail() {
                         </EditField>
                         <EditField label={t("topos.container.description", "Beschreibung")}>
                             <textarea
+                                className={input}
                                 data-testid="container-edit-description"
                                 value={edit.description}
                                 onChange={(e) => setEdit({...edit, description: e.target.value})}
@@ -261,6 +266,7 @@ export default function ContainerDetail() {
                         <EditField label={t("topos.container.location", "Ort")}>
                             <input
                                 type="text"
+                                className={input}
                                 data-testid="container-edit-location"
                                 value={edit.location}
                                 onChange={(e) => setEdit({...edit, location: e.target.value})}
@@ -269,16 +275,17 @@ export default function ContainerDetail() {
                         <EditField label={t("topos.container.size_group", "Größengruppe")}>
                             <input
                                 type="text"
+                                className={input}
                                 data-testid="container-edit-size-group"
                                 value={edit.sizeGroup}
                                 onChange={(e) => setEdit({...edit, sizeGroup: e.target.value})}
                             />
                         </EditField>
                         <div style={{display: "flex", gap: "0.5rem"}}>
-                            <button type="submit" data-testid="container-edit-save" disabled={saving}>
+                            <button type="submit" className={btnPrimary} data-testid="container-edit-save" disabled={saving}>
                                 {saving ? t("topos.common.saving", "Speichere...") : t("topos.common.save", "Speichern")}
                             </button>
-                            <button type="button" data-testid="container-edit-cancel" onClick={() => setEditing(false)}>
+                            <button type="button" className={btn} data-testid="container-edit-cancel" onClick={() => setEditing(false)}>
                                 {t("topos.common.cancel", "Abbrechen")}
                             </button>
                         </div>
@@ -329,6 +336,7 @@ export default function ContainerDetail() {
                         <h2>{t("topos.page.container_detail.items", "Einträge")}</h2>
                         <button
                             type="button"
+                            className={btnPrimary}
                             data-testid="container-detail-new-item"
                             onClick={() =>
                                 navigate(`/items/new?container_id=${containerId}`)
@@ -364,18 +372,9 @@ export default function ContainerDetail() {
                                             <div>{item.content}</div>
                                             <button
                                                 type="button"
+                                                className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 cursor-pointer"
                                                 data-testid={`item-actions-badge-${item.id}`}
                                                 onClick={() => toggleExpanded(item.id)}
-                                                style={{
-                                                    background: "none",
-                                                    border: "1px solid var(--border)",
-                                                    borderRadius: 10,
-                                                    cursor: "pointer",
-                                                    fontSize: "0.75rem",
-                                                    padding: "1px 8px",
-                                                    marginTop: 4,
-                                                    color: "var(--text-secondary)",
-                                                }}
                                             >
                                                 {t("topos.page.container_detail.item_actions", "Aktionen")}: {itemActions.length}{" "}
                                                 {itemActions.length > 0 ? (isOpen ? "▾" : "▸") : ""}
@@ -388,7 +387,7 @@ export default function ContainerDetail() {
                                                     {itemActions.map((a) => (
                                                         <li key={a.id}>
                                                             {a.text}{" "}
-                                                            <span style={{color: "var(--text-secondary)"}}>
+                                                            <span className={muted}>
                                                                 [{t(`topos.action.status.${a.status}`, a.status)}]
                                                             </span>
                                                         </li>
@@ -401,34 +400,30 @@ export default function ContainerDetail() {
                                         </td>
                                         <td style={{padding: "0.5rem"}}>{item.categoryPath ?? ""}</td>
                                         <td style={{padding: "0.5rem"}}>
-                                            <Link
-                                                to={`/items/${item.id}`}
-                                                data-testid={`edit-item-${item.id}`}
-                                            >
-                                                {t("topos.common.edit", "Bearbeiten")}
-                                            </Link>
-                                            {" / "}
-                                            <button
-                                                type="button"
-                                                data-testid={`delete-item-${item.id}`}
-                                                onClick={() => handleDeleteItem(item.id, item.content)}
-                                                style={{
-                                                    background: "none",
-                                                    border: "none",
-                                                    color: "var(--danger)",
-                                                    cursor: "pointer",
-                                                    padding: 0,
-                                                }}
-                                            >
-                                                {t("topos.common.delete", "Löschen")}
-                                            </button>
+                                            <span style={{display: "inline-flex", gap: "0.5rem"}}>
+                                                <Link
+                                                    to={`/items/${item.id}`}
+                                                    className={btn}
+                                                    data-testid={`edit-item-${item.id}`}
+                                                >
+                                                    {t("topos.common.edit", "Bearbeiten")}
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    className={btnDanger}
+                                                    data-testid={`delete-item-${item.id}`}
+                                                    onClick={() => handleDeleteItem(item.id, item.content)}
+                                                >
+                                                    {t("topos.common.delete", "Löschen")}
+                                                </button>
+                                            </span>
                                         </td>
                                     </tr>
                                 );
                             })}
                             {items.data.length === 0 && !items.loading && (
                                 <tr>
-                                    <td colSpan={4} style={{padding: "1rem", color: "var(--text-secondary)"}}>
+                                    <td colSpan={4} className={muted} style={{padding: "1rem"}}>
                                         {t(
                                             "topos.page.container_detail.empty",
                                             "Keine Einträge in diesem Container.",

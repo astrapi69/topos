@@ -17,6 +17,7 @@ import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
+import {btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
 import type {Container, ContainerType, Owner} from "../types/topos";
 
 interface FormState {
@@ -190,7 +191,7 @@ export default function ContainerList() {
                     <h1 data-testid="container-list-title">
                         {t("topos.page.containers.title", "Container")}
                     </h1>
-                    <button type="button" data-testid="container-new-button" onClick={openCreate}>
+                    <button type="button" className={btnPrimary} data-testid="container-new-button" onClick={openCreate}>
                         {t("topos.page.containers.new_container", "Neuer Container")}
                     </button>
                 </header>
@@ -218,6 +219,7 @@ export default function ContainerList() {
                         <FormField label={t("topos.container.external_id", "Nr.")}>
                             <input
                                 type="number"
+                                className={input}
                                 data-testid="container-form-external-id"
                                 value={form.externalId}
                                 onChange={(e) => setForm((f) => ({...f, externalId: e.target.value}))}
@@ -226,6 +228,7 @@ export default function ContainerList() {
                         </FormField>
                         <FormField label={t("topos.container.type_label", "Typ")}>
                             <select
+                                className={input}
                                 data-testid="container-form-type"
                                 value={form.type}
                                 onChange={(e) => setForm((f) => ({...f, type: e.target.value as ContainerType}))}
@@ -236,6 +239,7 @@ export default function ContainerList() {
                         </FormField>
                         <FormField label={t("topos.container.owner", "Eigentümer")}>
                             <select
+                                className={input}
                                 data-testid="container-form-owner"
                                 value={form.owner}
                                 onChange={(e) => setForm((f) => ({...f, owner: e.target.value as Owner}))}
@@ -248,6 +252,7 @@ export default function ContainerList() {
                         <FormField label={t("topos.container.label", "Bezeichnung")}>
                             <input
                                 type="text"
+                                className={input}
                                 data-testid="container-form-label"
                                 value={form.label}
                                 onChange={(e) => setForm((f) => ({...f, label: e.target.value}))}
@@ -256,6 +261,7 @@ export default function ContainerList() {
                         </FormField>
                         <FormField label={t("topos.container.description", "Beschreibung")}>
                             <textarea
+                                className={input}
                                 data-testid="container-form-description"
                                 value={form.description}
                                 onChange={(e) => setForm((f) => ({...f, description: e.target.value}))}
@@ -265,6 +271,7 @@ export default function ContainerList() {
                         <FormField label={t("topos.container.location", "Ort")}>
                             <input
                                 type="text"
+                                className={input}
                                 data-testid="container-form-location"
                                 value={form.location}
                                 onChange={(e) => setForm((f) => ({...f, location: e.target.value}))}
@@ -273,16 +280,17 @@ export default function ContainerList() {
                         <FormField label={t("topos.container.size_group", "Größengruppe")}>
                             <input
                                 type="text"
+                                className={input}
                                 data-testid="container-form-size-group"
                                 value={form.sizeGroup}
                                 onChange={(e) => setForm((f) => ({...f, sizeGroup: e.target.value}))}
                             />
                         </FormField>
                         <div style={{display: "flex", gap: "0.5rem"}}>
-                            <button type="submit" data-testid="container-form-submit" disabled={saving}>
+                            <button type="submit" className={btnPrimary} data-testid="container-form-submit" disabled={saving}>
                                 {saving ? t("topos.common.saving", "Speichere...") : t("topos.common.save", "Speichern")}
                             </button>
-                            <button type="button" data-testid="container-form-cancel" onClick={closeForm}>
+                            <button type="button" className={btn} data-testid="container-form-cancel" onClick={closeForm}>
                                 {t("topos.common.cancel", "Abbrechen")}
                             </button>
                         </div>
@@ -320,6 +328,7 @@ export default function ContainerList() {
                         {t("topos.filter.search", "Suche")}
                         <input
                             type="text"
+                            className={input}
                             value={needle}
                             onChange={(e) => setNeedle(e.target.value)}
                             data-testid="filter-needle"
@@ -337,7 +346,7 @@ export default function ContainerList() {
                     </p>
                 )}
                 {error && (
-                    <p data-testid="container-list-error" style={{color: "var(--danger)"}}>
+                    <p data-testid="container-list-error" className={danger}>
                         {error.message}
                     </p>
                 )}
@@ -371,6 +380,7 @@ export default function ContainerList() {
                                 <td style={{padding: "0.5rem"}}>
                                     <Link
                                         to={`/containers/${c.id}`}
+                                        className={link}
                                         data-testid={`container-link-${c.id}`}
                                     >
                                         {c.label}
@@ -384,28 +394,30 @@ export default function ContainerList() {
                                 </td>
                                 <td style={{padding: "0.5rem"}}>{c.location ?? ""}</td>
                                 <td style={{padding: "0.5rem", whiteSpace: "nowrap"}}>
-                                    <button
-                                        type="button"
-                                        data-testid={`container-edit-${c.id}`}
-                                        onClick={() => openEdit(c)}
-                                    >
-                                        {t("topos.common.edit", "Bearbeiten")}
-                                    </button>
-                                    {" "}
-                                    <button
-                                        type="button"
-                                        data-testid={`container-delete-${c.id}`}
-                                        onClick={() => handleDelete(c)}
-                                        style={{color: "var(--danger)"}}
-                                    >
-                                        {t("topos.common.delete", "Löschen")}
-                                    </button>
+                                    <span style={{display: "inline-flex", gap: "0.5rem"}}>
+                                        <button
+                                            type="button"
+                                            className={btn}
+                                            data-testid={`container-edit-${c.id}`}
+                                            onClick={() => openEdit(c)}
+                                        >
+                                            {t("topos.common.edit", "Bearbeiten")}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={btnDanger}
+                                            data-testid={`container-delete-${c.id}`}
+                                            onClick={() => handleDelete(c)}
+                                        >
+                                            {t("topos.common.delete", "Löschen")}
+                                        </button>
+                                    </span>
                                 </td>
                             </tr>
                         ))}
                         {filtered.length === 0 && !loading && (
                             <tr>
-                                <td colSpan={6} style={{padding: "1rem", color: "var(--text-secondary)"}}>
+                                <td colSpan={6} className={muted} style={{padding: "1rem"}}>
                                     {t("topos.page.containers.empty", "Keine Container gefunden.")}
                                 </td>
                             </tr>
@@ -434,6 +446,7 @@ function FilterSelect({
         <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
             {label}
             <select
+                className={input}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 data-testid={testId}

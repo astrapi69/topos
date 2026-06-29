@@ -15,6 +15,7 @@ import {useI18n} from "../hooks/useI18n";
 import {useTheme} from "../hooks/useTheme";
 import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
+import {btn, input, muted} from "../ui/classes";
 
 const LANGUAGES = ["de", "en", "es", "fr", "el", "pt", "tr", "ja"];
 
@@ -85,6 +86,7 @@ export default function Settings() {
                 <section style={{marginBottom: "1.5rem"}}>
                     <h2>{t("topos.page.settings.language", "Sprache")}</h2>
                     <select
+                        className={input}
                         value={lang}
                         onChange={(e) => setLang(e.target.value)}
                         data-testid="settings-language-select"
@@ -101,6 +103,7 @@ export default function Settings() {
                     <h2>{t("topos.page.settings.theme", "Erscheinungsbild")}</h2>
                     <button
                         type="button"
+                        className={btn}
                         onClick={toggle}
                         data-testid="settings-theme-toggle"
                     >
@@ -121,7 +124,7 @@ export default function Settings() {
                             secretSource.source === "env") && (
                             <p
                                 data-testid="settings-secret-source-hint"
-                                style={{color: "var(--text-secondary)", fontSize: "0.875rem"}}
+                                className={muted} style={{fontSize: "0.875rem"}}
                             >
                                 {t(
                                     "topos.page.settings.secret_key_external_hint",
@@ -139,7 +142,7 @@ export default function Settings() {
 
                 <section>
                     <h2>{t("topos.page.settings.cache", "Lokaler Cache")}</h2>
-                    <p style={{color: "var(--text-secondary)"}}>
+                    <p className={muted}>
                         {t(
                             "topos.page.settings.cache_description",
                             "Leert den IndexedDB-Cache und holt die Daten neu vom Server.",
@@ -147,6 +150,7 @@ export default function Settings() {
                     </p>
                     <button
                         type="button"
+                        className={btn}
                         onClick={handleResetCache}
                         disabled={resetting}
                         data-testid="settings-reset-cache"

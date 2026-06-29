@@ -13,6 +13,7 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {useActions, useCategories, useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {btnPrimary, input, link, muted} from "../ui/classes";
 import type {Item} from "../types/topos";
 
 export default function Dashboard() {
@@ -86,6 +87,7 @@ export default function Dashboard() {
                     <form onSubmit={handleSearch} style={{display: "flex", gap: "0.5rem"}}>
                         <input
                             type="text"
+                            className={input}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder={t(
@@ -97,6 +99,7 @@ export default function Dashboard() {
                         />
                         <button
                             type="submit"
+                            className={btnPrimary}
                             data-testid="dashboard-search-submit"
                             disabled={searching}
                         >
@@ -113,15 +116,8 @@ export default function Dashboard() {
                                         type="button"
                                         onClick={() => navigate(`/containers/${item.containerId}`)}
                                         data-testid={`search-hit-${item.id}`}
-                                        style={{
-                                            background: "none",
-                                            border: "none",
-                                            cursor: "pointer",
-                                            textAlign: "left",
-                                            padding: "0.25rem 0",
-                                            color: "#0066cc",
-                                            textDecoration: "underline",
-                                        }}
+                                        className={`${link} bg-transparent border-0 cursor-pointer text-left`}
+                                        style={{padding: "0.25rem 0"}}
                                     >
                                         {item.content}
                                     </button>
@@ -161,7 +157,7 @@ function Stat({
                 minWidth: 140,
             }}
         >
-            <span style={{fontSize: "0.875rem", color: "var(--text-secondary)"}}>{label}</span>
+            <span className={muted} style={{fontSize: "0.875rem"}}>{label}</span>
             <span style={{fontSize: "2rem", fontWeight: 600}}>{value}</span>
         </Link>
     );

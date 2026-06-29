@@ -19,6 +19,7 @@ import {useActions, useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
+import {btn, btnPrimary, btnDanger, input, muted, link} from "../ui/classes";
 import type {ActionRow, ActionStatus} from "../types/topos";
 
 type StatusFilter = ActionStatus | "all";
@@ -173,6 +174,7 @@ export default function Actions() {
                     <h1 data-testid="actions-title">{t("topos.page.actions.title", "Aktionen")}</h1>
                     <button
                         type="button"
+                        className={btnPrimary}
                         data-testid="actions-new-button"
                         onClick={() => setCreating((v) => !v)}
                     >
@@ -188,13 +190,10 @@ export default function Actions() {
                         <button
                             key={f}
                             type="button"
+                            className={statusFilter === f ? btnPrimary : btn}
                             data-testid={`actions-filter-${f}`}
                             onClick={() => setStatusFilter(f)}
                             aria-pressed={statusFilter === f}
-                            style={{
-                                fontWeight: statusFilter === f ? 700 : 400,
-                                textDecoration: statusFilter === f ? "underline" : "none",
-                            }}
                         >
                             {t(`topos.page.actions.filter_${f}`, f)}
                         </button>
@@ -205,8 +204,8 @@ export default function Actions() {
                     <form
                         data-testid="actions-create-form"
                         onSubmit={handleCreate}
+                        className="border border-gray-300 dark:border-gray-700"
                         style={{
-                            border: "1px solid var(--border)",
                             borderRadius: 6,
                             padding: "1rem",
                             marginBottom: "1.5rem",
@@ -222,6 +221,7 @@ export default function Actions() {
                         <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
                             {t("topos.page.actions.item", "Eintrag")}
                             <select
+                                className={input}
                                 data-testid="action-create-item"
                                 value={newItemId ?? ""}
                                 onChange={(e) => setNewItemId(e.target.value === "" ? null : Number(e.target.value))}
@@ -238,6 +238,7 @@ export default function Actions() {
                             {t("topos.page.actions.text", "Text")}
                             <input
                                 type="text"
+                                className={input}
                                 data-testid="action-create-text"
                                 value={newText}
                                 onChange={(e) => setNewText(e.target.value)}
@@ -247,16 +248,17 @@ export default function Actions() {
                             {t("topos.page.actions.due_date", "Fälligkeitsdatum")}
                             <input
                                 type="date"
+                                className={input}
                                 data-testid="action-create-due"
                                 value={newDue}
                                 onChange={(e) => setNewDue(e.target.value)}
                             />
                         </label>
                         <div style={{display: "flex", gap: "0.5rem"}}>
-                            <button type="submit" data-testid="action-create-submit">
+                            <button type="submit" className={btnPrimary} data-testid="action-create-submit">
                                 {t("topos.common.save", "Speichern")}
                             </button>
-                            <button type="button" data-testid="action-create-cancel" onClick={resetCreate}>
+                            <button type="button" className={btn} data-testid="action-create-cancel" onClick={resetCreate}>
                                 {t("topos.common.cancel", "Abbrechen")}
                             </button>
                         </div>
@@ -264,7 +266,7 @@ export default function Actions() {
                 )}
 
                 {actions.data.length === 0 && !actions.loading && (
-                    <p data-testid="actions-empty" style={{color: "var(--text-secondary)"}}>
+                    <p data-testid="actions-empty" className={muted}>
                         {t("topos.page.actions.empty", "Keine Aktionen.")}
                     </p>
                 )}
@@ -281,6 +283,7 @@ export default function Actions() {
                                 {container ? (
                                     <Link
                                         to={`/containers/${container.id}`}
+                                        className={link}
                                         data-testid={`actions-group-link-${container.id}`}
                                     >
                                         {container.label}
@@ -309,6 +312,7 @@ export default function Actions() {
                                                 >
                                                     <input
                                                         type="text"
+                                                        className={input}
                                                         data-testid={`action-edit-text-${action.id}`}
                                                         value={editText}
                                                         onChange={(e) => setEditText(e.target.value)}
@@ -316,12 +320,14 @@ export default function Actions() {
                                                     />
                                                     <input
                                                         type="date"
+                                                        className={input}
                                                         data-testid={`action-edit-due-${action.id}`}
                                                         value={editDue}
                                                         onChange={(e) => setEditDue(e.target.value)}
                                                     />
                                                     <button
                                                         type="button"
+                                                        className={btnPrimary}
                                                         data-testid={`action-edit-save-${action.id}`}
                                                         onClick={() => handleSaveEdit(action.id)}
                                                     >
@@ -329,6 +335,7 @@ export default function Actions() {
                                                     </button>
                                                     <button
                                                         type="button"
+                                                        className={btn}
                                                         data-testid={`action-edit-cancel-${action.id}`}
                                                         onClick={() => setEditingId(null)}
                                                     >
@@ -349,14 +356,16 @@ export default function Actions() {
                                                         <strong>{action.text}</strong>
                                                         {action.dueDate && (
                                                             <span
+                                                                className={muted}
                                                                 data-testid={`action-due-${action.id}`}
-                                                                style={{color: "var(--text-secondary)", marginLeft: "0.5rem", fontSize: "0.875rem"}}
+                                                                style={{marginLeft: "0.5rem", fontSize: "0.875rem"}}
                                                             >
                                                                 {t("topos.action.due", "fällig")}: {action.dueDate}
                                                             </span>
                                                         )}
                                                         <span
-                                                            style={{color: "var(--text-secondary)", marginLeft: "0.5rem", fontSize: "0.8125rem"}}
+                                                            className={muted}
+                                                            style={{marginLeft: "0.5rem", fontSize: "0.8125rem"}}
                                                         >
                                                             [{t(`topos.action.status.${action.status}`, action.status)}]
                                                         </span>
@@ -364,13 +373,14 @@ export default function Actions() {
                                                         {item ? (
                                                             <Link
                                                                 to={`/containers/${item.containerId}`}
+                                                                className={link}
                                                                 data-testid={`action-item-link-${action.id}`}
                                                                 style={{fontSize: "0.875rem"}}
                                                             >
                                                                 {item.content}
                                                             </Link>
                                                         ) : (
-                                                            <small style={{color: "var(--text-secondary)"}}>
+                                                            <small className={muted}>
                                                                 {t("topos.page.actions.missing_item", "Eintrag nicht geladen")}
                                                             </small>
                                                         )}
@@ -379,6 +389,7 @@ export default function Actions() {
                                                         {action.status === "open" ? (
                                                             <button
                                                                 type="button"
+                                                                className={btn}
                                                                 data-testid={`action-complete-${action.id}`}
                                                                 onClick={() => handleComplete(action.id)}
                                                             >
@@ -387,6 +398,7 @@ export default function Actions() {
                                                         ) : (
                                                             <button
                                                                 type="button"
+                                                                className={btn}
                                                                 data-testid={`action-reopen-${action.id}`}
                                                                 onClick={() => handleReopen(action.id)}
                                                             >
@@ -395,6 +407,7 @@ export default function Actions() {
                                                         )}
                                                         <button
                                                             type="button"
+                                                            className={btn}
                                                             data-testid={`action-edit-${action.id}`}
                                                             onClick={() => startEdit(action)}
                                                         >
@@ -402,9 +415,9 @@ export default function Actions() {
                                                         </button>
                                                         <button
                                                             type="button"
+                                                            className={btnDanger}
                                                             data-testid={`action-delete-${action.id}`}
                                                             onClick={() => handleDelete(action)}
-                                                            style={{color: "var(--danger)"}}
                                                         >
                                                             {t("topos.common.delete", "Löschen")}
                                                         </button>

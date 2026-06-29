@@ -17,6 +17,7 @@ import {api} from "../api/client";
 import {useCategories, useContainers} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {notify, errorMessage} from "../utils/notify";
+import {btn, btnPrimary, input} from "../ui/classes";
 import type {Item, Priority} from "../types/topos";
 
 const PRIORITIES: Priority[] = ["none", "low", "medium", "high", "very_high"];
@@ -126,6 +127,7 @@ export default function ItemEditor() {
                         testId="item-editor-container"
                     >
                         <select
+                            className={input}
                             value={containerId ?? ""}
                             onChange={(e) =>
                                 setContainerId(e.target.value === "" ? null : Number(e.target.value))
@@ -147,6 +149,7 @@ export default function ItemEditor() {
                     >
                         <input
                             type="text"
+                            className={input}
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             data-testid="item-editor-content-input"
@@ -159,6 +162,7 @@ export default function ItemEditor() {
                         testId="item-editor-priority"
                     >
                         <select
+                            className={input}
                             value={priority}
                             onChange={(e) => setPriority(e.target.value as Priority)}
                             data-testid="item-editor-priority-select"
@@ -177,6 +181,7 @@ export default function ItemEditor() {
                     >
                         <input
                             type="text"
+                            className={input}
                             value={categoryPath}
                             onChange={(e) => setCategoryPath(e.target.value)}
                             list="category-paths"
@@ -195,6 +200,7 @@ export default function ItemEditor() {
                         testId="item-editor-notes"
                     >
                         <textarea
+                            className={input}
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             data-testid="item-editor-notes-input"
@@ -205,6 +211,7 @@ export default function ItemEditor() {
                     <div style={{display: "flex", gap: "0.5rem"}}>
                         <button
                             type="submit"
+                            className={btnPrimary}
                             data-testid="item-editor-submit"
                             disabled={saving || loading}
                         >
@@ -214,6 +221,7 @@ export default function ItemEditor() {
                         </button>
                         <button
                             type="button"
+                            className={btn}
                             onClick={() => navigate(-1)}
                             data-testid="item-editor-cancel"
                         >

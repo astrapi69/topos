@@ -14,6 +14,7 @@ import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
+import {btnPrimary} from "../ui/classes";
 import type {ImportReport} from "../types/topos";
 
 export default function Import() {
@@ -133,6 +134,7 @@ export default function Import() {
 
                     <button
                         type="submit"
+                        className={btnPrimary}
                         disabled={!file || submitting}
                         data-testid="import-submit"
                     >
