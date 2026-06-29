@@ -1911,3 +1911,28 @@ body {
         margin-bottom: 2px;
     }
 }
+
+/* --- Top navigation bar (NavBar.tsx) ---
+   Theme-token based so the bar stays readable in every light/dark
+   palette. Fixes the dark-mode contrast bug where inactive links
+   (color: inherit) rendered dark-grey on a dark background. */
+.topos-navbar {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+}
+.topos-navbar__brand {
+    color: var(--text-primary);
+}
+.topos-navbar__link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.12s ease;
+}
+.topos-navbar__link:hover {
+    color: var(--text-primary);
+}
+.topos-navbar__link--active,
+.topos-navbar__link--active:hover {
+    color: #0066cc;
+    font-weight: 600;
+}
