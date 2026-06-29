@@ -71,7 +71,7 @@ export default function ContainerDetail() {
                             : t("topos.page.container_detail.missing", "Container nicht gefunden"))}
                 </h1>
                 {error && (
-                    <p data-testid="container-detail-error" style={{color: "#c00"}}>
+                    <p data-testid="container-detail-error" style={{color: "var(--danger)"}}>
                         {error.message}
                     </p>
                 )}
@@ -134,7 +134,7 @@ export default function ContainerDetail() {
                         style={{width: "100%", borderCollapse: "collapse", marginTop: "0.5rem"}}
                     >
                         <thead>
-                            <tr style={{textAlign: "left", borderBottom: "1px solid #ddd"}}>
+                            <tr style={{textAlign: "left", borderBottom: "1px solid var(--border)"}}>
                                 <th style={{padding: "0.5rem"}}>{t("topos.item.content", "Inhalt")}</th>
                                 <th style={{padding: "0.5rem"}}>{t("topos.item.priority", "Priorität")}</th>
                                 <th style={{padding: "0.5rem"}}>{t("topos.item.category", "Kategorie")}</th>
@@ -146,7 +146,7 @@ export default function ContainerDetail() {
                                 <tr
                                     key={item.id}
                                     data-testid={`item-row-${item.id}`}
-                                    style={{borderBottom: "1px solid #eee"}}
+                                    style={{borderBottom: "1px solid var(--border)"}}
                                 >
                                     <td style={{padding: "0.5rem"}}>{item.content}</td>
                                     <td style={{padding: "0.5rem"}}>
@@ -168,7 +168,7 @@ export default function ContainerDetail() {
                                             style={{
                                                 background: "none",
                                                 border: "none",
-                                                color: "#c00",
+                                                color: "var(--danger)",
                                                 cursor: "pointer",
                                                 padding: 0,
                                             }}
@@ -180,7 +180,7 @@ export default function ContainerDetail() {
                             ))}
                             {items.data.length === 0 && !items.loading && (
                                 <tr>
-                                    <td colSpan={4} style={{padding: "1rem", color: "#666"}}>
+                                    <td colSpan={4} style={{padding: "1rem", color: "var(--text-secondary)"}}>
                                         {t(
                                             "topos.page.container_detail.empty",
                                             "Keine Einträge in diesem Container.",

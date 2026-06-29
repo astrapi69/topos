@@ -206,7 +206,7 @@ export default function Actions() {
                         data-testid="actions-create-form"
                         onSubmit={handleCreate}
                         style={{
-                            border: "1px solid #ccc",
+                            border: "1px solid var(--border)",
                             borderRadius: 6,
                             padding: "1rem",
                             marginBottom: "1.5rem",
@@ -264,7 +264,7 @@ export default function Actions() {
                 )}
 
                 {actions.data.length === 0 && !actions.loading && (
-                    <p data-testid="actions-empty" style={{color: "#666"}}>
+                    <p data-testid="actions-empty" style={{color: "var(--text-secondary)"}}>
                         {t("topos.page.actions.empty", "Keine Aktionen.")}
                     </p>
                 )}
@@ -299,7 +299,7 @@ export default function Actions() {
                                             data-testid={`action-row-${action.id}`}
                                             style={{
                                                 padding: "0.5rem 0",
-                                                borderBottom: "1px solid #eee",
+                                                borderBottom: "1px solid var(--border)",
                                             }}
                                         >
                                             {isEditing ? (
@@ -350,13 +350,13 @@ export default function Actions() {
                                                         {action.dueDate && (
                                                             <span
                                                                 data-testid={`action-due-${action.id}`}
-                                                                style={{color: "#666", marginLeft: "0.5rem", fontSize: "0.875rem"}}
+                                                                style={{color: "var(--text-secondary)", marginLeft: "0.5rem", fontSize: "0.875rem"}}
                                                             >
                                                                 {t("topos.action.due", "fällig")}: {action.dueDate}
                                                             </span>
                                                         )}
                                                         <span
-                                                            style={{color: "#888", marginLeft: "0.5rem", fontSize: "0.8125rem"}}
+                                                            style={{color: "var(--text-secondary)", marginLeft: "0.5rem", fontSize: "0.8125rem"}}
                                                         >
                                                             [{t(`topos.action.status.${action.status}`, action.status)}]
                                                         </span>
@@ -370,7 +370,7 @@ export default function Actions() {
                                                                 {item.content}
                                                             </Link>
                                                         ) : (
-                                                            <small style={{color: "#666"}}>
+                                                            <small style={{color: "var(--text-secondary)"}}>
                                                                 {t("topos.page.actions.missing_item", "Eintrag nicht geladen")}
                                                             </small>
                                                         )}
@@ -404,7 +404,7 @@ export default function Actions() {
                                                             type="button"
                                                             data-testid={`action-delete-${action.id}`}
                                                             onClick={() => handleDelete(action)}
-                                                            style={{color: "#c00"}}
+                                                            style={{color: "var(--danger)"}}
                                                         >
                                                             {t("topos.common.delete", "Löschen")}
                                                         </button>

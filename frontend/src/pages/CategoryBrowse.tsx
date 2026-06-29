@@ -85,7 +85,7 @@ export default function CategoryBrowse() {
                             data-testid="category-show-uncategorized"
                             onClick={() => setSelected(null)}
                             style={{
-                                background: selected === null ? "#def" : "none",
+                                background: selected === null ? "var(--accent-light)" : "none",
                                 border: "none",
                                 cursor: "pointer",
                                 padding: "0.25rem 0",
@@ -105,7 +105,7 @@ export default function CategoryBrowse() {
                             />
                         ))}
                         {tree.length === 0 && (
-                            <p style={{color: "#666"}}>
+                            <p style={{color: "var(--text-secondary)"}}>
                                 {t("topos.page.categories.empty", "Noch keine Kategorien.")}
                             </p>
                         )}
@@ -117,7 +117,7 @@ export default function CategoryBrowse() {
                                 ? selected
                                 : t("topos.page.categories.uncategorized", "Ohne Kategorie")}
                             {" "}
-                            <small style={{color: "#666"}}>
+                            <small style={{color: "var(--text-secondary)"}}>
                                 ({filteredItems.length})
                             </small>
                         </h2>
@@ -127,13 +127,13 @@ export default function CategoryBrowse() {
                                     <Link to={`/containers/${item.containerId}`}>
                                         {item.content}
                                     </Link>{" "}
-                                    <small style={{color: "#666"}}>
+                                    <small style={{color: "var(--text-secondary)"}}>
                                         ({item.categoryPath ?? "-"})
                                     </small>
                                 </li>
                             ))}
                             {filteredItems.length === 0 && (
-                                <li style={{color: "#666"}}>
+                                <li style={{color: "var(--text-secondary)"}}>
                                     {t("topos.page.categories.no_items", "Keine Einträge.")}
                                 </li>
                             )}
@@ -174,7 +174,7 @@ function TreeNode({
                     display: "flex",
                     alignItems: "center",
                     paddingLeft: `${depth * 12}px`,
-                    background: isSelected ? "#def" : "transparent",
+                    background: isSelected ? "var(--accent-light)" : "transparent",
                     borderRadius: 4,
                 }}
             >
@@ -208,7 +208,7 @@ function TreeNode({
                     }}
                 >
                     {node.displayName}{" "}
-                    <small style={{color: "#666"}}>({count})</small>
+                    <small style={{color: "var(--text-secondary)"}}>({count})</small>
                 </button>
             </div>
             <Collapsible.Content>

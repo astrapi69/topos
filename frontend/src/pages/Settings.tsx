@@ -121,7 +121,7 @@ export default function Settings() {
                             secretSource.source === "env") && (
                             <p
                                 data-testid="settings-secret-source-hint"
-                                style={{color: "#666", fontSize: "0.875rem"}}
+                                style={{color: "var(--text-secondary)", fontSize: "0.875rem"}}
                             >
                                 {t(
                                     "topos.page.settings.secret_key_external_hint",
@@ -139,7 +139,7 @@ export default function Settings() {
 
                 <section>
                     <h2>{t("topos.page.settings.cache", "Lokaler Cache")}</h2>
-                    <p style={{color: "#666"}}>
+                    <p style={{color: "var(--text-secondary)"}}>
                         {t(
                             "topos.page.settings.cache_description",
                             "Leert den IndexedDB-Cache und holt die Daten neu vom Server.",

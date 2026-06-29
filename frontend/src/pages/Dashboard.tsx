@@ -154,14 +154,14 @@ function Stat({
                 display: "flex",
                 flexDirection: "column",
                 padding: "1rem 1.25rem",
-                border: "1px solid #ddd",
+                border: "1px solid var(--border)",
                 borderRadius: 6,
                 textDecoration: "none",
                 color: "inherit",
                 minWidth: 140,
             }}
         >
-            <span style={{fontSize: "0.875rem", color: "#666"}}>{label}</span>
+            <span style={{fontSize: "0.875rem", color: "var(--text-secondary)"}}>{label}</span>
             <span style={{fontSize: "2rem", fontWeight: 600}}>{value}</span>
         </Link>
     );

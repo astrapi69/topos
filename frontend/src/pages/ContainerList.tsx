@@ -200,7 +200,7 @@ export default function ContainerList() {
                         data-testid="container-form"
                         onSubmit={handleSubmit}
                         style={{
-                            border: "1px solid #ccc",
+                            border: "1px solid var(--border)",
                             borderRadius: 6,
                             padding: "1rem",
                             margin: "1rem 0",
@@ -337,7 +337,7 @@ export default function ContainerList() {
                     </p>
                 )}
                 {error && (
-                    <p data-testid="container-list-error" style={{color: "#c00"}}>
+                    <p data-testid="container-list-error" style={{color: "var(--danger)"}}>
                         {error.message}
                     </p>
                 )}
@@ -351,7 +351,7 @@ export default function ContainerList() {
                     }}
                 >
                     <thead>
-                        <tr style={{textAlign: "left", borderBottom: "1px solid #ddd"}}>
+                        <tr style={{textAlign: "left", borderBottom: "1px solid var(--border)"}}>
                             <th style={{padding: "0.5rem"}}>{t("topos.container.external_id", "Nr.")}</th>
                             <th style={{padding: "0.5rem"}}>{t("topos.container.label", "Bezeichnung")}</th>
                             <th style={{padding: "0.5rem"}}>{t("topos.container.type_label", "Typ")}</th>
@@ -365,7 +365,7 @@ export default function ContainerList() {
                             <tr
                                 key={c.id}
                                 data-testid={`container-row-${c.id}`}
-                                style={{borderBottom: "1px solid #eee"}}
+                                style={{borderBottom: "1px solid var(--border)"}}
                             >
                                 <td style={{padding: "0.5rem"}}>{c.externalId}</td>
                                 <td style={{padding: "0.5rem"}}>
@@ -396,7 +396,7 @@ export default function ContainerList() {
                                         type="button"
                                         data-testid={`container-delete-${c.id}`}
                                         onClick={() => handleDelete(c)}
-                                        style={{color: "#c00"}}
+                                        style={{color: "var(--danger)"}}
                                     >
                                         {t("topos.common.delete", "Löschen")}
                                     </button>
@@ -405,7 +405,7 @@ export default function ContainerList() {
                         ))}
                         {filtered.length === 0 && !loading && (
                             <tr>
-                                <td colSpan={6} style={{padding: "1rem", color: "#666"}}>
+                                <td colSpan={6} style={{padding: "1rem", color: "var(--text-secondary)"}}>
                                     {t("topos.page.containers.empty", "Keine Container gefunden.")}
                                 </td>
                             </tr>

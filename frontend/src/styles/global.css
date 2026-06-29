@@ -1936,3 +1936,19 @@ body {
     color: #0066cc;
     font-weight: 600;
 }
+
+/* --- Dark-mode text contrast (systematic) ---
+   The Phase-6 pages render clickable text as bare <button>/<a>
+   elements with inline layout styles. Native buttons do NOT inherit
+   `color` (they fall back to the UA canvas text colour), so in dark
+   mode every unstyled text-button (category tree nodes, expand
+   arrows, row action buttons) rendered dark-on-dark and vanished.
+   Make page-level buttons and links follow the theme text/accent
+   colour. Components with their own class (.btn*, .topos-navbar__*)
+   set an explicit colour and are unaffected (higher specificity). */
+main button {
+    color: inherit;
+}
+main a {
+    color: var(--accent);
+}

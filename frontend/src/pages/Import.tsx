@@ -88,12 +88,12 @@ export default function Import() {
                         onDragLeave={() => setDragging(false)}
                         onDrop={onDrop}
                         style={{
-                            border: `2px dashed ${dragging ? "#0066cc" : "#ccc"}`,
+                            border: `2px dashed ${dragging ? "#0066cc" : "var(--border)"}`,
                             padding: "2rem",
                             textAlign: "center",
                             borderRadius: 6,
                             marginBottom: "1rem",
-                            background: dragging ? "#def" : "transparent",
+                            background: dragging ? "var(--accent-light)" : "transparent",
                         }}
                     >
                         {file ? (
@@ -146,11 +146,11 @@ export default function Import() {
                     <section
                         data-testid="import-report"
                         style={{
-                            border: "1px solid #0066cc",
+                            border: "1px solid var(--accent)",
                             borderRadius: 6,
                             padding: "1rem",
                             marginTop: "1.5rem",
-                            background: "#def",
+                            background: "var(--accent-light)",
                         }}
                     >
                         <h2>{t("topos.page.import.report_title", "Importbericht")}</h2>
