@@ -149,6 +149,41 @@ test-backend: ## Run backend tests
 	@echo "=== Backend Tests ==="
 	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -v
 
+# --- Fast gates + Test Impact Analysis ---
+
+test-fast: ## Fast PR-mirror gate: backend ruff+mypy+pytest, frontend tsc+vitest (no coverage, no plugins)
+	@echo ""
+	@echo "=== test-fast: backend ruff check app/ ==="
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry run ruff check app/
+	@echo ""
+	@echo "=== test-fast: backend mypy app/ ==="
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run mypy app/
+	@echo ""
+	@echo "=== test-fast: backend pytest tests/ ==="
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -q
+	@echo ""
+	@echo "=== test-fast: frontend tsc --noEmit ==="
+	cd frontend && npx tsc --noEmit
+	@echo ""
+	@echo "=== test-fast: frontend vitest run ==="
+	cd frontend && npx vitest run
+	@echo ""
+	@echo "test-fast mirrors the PR gate. Full suite incl. plugins: 'make test'."
+
+test-changed: ## Test Impact Analysis: only tests affected vs $(TIA_BASE) (vitest --changed + pytest --testmon)
+	@echo ""
+	@echo "=== test-changed: frontend Vitest --changed $(TIA_BASE) ==="
+	cd frontend && npx vitest run --changed $(TIA_BASE) --passWithNoTests
+	@echo ""
+	@echo "=== test-changed: backend pytest --testmon (vs .testmondata) ==="
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry run pip install -q pytest-testmon
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && { poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ --testmon -q; code=$$?; [ $$code -eq 5 ] && exit 0; exit $$code; }
+	@echo ""
+	@echo "test-changed runs only impacted tests. Full run: 'make test' (nightly/CI run the full suite)."
+
+# Base ref for Test Impact Analysis. Under gitflow set TIA_BASE=origin/develop.
+TIA_BASE ?= origin/main
+
 # Plugin test targets: skeleton ships zero plugins. When you add a
 # plugin under plugins/topos-plugin-<name>/, follow the
 # pattern below and wire it into `test-plugins`.
