@@ -48,16 +48,9 @@ export default function NavBar() {
     return (
         <nav
             data-testid="topos-navbar"
-            className="topos-navbar"
-            style={{
-                display: "flex",
-                gap: "1rem",
-                padding: "0.75rem 1.25rem",
-                alignItems: "center",
-                fontFamily: "system-ui, sans-serif",
-            }}
+            className="flex items-center gap-4 px-5 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700"
         >
-            <strong className="topos-navbar__brand" style={{marginRight: "0.5rem"}}>
+            <strong className="mr-2 font-bold text-gray-900 dark:text-gray-100">
                 {t("topos.app.name", "Topos")}
             </strong>
             {LINKS.map((link) => {
@@ -69,8 +62,8 @@ export default function NavBar() {
                         data-testid={link.testId}
                         className={
                             active
-                                ? "topos-navbar__link topos-navbar__link--active"
-                                : "topos-navbar__link"
+                                ? "no-underline font-semibold text-blue-600 dark:text-blue-400"
+                                : "no-underline text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                         }
                     >
                         {t(link.labelKey, link.fallback)}
