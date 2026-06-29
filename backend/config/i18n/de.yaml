@@ -53,6 +53,7 @@ topos:
     high: Hoch
     very_high: Sehr hoch
   action:
+    due: fällig
     status:
       open: Offen
       done: Erledigt
@@ -92,11 +93,23 @@ topos:
       no_items: Keine Einträge.
       empty: Noch keine Kategorien.
     actions:
-      title: Offene Aktionen
-      empty: Keine offenen Aktionen.
+      title: Aktionen
+      empty: Keine Aktionen.
       no_container: Ohne Container
       missing_item: Eintrag nicht geladen
       mark_done: Erledigt
+      reopen: Wieder öffnen
+      new_action: Neue Aktion
+      create_title: Neue Aktion
+      item: Eintrag
+      text: Text
+      due_date: Fälligkeitsdatum
+      item_required: Eintrag ist erforderlich.
+      text_required: Text ist erforderlich.
+      filter_open: Offen
+      filter_done: Erledigt
+      filter_archived: Archiviert
+      filter_all: Alle
     import:
       title: Excel-Import
       description: >-
@@ -150,6 +163,14 @@ topos:
     import_failed: Import fehlgeschlagen
     cache_cleared: Lokaler Cache geleert
     cache_clear_failed: Cache konnte nicht geleert werden
+    action_reopened: Aktion wieder geöffnet
+    action_reopen_failed: Aktion konnte nicht wieder geöffnet werden
+    action_created: Aktion erstellt
+    action_create_failed: Aktion konnte nicht erstellt werden
+    action_updated: Aktion aktualisiert
+    action_update_failed: Aktion konnte nicht aktualisiert werden
+    action_deleted: Aktion gelöscht
+    action_delete_failed: Aktion konnte nicht gelöscht werden
   confirm:
     delete_item_title: Eintrag löschen?
     delete_item_message: Der Eintrag "{content}" wird dauerhaft gelöscht.
@@ -157,3 +178,5 @@ topos:
     reset_cache_message: Der lokale Cache wird geleert und die Daten werden neu vom Server geladen.
     prune_title: Fehlende Einträge löschen?
     prune_message: Einträge, die nicht mehr in der Excel-Datei stehen, werden dauerhaft aus der Datenbank gelöscht.
+    delete_action_title: Aktion löschen?
+    delete_action_message: Die Aktion "{text}" wird dauerhaft gelöscht.
