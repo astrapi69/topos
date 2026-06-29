@@ -76,6 +76,11 @@ topos:
     containers:
       title: Container
       empty: Keine Container gefunden.
+      new_container: Neuer Container
+      create_title: Neuer Container
+      edit_title: Container bearbeiten
+      label_required: Bezeichnung ist erforderlich.
+      external_id_invalid: Nr. muss eine ganze Zahl sein.
     container_detail:
       no_id: Kein Container ausgewählt.
       missing: Container nicht gefunden
@@ -171,6 +176,11 @@ topos:
     action_update_failed: Aktion konnte nicht aktualisiert werden
     action_deleted: Aktion gelöscht
     action_delete_failed: Aktion konnte nicht gelöscht werden
+    container_created: Container erstellt
+    container_updated: Container aktualisiert
+    container_deleted: Container gelöscht
+    container_save_failed: Container konnte nicht gespeichert werden
+    container_delete_failed: Container konnte nicht gelöscht werden
   confirm:
     delete_item_title: Eintrag löschen?
     delete_item_message: Der Eintrag "{content}" wird dauerhaft gelöscht.
@@ -180,3 +190,6 @@ topos:
     prune_message: Einträge, die nicht mehr in der Excel-Datei stehen, werden dauerhaft aus der Datenbank gelöscht.
     delete_action_title: Aktion löschen?
     delete_action_message: Die Aktion "{text}" wird dauerhaft gelöscht.
+    delete_container_title: Container löschen?
+    delete_container_message: Der Container "{label}" wird dauerhaft gelöscht.
+    delete_container_items_warning: "Achtung: {count} zugehörige Einträge werden ebenfalls gelöscht."

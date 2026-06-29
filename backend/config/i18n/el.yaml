@@ -77,6 +77,11 @@ topos:
     containers:
       title: Containers
       empty: No containers found.
+      new_container: New container
+      create_title: New container
+      edit_title: Edit container
+      label_required: A label is required.
+      external_id_invalid: The number must be an integer.
     container_detail:
       no_id: No container selected.
       missing: Container not found
@@ -171,6 +176,11 @@ topos:
     action_update_failed: Could not update the action
     action_deleted: Action deleted
     action_delete_failed: Could not delete the action
+    container_created: Container created
+    container_updated: Container updated
+    container_deleted: Container deleted
+    container_save_failed: Could not save the container
+    container_delete_failed: Could not delete the container
   confirm:
     delete_item_title: Delete item?
     delete_item_message: The item "{content}" will be permanently deleted.
@@ -180,3 +190,6 @@ topos:
     prune_message: Items that are no longer in the Excel file will be permanently deleted from the database.
     delete_action_title: Delete action?
     delete_action_message: The action "{text}" will be permanently deleted.
+    delete_container_title: Delete container?
+    delete_container_message: The container "{label}" will be permanently deleted.
+    delete_container_items_warning: "Warning: {count} contained items will also be deleted."
