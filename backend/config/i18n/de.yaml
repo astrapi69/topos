@@ -87,6 +87,7 @@ topos:
       items: Einträge
       new_item: Neuer Eintrag
       empty: Keine Einträge in diesem Container.
+      item_actions: Aktionen
     item_editor:
       new_title: Neuer Eintrag
       edit_title: Eintrag bearbeiten

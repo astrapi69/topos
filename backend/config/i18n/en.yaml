@@ -88,6 +88,7 @@ topos:
       items: Items
       new_item: New item
       empty: No items in this container.
+      item_actions: Actions
     item_editor:
       new_title: New item
       edit_title: Edit item
