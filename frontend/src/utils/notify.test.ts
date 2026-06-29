@@ -22,7 +22,7 @@ vi.mock('react-toastify', () => ({
 
 import {toast} from 'react-toastify'
 import {ApiError} from '../api/client'
-import {notify} from './notify'
+import {notify, errorMessage} from './notify'
 
 beforeEach(() => {
   vi.mocked(toast.error).mockReset()
@@ -58,6 +58,28 @@ describe('notify.error', () => {
     expect(() => notify.error('oops', new Error('plain'))).not.toThrow()
     expect(() => notify.error('oops', 'string error')).not.toThrow()
     expect(() => notify.error('oops', undefined)).not.toThrow()
+  })
+})
+
+describe('errorMessage', () => {
+  it('prefers ApiError.detail over the generic message', () => {
+    const apiErr = new ApiError(404, 'Container 5 not found', '/api/containers/5', 'GET')
+    expect(errorMessage(apiErr, 'fallback')).toBe('Container 5 not found')
+  })
+
+  it('uses Error.message for plain errors', () => {
+    expect(errorMessage(new Error('boom'), 'fallback')).toBe('boom')
+  })
+
+  it('falls back for non-error values', () => {
+    expect(errorMessage('a string', 'fallback')).toBe('fallback')
+    expect(errorMessage(undefined, 'fallback')).toBe('fallback')
+    expect(errorMessage(null, 'fallback')).toBe('fallback')
+  })
+
+  it('uses the fallback when the error carries an empty detail/message', () => {
+    const apiErr = new ApiError(500, '', '/api/x', 'POST')
+    expect(errorMessage(apiErr, 'fallback')).toBe('fallback')
   })
 })
 

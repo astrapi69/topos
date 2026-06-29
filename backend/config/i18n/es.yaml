@@ -136,3 +136,17 @@ topos:
       actions_created: Actions created
       categories_created: Categories created
       warnings: Warnings
+  toast:
+    item_created: Item created
+    item_updated: Item updated
+    item_deleted: Item deleted
+    item_load_failed: Could not load the item
+    item_save_failed: Could not save the item
+    item_delete_failed: Could not delete the item
+    action_done: Action marked as done
+    action_done_failed: Could not complete the action
+    categories_load_failed: Could not load categories
+    import_done: Import complete
+    import_failed: Import failed
+    cache_cleared: Local cache cleared
+    cache_clear_failed: Could not clear the cache

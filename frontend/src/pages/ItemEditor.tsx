@@ -16,6 +16,7 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {useCategories, useContainers} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {notify, errorMessage} from "../utils/notify";
 import type {Item, Priority} from "../types/topos";
 
 const PRIORITIES: Priority[] = ["none", "low", "medium", "high", "very_high"];
@@ -41,7 +42,6 @@ export default function ItemEditor() {
     const [notes, setNotes] = useState("");
     const [loading, setLoading] = useState(!isNew);
     const [saving, setSaving] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (isNew) return;
@@ -55,20 +55,24 @@ export default function ItemEditor() {
                 setPriority(row.priority);
                 setCategoryPath(row.categoryPath ?? "");
                 setNotes(row.notes ?? "");
-                setError(null);
             })
-            .catch((e) => setError(String(e)))
+            .catch((e) =>
+                notify.error(
+                    errorMessage(e, t("topos.toast.item_load_failed", "Eintrag konnte nicht geladen werden")),
+                    e,
+                ),
+            )
             .finally(() => setLoading(false));
-    }, [isNew, itemId]);
+    }, [isNew, itemId, t]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (containerId === null) {
-            setError(t("topos.page.item_editor.container_required", "Container ist erforderlich."));
+            notify.warning(t("topos.page.item_editor.container_required", "Container ist erforderlich."));
             return;
         }
         if (!content.trim()) {
-            setError(t("topos.page.item_editor.content_required", "Inhalt ist erforderlich."));
+            notify.warning(t("topos.page.item_editor.content_required", "Inhalt ist erforderlich."));
             return;
         }
         setSaving(true);
@@ -81,6 +85,7 @@ export default function ItemEditor() {
                     categoryPath: categoryPath.trim() || null,
                     notes: notes.trim() || null,
                 });
+                notify.success(t("topos.toast.item_created", "Eintrag erstellt"));
                 navigate(`/containers/${created.containerId}`);
             } else if (itemId !== null) {
                 await api.items.update(itemId, {
@@ -90,10 +95,14 @@ export default function ItemEditor() {
                     categoryPath: categoryPath.trim() || null,
                     notes: notes.trim() || null,
                 });
+                notify.success(t("topos.toast.item_updated", "Eintrag aktualisiert"));
                 navigate(`/containers/${containerId}`);
             }
         } catch (err) {
-            setError(String(err));
+            notify.error(
+                errorMessage(err, t("topos.toast.item_save_failed", "Eintrag konnte nicht gespeichert werden")),
+                err,
+            );
         } finally {
             setSaving(false);
         }
@@ -192,12 +201,6 @@ export default function ItemEditor() {
                             rows={3}
                         />
                     </Field>
-
-                    {error && (
-                        <p data-testid="item-editor-error" style={{color: "#c00"}}>
-                            {error}
-                        </p>
-                    )}
 
                     <div style={{display: "flex", gap: "0.5rem"}}>
                         <button

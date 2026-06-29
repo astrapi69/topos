@@ -12,6 +12,7 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {notify, errorMessage} from "../utils/notify";
 import type {ImportReport} from "../types/topos";
 
 export default function Import() {
@@ -20,21 +21,22 @@ export default function Import() {
     const [pruneMissing, setPruneMissing] = useState(false);
     const [report, setReport] = useState<ImportReport | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [dragging, setDragging] = useState(false);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!file) return;
         setSubmitting(true);
-        setError(null);
         setReport(null);
         try {
             const result = await api.importExcel(file, {pruneMissing});
             setReport(result);
             await refreshAll();
+            notify.success(
+                t("topos.toast.import_done", "Import abgeschlossen"),
+            );
         } catch (err) {
-            setError(String(err));
+            notify.error(errorMessage(err, t("topos.toast.import_failed", "Import fehlgeschlagen")), err);
         } finally {
             setSubmitting(false);
         }
@@ -122,12 +124,6 @@ export default function Import() {
                             : t("topos.page.import.upload", "Hochladen")}
                     </button>
                 </form>
-
-                {error && (
-                    <p data-testid="import-error" style={{color: "#c00", marginTop: "1rem"}}>
-                        {error}
-                    </p>
-                )}
 
                 {report && (
                     <section

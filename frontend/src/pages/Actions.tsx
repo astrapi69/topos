@@ -13,6 +13,7 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {useActions, useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {notify, errorMessage} from "../utils/notify";
 import type {ActionRow} from "../types/topos";
 
 export default function Actions() {
@@ -66,13 +67,17 @@ export default function Actions() {
                 next.delete(id);
                 return next;
             });
+            notify.success(t("topos.toast.action_done", "Aktion als erledigt markiert"));
         } catch (e) {
             setHidden((prev) => {
                 const next = new Set(prev);
                 next.delete(id);
                 return next;
             });
-            setErrors((prev) => new Map(prev).set(id, String(e)));
+            notify.error(
+                errorMessage(e, t("topos.toast.action_done_failed", "Aktion konnte nicht abgeschlossen werden")),
+                e,
+            );
         }
     }
 

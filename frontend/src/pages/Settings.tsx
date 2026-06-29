@@ -13,6 +13,7 @@ import {db} from "../db/schema";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useTheme} from "../hooks/useTheme";
+import {notify, errorMessage} from "../utils/notify";
 
 const LANGUAGES = ["de", "en", "es", "fr", "el", "pt", "tr", "ja"];
 
@@ -20,7 +21,6 @@ export default function Settings() {
     const {t, lang, setLang} = useI18n();
     const {theme, toggle} = useTheme();
     const [resetting, setResetting] = useState(false);
-    const [resetStatus, setResetStatus] = useState<string | null>(null);
     const [secretSource, setSecretSource] = useState<SecretSource | null>(null);
 
     useEffect(() => {
@@ -40,7 +40,6 @@ export default function Settings() {
 
     async function handleResetCache() {
         setResetting(true);
-        setResetStatus(null);
         try {
             await Promise.all([
                 db.containers.clear(),
@@ -49,9 +48,12 @@ export default function Settings() {
                 db.actions.clear(),
             ]);
             await refreshAll();
-            setResetStatus(t("topos.page.settings.reset_ok", "Cache zurückgesetzt."));
+            notify.success(t("topos.toast.cache_cleared", "Lokaler Cache geleert"));
         } catch (e) {
-            setResetStatus(String(e));
+            notify.error(
+                errorMessage(e, t("topos.toast.cache_clear_failed", "Cache konnte nicht geleert werden")),
+                e,
+            );
         } finally {
             setResetting(false);
         }
@@ -138,11 +140,6 @@ export default function Settings() {
                             ? t("topos.page.settings.resetting", "Wird zurückgesetzt...")
                             : t("topos.page.settings.reset", "Cache zurücksetzen")}
                     </button>
-                    {resetStatus && (
-                        <p data-testid="settings-reset-status" style={{marginTop: "0.5rem"}}>
-                            {resetStatus}
-                        </p>
-                    )}
                 </section>
             </main>
         </>

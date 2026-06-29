@@ -8,6 +8,7 @@ import NavBar from "../components/NavBar";
 import {useContainer, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {api} from "../api/client";
+import {notify, errorMessage} from "../utils/notify";
 
 export default function ContainerDetail() {
     const {t} = useI18n();
@@ -29,8 +30,16 @@ export default function ContainerDetail() {
     }
 
     async function handleDelete(itemId: number) {
-        await api.items.delete(itemId);
-        await items.refresh();
+        try {
+            await api.items.delete(itemId);
+            await items.refresh();
+            notify.success(t("topos.toast.item_deleted", "Eintrag gelöscht"));
+        } catch (e) {
+            notify.error(
+                errorMessage(e, t("topos.toast.item_delete_failed", "Eintrag konnte nicht gelöscht werden")),
+                e,
+            );
+        }
     }
 
     return (

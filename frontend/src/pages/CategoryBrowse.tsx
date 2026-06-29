@@ -14,6 +14,7 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {notify, errorMessage} from "../utils/notify";
 import type {CategoryNode, Item} from "../types/topos";
 
 export default function CategoryBrowse() {
@@ -21,7 +22,6 @@ export default function CategoryBrowse() {
     const items = useItems();
     const [tree, setTree] = useState<CategoryNode[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -31,11 +31,17 @@ export default function CategoryBrowse() {
                 if (!cancelled) setTree(data);
             })
             .catch((e) => {
-                if (!cancelled) setError(String(e));
+                if (!cancelled) {
+                    notify.error(
+                        errorMessage(e, t("topos.toast.categories_load_failed", "Kategorien konnten nicht geladen werden")),
+                        e,
+                    );
+                }
             });
         return () => {
             cancelled = true;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const itemsByPathPrefix = useMemo(() => {
@@ -64,12 +70,6 @@ export default function CategoryBrowse() {
                 <h1 data-testid="category-browse-title">
                     {t("topos.page.categories.title", "Kategorien")}
                 </h1>
-
-                {error && (
-                    <p data-testid="category-browse-error" style={{color: "#c00"}}>
-                        {error}
-                    </p>
-                )}
 
                 <div
                     style={{
