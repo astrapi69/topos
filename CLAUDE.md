@@ -42,7 +42,7 @@ On a conflict between CLAUDE.md and the rules, the rules win.
 ## Tech stack
 
 - **Backend:** Python 3.11+, FastAPI, SQLAlchemy 2.0, SQLite, Pydantic v2, Alembic, Poetry
-- **Frontend:** React 18+, TypeScript (strict), Vite, Radix UI, Dexie, Lucide, react-toastify
+- **Frontend:** React 18+, TypeScript (strict), Vite, Radix UI, Tailwind CSS (v3, Preflight off), Dexie, Lucide, react-toastify
 - **Plugins:** pluginforge ^0.10.0 (PyPI), entry-point group `topos.plugins`. Host passes `app_id="topos"` + `app_version`; plugins must declare `target_application = "topos"` or are filtered at activation. User-overlay applied via `config_overlay.refresh_manager_overlay(manager)`.
 - **Launcher:** PyInstaller cross-OS desktop launcher (`launcher/`)
 - **Testing:** pytest (backend + plugins), Vitest (frontend), Playwright (e2e)
@@ -130,7 +130,8 @@ topos/
 │   ├── db/schema.ts       # Dexie cache
 │   ├── hooks/useTopos.ts  # stale-while-revalidate hooks
 │   ├── pages/             # Dashboard, ContainerList, ContainerDetail, ItemEditor, CategoryBrowse, Actions, Import, Settings
-│   └── styles/global.css  # CSS variables, themes
+│   ├── ui/classes.ts      # shared Tailwind class strings (light+dark)
+│   └── styles/global.css  # CSS variables, themes, @tailwind directives
 ├── e2e/                   # Playwright spec (import-roundtrip)
 ├── launcher/              # cross-OS PyInstaller launcher
 ├── docs/                  # CONCEPT, ROADMAP, configuration
@@ -142,7 +143,7 @@ topos/
 - i18n: 8 languages in `backend/config/i18n/{lang}.yaml`. DE + EN fully populated; the other 6 carry EN as placeholders. DE uses real umlauts.
 - Python: type hints, snake_case, Pydantic v2, SQLAlchemy 2.0 mapped columns
 - TypeScript: strict mode, no `any`, Radix UI for primitives
-- CSS: custom properties, dark mode via `[data-theme="dark"]`. New Topos pages use literal hex colors (theme-token integration is a future-phase polish)
+- Styling: CSS custom properties drive the 5 app-themes + `.btn` system; Tailwind CSS (v3, Preflight off, `dark:` keyed to `[data-theme="dark"]`) provides per-element utility classes. New components use Tailwind classes from `src/ui/classes.ts` with explicit `dark:` variants; existing ones migrate incrementally. See architecture.md "Theming and styling".
 - Commits: English, conventional (feat/fix/refactor/docs)
 - E2E: `data-testid` selectors only
 - Secrets NEVER in committed config files. Four-layer chain: project `backend/config/app.yaml` < user overlay (`<data_dir>/config/app.yaml`) < `~/.config/topos/secrets.yaml` (gitignored, auto-templated at 0o600) < env-vars. Env-overrides are keyed by `app.secrets_store._ENV_SECRET_OVERRIDES`; plugins extend the map via `register_plugin_secret_override(config_path, env_var)` from their `activate()`. The Settings page renders the resolved source label via `GET /api/settings/secret-source`. Full doc in [docs/configuration.md](docs/configuration.md).
