@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     ports:
-      - "8000:8000"
+      - "8010:8010"
     volumes:
       - ./backend:/app
       - topos-data:/app/data
@@ -19,7 +19,7 @@ services:
     image: node:24-slim
     working_dir: /app
     ports:
-      - "5173:5173"
+      - "5183:5183"
     volumes:
       - ./frontend:/app
       - frontend-modules:/app/node_modules
@@ -28,7 +28,7 @@ services:
       # (correct for `make dev`); inside Docker Compose the
       # frontend container's localhost is itself, so route via the
       # `backend` service name on the compose network.
-      - VITE_API_PROXY_TARGET=http://backend:8000
+      - VITE_API_PROXY_TARGET=http://backend:8010
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
       - backend

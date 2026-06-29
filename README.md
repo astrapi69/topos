@@ -52,10 +52,10 @@ git clone https://github.com/astrapi69/topos.git
 cd topos
 make install              # Poetry (backend + launcher) + npm (frontend)
 make test                 # backend pytest + frontend Vitest
-make dev                  # backend on :8000, frontend on :5173
+make dev                  # backend on :8010, frontend on :5183
 ```
 
-Open <http://localhost:5173> in the browser; the dashboard opens
+Open <http://localhost:5183> in the browser; the dashboard opens
 on an empty inventory.
 
 To seed from an Excel workbook:

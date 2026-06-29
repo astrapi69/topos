@@ -24,10 +24,10 @@ dev: ## Start backend + frontend (backend first, then frontend)
 		fi; \
 	fi
 	@echo "Starting Topos..."
-	@cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8000 &
+	@cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8010 &
 	@echo "Waiting for backend..."
 	@for i in 1 2 3 4 5 6 7 8 9 10; do \
-		curl -s http://localhost:8000/api/health > /dev/null 2>&1 && break; \
+		curl -s http://localhost:8010/api/health > /dev/null 2>&1 && break; \
 		sleep 1; \
 	done
 	@echo "Backend ready. Starting frontend..."
@@ -51,7 +51,7 @@ dev-bg: ## Start in background, logs to $(DEV_LOG_DIR) (stop with: make dev-down
 	@# files are written from the main recipe shell at repo root, and
 	@# the path is `.pid-backend` (NOT `../.pid-backend`).
 	@cd backend && \
-		setsid poetry run uvicorn app.main:app --reload --port 8000 \
+		setsid poetry run uvicorn app.main:app --reload --port 8010 \
 			< /dev/null > $(DEV_LOG_DIR)/backend.log 2>&1 & \
 		echo $$! > .pid-backend
 	@cd frontend && \
@@ -107,7 +107,7 @@ fix-watchers: ## Persist Linux inotify limits for vite dev (sudo required, runs 
 	@echo "Persistent across reboots."
 
 dev-backend:
-	cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8000
+	cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8010
 
 dev-frontend:
 	cd frontend && npm run dev

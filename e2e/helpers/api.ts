@@ -3,7 +3,7 @@
  * Bypasses the UI for fast data manipulation.
  */
 
-const API = "http://localhost:8000/api";
+const API = "http://localhost:8010/api";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
     const res = await fetch(`${API}${path}`, {

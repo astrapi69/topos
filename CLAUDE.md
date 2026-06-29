@@ -60,7 +60,7 @@ queue, no CRDT). Licensing infrastructure exists but is dormant
 
 ```bash
 make install              # Poetry (backend + launcher) + npm (frontend)
-make dev                  # backend (8000) + frontend (5173) in parallel
+make dev                  # backend (8010) + frontend (5183) in parallel
 make test                 # backend pytest + frontend Vitest
 make test-backend         # backend only
 make test-frontend        # Vitest

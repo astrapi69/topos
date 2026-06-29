@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8010 --workers 2
     volumes:
       - topos-data:/app/data
     environment:
@@ -17,7 +17,7 @@ services:
       - TOPOS_CORS_ORIGINS=${TOPOS_CORS_ORIGINS:-http://localhost:7880}
       - TOPOS_SECRET_KEY=${TOPOS_SECRET_KEY:-}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8010/api/health')"]
       interval: 30s
       timeout: 5s
       retries: 3

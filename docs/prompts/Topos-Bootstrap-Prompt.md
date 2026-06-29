@@ -485,7 +485,7 @@ fixture pattern. Each router gets at minimum:
 **Acceptance criteria:**
 - `poetry run pytest backend/tests/` is green.
 - `GET /docs` (Swagger UI) shows the four new tag groups.
-- `curl http://localhost:8000/categories/tree` returns `[]` on a fresh DB.
+- `curl http://localhost:8010/categories/tree` returns `[]` on a fresh DB.
 
 **Commit message:**
 `feat(backend): add CRUD services and routers for the topos domain`
@@ -664,7 +664,7 @@ that exercises:
 
 **Acceptance criteria:**
 - `poetry run pytest plugins/topos-plugin-excel-import/tests/` is green.
-- `curl -F file=@Ordner-Ordnung.xlsx http://localhost:8000/import/excel`
+- `curl -F file=@Ordner-Ordnung.xlsx http://localhost:8010/import/excel`
   returns an `ImportReport` with sensible counts (roughly 50+ containers,
   300+ items based on the user's real file).
 - A second import of the same file produces zero new inserts.
@@ -988,7 +988,7 @@ All nine commands must succeed before the bootstrap is declared done.
 The bootstrap is complete when **all** of the following hold:
 
 - [ ] `make install && make test` is green from a fresh clone
-- [ ] `make dev` starts backend on 8000 and frontend on 5173 without errors
+- [ ] `make dev` starts backend on 8010 and frontend on 5183 without errors
 - [ ] `POST /import/excel` with the user's `Ordner-Ordnung.xlsx` produces an
       `ImportReport` with non-zero counts, no exceptions
 - [ ] A second import of the same file produces zero new inserts

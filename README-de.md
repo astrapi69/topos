@@ -55,10 +55,10 @@ git clone https://github.com/astrapi69/topos.git
 cd topos
 make install              # Poetry (Backend + Launcher) + npm (Frontend)
 make test                 # Backend pytest + Frontend Vitest
-make dev                  # Backend auf :8000, Frontend auf :5173
+make dev                  # Backend auf :8010, Frontend auf :5183
 ```
 
-<http://localhost:5173> im Browser öffnen; das Dashboard
+<http://localhost:5183> im Browser öffnen; das Dashboard
 erscheint mit leerem Inventar.
 
 Aus einer Excel-Mappe füllen:
