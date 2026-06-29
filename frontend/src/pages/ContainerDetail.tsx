@@ -7,6 +7,7 @@ import {useParams, Link, useNavigate} from "react-router-dom";
 import NavBar from "../components/NavBar";
 import {useContainer, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
 
@@ -17,6 +18,7 @@ export default function ContainerDetail() {
     const containerId = params.id ? Number(params.id) : null;
     const {data: container, loading, error} = useContainer(containerId);
     const items = useItems({containerId: containerId ?? undefined});
+    const {confirm} = useDialog();
 
     if (containerId === null) {
         return (
@@ -29,7 +31,20 @@ export default function ContainerDetail() {
         );
     }
 
-    async function handleDelete(itemId: number) {
+    async function handleDelete(itemId: number, itemContent: string) {
+        const ok = await confirm(
+            t("topos.confirm.delete_item_title", "Eintrag löschen?"),
+            t(
+                "topos.confirm.delete_item_message",
+                "Der Eintrag \"{content}\" wird dauerhaft gelöscht.",
+            ).replace("{content}", itemContent),
+            "danger",
+            {
+                confirmLabel: t("topos.common.delete", "Löschen"),
+                cancelLabel: t("topos.common.cancel", "Abbrechen"),
+            },
+        );
+        if (!ok) return;
         try {
             await api.items.delete(itemId);
             await items.refresh();
@@ -149,7 +164,7 @@ export default function ContainerDetail() {
                                         <button
                                             type="button"
                                             data-testid={`delete-item-${item.id}`}
-                                            onClick={() => handleDelete(item.id)}
+                                            onClick={() => handleDelete(item.id, item.content)}
                                             style={{
                                                 background: "none",
                                                 border: "none",

@@ -150,3 +150,10 @@ topos:
     import_failed: Import failed
     cache_cleared: Local cache cleared
     cache_clear_failed: Could not clear the cache
+  confirm:
+    delete_item_title: Delete item?
+    delete_item_message: The item "{content}" will be permanently deleted.
+    reset_cache_title: Reset cache?
+    reset_cache_message: The local cache will be cleared and data reloaded from the server.
+    prune_title: Delete missing items?
+    prune_message: Items that are no longer in the Excel file will be permanently deleted from the database.

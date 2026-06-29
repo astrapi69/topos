@@ -13,6 +13,7 @@ import {db} from "../db/schema";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useTheme} from "../hooks/useTheme";
+import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
 
 const LANGUAGES = ["de", "en", "es", "fr", "el", "pt", "tr", "ja"];
@@ -20,6 +21,7 @@ const LANGUAGES = ["de", "en", "es", "fr", "el", "pt", "tr", "ja"];
 export default function Settings() {
     const {t, lang, setLang} = useI18n();
     const {theme, toggle} = useTheme();
+    const {confirm} = useDialog();
     const [resetting, setResetting] = useState(false);
     const [secretSource, setSecretSource] = useState<SecretSource | null>(null);
 
@@ -39,6 +41,19 @@ export default function Settings() {
     }, []);
 
     async function handleResetCache() {
+        const ok = await confirm(
+            t("topos.confirm.reset_cache_title", "Cache zurücksetzen?"),
+            t(
+                "topos.confirm.reset_cache_message",
+                "Der lokale Cache wird geleert und die Daten werden neu vom Server geladen.",
+            ),
+            "danger",
+            {
+                confirmLabel: t("topos.page.settings.reset", "Cache zurücksetzen"),
+                cancelLabel: t("topos.common.cancel", "Abbrechen"),
+            },
+        );
+        if (!ok) return;
         setResetting(true);
         try {
             await Promise.all([

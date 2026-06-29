@@ -4,6 +4,7 @@ import {MemoryRouter} from "react-router-dom";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import Import from "./Import";
+import {DialogProvider} from "../components/AppDialog";
 
 vi.mock("../api/client", () => ({
     api: {
@@ -33,7 +34,9 @@ describe("Import", () => {
     it("renders the upload form", () => {
         render(
             <MemoryRouter>
-                <Import />
+                <DialogProvider>
+                    <Import />
+                </DialogProvider>
             </MemoryRouter>,
         );
         expect(screen.getByTestId("import-title")).toBeInTheDocument();

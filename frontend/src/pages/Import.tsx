@@ -12,6 +12,7 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
 import type {ImportReport} from "../types/topos";
 
@@ -22,10 +23,26 @@ export default function Import() {
     const [report, setReport] = useState<ImportReport | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [dragging, setDragging] = useState(false);
+    const {confirm} = useDialog();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!file) return;
+        if (pruneMissing) {
+            const ok = await confirm(
+                t("topos.confirm.prune_title", "Fehlende Einträge löschen?"),
+                t(
+                    "topos.confirm.prune_message",
+                    "Einträge, die nicht mehr in der Excel-Datei stehen, werden dauerhaft aus der Datenbank gelöscht.",
+                ),
+                "danger",
+                {
+                    confirmLabel: t("topos.page.import.upload", "Hochladen"),
+                    cancelLabel: t("topos.common.cancel", "Abbrechen"),
+                },
+            );
+            if (!ok) return;
+        }
         setSubmitting(true);
         setReport(null);
         try {
