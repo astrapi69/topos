@@ -10,6 +10,7 @@ topos:
     name: Topos
     description: Persönliche Inventarverwaltung
   nav:
+    search: Suchen
     dashboard: Übersicht
     containers: Container
     categories: Kategorien

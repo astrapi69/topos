@@ -17,6 +17,7 @@ import {api} from "../api/client";
 import {useCategories, useContainers} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {notify, errorMessage} from "../utils/notify";
+import {indexUpsertItem} from "../search/buildIndex";
 import {btn, btnPrimary, input} from "../ui/classes";
 import type {Item, Priority} from "../types/topos";
 
@@ -86,16 +87,18 @@ export default function ItemEditor() {
                     categoryPath: categoryPath.trim() || null,
                     notes: notes.trim() || null,
                 });
+                indexUpsertItem(created);
                 notify.success(t("topos.toast.item_created", "Eintrag erstellt"));
                 navigate(`/containers/${created.containerId}`);
             } else if (itemId !== null) {
-                await api.items.update(itemId, {
+                const updated = await api.items.update(itemId, {
                     containerId,
                     content: content.trim(),
                     priority,
                     categoryPath: categoryPath.trim() || null,
                     notes: notes.trim() || null,
                 });
+                indexUpsertItem(updated);
                 notify.success(t("topos.toast.item_updated", "Eintrag aktualisiert"));
                 navigate(`/containers/${containerId}`);
             }

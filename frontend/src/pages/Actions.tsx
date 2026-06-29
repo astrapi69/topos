@@ -19,6 +19,7 @@ import {useActions, useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
+import {indexRemove, indexUpsertAction} from "../search/buildIndex";
 import {btn, btnPrimary, btnDanger, input, muted, link} from "../ui/classes";
 import type {ActionRow, ActionStatus} from "../types/topos";
 
@@ -70,7 +71,8 @@ export default function Actions() {
 
     async function handleComplete(id: number) {
         try {
-            await api.actions.complete(id);
+            const updated = await api.actions.complete(id);
+            indexUpsertAction(updated);
             await actions.refresh();
             notify.success(t("topos.toast.action_done", "Aktion als erledigt markiert"));
         } catch (e) {
@@ -80,7 +82,8 @@ export default function Actions() {
 
     async function handleReopen(id: number) {
         try {
-            await api.actions.reopen(id);
+            const updated = await api.actions.reopen(id);
+            indexUpsertAction(updated);
             await actions.refresh();
             notify.success(t("topos.toast.action_reopened", "Aktion wieder geöffnet"));
         } catch (e) {
@@ -106,11 +109,12 @@ export default function Actions() {
             return;
         }
         try {
-            await api.actions.create({
+            const created = await api.actions.create({
                 itemId: newItemId,
                 text: newText.trim(),
                 dueDate: newDue.trim() || null,
             });
+            indexUpsertAction(created);
             await actions.refresh();
             notify.success(t("topos.toast.action_created", "Aktion erstellt"));
             resetCreate();
@@ -131,10 +135,11 @@ export default function Actions() {
             return;
         }
         try {
-            await api.actions.update(id, {
+            const updated = await api.actions.update(id, {
                 text: editText.trim(),
                 dueDate: editDue.trim() || null,
             });
+            indexUpsertAction(updated);
             await actions.refresh();
             notify.success(t("topos.toast.action_updated", "Aktion aktualisiert"));
             setEditingId(null);
@@ -159,6 +164,7 @@ export default function Actions() {
         if (!ok) return;
         try {
             await api.actions.delete(action.id);
+            indexRemove("action", action.id);
             await actions.refresh();
             notify.success(t("topos.toast.action_deleted", "Aktion gelöscht"));
         } catch (e) {

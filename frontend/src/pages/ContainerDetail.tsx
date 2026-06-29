@@ -13,6 +13,7 @@ import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
+import {indexRemove, indexUpsertContainer} from "../search/buildIndex";
 import {btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
 import type {ActionRow, ContainerType, Owner} from "../types/topos";
 
@@ -106,7 +107,7 @@ export default function ContainerDetail() {
         }
         setSaving(true);
         try {
-            await api.containers.update(containerId, {
+            const updated = await api.containers.update(containerId, {
                 type: edit.type,
                 owner: edit.owner,
                 label: edit.label.trim(),
@@ -114,6 +115,7 @@ export default function ContainerDetail() {
                 location: edit.location.trim() || null,
                 sizeGroup: edit.sizeGroup.trim() || null,
             });
+            indexUpsertContainer(updated);
             await refresh();
             notify.success(t("topos.toast.container_updated", "Container aktualisiert"));
             setEditing(false);
@@ -151,6 +153,8 @@ export default function ContainerDetail() {
         if (!ok) return;
         try {
             await api.containers.delete(containerId);
+            indexRemove("container", containerId);
+            for (const it of items.data) indexRemove("item", it.id);
             notify.success(t("topos.toast.container_deleted", "Container gelöscht"));
             navigate("/containers");
         } catch (e) {
@@ -174,6 +178,7 @@ export default function ContainerDetail() {
         if (!ok) return;
         try {
             await api.items.delete(itemId);
+            indexRemove("item", itemId);
             await items.refresh();
             notify.success(t("topos.toast.item_deleted", "Eintrag gelöscht"));
         } catch (e) {

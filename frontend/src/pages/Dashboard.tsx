@@ -8,12 +8,12 @@
 
 import {useEffect, useMemo, useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
-import {Clock, FileText, Folder} from "lucide-react";
 
 import NavBar from "../components/NavBar";
 import {useActions, useCategories, useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {rebuildSearchIndex} from "../search/buildIndex";
+import SearchResults from "../search/SearchResults";
 import {useSearch, type SearchResult} from "../search/useSearch";
 import {input, muted} from "../ui/classes";
 
@@ -40,29 +40,10 @@ export default function Dashboard() {
     );
     const itemById = useMemo(() => new Map(items.data.map((i) => [i.id, i])), [items.data]);
 
-    function subtitleFor(r: SearchResult): string {
-        if (r.type === "item") {
-            const label = r.containerId != null ? containerById.get(r.containerId)?.label : undefined;
-            return [label, r.secondary].filter(Boolean).join(" · ");
-        }
-        if (r.type === "action") {
-            const content = r.itemId != null ? itemById.get(r.itemId)?.content : undefined;
-            const status = r.secondary ? t(`topos.action.status.${r.secondary}`, r.secondary) : "";
-            return [content, status].filter(Boolean).join(" · ");
-        }
-        return r.secondary;
-    }
-
     function goTo(r: SearchResult): void {
         if (r.type === "container") navigate(`/containers/${r.refId}`);
         else if (r.type === "item" && r.containerId != null) navigate(`/containers/${r.containerId}#item-${r.refId}`);
         else navigate("/actions");
-    }
-
-    function iconFor(type: SearchResult["type"]) {
-        if (type === "container") return <Folder size={16} aria-hidden />;
-        if (type === "item") return <FileText size={16} aria-hidden />;
-        return <Clock size={16} aria-hidden />;
     }
 
     const trimmed = searchTerm.trim();
@@ -135,32 +116,14 @@ export default function Dashboard() {
                     )}
 
                     {results.length > 0 && (
-                        <ul data-testid="dashboard-search-results" className="mt-2 max-w-xl">
-                            {results.map((r) => (
-                                <li key={r.id}>
-                                    <button
-                                        type="button"
-                                        onClick={() => goTo(r)}
-                                        data-testid={`search-hit-${r.type}-${r.refId}`}
-                                        className="flex w-full items-center gap-3 rounded px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-                                    >
-                                        <span className="text-gray-500 dark:text-gray-400 shrink-0">
-                                            {iconFor(r.type)}
-                                        </span>
-                                        <span className="min-w-0">
-                                            <span className="block truncate text-gray-900 dark:text-gray-100">
-                                                {r.displayTitle}
-                                            </span>
-                                            {subtitleFor(r) && (
-                                                <span className="block truncate text-sm text-gray-500 dark:text-gray-400">
-                                                    {subtitleFor(r)}
-                                                </span>
-                                            )}
-                                        </span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
+                        <div className="mt-2 max-w-xl">
+                            <SearchResults
+                                results={results}
+                                containerById={containerById}
+                                itemById={itemById}
+                                onSelect={goTo}
+                            />
+                        </div>
                     )}
                 </section>
             </main>

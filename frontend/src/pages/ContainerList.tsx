@@ -17,6 +17,7 @@ import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
+import {indexRemove, indexUpsertContainer} from "../search/buildIndex";
 import {btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
 import type {Container, ContainerType, Owner} from "../types/topos";
 
@@ -120,7 +121,7 @@ export default function ContainerList() {
                     setSaving(false);
                     return;
                 }
-                await api.containers.create({
+                const created = await api.containers.create({
                     externalId,
                     type: form.type,
                     owner: form.owner,
@@ -129,9 +130,10 @@ export default function ContainerList() {
                     location,
                     sizeGroup,
                 });
+                indexUpsertContainer(created);
                 notify.success(t("topos.toast.container_created", "Container erstellt"));
             } else {
-                await api.containers.update(editingId, {
+                const updated = await api.containers.update(editingId, {
                     type: form.type,
                     owner: form.owner,
                     label: form.label.trim(),
@@ -139,6 +141,7 @@ export default function ContainerList() {
                     location,
                     sizeGroup,
                 });
+                indexUpsertContainer(updated);
                 notify.success(t("topos.toast.container_updated", "Container aktualisiert"));
             }
             await refresh();
@@ -176,6 +179,10 @@ export default function ContainerList() {
         if (!ok) return;
         try {
             await api.containers.delete(c.id);
+            indexRemove("container", c.id);
+            for (const it of items.data.filter((i) => i.containerId === c.id)) {
+                indexRemove("item", it.id);
+            }
             await Promise.all([refresh(), items.refresh()]);
             notify.success(t("topos.toast.container_deleted", "Container gelöscht"));
         } catch (e) {
