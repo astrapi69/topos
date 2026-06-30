@@ -11,8 +11,7 @@
 import {useEffect, useState} from "react";
 
 import {useI18n} from "../hooks/useI18n";
-
-const PROBE_TIMEOUT_MS = 3000;
+import {isBackendAvailable} from "../utils/backendStatus";
 
 export default function OfflineBanner() {
     const {t} = useI18n();
@@ -20,20 +19,13 @@ export default function OfflineBanner() {
 
     useEffect(() => {
         let cancelled = false;
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
-        fetch("/api/health", {signal: controller.signal})
-            .then((res) => {
-                if (!cancelled) setOffline(!res.ok);
-            })
-            .catch(() => {
-                if (!cancelled) setOffline(true);
-            })
-            .finally(() => clearTimeout(timer));
+        // Shares the single /api/health probe with the data hooks
+        // (see utils/backendStatus) - no second health request.
+        void isBackendAvailable().then((available) => {
+            if (!cancelled) setOffline(!available);
+        });
         return () => {
             cancelled = true;
-            controller.abort();
-            clearTimeout(timer);
         };
     }, []);
 
