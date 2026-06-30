@@ -34,6 +34,13 @@ logger = logging.getLogger(__name__)
 # ``app.licensing``; Topos itself ships zero AI keys.
 _ENV_SECRET_OVERRIDES: dict[str, tuple[str, ...]] = {
     "TOPOS_SECRET_KEY": ("secret_key",),
+    # AI provider API keys land at ``ai.keys.<provider>`` in the merged
+    # config. The env-var names mirror ``app.ai.providers`` (a test pins
+    # the parity); the resolved key is used for box-content recognition.
+    "TOPOS_ANTHROPIC_API_KEY": ("ai", "keys", "anthropic"),
+    "TOPOS_OPENAI_API_KEY": ("ai", "keys", "openai"),
+    "TOPOS_GEMINI_API_KEY": ("ai", "keys", "google"),
+    "TOPOS_CUSTOM_API_KEY": ("ai", "keys", "custom"),
 }
 
 # Sentinel returned from ``get_secret_source`` when the secret comes
@@ -96,6 +103,16 @@ SECRETS_TEMPLATE = """# Topos - Secrets
 # Uncomment and fill in your values below.
 
 # secret_key: "generate-with-python3 -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
+
+# AI provider API keys (for box-content image recognition).
+# Uncomment the providers you use. These override app.yaml and are
+# themselves overridden by the matching TOPOS_*_API_KEY env vars.
+# ai:
+#   keys:
+#     anthropic: "sk-ant-..."
+#     openai: "sk-..."
+#     google: "AIza..."
+#     custom: "..."
 
 # Plugin secrets (extend as needed):
 # plugins:

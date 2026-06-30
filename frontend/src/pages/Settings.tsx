@@ -8,6 +8,7 @@
 import {useEffect, useState} from "react";
 
 import NavBar from "../components/NavBar";
+import AiProviderSettings from "../components/AiProviderSettings";
 import {api, type SecretSource} from "../api/client";
 import {db} from "../db/schema";
 import {refreshAll} from "../hooks/useTopos";
@@ -139,6 +140,8 @@ export default function Settings() {
                         )}
                     </section>
                 )}
+
+                <AiProviderSettings />
 
                 <section>
                     <h2>{t("topos.page.settings.cache", "Lokaler Cache")}</h2>

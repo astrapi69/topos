@@ -148,6 +148,33 @@ topos:
       secret_key_source_auto_generated: "Key from: auto-generated"
       secret_key_external_hint: >-
         This key is configured in {path}. Edit the file to change it.
+      ai:
+        title: AI Assistant
+        description: "Provider, API key and model for recognising box contents from a photo."
+        enable: Enable AI features
+        provider: Provider
+        model: Model
+        base_url: Base URL
+        api_key: API key
+        key_placeholder: Enter API key
+        key_set: Stored
+        configured: Key stored
+        vision_badge: Vision
+        custom_vision_hint: "Vision support depends on the selected model."
+        save: Save
+        saving: Saving...
+        saved: AI settings saved
+        save_failed: Could not save settings
+        test: Test connection
+        testing: Testing...
+        test_ok: Connection successful
+        test_failed: Connection failed
+        test_err_auth_error: Invalid API key
+        test_err_missing_key: No API key provided
+        test_err_missing_base_url: No base URL provided
+        test_err_provider_error: Provider error
+        test_err_network_error: Network error
+        test_err_unknown_provider: Unknown provider
   import:
     report:
       containers_created: Containers created

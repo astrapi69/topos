@@ -42,7 +42,14 @@ def _clean_env_overrides(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture(autouse=True)
 def _clear_topos_env(monkeypatch: pytest.MonkeyPatch):
-    for var in ("TOPOS_SECRET_KEY", "TOPOS_PLUGIN_TESTING_SECRET"):
+    for var in (
+        "TOPOS_SECRET_KEY",
+        "TOPOS_PLUGIN_TESTING_SECRET",
+        "TOPOS_ANTHROPIC_API_KEY",
+        "TOPOS_OPENAI_API_KEY",
+        "TOPOS_GEMINI_API_KEY",
+        "TOPOS_CUSTOM_API_KEY",
+    ):
         monkeypatch.delenv(var, raising=False)
 
 
@@ -67,6 +74,38 @@ def test_apply_env_overrides_does_not_mutate_input(
     original = {"app": {"name": "Topos"}}
     secrets_store.apply_env_overrides(original)
     assert original == {"app": {"name": "Topos"}}
+
+
+def test_apply_env_overrides_lands_ai_key_at_nested_path(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("TOPOS_ANTHROPIC_API_KEY", "sk-ant-from-env")
+    merged = secrets_store.apply_env_overrides({"ai": {"enabled": True}})
+    assert merged["ai"]["keys"]["anthropic"] == "sk-ant-from-env"
+    # Pre-existing ai sub-keys are preserved (deep, not replace).
+    assert merged["ai"]["enabled"] is True
+
+
+def test_ai_env_overrides_registered_for_every_provider() -> None:
+    """Parity guard: every provider's env_var is in the override map and
+    points at ``ai.keys.<provider>``. Keeps secrets_store in sync with
+    app.ai.providers without coupling the two modules."""
+    from app.ai.providers import list_providers
+
+    for preset in list_providers():
+        assert preset.env_var in secrets_store._ENV_SECRET_OVERRIDES, (
+            f"{preset.id}: env_var {preset.env_var} not registered"
+        )
+        assert secrets_store._ENV_SECRET_OVERRIDES[preset.env_var] == (
+            "ai",
+            "keys",
+            preset.id,
+        )
+
+
+def test_secrets_template_documents_ai_keys() -> None:
+    assert "ai:" in secrets_store.SECRETS_TEMPLATE
+    assert "keys:" in secrets_store.SECRETS_TEMPLATE
 
 
 def test_register_plugin_secret_override_extends_chain(
@@ -96,9 +135,10 @@ def test_register_plugin_secret_override_is_idempotent(
     secrets_store.register_plugin_secret_override(
         "plugins.testing.token", "TOPOS_PLUGIN_TESTING_SECRET"
     )
-    assert (
-        secrets_store._ENV_SECRET_OVERRIDES["TOPOS_PLUGIN_TESTING_SECRET"]
-        == ("plugins", "testing", "token")
+    assert secrets_store._ENV_SECRET_OVERRIDES["TOPOS_PLUGIN_TESTING_SECRET"] == (
+        "plugins",
+        "testing",
+        "token",
     )
 
 
@@ -154,9 +194,7 @@ def test_warn_if_world_readable_silent_on_missing_file(
     assert all("permissive mode" not in rec.message for rec in caplog.records)
 
 
-def test_get_secret_key_source_reports_env(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_get_secret_key_source_reports_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.setenv("TOPOS_SECRET_KEY", "from-env")
     source, path = secrets_store.get_secret_key_source(
         env_var_name="TOPOS_SECRET_KEY",
