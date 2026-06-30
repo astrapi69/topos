@@ -16,6 +16,9 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {useCategories, useContainers} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {notify, errorMessage} from "../utils/notify";
+import {indexUpsertItem} from "../search/buildIndex";
+import {btn, btnPrimary, input} from "../ui/classes";
 import type {Item, Priority} from "../types/topos";
 
 const PRIORITIES: Priority[] = ["none", "low", "medium", "high", "very_high"];
@@ -41,7 +44,6 @@ export default function ItemEditor() {
     const [notes, setNotes] = useState("");
     const [loading, setLoading] = useState(!isNew);
     const [saving, setSaving] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (isNew) return;
@@ -55,20 +57,24 @@ export default function ItemEditor() {
                 setPriority(row.priority);
                 setCategoryPath(row.categoryPath ?? "");
                 setNotes(row.notes ?? "");
-                setError(null);
             })
-            .catch((e) => setError(String(e)))
+            .catch((e) =>
+                notify.error(
+                    errorMessage(e, t("topos.toast.item_load_failed", "Eintrag konnte nicht geladen werden")),
+                    e,
+                ),
+            )
             .finally(() => setLoading(false));
-    }, [isNew, itemId]);
+    }, [isNew, itemId, t]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (containerId === null) {
-            setError(t("topos.page.item_editor.container_required", "Container ist erforderlich."));
+            notify.warning(t("topos.page.item_editor.container_required", "Container ist erforderlich."));
             return;
         }
         if (!content.trim()) {
-            setError(t("topos.page.item_editor.content_required", "Inhalt ist erforderlich."));
+            notify.warning(t("topos.page.item_editor.content_required", "Inhalt ist erforderlich."));
             return;
         }
         setSaving(true);
@@ -81,19 +87,26 @@ export default function ItemEditor() {
                     categoryPath: categoryPath.trim() || null,
                     notes: notes.trim() || null,
                 });
+                indexUpsertItem(created);
+                notify.success(t("topos.toast.item_created", "Eintrag erstellt"));
                 navigate(`/containers/${created.containerId}`);
             } else if (itemId !== null) {
-                await api.items.update(itemId, {
+                const updated = await api.items.update(itemId, {
                     containerId,
                     content: content.trim(),
                     priority,
                     categoryPath: categoryPath.trim() || null,
                     notes: notes.trim() || null,
                 });
+                indexUpsertItem(updated);
+                notify.success(t("topos.toast.item_updated", "Eintrag aktualisiert"));
                 navigate(`/containers/${containerId}`);
             }
         } catch (err) {
-            setError(String(err));
+            notify.error(
+                errorMessage(err, t("topos.toast.item_save_failed", "Eintrag konnte nicht gespeichert werden")),
+                err,
+            );
         } finally {
             setSaving(false);
         }
@@ -117,6 +130,7 @@ export default function ItemEditor() {
                         testId="item-editor-container"
                     >
                         <select
+                            className={input}
                             value={containerId ?? ""}
                             onChange={(e) =>
                                 setContainerId(e.target.value === "" ? null : Number(e.target.value))
@@ -138,6 +152,7 @@ export default function ItemEditor() {
                     >
                         <input
                             type="text"
+                            className={input}
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             data-testid="item-editor-content-input"
@@ -150,6 +165,7 @@ export default function ItemEditor() {
                         testId="item-editor-priority"
                     >
                         <select
+                            className={input}
                             value={priority}
                             onChange={(e) => setPriority(e.target.value as Priority)}
                             data-testid="item-editor-priority-select"
@@ -168,6 +184,7 @@ export default function ItemEditor() {
                     >
                         <input
                             type="text"
+                            className={input}
                             value={categoryPath}
                             onChange={(e) => setCategoryPath(e.target.value)}
                             list="category-paths"
@@ -186,6 +203,7 @@ export default function ItemEditor() {
                         testId="item-editor-notes"
                     >
                         <textarea
+                            className={input}
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             data-testid="item-editor-notes-input"
@@ -193,15 +211,10 @@ export default function ItemEditor() {
                         />
                     </Field>
 
-                    {error && (
-                        <p data-testid="item-editor-error" style={{color: "#c00"}}>
-                            {error}
-                        </p>
-                    )}
-
                     <div style={{display: "flex", gap: "0.5rem"}}>
                         <button
                             type="submit"
+                            className={btnPrimary}
                             data-testid="item-editor-submit"
                             disabled={saving || loading}
                         >
@@ -211,6 +224,7 @@ export default function ItemEditor() {
                         </button>
                         <button
                             type="button"
+                            className={btn}
                             onClick={() => navigate(-1)}
                             data-testid="item-editor-cancel"
                         >

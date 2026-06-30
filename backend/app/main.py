@@ -60,7 +60,7 @@ if not CONFIG_PATH.exists() and CONFIG_EXAMPLE_PATH.exists():
     logger.info("Created config/app.yaml from app.yaml.example")
 
 DEBUG = os.getenv("TOPOS_DEBUG", "true").lower() in ("true", "1", "yes")
-CORS_ORIGINS = os.getenv("TOPOS_CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+CORS_ORIGINS = os.getenv("TOPOS_CORS_ORIGINS", "http://localhost:5183,http://localhost:3000")
 SECRET_KEY = os.getenv("TOPOS_SECRET_KEY", "")
 
 

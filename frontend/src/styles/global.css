@@ -1,3 +1,10 @@
+/* Tailwind utility layers. Preflight is disabled in tailwind.config.js
+   so these directives only emit component/utility classes and do not
+   reset the hand-written styles below. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* --- Local font faces (offline-capable, no Google Fonts CDN) --- */
 
 /* Crimson Pro (variable, latin) */

@@ -14,6 +14,8 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {notify, errorMessage} from "../utils/notify";
+import {text, muted, link, selected as selectedCls} from "../ui/classes";
 import type {CategoryNode, Item} from "../types/topos";
 
 export default function CategoryBrowse() {
@@ -21,7 +23,6 @@ export default function CategoryBrowse() {
     const items = useItems();
     const [tree, setTree] = useState<CategoryNode[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -31,11 +32,17 @@ export default function CategoryBrowse() {
                 if (!cancelled) setTree(data);
             })
             .catch((e) => {
-                if (!cancelled) setError(String(e));
+                if (!cancelled) {
+                    notify.error(
+                        errorMessage(e, t("topos.toast.categories_load_failed", "Kategorien konnten nicht geladen werden")),
+                        e,
+                    );
+                }
             });
         return () => {
             cancelled = true;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const itemsByPathPrefix = useMemo(() => {
@@ -65,12 +72,6 @@ export default function CategoryBrowse() {
                     {t("topos.page.categories.title", "Kategorien")}
                 </h1>
 
-                {error && (
-                    <p data-testid="category-browse-error" style={{color: "#c00"}}>
-                        {error}
-                    </p>
-                )}
-
                 <div
                     style={{
                         display: "grid",
@@ -84,13 +85,11 @@ export default function CategoryBrowse() {
                             type="button"
                             data-testid="category-show-uncategorized"
                             onClick={() => setSelected(null)}
+                            className={`${text} ${selected === null ? selectedCls : ""} w-full text-left rounded cursor-pointer`}
                             style={{
-                                background: selected === null ? "#def" : "none",
+                                background: selected === null ? undefined : "none",
                                 border: "none",
-                                cursor: "pointer",
-                                padding: "0.25rem 0",
-                                textAlign: "left",
-                                width: "100%",
+                                padding: "0.25rem 0.5rem",
                             }}
                         >
                             {t("topos.page.categories.uncategorized", "Ohne Kategorie")}
@@ -105,7 +104,7 @@ export default function CategoryBrowse() {
                             />
                         ))}
                         {tree.length === 0 && (
-                            <p style={{color: "#666"}}>
+                            <p className={muted}>
                                 {t("topos.page.categories.empty", "Noch keine Kategorien.")}
                             </p>
                         )}
@@ -117,23 +116,23 @@ export default function CategoryBrowse() {
                                 ? selected
                                 : t("topos.page.categories.uncategorized", "Ohne Kategorie")}
                             {" "}
-                            <small style={{color: "#666"}}>
+                            <small className={muted}>
                                 ({filteredItems.length})
                             </small>
                         </h2>
                         <ul>
                             {filteredItems.map((item) => (
                                 <li key={item.id} data-testid={`category-item-${item.id}`}>
-                                    <Link to={`/containers/${item.containerId}`}>
+                                    <Link to={`/containers/${item.containerId}`} className={link}>
                                         {item.content}
                                     </Link>{" "}
-                                    <small style={{color: "#666"}}>
+                                    <small className={muted}>
                                         ({item.categoryPath ?? "-"})
                                     </small>
                                 </li>
                             ))}
                             {filteredItems.length === 0 && (
-                                <li style={{color: "#666"}}>
+                                <li className={muted}>
                                     {t("topos.page.categories.no_items", "Keine Einträge.")}
                                 </li>
                             )}
@@ -170,21 +169,16 @@ function TreeNode({
             data-testid={`category-node-${node.path.replace(/\//g, "-")}`}
         >
             <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    paddingLeft: `${depth * 12}px`,
-                    background: isSelected ? "#def" : "transparent",
-                    borderRadius: 4,
-                }}
+                className={`flex items-center rounded ${isSelected ? selectedCls : ""}`}
+                style={{paddingLeft: `${depth * 12}px`}}
             >
                 {hasChildren ? (
                     <Collapsible.Trigger
                         data-testid={`category-toggle-${node.path.replace(/\//g, "-")}`}
+                        className={`${text} cursor-pointer`}
                         style={{
                             background: "none",
                             border: "none",
-                            cursor: "pointer",
                             width: 20,
                             padding: 0,
                         }}
@@ -198,17 +192,15 @@ function TreeNode({
                     type="button"
                     onClick={() => setSelected(node.path)}
                     data-testid={`category-select-${node.path.replace(/\//g, "-")}`}
+                    className={`${text} flex-1 text-left cursor-pointer`}
                     style={{
                         background: "none",
                         border: "none",
-                        cursor: "pointer",
                         padding: "0.25rem 0.5rem",
-                        textAlign: "left",
-                        flex: 1,
                     }}
                 >
                     {node.displayName}{" "}
-                    <small style={{color: "#666"}}>({count})</small>
+                    <small className={muted}>({count})</small>
                 </button>
             </div>
             <Collapsible.Content>

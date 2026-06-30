@@ -77,14 +77,20 @@ Third-party plugins are installed as a ZIP through Settings > Plugins:
 | TipTap | WYSIWYG/Markdown editor (StarterKit + 15 extensions) |
 | Lucide React | Icons |
 | react-toastify | Toast notifications |
+| Tailwind CSS | Utility classes (v3, Preflight disabled) - light/dark element styling |
 
-Rejected: shadcn/ui (requires Tailwind), MUI (too opinionated), Ant Design (too heavy).
+Rejected: shadcn/ui (too opinionated for this stack), MUI (too opinionated), Ant Design (too heavy).
 
-### Theming
+### Theming and styling
 
 - 5 themes: Classic, Cool Modern, Nord, Notebook, Studio (each with Light + Dark = 10 variants). Notebook + Studio were added after the original "3 themes" doc. Audit recipe to verify the current count: `grep -oE 'data-app-theme="[a-z-]+"' frontend/src/styles/global.css | sort -u`.
-- Everything via CSS variables. New UI elements MUST use CSS variables.
-- No Tailwind. Custom properties in frontend/src/styles/global.css.
+- **Two coexisting layers:**
+  1. **CSS custom properties** in `frontend/src/styles/global.css` drive the 5 app-themes (`data-app-theme`) and the shared component system (`.btn*`, AppDialog). These remain the source of truth for the multi-theme palettes.
+  2. **Tailwind CSS v3** provides per-element utility classes (added 2026-06-29; the earlier "No Tailwind" rule was explicitly retired by the maintainer). Config in `frontend/tailwind.config.js`:
+     - `darkMode: ["class", '[data-theme="dark"]']` - the `dark:` variant is keyed to the `data-theme="dark"` attribute on `<html>` (set by `hooks/useTheme.ts`), NOT a `.dark` class.
+     - `corePlugins.preflight: false` - Tailwind's reset is DISABLED so it coexists with `global.css` without clobbering the hand-written base styles and `.btn` system.
+- **Shared Tailwind class strings live in `frontend/src/ui/classes.ts`** (`btn`, `btnPrimary`, `btnDanger`, `input`, `link`, `muted`, `danger`, `badge`, `selected`). Each pairs a light colour with an explicit `dark:` variant. Reuse these instead of inventing per-element strings.
+- **Rule:** new components/elements use Tailwind classes (from `ui/classes.ts` where applicable) with explicit `dark:` variants; existing components are migrated incrementally. Never rely on bare `<button>`/`<a>` colour (it falls back to dark-on-dark UA chrome - see lessons-learned). Inline `style` beats Tailwind utilities, so move colour out of inline `style` when theming an element.
 
 ### Plugin UI (manifest-driven)
 

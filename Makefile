@@ -24,10 +24,10 @@ dev: ## Start backend + frontend (backend first, then frontend)
 		fi; \
 	fi
 	@echo "Starting Topos..."
-	@cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8000 &
+	@cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8010 &
 	@echo "Waiting for backend..."
 	@for i in 1 2 3 4 5 6 7 8 9 10; do \
-		curl -s http://localhost:8000/api/health > /dev/null 2>&1 && break; \
+		curl -s http://localhost:8010/api/health > /dev/null 2>&1 && break; \
 		sleep 1; \
 	done
 	@echo "Backend ready. Starting frontend..."
@@ -51,7 +51,7 @@ dev-bg: ## Start in background, logs to $(DEV_LOG_DIR) (stop with: make dev-down
 	@# files are written from the main recipe shell at repo root, and
 	@# the path is `.pid-backend` (NOT `../.pid-backend`).
 	@cd backend && \
-		setsid poetry run uvicorn app.main:app --reload --port 8000 \
+		setsid poetry run uvicorn app.main:app --reload --port 8010 \
 			< /dev/null > $(DEV_LOG_DIR)/backend.log 2>&1 & \
 		echo $$! > .pid-backend
 	@cd frontend && \
@@ -107,7 +107,7 @@ fix-watchers: ## Persist Linux inotify limits for vite dev (sudo required, runs 
 	@echo "Persistent across reboots."
 
 dev-backend:
-	cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8000
+	cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8010
 
 dev-frontend:
 	cd frontend && npm run dev
@@ -148,6 +148,41 @@ test-backend: ## Run backend tests
 	@echo ""
 	@echo "=== Backend Tests ==="
 	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -v
+
+# --- Fast gates + Test Impact Analysis ---
+
+test-fast: ## Fast PR-mirror gate: backend ruff+mypy+pytest, frontend tsc+vitest (no coverage, no plugins)
+	@echo ""
+	@echo "=== test-fast: backend ruff check app/ ==="
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry run ruff check app/
+	@echo ""
+	@echo "=== test-fast: backend mypy app/ ==="
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run mypy app/
+	@echo ""
+	@echo "=== test-fast: backend pytest tests/ ==="
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -q
+	@echo ""
+	@echo "=== test-fast: frontend tsc --noEmit ==="
+	cd frontend && npx tsc --noEmit
+	@echo ""
+	@echo "=== test-fast: frontend vitest run ==="
+	cd frontend && npx vitest run
+	@echo ""
+	@echo "test-fast mirrors the PR gate. Full suite incl. plugins: 'make test'."
+
+test-changed: ## Test Impact Analysis: only tests affected vs $(TIA_BASE) (vitest --changed + pytest --testmon)
+	@echo ""
+	@echo "=== test-changed: frontend Vitest --changed $(TIA_BASE) ==="
+	cd frontend && npx vitest run --changed $(TIA_BASE) --passWithNoTests
+	@echo ""
+	@echo "=== test-changed: backend pytest --testmon (vs .testmondata) ==="
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry run pip install -q pytest-testmon
+	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && { poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ --testmon -q; code=$$?; [ $$code -eq 5 ] && exit 0; exit $$code; }
+	@echo ""
+	@echo "test-changed runs only impacted tests. Full run: 'make test' (nightly/CI run the full suite)."
+
+# Base ref for Test Impact Analysis. Under gitflow set TIA_BASE=origin/develop.
+TIA_BASE ?= origin/main
 
 # Plugin test targets: skeleton ships zero plugins. When you add a
 # plugin under plugins/topos-plugin-<name>/, follow the

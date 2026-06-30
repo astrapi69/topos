@@ -4,6 +4,7 @@ import {MemoryRouter} from "react-router-dom";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import Settings from "./Settings";
+import {DialogProvider} from "../components/AppDialog";
 
 const mockGetSecretSource = vi.fn();
 
@@ -36,7 +37,9 @@ describe("Settings", () => {
     it("renders language, theme, and reset controls", () => {
         render(
             <MemoryRouter>
-                <Settings />
+                <DialogProvider>
+                    <Settings />
+                </DialogProvider>
             </MemoryRouter>,
         );
         expect(screen.getByTestId("settings-title")).toBeInTheDocument();
@@ -48,7 +51,9 @@ describe("Settings", () => {
     it("renders the secret-source label when the endpoint resolves", async () => {
         render(
             <MemoryRouter>
-                <Settings />
+                <DialogProvider>
+                    <Settings />
+                </DialogProvider>
             </MemoryRouter>,
         );
         await waitFor(() => {
@@ -65,7 +70,9 @@ describe("Settings", () => {
         });
         render(
             <MemoryRouter>
-                <Settings />
+                <DialogProvider>
+                    <Settings />
+                </DialogProvider>
             </MemoryRouter>,
         );
         await waitFor(() => {
@@ -85,7 +92,9 @@ describe("Settings", () => {
         });
         render(
             <MemoryRouter>
-                <Settings />
+                <DialogProvider>
+                    <Settings />
+                </DialogProvider>
             </MemoryRouter>,
         );
         await waitFor(() => {
@@ -99,7 +108,9 @@ describe("Settings", () => {
         mockGetSecretSource.mockRejectedValue(new Error("offline"));
         render(
             <MemoryRouter>
-                <Settings />
+                <DialogProvider>
+                    <Settings />
+                </DialogProvider>
             </MemoryRouter>,
         );
         // Wait for the rejection to settle, then assert the card never appeared.

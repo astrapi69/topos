@@ -204,6 +204,17 @@ function SuccessActionContent(
   );
 }
 
+/** Extract the best human-readable message from a thrown value.
+ *  Prefers ApiError.detail (carries the backend's reason), then a
+ *  generic Error.message, then the supplied fallback. Pair the return
+ *  value with the original error: ``notify.error(errorMessage(e, fb), e)``
+ *  so the toast shows the reason AND the "Report issue" enrichment. */
+export function errorMessage(error: unknown, fallback = "Unexpected error"): string {
+  if (error instanceof ApiError) return error.detail || fallback
+  if (error instanceof Error) return error.message || fallback
+  return fallback
+}
+
 function recordToast(_level: string, _message: string) {
   // Phase 3 of the bootstrap removed the event recorder along with
   // the rest of the book-app instrumentation. Reintroduce when a

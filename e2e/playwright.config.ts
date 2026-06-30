@@ -11,20 +11,20 @@ export default defineConfig({
     retries: process.env.CI ? 1 : 0,
     timeout: 30_000,
     use: {
-        baseURL: "http://localhost:5173",
+        baseURL: "http://localhost:5183",
         actionTimeout: 10_000,
         trace: "on-first-retry",
     },
     webServer: [
         {
-            command: "cd ../backend && poetry run uvicorn app.main:app --port 8000",
-            url: "http://localhost:8000/api/health",
+            command: "cd ../backend && poetry run uvicorn app.main:app --port 8010",
+            url: "http://localhost:8010/api/health",
             reuseExistingServer: !process.env.CI,
             timeout: 30_000,
         },
         {
             command: "cd ../frontend && npm run dev",
-            url: "http://localhost:5173",
+            url: "http://localhost:5183",
             reuseExistingServer: !process.env.CI,
             timeout: 30_000,
         },

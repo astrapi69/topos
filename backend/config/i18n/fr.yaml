@@ -11,6 +11,7 @@ topos:
     name: Topos
     description: Personal inventory tracker
   nav:
+    search: Search
     dashboard: Dashboard
     containers: Containers
     categories: Categories
@@ -54,6 +55,7 @@ topos:
     high: High
     very_high: Very high
   action:
+    due: due
     status:
       open: Open
       done: Done
@@ -71,17 +73,25 @@ topos:
       categories: Categories
       open_actions: Open actions
       search: Search
-      search_placeholder: Search content, notes, or categories...
+      search_placeholder: Search containers, items, actions...
       searching: Searching...
+      no_results: No results
+      result_count: "{count} results"
     containers:
       title: Containers
       empty: No containers found.
+      new_container: New container
+      create_title: New container
+      edit_title: Edit container
+      label_required: A label is required.
+      external_id_invalid: The number must be an integer.
     container_detail:
       no_id: No container selected.
       missing: Container not found
       items: Items
       new_item: New item
       empty: No items in this container.
+      item_actions: Actions
     item_editor:
       new_title: New item
       edit_title: Edit item
@@ -93,11 +103,23 @@ topos:
       no_items: No items.
       empty: No categories yet.
     actions:
-      title: Open actions
-      empty: No open actions.
+      title: Actions
+      empty: No actions.
       no_container: Without container
       missing_item: Item not loaded
       mark_done: Done
+      reopen: Reopen
+      new_action: New action
+      create_title: New action
+      item: Item
+      text: Text
+      due_date: Due date
+      item_required: An item is required.
+      text_required: Text is required.
+      filter_open: Open
+      filter_done: Done
+      filter_archived: Archived
+      filter_all: All
     import:
       title: Excel import
       description: >-
@@ -136,3 +158,47 @@ topos:
       actions_created: Actions created
       categories_created: Categories created
       warnings: Warnings
+  toast:
+    item_created: Item created
+    item_updated: Item updated
+    item_deleted: Item deleted
+    item_load_failed: Could not load the item
+    item_save_failed: Could not save the item
+    item_delete_failed: Could not delete the item
+    action_done: Action marked as done
+    action_done_failed: Could not complete the action
+    categories_load_failed: Could not load categories
+    import_done: Import complete
+    import_failed: Import failed
+    cache_cleared: Local cache cleared
+    cache_clear_failed: Could not clear the cache
+    action_reopened: Action reopened
+    action_reopen_failed: Could not reopen the action
+    action_created: Action created
+    action_create_failed: Could not create the action
+    action_updated: Action updated
+    action_update_failed: Could not update the action
+    action_deleted: Action deleted
+    action_delete_failed: Could not delete the action
+    container_created: Container created
+    container_updated: Container updated
+    container_deleted: Container deleted
+    container_save_failed: Could not save the container
+    container_delete_failed: Could not delete the container
+  confirm:
+    delete_item_title: Delete item?
+    delete_item_message: The item "{content}" will be permanently deleted.
+    reset_cache_title: Reset cache?
+    reset_cache_message: The local cache will be cleared and data reloaded from the server.
+    prune_title: Delete missing items?
+    prune_message: Items that are no longer in the Excel file will be permanently deleted from the database.
+    delete_action_title: Delete action?
+    delete_action_message: The action "{text}" will be permanently deleted.
+    delete_container_title: Delete container?
+    delete_container_message: The container "{label}" will be permanently deleted.
+    delete_container_items_warning: "Warning: {count} contained items will also be deleted."
+
+pwa:
+  update_available: New version available
+  update_action: Update
+  install_app: Install app

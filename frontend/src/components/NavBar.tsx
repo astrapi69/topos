@@ -6,9 +6,13 @@
  * this to a full layout with theme toggles, breadcrumbs, etc.
  */
 
+import {useState} from "react";
 import {Link, useLocation} from "react-router-dom";
+import {Search} from "lucide-react";
 
 import {useI18n} from "../hooks/useI18n";
+import {useKeyboardShortcuts} from "../hooks/useKeyboardShortcuts";
+import GlobalSearch from "./GlobalSearch";
 
 interface NavLink {
     to: string;
@@ -44,21 +48,21 @@ const LINKS: NavLink[] = [
 export default function NavBar() {
     const {t} = useI18n();
     const {pathname} = useLocation();
+    const [searchOpen, setSearchOpen] = useState(false);
+
+    useKeyboardShortcuts([
+        {keys: "mod+k", handler: () => setSearchOpen(true)},
+        {keys: "/", handler: () => setSearchOpen(true)},
+    ]);
 
     return (
         <nav
             data-testid="topos-navbar"
-            style={{
-                display: "flex",
-                gap: "1rem",
-                padding: "0.75rem 1.25rem",
-                borderBottom: "1px solid #ddd",
-                background: "#fafafa",
-                alignItems: "center",
-                fontFamily: "system-ui, sans-serif",
-            }}
+            className="flex items-center gap-4 px-5 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700"
         >
-            <strong style={{marginRight: "0.5rem"}}>{t("topos.app.name", "Topos")}</strong>
+            <strong className="mr-2 font-bold text-gray-900 dark:text-gray-100">
+                {t("topos.app.name", "Topos")}
+            </strong>
             {LINKS.map((link) => {
                 const active = link.to === "/" ? pathname === "/" : pathname.startsWith(link.to);
                 return (
@@ -66,16 +70,31 @@ export default function NavBar() {
                         key={link.to}
                         to={link.to}
                         data-testid={link.testId}
-                        style={{
-                            color: active ? "#0066cc" : "inherit",
-                            textDecoration: "none",
-                            fontWeight: active ? 600 : 400,
-                        }}
+                        className={
+                            active
+                                ? "no-underline font-semibold text-blue-600 dark:text-blue-400"
+                                : "no-underline text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                        }
                     >
                         {t(link.labelKey, link.fallback)}
                     </Link>
                 );
             })}
+            <button
+                type="button"
+                data-testid="nav-search"
+                onClick={() => setSearchOpen(true)}
+                aria-label={t("topos.nav.search", "Suchen")}
+                title={t("topos.nav.search", "Suchen")}
+                className="ml-auto inline-flex items-center gap-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+            >
+                <Search size={16} aria-hidden />
+                <span className="hidden sm:inline">{t("topos.nav.search", "Suchen")}</span>
+                <kbd className="hidden sm:inline rounded border border-gray-300 dark:border-gray-600 px-1 text-xs">
+                    Ctrl K
+                </kbd>
+            </button>
+            {searchOpen && <GlobalSearch onClose={() => setSearchOpen(false)} />}
         </nav>
     );
 }

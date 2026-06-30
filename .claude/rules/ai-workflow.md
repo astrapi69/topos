@@ -48,7 +48,7 @@ When the user says "continue", "next item", "go on" or similar:
 
 ## Not allowed (AI-specific)
 
-For code-level prohibitions (fetch, console.log, Tailwind, etc.) see coding-standards.md and architecture.md.
+For code-level prohibitions (fetch, console.log, etc.) see coding-standards.md and architecture.md. (Tailwind CSS is now part of the stack - see architecture.md "Theming and styling".)
 
 Additionally for the AI:
 - Introduce new dependencies without asking first.

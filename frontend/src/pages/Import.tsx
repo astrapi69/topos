@@ -12,6 +12,10 @@ import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {useDialog} from "../components/AppDialog";
+import {notify, errorMessage} from "../utils/notify";
+import {rebuildSearchIndex} from "../search/buildIndex";
+import {btnPrimary} from "../ui/classes";
 import type {ImportReport} from "../types/topos";
 
 export default function Import() {
@@ -20,21 +24,39 @@ export default function Import() {
     const [pruneMissing, setPruneMissing] = useState(false);
     const [report, setReport] = useState<ImportReport | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [dragging, setDragging] = useState(false);
+    const {confirm} = useDialog();
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!file) return;
+        if (pruneMissing) {
+            const ok = await confirm(
+                t("topos.confirm.prune_title", "Fehlende Einträge löschen?"),
+                t(
+                    "topos.confirm.prune_message",
+                    "Einträge, die nicht mehr in der Excel-Datei stehen, werden dauerhaft aus der Datenbank gelöscht.",
+                ),
+                "danger",
+                {
+                    confirmLabel: t("topos.page.import.upload", "Hochladen"),
+                    cancelLabel: t("topos.common.cancel", "Abbrechen"),
+                },
+            );
+            if (!ok) return;
+        }
         setSubmitting(true);
-        setError(null);
         setReport(null);
         try {
             const result = await api.importExcel(file, {pruneMissing});
             setReport(result);
             await refreshAll();
+            await rebuildSearchIndex();
+            notify.success(
+                t("topos.toast.import_done", "Import abgeschlossen"),
+            );
         } catch (err) {
-            setError(String(err));
+            notify.error(errorMessage(err, t("topos.toast.import_failed", "Import fehlgeschlagen")), err);
         } finally {
             setSubmitting(false);
         }
@@ -69,12 +91,12 @@ export default function Import() {
                         onDragLeave={() => setDragging(false)}
                         onDrop={onDrop}
                         style={{
-                            border: `2px dashed ${dragging ? "#0066cc" : "#ccc"}`,
+                            border: `2px dashed ${dragging ? "#0066cc" : "var(--border)"}`,
                             padding: "2rem",
                             textAlign: "center",
                             borderRadius: 6,
                             marginBottom: "1rem",
-                            background: dragging ? "#def" : "transparent",
+                            background: dragging ? "var(--accent-light)" : "transparent",
                         }}
                     >
                         {file ? (
@@ -114,6 +136,7 @@ export default function Import() {
 
                     <button
                         type="submit"
+                        className={btnPrimary}
                         disabled={!file || submitting}
                         data-testid="import-submit"
                     >
@@ -123,21 +146,15 @@ export default function Import() {
                     </button>
                 </form>
 
-                {error && (
-                    <p data-testid="import-error" style={{color: "#c00", marginTop: "1rem"}}>
-                        {error}
-                    </p>
-                )}
-
                 {report && (
                     <section
                         data-testid="import-report"
                         style={{
-                            border: "1px solid #0066cc",
+                            border: "1px solid var(--accent)",
                             borderRadius: 6,
                             padding: "1rem",
                             marginTop: "1.5rem",
-                            background: "#def",
+                            background: "var(--accent-light)",
                         }}
                     >
                         <h2>{t("topos.page.import.report_title", "Importbericht")}</h2>

@@ -13,14 +13,17 @@ import {db} from "../db/schema";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useTheme} from "../hooks/useTheme";
+import {useDialog} from "../components/AppDialog";
+import {notify, errorMessage} from "../utils/notify";
+import {btn, input, muted} from "../ui/classes";
 
 const LANGUAGES = ["de", "en", "es", "fr", "el", "pt", "tr", "ja"];
 
 export default function Settings() {
     const {t, lang, setLang} = useI18n();
     const {theme, toggle} = useTheme();
+    const {confirm} = useDialog();
     const [resetting, setResetting] = useState(false);
-    const [resetStatus, setResetStatus] = useState<string | null>(null);
     const [secretSource, setSecretSource] = useState<SecretSource | null>(null);
 
     useEffect(() => {
@@ -39,8 +42,20 @@ export default function Settings() {
     }, []);
 
     async function handleResetCache() {
+        const ok = await confirm(
+            t("topos.confirm.reset_cache_title", "Cache zurücksetzen?"),
+            t(
+                "topos.confirm.reset_cache_message",
+                "Der lokale Cache wird geleert und die Daten werden neu vom Server geladen.",
+            ),
+            "danger",
+            {
+                confirmLabel: t("topos.page.settings.reset", "Cache zurücksetzen"),
+                cancelLabel: t("topos.common.cancel", "Abbrechen"),
+            },
+        );
+        if (!ok) return;
         setResetting(true);
-        setResetStatus(null);
         try {
             await Promise.all([
                 db.containers.clear(),
@@ -49,9 +64,12 @@ export default function Settings() {
                 db.actions.clear(),
             ]);
             await refreshAll();
-            setResetStatus(t("topos.page.settings.reset_ok", "Cache zurückgesetzt."));
+            notify.success(t("topos.toast.cache_cleared", "Lokaler Cache geleert"));
         } catch (e) {
-            setResetStatus(String(e));
+            notify.error(
+                errorMessage(e, t("topos.toast.cache_clear_failed", "Cache konnte nicht geleert werden")),
+                e,
+            );
         } finally {
             setResetting(false);
         }
@@ -68,6 +86,7 @@ export default function Settings() {
                 <section style={{marginBottom: "1.5rem"}}>
                     <h2>{t("topos.page.settings.language", "Sprache")}</h2>
                     <select
+                        className={input}
                         value={lang}
                         onChange={(e) => setLang(e.target.value)}
                         data-testid="settings-language-select"
@@ -84,6 +103,7 @@ export default function Settings() {
                     <h2>{t("topos.page.settings.theme", "Erscheinungsbild")}</h2>
                     <button
                         type="button"
+                        className={btn}
                         onClick={toggle}
                         data-testid="settings-theme-toggle"
                     >
@@ -104,7 +124,7 @@ export default function Settings() {
                             secretSource.source === "env") && (
                             <p
                                 data-testid="settings-secret-source-hint"
-                                style={{color: "#666", fontSize: "0.875rem"}}
+                                className={muted} style={{fontSize: "0.875rem"}}
                             >
                                 {t(
                                     "topos.page.settings.secret_key_external_hint",
@@ -122,7 +142,7 @@ export default function Settings() {
 
                 <section>
                     <h2>{t("topos.page.settings.cache", "Lokaler Cache")}</h2>
-                    <p style={{color: "#666"}}>
+                    <p className={muted}>
                         {t(
                             "topos.page.settings.cache_description",
                             "Leert den IndexedDB-Cache und holt die Daten neu vom Server.",
@@ -130,6 +150,7 @@ export default function Settings() {
                     </p>
                     <button
                         type="button"
+                        className={btn}
                         onClick={handleResetCache}
                         disabled={resetting}
                         data-testid="settings-reset-cache"
@@ -138,11 +159,6 @@ export default function Settings() {
                             ? t("topos.page.settings.resetting", "Wird zurückgesetzt...")
                             : t("topos.page.settings.reset", "Cache zurücksetzen")}
                     </button>
-                    {resetStatus && (
-                        <p data-testid="settings-reset-status" style={{marginTop: "0.5rem"}}>
-                            {resetStatus}
-                        </p>
-                    )}
                 </section>
             </main>
         </>

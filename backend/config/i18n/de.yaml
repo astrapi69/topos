@@ -10,6 +10,7 @@ topos:
     name: Topos
     description: Persönliche Inventarverwaltung
   nav:
+    search: Suchen
     dashboard: Übersicht
     containers: Container
     categories: Kategorien
@@ -53,6 +54,7 @@ topos:
     high: Hoch
     very_high: Sehr hoch
   action:
+    due: fällig
     status:
       open: Offen
       done: Erledigt
@@ -70,17 +72,25 @@ topos:
       categories: Kategorien
       open_actions: Offene Aktionen
       search: Suche
-      search_placeholder: Suche im Inhalt, in Notizen, in Kategorien...
+      search_placeholder: Container, Einträge, Aktionen durchsuchen...
       searching: Suche...
+      no_results: Keine Treffer
+      result_count: "{count} Ergebnisse"
     containers:
       title: Container
       empty: Keine Container gefunden.
+      new_container: Neuer Container
+      create_title: Neuer Container
+      edit_title: Container bearbeiten
+      label_required: Bezeichnung ist erforderlich.
+      external_id_invalid: Nr. muss eine ganze Zahl sein.
     container_detail:
       no_id: Kein Container ausgewählt.
       missing: Container nicht gefunden
       items: Einträge
       new_item: Neuer Eintrag
       empty: Keine Einträge in diesem Container.
+      item_actions: Aktionen
     item_editor:
       new_title: Neuer Eintrag
       edit_title: Eintrag bearbeiten
@@ -92,11 +102,23 @@ topos:
       no_items: Keine Einträge.
       empty: Noch keine Kategorien.
     actions:
-      title: Offene Aktionen
-      empty: Keine offenen Aktionen.
+      title: Aktionen
+      empty: Keine Aktionen.
       no_container: Ohne Container
       missing_item: Eintrag nicht geladen
       mark_done: Erledigt
+      reopen: Wieder öffnen
+      new_action: Neue Aktion
+      create_title: Neue Aktion
+      item: Eintrag
+      text: Text
+      due_date: Fälligkeitsdatum
+      item_required: Eintrag ist erforderlich.
+      text_required: Text ist erforderlich.
+      filter_open: Offen
+      filter_done: Erledigt
+      filter_archived: Archiviert
+      filter_all: Alle
     import:
       title: Excel-Import
       description: >-
@@ -136,3 +158,47 @@ topos:
       actions_created: Aktionen neu
       categories_created: Kategorien neu
       warnings: Warnungen
+  toast:
+    item_created: Eintrag erstellt
+    item_updated: Eintrag aktualisiert
+    item_deleted: Eintrag gelöscht
+    item_load_failed: Eintrag konnte nicht geladen werden
+    item_save_failed: Eintrag konnte nicht gespeichert werden
+    item_delete_failed: Eintrag konnte nicht gelöscht werden
+    action_done: Aktion als erledigt markiert
+    action_done_failed: Aktion konnte nicht abgeschlossen werden
+    categories_load_failed: Kategorien konnten nicht geladen werden
+    import_done: Import abgeschlossen
+    import_failed: Import fehlgeschlagen
+    cache_cleared: Lokaler Cache geleert
+    cache_clear_failed: Cache konnte nicht geleert werden
+    action_reopened: Aktion wieder geöffnet
+    action_reopen_failed: Aktion konnte nicht wieder geöffnet werden
+    action_created: Aktion erstellt
+    action_create_failed: Aktion konnte nicht erstellt werden
+    action_updated: Aktion aktualisiert
+    action_update_failed: Aktion konnte nicht aktualisiert werden
+    action_deleted: Aktion gelöscht
+    action_delete_failed: Aktion konnte nicht gelöscht werden
+    container_created: Container erstellt
+    container_updated: Container aktualisiert
+    container_deleted: Container gelöscht
+    container_save_failed: Container konnte nicht gespeichert werden
+    container_delete_failed: Container konnte nicht gelöscht werden
+  confirm:
+    delete_item_title: Eintrag löschen?
+    delete_item_message: Der Eintrag "{content}" wird dauerhaft gelöscht.
+    reset_cache_title: Cache zurücksetzen?
+    reset_cache_message: Der lokale Cache wird geleert und die Daten werden neu vom Server geladen.
+    prune_title: Fehlende Einträge löschen?
+    prune_message: Einträge, die nicht mehr in der Excel-Datei stehen, werden dauerhaft aus der Datenbank gelöscht.
+    delete_action_title: Aktion löschen?
+    delete_action_message: Die Aktion "{text}" wird dauerhaft gelöscht.
+    delete_container_title: Container löschen?
+    delete_container_message: Der Container "{label}" wird dauerhaft gelöscht.
+    delete_container_items_warning: "Achtung: {count} zugehörige Einträge werden ebenfalls gelöscht."
+
+pwa:
+  update_available: Neue Version verfügbar
+  update_action: Aktualisieren
+  install_app: App installieren

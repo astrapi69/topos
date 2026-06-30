@@ -1,10 +1,13 @@
+import {useEffect} from "react";
 import {Route, Routes} from "react-router-dom";
 import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import {DialogProvider} from "./components/AppDialog";
+import PwaPrompts from "./components/PwaPrompts";
 import {I18nProvider} from "./hooks/useI18n";
 import {useTheme} from "./hooks/useTheme";
+import {rebuildSearchIndex} from "./search/buildIndex";
 
 import Actions from "./pages/Actions";
 import CategoryBrowse from "./pages/CategoryBrowse";
@@ -17,6 +20,13 @@ import Settings from "./pages/Settings";
 
 export default function App() {
     useTheme();
+
+    // Build the search index on app start from whatever is already cached
+    // in Dexie (instant + offline-capable). Pages refresh the cache and
+    // rebuild as fresh data arrives.
+    useEffect(() => {
+        void rebuildSearchIndex();
+    }, []);
 
     return (
         <I18nProvider>
@@ -41,6 +51,7 @@ export default function App() {
                     pauseOnHover
                     theme="colored"
                 />
+                <PwaPrompts />
             </DialogProvider>
         </I18nProvider>
     );
