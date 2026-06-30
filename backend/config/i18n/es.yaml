@@ -12,12 +12,15 @@ topos:
     description: Personal inventory tracker
   nav:
     search: Search
+    menu: Menu
     dashboard: Dashboard
     containers: Containers
     categories: Categories
     actions: Actions
     import: Import
     settings: Settings
+  offline:
+    banner: Offline mode - data is stored locally only.
   common:
     actions: Actions
     back: Back

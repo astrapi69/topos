@@ -11,12 +11,15 @@ topos:
     description: Persönliche Inventarverwaltung
   nav:
     search: Suchen
+    menu: Menü
     dashboard: Übersicht
     containers: Container
     categories: Kategorien
     actions: Aktionen
     import: Import
     settings: Einstellungen
+  offline:
+    banner: Offline-Modus - Daten werden nur lokal gespeichert.
   common:
     actions: Aktionen
     back: Zurück

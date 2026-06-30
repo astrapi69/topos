@@ -4,6 +4,7 @@ import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import {DialogProvider} from "./components/AppDialog";
+import OfflineBanner from "./components/OfflineBanner";
 import PwaPrompts from "./components/PwaPrompts";
 import {I18nProvider} from "./hooks/useI18n";
 import {useTheme} from "./hooks/useTheme";
@@ -31,6 +32,7 @@ export default function App() {
     return (
         <I18nProvider>
             <DialogProvider>
+                <OfflineBanner />
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/containers" element={<ContainerList />} />
