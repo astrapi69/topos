@@ -31,6 +31,10 @@ interface FormState {
     sizeGroup: string;
 }
 
+// Mobile-only inline field label shown inside each stacked card; hidden
+// from md up where the column header carries the label instead.
+const cellLabel = "md:hidden font-medium text-gray-500 dark:text-gray-400";
+
 const EMPTY_FORM: FormState = {
     externalId: "",
     type: "folder",
@@ -358,79 +362,79 @@ export default function ContainerList() {
                     </p>
                 )}
 
-                <table
-                    data-testid="container-table"
-                    style={{
-                        width: "100%",
-                        borderCollapse: "collapse",
-                        marginTop: "0.5rem",
-                    }}
-                >
-                    <thead>
-                        <tr style={{textAlign: "left", borderBottom: "1px solid var(--border)"}}>
-                            <th style={{padding: "0.5rem"}}>{t("topos.container.external_id", "Nr.")}</th>
-                            <th style={{padding: "0.5rem"}}>{t("topos.container.label", "Bezeichnung")}</th>
-                            <th style={{padding: "0.5rem"}}>{t("topos.container.type_label", "Typ")}</th>
-                            <th style={{padding: "0.5rem"}}>{t("topos.container.owner", "Eigentümer")}</th>
-                            <th style={{padding: "0.5rem"}}>{t("topos.container.location", "Ort")}</th>
-                            <th style={{padding: "0.5rem"}}>{t("topos.common.actions", "Aktionen")}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filtered.map((c) => (
-                            <tr
-                                key={c.id}
-                                data-testid={`container-row-${c.id}`}
-                                style={{borderBottom: "1px solid var(--border)"}}
-                            >
-                                <td style={{padding: "0.5rem"}}>{c.externalId}</td>
-                                <td style={{padding: "0.5rem"}}>
-                                    <Link
-                                        to={`/containers/${c.id}`}
-                                        className={link}
-                                        data-testid={`container-link-${c.id}`}
-                                    >
-                                        {c.label}
-                                    </Link>
-                                </td>
-                                <td style={{padding: "0.5rem"}}>
-                                    {t(`topos.container.type.${c.type}`, c.type)}
-                                </td>
-                                <td style={{padding: "0.5rem"}}>
-                                    {t(`topos.owner.${c.owner}`, c.owner)}
-                                </td>
-                                <td style={{padding: "0.5rem"}}>{c.location ?? ""}</td>
-                                <td style={{padding: "0.5rem", whiteSpace: "nowrap"}}>
-                                    <span style={{display: "inline-flex", gap: "0.5rem"}}>
-                                        <button
-                                            type="button"
-                                            className={btn}
-                                            data-testid={`container-edit-${c.id}`}
-                                            onClick={() => openEdit(c)}
-                                        >
-                                            {t("topos.common.edit", "Bearbeiten")}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={btnDanger}
-                                            data-testid={`container-delete-${c.id}`}
-                                            onClick={() => handleDelete(c)}
-                                        >
-                                            {t("topos.common.delete", "Löschen")}
-                                        </button>
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                        {filtered.length === 0 && !loading && (
-                            <tr>
-                                <td colSpan={6} className={muted} style={{padding: "1rem"}}>
-                                    {t("topos.page.containers.empty", "Keine Container gefunden.")}
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                {/*
+                 * Responsive list: a stacked card per container on mobile
+                 * (each field on its own line with a label), a 6-column
+                 * grid row from md up. One rendering keeps the test ids
+                 * stable across breakpoints.
+                 */}
+                <div data-testid="container-table" className="mt-2">
+                    <div className="hidden md:grid md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-gray-300 dark:border-gray-700 text-left font-medium text-gray-600 dark:text-gray-300">
+                        <span>{t("topos.container.external_id", "Nr.")}</span>
+                        <span>{t("topos.container.label", "Bezeichnung")}</span>
+                        <span>{t("topos.container.type_label", "Typ")}</span>
+                        <span>{t("topos.container.owner", "Eigentümer")}</span>
+                        <span>{t("topos.container.location", "Ort")}</span>
+                        <span>{t("topos.common.actions", "Aktionen")}</span>
+                    </div>
+                    {filtered.map((c) => (
+                        <div
+                            key={c.id}
+                            data-testid={`container-row-${c.id}`}
+                            className="grid grid-cols-1 md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-1 md:gap-2 md:items-center border md:border-0 md:border-b border-gray-200 dark:border-gray-700 rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
+                        >
+                            <div>
+                                <span className={cellLabel}>{t("topos.container.external_id", "Nr.")}: </span>
+                                {c.externalId}
+                            </div>
+                            <div>
+                                <span className={cellLabel}>{t("topos.container.label", "Bezeichnung")}: </span>
+                                <Link
+                                    to={`/containers/${c.id}`}
+                                    className={link}
+                                    data-testid={`container-link-${c.id}`}
+                                >
+                                    {c.label}
+                                </Link>
+                            </div>
+                            <div>
+                                <span className={cellLabel}>{t("topos.container.type_label", "Typ")}: </span>
+                                {t(`topos.container.type.${c.type}`, c.type)}
+                            </div>
+                            <div>
+                                <span className={cellLabel}>{t("topos.container.owner", "Eigentümer")}: </span>
+                                {t(`topos.owner.${c.owner}`, c.owner)}
+                            </div>
+                            <div>
+                                <span className={cellLabel}>{t("topos.container.location", "Ort")}: </span>
+                                {c.location ?? ""}
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+                                <button
+                                    type="button"
+                                    className={btn}
+                                    data-testid={`container-edit-${c.id}`}
+                                    onClick={() => openEdit(c)}
+                                >
+                                    {t("topos.common.edit", "Bearbeiten")}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={btnDanger}
+                                    data-testid={`container-delete-${c.id}`}
+                                    onClick={() => handleDelete(c)}
+                                >
+                                    {t("topos.common.delete", "Löschen")}
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                    {filtered.length === 0 && !loading && (
+                        <div data-testid="container-empty" className={`${muted} p-4`}>
+                            {t("topos.page.containers.empty", "Keine Container gefunden.")}
+                        </div>
+                    )}
+                </div>
             </main>
         </>
     );
