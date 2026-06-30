@@ -11,11 +11,77 @@
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"/>
-    <title>Topos</title>
+    <title>Topos - Personal Inventory Tracker</title>
+    <meta name="description" content="Offline-first PWA for indexing physical storage - folders, boxes, drawers. Hierarchical categories, action tracking, AI-powered content recognition."/>
+    <meta name="keywords" content="inventory, personal organization, storage tracker, offline-first, PWA, folders, boxes, home organization, file organization"/>
+    <meta name="author" content="Asterios Raptis"/>
+    <meta name="application-name" content="Topos"/>
+    <link rel="canonical" href="https://astrapi69.github.io/topos/"/>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://astrapi69.github.io/topos/"/>
+    <meta property="og:title" content="Topos - Personal Inventory Tracker"/>
+    <meta property="og:description" content="Offline-first PWA for indexing physical storage - folders, boxes, drawers. Hierarchical categories, action tracking, AI-powered content recognition."/>
+    <meta property="og:image" content="https://astrapi69.github.io/topos/og-image.png"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:locale" content="de_DE"/>
+    <meta property="og:locale:alternate" content="en_US"/>
+    <meta property="og:site_name" content="Topos"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Topos - Personal Inventory Tracker"/>
+    <meta name="twitter:description" content="Offline-first PWA for indexing physical storage - folders, boxes, drawers."/>
+    <meta name="twitter:image" content="https://astrapi69.github.io/topos/og-image.png"/>
+
+    <!-- Structured data: WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Topos",
+      "description": "Personal inventory tracker for folders, boxes, and what's inside them.",
+      "url": "https://astrapi69.github.io/topos/",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Web, Linux, macOS, Windows",
+      "author": {
+        "@type": "Person",
+        "name": "Asterios Raptis",
+        "url": "https://github.com/astrapi69"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "license": "https://opensource.org/licenses/MIT",
+      "screenshot": "https://astrapi69.github.io/topos/og-image.png",
+      "featureList": [
+        "Hierarchical category tree",
+        "Excel import",
+        "Full-text search",
+        "Action tracking",
+        "AI-powered box content recognition",
+        "Offline-first PWA",
+        "Cross-platform desktop app"
+      ],
+      "inLanguage": ["de", "en", "es", "fr", "el", "pt", "tr", "ja"]
+    }
+    </script>
     <!-- Fonts are bundled locally in public/fonts/ (no CDN dependency) -->
 </head>
 <body>
 <div id="root"></div>
+<noscript>
+    <div style="padding: 2rem; text-align: center;">
+        <h1>Topos</h1>
+        <p>Personal inventory tracker for folders, boxes, and what's inside them.</p>
+        <p>This application requires JavaScript to run.</p>
+        <p><a href="https://github.com/astrapi69/topos">View on GitHub</a></p>
+    </div>
+</noscript>
 <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
