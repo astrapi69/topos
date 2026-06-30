@@ -13,7 +13,14 @@ if (import.meta.env.DEV) {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    {/*
+      basename matches the Vite base path so routes resolve under the
+      GitHub Pages subpath (/topos/) as well as at root (make dev).
+      Without it, /topos/ matches no route and only the outside-Routes
+      offline banner renders. import.meta.env.BASE_URL is "/topos/" in the
+      GitHub Pages build, "/" otherwise.
+    */}
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <App />
     </BrowserRouter>
   </React.StrictMode>,
