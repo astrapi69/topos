@@ -72,14 +72,11 @@ export default function CategoryBrowse() {
                     {t("topos.page.categories.title", "Kategorien")}
                 </h1>
 
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: "minmax(240px, 1fr) 2fr",
-                        gap: "1.5rem",
-                        marginTop: "1rem",
-                    }}
-                >
+                {/*
+                 * Master-detail: stacked on mobile (tree first, then the
+                 * item list below), side-by-side from md up.
+                 */}
+                <div className="grid grid-cols-1 md:grid-cols-[minmax(240px,1fr)_2fr] gap-6 mt-4">
                     <aside data-testid="category-tree">
                         <button
                             type="button"

@@ -58,7 +58,7 @@ export default function Dashboard() {
 
                 <section
                     data-testid="dashboard-counts"
-                    style={{display: "flex", gap: "1.5rem", marginBottom: "1.5rem", flexWrap: "wrap"}}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
                 >
                     <Stat
                         label={t("topos.nav.containers", "Container")}
