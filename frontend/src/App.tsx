@@ -4,6 +4,7 @@ import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import {DialogProvider} from "./components/AppDialog";
+import ErrorReportDialog from "./components/ErrorReportDialog";
 import OfflineBanner from "./components/OfflineBanner";
 import PwaPrompts from "./components/PwaPrompts";
 import {I18nProvider} from "./hooks/useI18n";
@@ -54,6 +55,7 @@ export default function App() {
                     theme="colored"
                 />
                 <PwaPrompts />
+                <ErrorReportDialog />
             </DialogProvider>
         </I18nProvider>
     );
