@@ -20,6 +20,8 @@ topos:
     settings: Einstellungen
   offline:
     banner: Offline-Modus - Daten werden nur lokal gespeichert.
+  demo:
+    seeded: Demo-Daten geladen. Verbinde ein Backend für echte Daten.
   common:
     actions: Aktionen
     back: Zurück
