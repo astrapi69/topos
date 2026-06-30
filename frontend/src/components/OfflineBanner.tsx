@@ -21,11 +21,17 @@ export default function OfflineBanner() {
         let cancelled = false;
         // Shares the single /api/health probe with the data hooks
         // (see utils/backendStatus) - no second health request.
-        void isBackendAvailable().then((available) => {
-            if (!cancelled) setOffline(!available);
-        });
+        const evaluate = () =>
+            void isBackendAvailable().then((available) => {
+                if (!cancelled) setOffline(!available);
+            });
+        evaluate();
+        // Re-evaluate when a backend is connected from Settings (the probe
+        // is reset there), so the banner hides without a reload.
+        window.addEventListener("topos:data-refresh", evaluate);
         return () => {
             cancelled = true;
+            window.removeEventListener("topos:data-refresh", evaluate);
         };
     }, []);
 

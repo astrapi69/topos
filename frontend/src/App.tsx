@@ -4,6 +4,7 @@ import {ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import {DialogProvider} from "./components/AppDialog";
+import DemoSeeder from "./components/DemoSeeder";
 import ErrorReportDialog from "./components/ErrorReportDialog";
 import OfflineBanner from "./components/OfflineBanner";
 import PwaPrompts from "./components/PwaPrompts";
@@ -34,6 +35,7 @@ export default function App() {
         <I18nProvider>
             <DialogProvider>
                 <OfflineBanner />
+                <DemoSeeder />
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/containers" element={<ContainerList />} />

@@ -128,6 +128,14 @@ function useCachedCollection<T extends {id: number}>(
         };
     }, [loadCached, fetchFresh]);
 
+    // Re-read when the cache is repopulated out of band (demo seed on
+    // first start, or a backend connecting from Settings).
+    useEffect(() => {
+        const onRefresh = () => void refresh();
+        window.addEventListener("topos:data-refresh", onRefresh);
+        return () => window.removeEventListener("topos:data-refresh", onRefresh);
+    }, [refresh]);
+
     return {data, loading, error, refresh};
 }
 
@@ -247,6 +255,12 @@ export function useContainer(id: number | null): CachedSingle<Container> {
             cancelled = true;
         };
     }, [id]);
+
+    useEffect(() => {
+        const onRefresh = () => void refresh();
+        window.addEventListener("topos:data-refresh", onRefresh);
+        return () => window.removeEventListener("topos:data-refresh", onRefresh);
+    }, [refresh]);
 
     return {data, loading, error, refresh};
 }

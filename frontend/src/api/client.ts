@@ -22,8 +22,7 @@ import type {
     Owner,
     Priority,
 } from "../types/topos";
-
-const BASE = "/api";
+import {apiBase} from "./baseUrl";
 
 export class ApiError extends Error {
     status: number;
@@ -122,7 +121,7 @@ interface RequestOptions {
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const method = options.method || "GET";
-    let url = `${BASE}${path}`;
+    let url = `${apiBase()}${path}`;
     if (options.query) {
         const params = new URLSearchParams();
         for (const [k, v] of Object.entries(options.query)) {

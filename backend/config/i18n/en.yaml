@@ -21,6 +21,8 @@ topos:
     settings: Settings
   offline:
     banner: Offline mode - data is stored locally only.
+  demo:
+    seeded: Demo data loaded. Connect a backend for real data.
   common:
     actions: Actions
     back: Back
@@ -151,6 +153,15 @@ topos:
       secret_key_source_auto_generated: "Key from: auto-generated"
       secret_key_external_hint: >-
         This key is configured in {path}. Edit the file to change it.
+      backend_title: Backend connection
+      backend_description: By default the app uses a backend on the same host. If your backend runs elsewhere, enter its address here.
+      backend_url_label: Backend URL
+      backend_test: Test connection
+      backend_testing: Testing...
+      backend_connected: Connected. Loading data from the backend.
+      backend_unreachable: Backend not reachable.
+      backend_current: "Currently connected: {url}"
+      backend_same_origin: "Currently: same host (/api)"
       ai:
         title: AI Assistant
         description: "Provider, API key and model for recognising box contents from a photo."

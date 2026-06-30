@@ -11,6 +11,8 @@
  * lifetime, so every caller shares a single /api/health request.
  */
 
+import {apiBase} from "../api/baseUrl";
+
 const PROBE_TIMEOUT_MS = 3000;
 
 let probe: Promise<boolean> | null = null;
@@ -21,7 +23,7 @@ export function isBackendAvailable(): Promise<boolean> {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
             try {
-                const res = await fetch("/api/health", {signal: controller.signal});
+                const res = await fetch(`${apiBase()}/health`, {signal: controller.signal});
                 return res.ok;
             } catch {
                 return false;
