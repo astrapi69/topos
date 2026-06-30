@@ -35,6 +35,7 @@ from app.middleware.body_size_limit import (
 )
 from app.routers import (
     actions,
+    ai_settings,
     categories,
     containers,
     items,
@@ -279,6 +280,7 @@ app.add_middleware(
 
 app.include_router(licenses.router, prefix="/api")
 app.include_router(settings.router, prefix="/api")
+app.include_router(ai_settings.router, prefix="/api")
 app.include_router(plugin_install.router, prefix="/api")
 
 app.include_router(containers.router, prefix="/api")

@@ -232,6 +232,52 @@ export interface AppConfig {
     app?: Record<string, unknown>;
     plugins?: Record<string, unknown>;
     ui?: Record<string, unknown>;
+    ai?: AiConfig;
+}
+
+// --- AI provider settings ---
+
+export interface AiModel {
+    id: string;
+    label: string;
+    vision: boolean;
+}
+
+export interface AiProvider {
+    id: string;
+    label: string;
+    baseUrl: string;
+    defaultModel: string;
+    models: AiModel[];
+    envVar: string;
+    requiresApiKey: boolean;
+    requiresBaseUrl: boolean;
+    note: string;
+}
+
+export type AiKeySource = "env" | "secrets_yaml" | "app_yaml" | "none";
+
+export interface AiKeyStatus {
+    provider: string;
+    configured: boolean;
+    source: AiKeySource;
+    externallyManaged: boolean;
+}
+
+export interface AiTestResult {
+    ok: boolean;
+    errorCode: string | null;
+}
+
+/** The user's AI configuration as stored in the app config ``ai`` block.
+ *  API key values never round-trip to the frontend; ``keys`` is only
+ *  ever written (a key the user typed), never read back. */
+export interface AiConfig {
+    enabled?: boolean;
+    activeProvider?: string;
+    models?: Record<string, string>;
+    baseUrls?: Record<string, string>;
+    keys?: Record<string, string>;
 }
 
 export type SecretSourceKind =
@@ -315,7 +361,16 @@ export const api = {
     },
     settings: {
         getApp: () => request<AppConfig>("/settings/app"),
+        updateApp: (patch: {ai?: AiConfig} & Record<string, unknown>) =>
+            request<AppConfig>("/settings/app", {method: "PATCH", body: patch}),
         getSecretSource: () => request<SecretSource>("/settings/secret-source"),
+        getAiProviders: () => request<AiProvider[]>("/settings/ai/providers"),
+        getAiKeyStatus: () => request<AiKeyStatus[]>("/settings/ai/key-status"),
+        testAiConnection: (body: {
+            provider: string;
+            apiKey?: string;
+            baseUrl?: string;
+        }) => request<AiTestResult>("/settings/ai/test", {method: "POST", body}),
     },
     health: () =>
         request<{status: string; version: string; debug: boolean}>("/health"),

@@ -42,3 +42,32 @@ licensing:
 ui:
   theme: classic
   title: Topos
+
+ai:
+  # AI provider configuration for image recognition of box contents.
+  # API keys are NEVER stored in this committed file - they live in
+  # ~/.config/topos/secrets.yaml or the TOPOS_*_API_KEY env vars and
+  # are merged in at runtime. The empty ``keys`` placeholders below
+  # only document the shape; the Settings UI writes resolved values to
+  # the user-overlay app.yaml, not here.
+  enabled: false
+  active_provider: anthropic
+  # Selected model per provider. Defaults are vision-capable because
+  # the headline feature is recognising items from a photo. See
+  # GET /api/settings/ai/providers for the suggested vision models.
+  models:
+    anthropic: claude-sonnet-4-6
+    openai: gpt-4o-mini
+    google: gemini-2.0-flash
+    custom: ""
+  # base_url override for the ``custom`` (OpenAI-compatible) provider,
+  # e.g. a local Ollama instance at http://localhost:11434/v1.
+  base_urls:
+    custom: ""
+  # API keys per provider. Leave empty here; set via secrets.yaml or
+  # env. The Settings UI edits these only when not externally managed.
+  keys:
+    anthropic: ""
+    openai: ""
+    google: ""
+    custom: ""

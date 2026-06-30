@@ -148,6 +148,33 @@ topos:
       secret_key_external_hint: >-
         Dieser Schlüssel wird in {path} konfiguriert. Bearbeiten Sie die
         Datei, um ihn zu ändern.
+      ai:
+        title: KI-Assistent
+        description: "Anbieter, API-Schlüssel und Modell für die Bilderkennung von Box-Inhalten."
+        enable: KI-Funktionen aktivieren
+        provider: Anbieter
+        model: Modell
+        base_url: Basis-URL
+        api_key: API-Schlüssel
+        key_placeholder: API-Schlüssel eingeben
+        key_set: Gespeichert
+        configured: Schlüssel gespeichert
+        vision_badge: Vision
+        custom_vision_hint: "Vision-Unterstützung hängt vom gewählten Modell ab."
+        save: Speichern
+        saving: Speichern...
+        saved: KI-Einstellungen gespeichert
+        save_failed: Speichern fehlgeschlagen
+        test: Verbindung testen
+        testing: Teste...
+        test_ok: Verbindung erfolgreich
+        test_failed: Verbindung fehlgeschlagen
+        test_err_auth_error: Ungültiger API-Schlüssel
+        test_err_missing_key: Kein API-Schlüssel angegeben
+        test_err_missing_base_url: Keine Basis-URL angegeben
+        test_err_provider_error: Fehler beim Anbieter
+        test_err_network_error: Netzwerkfehler
+        test_err_unknown_provider: Unbekannter Anbieter
   import:
     report:
       containers_created: Container neu
