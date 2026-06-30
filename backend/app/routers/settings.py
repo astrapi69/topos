@@ -164,6 +164,36 @@ def add_pen_name(body: AddPenNameRequest) -> dict[str, Any]:
     }
 
 
+def _sanitize_ai_patch(ai_patch: dict[str, Any]) -> dict[str, Any]:
+    """Drop externally-managed provider keys from an incoming ai patch.
+
+    A provider key sourced from an env var or ``secrets.yaml`` must not
+    be overwritten by a Settings UI write - the UI shows those as a
+    read-only source card and never sends them, but we strip defensively
+    in case a stale value reaches the endpoint. Keys stored in the user
+    overlay (UI-editable) and all other ai fields pass through unchanged.
+    """
+    sanitized = dict(ai_patch)
+    keys = sanitized.get("keys")
+    if not isinstance(keys, dict):
+        return sanitized
+
+    from app.ai.config import is_ai_key_externally_managed
+    from app.main import _get_user_override_path
+
+    secrets_path = _get_user_override_path()
+    kept: dict[str, Any] = {}
+    for provider, value in keys.items():
+        if is_ai_key_externally_managed(provider, secrets_yaml_path=secrets_path):
+            logger.warning(
+                "Stripped externally-managed AI key for provider '%s' from PATCH", provider
+            )
+            continue
+        kept[provider] = value
+    sanitized["keys"] = kept
+    return sanitized
+
+
 @router.patch("/app")
 def update_app_settings(body: AppSettingsUpdate) -> dict[str, Any]:
     """Update app configuration (merges with existing)."""
@@ -178,7 +208,8 @@ def update_app_settings(body: AppSettingsUpdate) -> dict[str, Any]:
     if body.plugins is not None:
         current.setdefault("plugins", {}).update(body.plugins)
     if body.ai is not None:
-        current.setdefault("ai", {}).update(body.ai)
+        sanitized_ai = _sanitize_ai_patch(body.ai)
+        current["ai"] = config_overlay.deep_merge(current.get("ai") or {}, sanitized_ai)
     if body.editor is not None:
         current.setdefault("editor", {}).update(body.editor)
     if body.topics is not None:
