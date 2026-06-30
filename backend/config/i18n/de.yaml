@@ -153,6 +153,15 @@ topos:
       secret_key_external_hint: >-
         Dieser Schlüssel wird in {path} konfiguriert. Bearbeiten Sie die
         Datei, um ihn zu ändern.
+      backend_title: Backend-Verbindung
+      backend_description: Standardmäßig nutzt die App ein Backend auf demselben Host. Läuft dein Backend woanders, trage hier seine Adresse ein.
+      backend_url_label: Backend-URL
+      backend_test: Verbindung testen
+      backend_testing: Teste...
+      backend_connected: Verbunden. Daten werden vom Backend geladen.
+      backend_unreachable: Backend nicht erreichbar.
+      backend_current: "Aktuell verbunden: {url}"
+      backend_same_origin: "Aktuell: gleicher Host (/api)"
       ai:
         title: KI-Assistent
         description: "Anbieter, API-Schlüssel und Modell für die Bilderkennung von Box-Inhalten."
