@@ -17,6 +17,10 @@ import {indexRemove, indexUpsertContainer} from "../search/buildIndex";
 import {btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
 import type {ActionRow, ContainerType, Owner} from "../types/topos";
 
+// Mobile-only inline field label inside each stacked item card; hidden
+// from md up where the column header carries the label instead.
+const cellLabel = "md:hidden font-medium text-gray-500 dark:text-gray-400";
+
 interface EditState {
     type: ContainerType;
     owner: Owner;
@@ -365,94 +369,92 @@ export default function ContainerDetail() {
                         </button>
                     </header>
 
-                    <table
-                        data-testid="container-detail-items"
-                        style={{width: "100%", borderCollapse: "collapse", marginTop: "0.5rem"}}
-                    >
-                        <thead>
-                            <tr style={{textAlign: "left", borderBottom: "1px solid var(--border)"}}>
-                                <th style={{padding: "0.5rem"}}>{t("topos.item.content", "Inhalt")}</th>
-                                <th style={{padding: "0.5rem"}}>{t("topos.item.priority", "Priorität")}</th>
-                                <th style={{padding: "0.5rem"}}>{t("topos.item.category", "Kategorie")}</th>
-                                <th style={{padding: "0.5rem"}}>{t("topos.common.actions", "Aktionen")}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {items.data.map((item) => {
-                                const itemActions = actionsByItem.get(item.id) ?? [];
-                                const isOpen = expanded.has(item.id);
-                                return (
-                                    <tr
-                                        key={item.id}
-                                        id={`item-${item.id}`}
-                                        data-testid={`item-row-${item.id}`}
-                                        style={{borderBottom: "1px solid var(--border)"}}
-                                    >
-                                        <td style={{padding: "0.5rem"}}>
-                                            <div>{item.content}</div>
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 cursor-pointer"
-                                                data-testid={`item-actions-badge-${item.id}`}
-                                                onClick={() => toggleExpanded(item.id)}
+                    {/*
+                     * Responsive: a stacked card per item on mobile, a
+                     * 4-column grid row from md up. The row keeps its
+                     * `item-${id}` anchor id for deep links from search.
+                     */}
+                    <div data-testid="container-detail-items" className="mt-2">
+                        <div className="hidden md:grid md:grid-cols-[1fr_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-gray-300 dark:border-gray-700 text-left font-medium text-gray-600 dark:text-gray-300">
+                            <span>{t("topos.item.content", "Inhalt")}</span>
+                            <span>{t("topos.item.priority", "Priorität")}</span>
+                            <span>{t("topos.item.category", "Kategorie")}</span>
+                            <span>{t("topos.common.actions", "Aktionen")}</span>
+                        </div>
+                        {items.data.map((item) => {
+                            const itemActions = actionsByItem.get(item.id) ?? [];
+                            const isOpen = expanded.has(item.id);
+                            return (
+                                <div
+                                    key={item.id}
+                                    id={`item-${item.id}`}
+                                    data-testid={`item-row-${item.id}`}
+                                    className="grid grid-cols-1 md:grid-cols-[1fr_7rem_1fr_auto] gap-1 md:gap-2 md:items-start border md:border-0 md:border-b border-gray-200 dark:border-gray-700 rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
+                                >
+                                    <div>
+                                        <div>{item.content}</div>
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 cursor-pointer"
+                                            data-testid={`item-actions-badge-${item.id}`}
+                                            onClick={() => toggleExpanded(item.id)}
+                                        >
+                                            {t("topos.page.container_detail.item_actions", "Aktionen")}: {itemActions.length}{" "}
+                                            {itemActions.length > 0 ? (isOpen ? "▾" : "▸") : ""}
+                                        </button>
+                                        {isOpen && itemActions.length > 0 && (
+                                            <ul
+                                                data-testid={`item-actions-list-${item.id}`}
+                                                style={{margin: "0.25rem 0 0", paddingLeft: "1.25rem", fontSize: "0.8125rem"}}
                                             >
-                                                {t("topos.page.container_detail.item_actions", "Aktionen")}: {itemActions.length}{" "}
-                                                {itemActions.length > 0 ? (isOpen ? "▾" : "▸") : ""}
-                                            </button>
-                                            {isOpen && itemActions.length > 0 && (
-                                                <ul
-                                                    data-testid={`item-actions-list-${item.id}`}
-                                                    style={{margin: "0.25rem 0 0", paddingLeft: "1.25rem", fontSize: "0.8125rem"}}
-                                                >
-                                                    {itemActions.map((a) => (
-                                                        <li key={a.id}>
-                                                            {a.text}{" "}
-                                                            <span className={muted}>
-                                                                [{t(`topos.action.status.${a.status}`, a.status)}]
-                                                            </span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            )}
-                                        </td>
-                                        <td style={{padding: "0.5rem"}}>
-                                            {t(`topos.priority.${item.priority}`, item.priority)}
-                                        </td>
-                                        <td style={{padding: "0.5rem"}}>{item.categoryPath ?? ""}</td>
-                                        <td style={{padding: "0.5rem"}}>
-                                            <span style={{display: "inline-flex", gap: "0.5rem"}}>
-                                                <Link
-                                                    to={`/items/${item.id}`}
-                                                    className={btn}
-                                                    data-testid={`edit-item-${item.id}`}
-                                                >
-                                                    {t("topos.common.edit", "Bearbeiten")}
-                                                </Link>
-                                                <button
-                                                    type="button"
-                                                    className={btnDanger}
-                                                    data-testid={`delete-item-${item.id}`}
-                                                    onClick={() => handleDeleteItem(item.id, item.content)}
-                                                >
-                                                    {t("topos.common.delete", "Löschen")}
-                                                </button>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            {items.data.length === 0 && !items.loading && (
-                                <tr>
-                                    <td colSpan={4} className={muted} style={{padding: "1rem"}}>
-                                        {t(
-                                            "topos.page.container_detail.empty",
-                                            "Keine Einträge in diesem Container.",
+                                                {itemActions.map((a) => (
+                                                    <li key={a.id}>
+                                                        {a.text}{" "}
+                                                        <span className={muted}>
+                                                            [{t(`topos.action.status.${a.status}`, a.status)}]
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
                                         )}
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                    </div>
+                                    <div>
+                                        <span className={cellLabel}>{t("topos.item.priority", "Priorität")}: </span>
+                                        {t(`topos.priority.${item.priority}`, item.priority)}
+                                    </div>
+                                    <div>
+                                        <span className={cellLabel}>{t("topos.item.category", "Kategorie")}: </span>
+                                        {item.categoryPath ?? ""}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+                                        <Link
+                                            to={`/items/${item.id}`}
+                                            className={btn}
+                                            data-testid={`edit-item-${item.id}`}
+                                        >
+                                            {t("topos.common.edit", "Bearbeiten")}
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            className={btnDanger}
+                                            data-testid={`delete-item-${item.id}`}
+                                            onClick={() => handleDeleteItem(item.id, item.content)}
+                                        >
+                                            {t("topos.common.delete", "Löschen")}
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {items.data.length === 0 && !items.loading && (
+                            <div data-testid="container-detail-empty" className={`${muted} p-4`}>
+                                {t(
+                                    "topos.page.container_detail.empty",
+                                    "Keine Einträge in diesem Container.",
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </section>
             </main>
         </>

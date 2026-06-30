@@ -1,0 +1,45 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+# Read the repo, mint the Pages deployment token.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only the newest develop deploy matters; cancel superseded runs.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+# Coerce any straggler JavaScript action still declaring Node 20 to
+# Node 24 (matches ci.yml; Node 20 is removed 2026-09-16).
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - name: Install and build for GitHub Pages
+        working-directory: frontend
+        run: |
+          npm ci
+          GITHUB_PAGES=true npm run build
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: frontend/dist
+      - id: deployment
+        uses: actions/deploy-pages@v5
