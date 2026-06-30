@@ -1,9 +1,29 @@
 /// <reference types="vitest" />
-import {defineConfig} from "vite";
+import {copyFileSync, existsSync} from "node:fs";
+import {resolve} from "node:path";
+
+import {defineConfig, type Plugin} from "vite";
 import react from "@vitejs/plugin-react";
 import {VitePWA} from "vite-plugin-pwa";
 
 import pkg from "./package.json" with {type: "json"};
+
+// GitHub Pages has no SPA rewrite: a deep link like /topos/containers/5
+// would 404. Serving a copy of index.html as 404.html makes GH Pages
+// return the app shell for any unknown path, and React Router then
+// resolves the route client-side.
+function spa404Fallback(): Plugin {
+    return {
+        name: "spa-404-fallback",
+        apply: "build",
+        closeBundle() {
+            const index = resolve(process.cwd(), "dist", "index.html");
+            if (existsSync(index)) {
+                copyFileSync(index, resolve(process.cwd(), "dist", "404.html"));
+            }
+        },
+    };
+}
 
 // GitHub Pages serves the PWA under https://astrapi69.github.io/topos/,
 // so the production GH-Pages build needs a "/topos/" base path while
@@ -23,6 +43,7 @@ export default defineConfig({
     },
     plugins: [
         react(),
+        spa404Fallback(),
         VitePWA({
             // "prompt" (not autoUpdate) so a new service worker WAITS and we
             // can show a "new version available" toast with an update button

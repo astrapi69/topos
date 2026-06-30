@@ -19,6 +19,8 @@ topos:
     actions: Actions
     import: Import
     settings: Settings
+  offline:
+    banner: Offline mode - data is stored locally only.
   common:
     actions: Actions
     back: Back
