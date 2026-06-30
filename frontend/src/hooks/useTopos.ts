@@ -19,6 +19,7 @@ import {useCallback, useEffect, useState} from "react";
 
 import {api} from "../api/client";
 import {db, refreshTable} from "../db/schema";
+import {isBackendAvailable} from "../utils/backendStatus";
 import type {ActionRow, ActionStatus, Category, Container, Item} from "../types/topos";
 
 interface CachedResult<T> {
@@ -35,25 +36,33 @@ interface CachedSingle<T> {
     refresh: () => Promise<void>;
 }
 
+// Each refresh checks backend availability first. In Dexie-only mode
+// (no backend, e.g. the GitHub Pages PWA) it returns the local cache
+// instead of calling /api, so the console is not flooded with 404s.
+
 export async function refreshContainers(): Promise<Container[]> {
+    if (!(await isBackendAvailable())) return db.containers.toArray();
     const fresh = await api.containers.list();
     await refreshTable(db.containers, fresh);
     return fresh;
 }
 
 export async function refreshItems(): Promise<Item[]> {
+    if (!(await isBackendAvailable())) return db.items.toArray();
     const fresh = await api.items.list();
     await refreshTable(db.items, fresh);
     return fresh;
 }
 
 export async function refreshCategories(): Promise<Category[]> {
+    if (!(await isBackendAvailable())) return db.categories.toArray();
     const fresh = await api.categories.list();
     await refreshTable(db.categories, fresh);
     return fresh;
 }
 
 export async function refreshActions(): Promise<ActionRow[]> {
+    if (!(await isBackendAvailable())) return db.actions.toArray();
     const fresh = await api.actions.list();
     await refreshTable(db.actions, fresh);
     return fresh;
@@ -138,6 +147,9 @@ export function useItems(filters: {containerId?: number} = {}): CachedResult<Ite
     );
     const fetchFresh = useCallback(async () => {
         if (containerId !== undefined) {
+            if (!(await isBackendAvailable())) {
+                return db.items.where("containerId").equals(containerId).toArray();
+            }
             const fresh = await api.items.list({containerId});
             // Replace just this container's slice in the cache.
             await db.items.where("containerId").equals(containerId).delete();
@@ -165,6 +177,9 @@ export function useActions(filters: {status?: ActionStatus} = {}): CachedResult<
     );
     const fetchFresh = useCallback(async () => {
         if (status !== undefined) {
+            if (!(await isBackendAvailable())) {
+                return db.actions.where("status").equals(status).toArray();
+            }
             const fresh = await api.actions.list({status});
             await db.actions.where("status").equals(status).delete();
             if (fresh.length > 0) await db.actions.bulkPut(fresh);
@@ -189,6 +204,10 @@ export function useContainer(id: number | null): CachedSingle<Container> {
         setLoading(true);
         setError(null);
         try {
+            if (!(await isBackendAvailable())) {
+                setData(await db.containers.get(id));
+                return;
+            }
             const fresh = await api.containers.get(id);
             await db.containers.put(fresh);
             setData(fresh);
@@ -209,6 +228,10 @@ export function useContainer(id: number | null): CachedSingle<Container> {
             const cached = await db.containers.get(id);
             if (!cancelled && cached) setData(cached);
             try {
+                if (!(await isBackendAvailable())) {
+                    // Dexie-only mode: keep the cached value, no /api call.
+                    return;
+                }
                 const fresh = await api.containers.get(id);
                 if (!cancelled) {
                     setData(fresh);

@@ -1,11 +1,18 @@
 import {render, screen, waitFor} from "@testing-library/react";
-import {afterEach, describe, expect, it, vi} from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 
 import OfflineBanner from "./OfflineBanner";
+import {_resetBackendProbe} from "../utils/backendStatus";
 
 vi.mock("../hooks/useI18n", () => ({
     useI18n: () => ({t: (_k: string, fb: string) => fb}),
 }));
+
+beforeEach(() => {
+    // The backend probe is cached module-wide; reset it so each test
+    // drives its own fetch stub instead of a stale result.
+    _resetBackendProbe();
+});
 
 afterEach(() => {
     vi.unstubAllGlobals();
