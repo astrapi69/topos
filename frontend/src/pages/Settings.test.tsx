@@ -18,6 +18,10 @@ vi.mock("../api/client", () => ({
         settings: {
             getApp: vi.fn().mockResolvedValue({}),
             getSecretSource: (...args: unknown[]) => mockGetSecretSource(...args),
+            getAiProviders: vi.fn().mockResolvedValue([]),
+            getAiKeyStatus: vi.fn().mockResolvedValue([]),
+            updateApp: vi.fn().mockResolvedValue({}),
+            testAiConnection: vi.fn().mockResolvedValue({ok: true, errorCode: null}),
         },
     },
     ApiError: class extends Error {},
