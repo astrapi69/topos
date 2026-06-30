@@ -12,6 +12,7 @@ topos:
     description: Personal inventory tracker
   nav:
     search: Search
+    menu: Menu
     dashboard: Dashboard
     containers: Containers
     categories: Categories

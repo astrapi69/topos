@@ -68,6 +68,26 @@ describe("NavBar global search", () => {
         );
     });
 
+    it("toggles the mobile menu via the hamburger button", async () => {
+        render(
+            <MemoryRouter>
+                <NavBar />
+            </MemoryRouter>,
+        );
+        // The stacked mobile menu is collapsed by default.
+        expect(screen.queryByTestId("nav-mobile-menu")).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId("nav-menu-toggle"));
+        expect(screen.getByTestId("nav-mobile-menu")).toBeInTheDocument();
+        expect(screen.getByTestId("nav-import-mobile")).toBeInTheDocument();
+
+        // Selecting a link closes the menu again.
+        fireEvent.click(screen.getByTestId("nav-import-mobile"));
+        await waitFor(() =>
+            expect(screen.queryByTestId("nav-mobile-menu")).not.toBeInTheDocument(),
+        );
+    });
+
     it("closes the spotlight on Escape", async () => {
         render(
             <MemoryRouter>
