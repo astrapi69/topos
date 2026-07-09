@@ -6,7 +6,13 @@ from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
+from app.schemas.item import (
+    BulkItemsRequest,
+    BulkItemsResult,
+    ItemCreate,
+    ItemRead,
+    ItemUpdate,
+)
 from app.services import items as service
 
 router = APIRouter(prefix="/items", tags=["items"])
@@ -32,6 +38,20 @@ def get_item(item_id: int, db: Session = Depends(get_db)) -> ItemRead:
 @router.post("", response_model=ItemRead, status_code=status.HTTP_201_CREATED)
 def create_item(payload: ItemCreate, db: Session = Depends(get_db)) -> ItemRead:
     return ItemRead.model_validate(service.create_item(db, payload))
+
+
+@router.post("/bulk", response_model=BulkItemsResult)
+def create_items_bulk(payload: BulkItemsRequest, db: Session = Depends(get_db)) -> BulkItemsResult:
+    """Insert many staged items at once (photo intake commit).
+
+    Per-row validation with partial success: valid rows are created,
+    invalid ones come back as ``errors[{index, reason}]``.
+    """
+    created, errors = service.create_items_bulk(db, payload.items)
+    return BulkItemsResult(
+        created=[ItemRead.model_validate(item) for item in created],
+        errors=errors,
+    )
 
 
 @router.patch("/{item_id}", response_model=ItemRead)
