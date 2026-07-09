@@ -20,7 +20,15 @@ import {useCallback, useEffect, useState} from "react";
 import {api} from "../api/client";
 import {db, refreshTable} from "../db/schema";
 import {isBackendAvailable} from "../utils/backendStatus";
-import type {ActionRow, ActionStatus, Category, Container, Item} from "../types/topos";
+import {buildCategoryTree} from "../utils/categoryTree";
+import type {
+    ActionRow,
+    ActionStatus,
+    Category,
+    CategoryNode,
+    Container,
+    Item,
+} from "../types/topos";
 
 interface CachedResult<T> {
     data: T[];
@@ -66,6 +74,17 @@ export async function refreshActions(): Promise<ActionRow[]> {
     const fresh = await api.actions.list();
     await refreshTable(db.actions, fresh);
     return fresh;
+}
+
+/** Fetch the nested category tree. In Dexie-only mode (no backend, e.g.
+ *  the GitHub Pages PWA) ``GET /api/categories/tree`` is unreachable, so
+ *  the tree is built locally from the flat categories cached in Dexie
+ *  instead of 404-ing. */
+export async function refreshCategoryTree(): Promise<CategoryNode[]> {
+    if (!(await isBackendAvailable())) {
+        return buildCategoryTree(await db.categories.toArray());
+    }
+    return api.categories.tree();
 }
 
 /** Refresh every cached table in one shot. Called after a successful

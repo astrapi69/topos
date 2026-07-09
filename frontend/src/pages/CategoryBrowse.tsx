@@ -11,8 +11,7 @@ import {useEffect, useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 
 import NavBar from "../components/NavBar";
-import {api} from "../api/client";
-import {useItems} from "../hooks/useTopos";
+import {refreshCategoryTree, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {notify, errorMessage} from "../utils/notify";
 import {text, muted, link, selected as selectedCls} from "../ui/classes";
@@ -26,8 +25,7 @@ export default function CategoryBrowse() {
 
     useEffect(() => {
         let cancelled = false;
-        api.categories
-            .tree()
+        refreshCategoryTree()
             .then((data) => {
                 if (!cancelled) setTree(data);
             })
