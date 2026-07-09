@@ -40,6 +40,12 @@ const LINKS: NavLink[] = [
     {to: "/actions", labelKey: "topos.nav.actions", fallback: "Aktionen", testId: "nav-actions"},
     {to: "/import", labelKey: "topos.nav.import", fallback: "Import", testId: "nav-import"},
     {
+        to: "/photo-intake",
+        labelKey: "topos.nav.photo_intake",
+        fallback: "Foto-Erfassung",
+        testId: "nav-photo-intake",
+    },
+    {
         to: "/settings",
         labelKey: "topos.nav.settings",
         fallback: "Einstellungen",

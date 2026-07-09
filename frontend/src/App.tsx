@@ -19,6 +19,7 @@ import ContainerList from "./pages/ContainerList";
 import Dashboard from "./pages/Dashboard";
 import Import from "./pages/Import";
 import ItemEditor from "./pages/ItemEditor";
+import PhotoIntake from "./pages/PhotoIntake";
 import Settings from "./pages/Settings";
 
 export default function App() {
@@ -45,6 +46,7 @@ export default function App() {
                     <Route path="/categories" element={<CategoryBrowse />} />
                     <Route path="/actions" element={<Actions />} />
                     <Route path="/import" element={<Import />} />
+                    <Route path="/photo-intake" element={<PhotoIntake />} />
                     <Route path="/settings" element={<Settings />} />
                 </Routes>
                 <ToastContainer
