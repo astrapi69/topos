@@ -19,6 +19,7 @@ topos:
     actions: Actions
     import: Import
     settings: Settings
+    photo_intake: "Photo intake"
   offline:
     banner: Offline mode - data is stored locally only.
   demo:
@@ -189,6 +190,37 @@ topos:
         test_err_provider_error: Provider error
         test_err_network_error: Network error
         test_err_unknown_provider: Unknown provider
+    photo_intake:
+      title: "Photo intake"
+      description: "Take a photo of a container's contents. The AI suggests entries for you to review and accept."
+      select_container: "Which container?"
+      select_container_placeholder: "Choose a container..."
+      take_photo: "Take photo"
+      upload_file: "Upload file"
+      photo_ready: "Photo ready: {name}"
+      recognize: "Recognize"
+      recognizing: "Recognizing contents..."
+      no_items: "No items recognized"
+      staging_title: "Staging list"
+      accept_all: "Select all"
+      reject_all: "Deselect all"
+      add_manual: "Add manually"
+      remove_row: "Remove"
+      label: "Label"
+      category: "Category"
+      no_category: "No category"
+      new_category: "New: {hint}"
+      item_description: "Description"
+      commit: "Add {count} items"
+      committed: "{count} items added"
+      commit_partial: "{failed} of {total} rows failed"
+      offline: "Photo recognition needs a backend connection."
+      privacy_title: "Send the photo to the AI provider?"
+      privacy_notice: "The photo is sent to {provider} for analysis."
+      decode_failed: "Could not read the image (unsupported format, e.g. HEIC)."
+      confidence_high: "High"
+      confidence_medium: "Medium"
+      confidence_low: "Low"
   import:
     report:
       containers_created: Containers created
@@ -226,6 +258,8 @@ topos:
     container_deleted: Container deleted
     container_save_failed: Could not save the container
     container_delete_failed: Could not delete the container
+    photo_recognize_failed: "Recognition failed"
+    photo_commit_failed: "Commit failed"
   confirm:
     delete_item_title: Delete item?
     delete_item_message: The item "{content}" will be permanently deleted.

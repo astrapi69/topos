@@ -18,6 +18,7 @@ topos:
     actions: Aktionen
     import: Import
     settings: Einstellungen
+    photo_intake: "Foto-Erfassung"
   offline:
     banner: Offline-Modus - Daten werden nur lokal gespeichert.
   demo:
@@ -189,6 +190,37 @@ topos:
         test_err_provider_error: Fehler beim Anbieter
         test_err_network_error: Netzwerkfehler
         test_err_unknown_provider: Unbekannter Anbieter
+    photo_intake:
+      title: "Foto-Erfassung"
+      description: "Fotografiere den Inhalt eines Containers. Die KI schlägt Einträge vor, die du prüfst und übernimmst."
+      select_container: "In welchen Container?"
+      select_container_placeholder: "Container wählen..."
+      take_photo: "Foto aufnehmen"
+      upload_file: "Datei hochladen"
+      photo_ready: "Foto bereit: {name}"
+      recognize: "Erkennen"
+      recognizing: "Inhalte werden erkannt..."
+      no_items: "Keine Einträge erkannt"
+      staging_title: "Aufnahmeliste"
+      accept_all: "Alle auswählen"
+      reject_all: "Alle abwählen"
+      add_manual: "Manuell hinzufügen"
+      remove_row: "Entfernen"
+      label: "Bezeichnung"
+      category: "Kategorie"
+      no_category: "Keine Kategorie"
+      new_category: "Neu: {hint}"
+      item_description: "Beschreibung"
+      commit: "{count} Items übernehmen"
+      committed: "{count} Items übernommen"
+      commit_partial: "{failed} von {total} Zeilen fehlgeschlagen"
+      offline: "Foto-Erkennung benötigt eine Backend-Verbindung."
+      privacy_title: "Foto an AI-Provider senden?"
+      privacy_notice: "Das Foto wird zur Analyse an {provider} gesendet."
+      decode_failed: "Bild konnte nicht gelesen werden (Format nicht unterstützt, z. B. HEIC)."
+      confidence_high: "Hoch"
+      confidence_medium: "Mittel"
+      confidence_low: "Niedrig"
   import:
     report:
       containers_created: Container neu
@@ -226,6 +258,8 @@ topos:
     container_deleted: Container gelöscht
     container_save_failed: Container konnte nicht gespeichert werden
     container_delete_failed: Container konnte nicht gelöscht werden
+    photo_recognize_failed: "Erkennung fehlgeschlagen"
+    photo_commit_failed: "Übernahme fehlgeschlagen"
   confirm:
     delete_item_title: Eintrag löschen?
     delete_item_message: Der Eintrag "{content}" wird dauerhaft gelöscht.
