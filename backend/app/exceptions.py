@@ -40,6 +40,12 @@ class PayloadTooLargeError(ToposError):
     status_code = 413
 
 
+class RateLimitError(ToposError):
+    """Upstream provider rate limit hit (-> HTTP 429)."""
+
+    status_code = 429
+
+
 class ExternalServiceError(ToposError):
     """External dependency unreachable or returned an error (-> HTTP 502)."""
 
