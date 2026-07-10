@@ -100,11 +100,16 @@ describe("AiProviderSettings", () => {
         expect(screen.getByText(/Claude Sonnet 4.6 - Vision/)).toBeInTheDocument();
     });
 
-    it("hides the whole section when the endpoints are unreachable", async () => {
+    it("shows an offline hint instead of the controls when the endpoints are unreachable", async () => {
         mockGetProviders.mockRejectedValue(new Error("offline"));
         render(<AiProviderSettings />);
-        await new Promise((r) => setTimeout(r, 30));
-        expect(screen.queryByTestId("ai-settings-section")).not.toBeInTheDocument();
+        await waitFor(() => screen.getByTestId("ai-settings-offline-hint"));
+        // The section stays visible (a silently missing section reads
+        // as "feature does not exist"), only the controls are gone.
+        expect(screen.getByTestId("ai-settings-section")).toBeInTheDocument();
+        expect(screen.queryByTestId("ai-enable-toggle")).not.toBeInTheDocument();
+        expect(screen.queryByTestId("ai-provider-select")).not.toBeInTheDocument();
+        expect(screen.queryByTestId("ai-save-button")).not.toBeInTheDocument();
     });
 
     it("shows a read-only source card for an externally-managed key", async () => {

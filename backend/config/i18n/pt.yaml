@@ -164,6 +164,7 @@ topos:
       backend_current: "Currently connected: {url}"
       backend_same_origin: "Currently: same host (/api)"
       ai:
+        offline: "AI settings need a backend connection. Configure the backend URL above and reload the page."
         title: AI Assistant
         description: "Provider, API key and model for recognising box contents from a photo."
         enable: Enable AI features

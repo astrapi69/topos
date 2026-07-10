@@ -8,8 +8,10 @@
  * application secret key), and the backend strips such keys from any
  * PATCH defensively.
  *
- * The whole section hides itself when the AI settings endpoints are not
- * reachable (PWA / offline mode with no backend).
+ * When the AI settings endpoints are unreachable (PWA / offline mode
+ * with no backend, blocked CORS, wrong backend URL) the section stays
+ * VISIBLE with an explanatory hint instead of hiding - a silently
+ * missing section reads as "feature does not exist".
  */
 
 import {useEffect, useState} from "react";
@@ -73,7 +75,20 @@ export default function AiProviderSettings() {
         };
     }, []);
 
-    if (!loaded || !available) return null;
+    if (!loaded) return null;
+    if (!available) {
+        return (
+            <section style={{marginBottom: "1.5rem"}} data-testid="ai-settings-section">
+                <h2>{t("topos.page.settings.ai.title", "KI-Assistent")}</h2>
+                <p data-testid="ai-settings-offline-hint" className={muted}>
+                    {t(
+                        "topos.page.settings.ai.offline",
+                        "KI-Einstellungen benötigen eine Backend-Verbindung. Backend-URL oben konfigurieren und die Seite neu laden.",
+                    )}
+                </p>
+            </section>
+        );
+    }
 
     const provider = providers.find((p) => p.id === activeProvider) ?? providers[0];
     const status = keyStatus[activeProvider];

@@ -164,6 +164,7 @@ topos:
       backend_current: "Aktuell verbunden: {url}"
       backend_same_origin: "Aktuell: gleicher Host (/api)"
       ai:
+        offline: "KI-Einstellungen benötigen eine Backend-Verbindung. Backend-URL oben konfigurieren und die Seite neu laden."
         title: KI-Assistent
         description: "Anbieter, API-Schlüssel und Modell für die Bilderkennung von Box-Inhalten."
         enable: KI-Funktionen aktivieren
