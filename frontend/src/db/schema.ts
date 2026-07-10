@@ -34,13 +34,24 @@ class ToposDB extends Dexie {
 
 export const db = new ToposDB();
 
-/** Replace the cached collection for a table with a fresh server payload. */
+/**
+ * Replace the cached collection for a table with a fresh server payload.
+ *
+ * Runs as one transaction with ``bulkPut`` because refreshes overlap in
+ * practice (React StrictMode double-mounts effects; two components can
+ * share a hook). A bare clear + bulkAdd interleaves across callers and
+ * dies with a BulkError on the duplicate primary key - the hook then
+ * reports an error and the page renders an empty list even though the
+ * server responded with data.
+ */
 export async function refreshTable<T, K>(
     table: Table<T, K>,
     rows: T[],
 ): Promise<void> {
-    await table.clear();
-    if (rows.length > 0) {
-        await table.bulkAdd(rows);
-    }
+    await table.db.transaction("rw", table, async () => {
+        await table.clear();
+        if (rows.length > 0) {
+            await table.bulkPut(rows);
+        }
+    });
 }
