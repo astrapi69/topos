@@ -10,9 +10,10 @@
  * `<input type="file" accept="image/*" capture="environment">`, photos
  * are downscaled client-side before upload, and every control keeps
  * the 44px touch target from ui/classes. Works from the GitHub Pages
- * PWA when a backend URL is configured in Settings; in Dexie-only mode
- * the camera stays usable but recognition/commit are disabled with a
- * hint.
+ * PWA when a backend URL is configured in Settings. In Dexie-only mode
+ * (no backend) recognition still works browser-direct via the local AI
+ * settings (adaptive-learner pattern); only the commit needs a backend
+ * because the backend stays the source of truth for item writes.
  *
  * Testid namespace: `photo-intake-*`; per-row ids are
  * `photo-intake-row-{index}` plus `-checkbox`, `-label`, `-category`,
@@ -24,7 +25,15 @@ import {useNavigate} from "react-router-dom";
 import {Camera, Plus, Trash2, Upload} from "lucide-react";
 
 import NavBar from "../components/NavBar";
-import {api, type BulkItemCreate, type RecognizedItem} from "../api/client";
+import {
+    getLocalAiConfig,
+    getProviderPreset,
+    isLocalAiConfigured,
+    recognizePhotoDirect,
+    resolveLocalAiProvider,
+} from "../ai";
+import {api, type BulkItemCreate, type RecognizedItem, type VisionResult} from "../api/client";
+import type {Container} from "../types/topos";
 import {useDialog} from "../components/AppDialog";
 import {useI18n} from "../hooks/useI18n";
 import {useOnlineStatus} from "../hooks/useOnlineStatus";
@@ -93,6 +102,7 @@ export default function PhotoIntake() {
     const {data: categories} = useCategories();
 
     const [backendUp, setBackendUp] = useState<boolean | null>(null);
+    const [localAiReady, setLocalAiReady] = useState(false);
     const [providerLabel, setProviderLabel] = useState("AI");
     const [containerId, setContainerId] = useState("");
     const [photo, setPhoto] = useState<CapturedPhoto | null>(null);
@@ -110,7 +120,14 @@ export default function PhotoIntake() {
         isBackendAvailable().then((available) => {
             if (cancelled) return;
             setBackendUp(available);
-            if (!available) return;
+            if (!available) {
+                // No backend: the browser-local AI settings drive recognition.
+                const localConfig = getLocalAiConfig();
+                setLocalAiReady(isLocalAiConfigured());
+                const preset = getProviderPreset(localConfig.activeProvider);
+                setProviderLabel(preset?.label ?? localConfig.activeProvider);
+                return;
+            }
             void Promise.all([api.settings.getApp(), api.settings.getAiProviders()])
                 .then(([config, providers]) => {
                     if (cancelled) return;
@@ -128,6 +145,7 @@ export default function PhotoIntake() {
     }, []);
 
     const backendReady = online && backendUp === true;
+    const recognizeReady = backendReady || (online && localAiReady);
     const knownPaths = useMemo(
         () => new Set(categories.map((category) => category.path)),
         [categories],
@@ -161,8 +179,36 @@ export default function PhotoIntake() {
         }
     }
 
+    function requestRecognition(
+        photoData: CapturedPhoto,
+        container: Container,
+    ): Promise<VisionResult> {
+        if (backendReady) {
+            return api.ai.recognize(photoData.blob, {
+                containerId: container.id,
+                containerType: container.type,
+                fileName: photoData.fileName,
+            });
+        }
+        const resolved = resolveLocalAiProvider();
+        if (!resolved) {
+            throw new Error(
+                t(
+                    "topos.page.photo_intake.offline",
+                    "Foto-Erkennung benötigt eine Backend-Verbindung oder gespeicherte KI-Einstellungen (Einstellungen: KI-Assistent).",
+                ),
+            );
+        }
+        return recognizePhotoDirect(resolved, {
+            photo: photoData.blob,
+            mediaType: photoData.blob.type || "image/jpeg",
+            containerType: container.type,
+            categories: categories.map((category) => category.path),
+        });
+    }
+
     async function handleRecognize() {
-        if (!photo || !selectedContainer || recognizing || !backendReady) return;
+        if (!photo || !selectedContainer || recognizing || !recognizeReady) return;
         if (!privacyAccepted) {
             const accepted = await confirm(
                 t("topos.page.photo_intake.privacy_title", "Foto an AI-Provider senden?"),
@@ -181,11 +227,7 @@ export default function PhotoIntake() {
         }
         setRecognizing(true);
         try {
-            const recognition = await api.ai.recognize(photo.blob, {
-                containerId: selectedContainer.id,
-                containerType: selectedContainer.type,
-                fileName: photo.fileName,
-            });
+            const recognition = await requestRecognition(photo, selectedContainer);
             setStaged((previous) => [...previous, ...recognition.items.map(toStagedRow)]);
             setRecognizedOnce(true);
         } catch (err) {
@@ -373,18 +415,18 @@ export default function PhotoIntake() {
                             type="button"
                             data-testid="photo-intake-recognize"
                             className={btnPrimary}
-                            disabled={!photo || !selectedContainer || recognizing || !backendReady}
+                            disabled={!photo || !selectedContainer || recognizing || !recognizeReady}
                             onClick={() => void handleRecognize()}
                         >
                             {recognizing
                                 ? t("topos.page.photo_intake.recognizing", "Inhalte werden erkannt...")
                                 : t("topos.page.photo_intake.recognize", "Erkennen")}
                         </button>
-                        {!backendReady && backendUp !== null && (
+                        {!recognizeReady && backendUp !== null && (
                             <span data-testid="photo-intake-offline-hint" className={muted}>
                                 {t(
                                     "topos.page.photo_intake.offline",
-                                    "Foto-Erkennung benötigt eine Backend-Verbindung.",
+                                    "Foto-Erkennung benötigt eine Backend-Verbindung oder gespeicherte KI-Einstellungen (Einstellungen: KI-Assistent).",
                                 )}
                             </span>
                         )}
@@ -455,7 +497,7 @@ export default function PhotoIntake() {
                     </ul>
 
                     {staged.length > 0 && (
-                        <div className="mt-4">
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
                             <button
                                 type="button"
                                 data-testid="photo-intake-commit"
@@ -470,6 +512,17 @@ export default function PhotoIntake() {
                             >
                                 {commitLabel}
                             </button>
+                            {!backendReady && backendUp !== null && (
+                                <span
+                                    data-testid="photo-intake-commit-offline-hint"
+                                    className={muted}
+                                >
+                                    {t(
+                                        "topos.page.photo_intake.commit_offline",
+                                        "Übernehmen benötigt eine Backend-Verbindung.",
+                                    )}
+                                </span>
+                            )}
                         </div>
                     )}
                 </section>

@@ -9,6 +9,7 @@ const mockGetKeyStatus = vi.fn();
 const mockGetApp = vi.fn();
 const mockUpdateApp = vi.fn();
 const mockTest = vi.fn();
+const mockTestDirect = vi.fn();
 
 vi.mock("../api/client", () => ({
     api: {
@@ -20,6 +21,12 @@ vi.mock("../api/client", () => ({
             testAiConnection: (body: unknown) => mockTest(body),
         },
     },
+}));
+
+// Keep the real presets + localStorage store; only the network probe is faked.
+vi.mock("../ai", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("../ai")>()),
+    testAiConnectionDirect: (body: unknown) => mockTestDirect(body),
 }));
 
 vi.mock("../hooks/useI18n", () => ({
@@ -72,6 +79,7 @@ function statuses(overrides: Record<string, unknown> = {}) {
 describe("AiProviderSettings", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        localStorage.clear();
         // mockResolvedValue (not Once) survives React 18 strict double-mount.
         mockGetProviders.mockResolvedValue(PROVIDERS);
         mockGetKeyStatus.mockResolvedValue(statuses());
@@ -80,6 +88,7 @@ describe("AiProviderSettings", () => {
         });
         mockUpdateApp.mockResolvedValue({});
         mockTest.mockResolvedValue({ok: true, errorCode: null});
+        mockTestDirect.mockResolvedValue({ok: true, errorCode: null});
     });
 
     it("renders the provider, model and key controls after load", async () => {
@@ -100,16 +109,82 @@ describe("AiProviderSettings", () => {
         expect(screen.getByText(/Claude Sonnet 4.6 - Vision/)).toBeInTheDocument();
     });
 
-    it("shows an offline hint instead of the controls when the endpoints are unreachable", async () => {
+    it("falls back to a fully functional local form when the endpoints are unreachable", async () => {
         mockGetProviders.mockRejectedValue(new Error("offline"));
         render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-settings-offline-hint"));
-        // The section stays visible (a silently missing section reads
-        // as "feature does not exist"), only the controls are gone.
-        expect(screen.getByTestId("ai-settings-section")).toBeInTheDocument();
-        expect(screen.queryByTestId("ai-enable-toggle")).not.toBeInTheDocument();
-        expect(screen.queryByTestId("ai-provider-select")).not.toBeInTheDocument();
-        expect(screen.queryByTestId("ai-save-button")).not.toBeInTheDocument();
+        await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
+        // No backend: the SAME controls stay usable, backed by localStorage
+        // (adaptive-learner pattern) - never a dead "needs a backend" stub.
+        expect(screen.getByTestId("ai-enable-toggle")).toBeInTheDocument();
+        expect(screen.getByTestId("ai-provider-select")).toBeInTheDocument();
+        expect(screen.getByTestId("ai-save-button")).toBeInTheDocument();
+        expect(screen.getByTestId("ai-test-button")).toBeInTheDocument();
+        // The client-side preset mirror fills the provider dropdown.
+        expect(screen.getByText("Anthropic (Claude)")).toBeInTheDocument();
+        expect(screen.getByText("Google (Gemini)")).toBeInTheDocument();
+        expect(screen.getByText("Custom (OpenAI-compatible)")).toBeInTheDocument();
+    });
+
+    it("saves the local config including the typed key to localStorage", async () => {
+        mockGetProviders.mockRejectedValue(new Error("offline"));
+        render(<AiProviderSettings />);
+        await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
+        fireEvent.click(screen.getByTestId("ai-enable-toggle"));
+        fireEvent.change(screen.getByTestId("ai-key-input"), {
+            target: {value: "sk-local"},
+        });
+        fireEvent.click(screen.getByTestId("ai-save-button"));
+        await waitFor(() => {
+            expect(screen.getByTestId("ai-key-configured")).toBeInTheDocument();
+        });
+        const stored = JSON.parse(localStorage.getItem("topos.ai_config") ?? "{}");
+        expect(stored.enabled).toBe(true);
+        expect(stored.keys).toEqual({anthropic: "sk-local"});
+        expect(notify.success).toHaveBeenCalled();
+        expect(mockUpdateApp).not.toHaveBeenCalled();
+    });
+
+    it("loads a previously stored local config on mount", async () => {
+        localStorage.setItem(
+            "topos.ai_config",
+            JSON.stringify({
+                enabled: true,
+                activeProvider: "google",
+                models: {},
+                baseUrls: {},
+                keys: {google: "g-key"},
+            }),
+        );
+        mockGetProviders.mockRejectedValue(new Error("offline"));
+        render(<AiProviderSettings />);
+        await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
+        expect(screen.getByTestId("ai-provider-select")).toHaveValue("google");
+        expect(screen.getByTestId("ai-enable-toggle")).toBeChecked();
+        expect(screen.getByTestId("ai-key-configured")).toBeInTheDocument();
+    });
+
+    it("tests the connection browser-direct with the stored key in local mode", async () => {
+        localStorage.setItem(
+            "topos.ai_config",
+            JSON.stringify({
+                enabled: true,
+                activeProvider: "anthropic",
+                models: {},
+                baseUrls: {},
+                keys: {anthropic: "sk-stored"},
+            }),
+        );
+        mockGetProviders.mockRejectedValue(new Error("offline"));
+        render(<AiProviderSettings />);
+        await waitFor(() => screen.getByTestId("ai-test-button"));
+        fireEvent.click(screen.getByTestId("ai-test-button"));
+        await waitFor(() => {
+            expect(mockTestDirect).toHaveBeenCalledWith(
+                expect.objectContaining({provider: "anthropic", apiKey: "sk-stored"}),
+            );
+        });
+        expect(mockTest).not.toHaveBeenCalled();
+        expect(notify.success).toHaveBeenCalled();
     });
 
     it("shows a read-only source card for an externally-managed key", async () => {

@@ -164,7 +164,7 @@ topos:
       backend_current: "Currently connected: {url}"
       backend_same_origin: "Currently: same host (/api)"
       ai:
-        offline: "AI settings need a backend connection. Configure the backend URL above and reload the page."
+        local_mode: "No backend connected: settings and API keys are stored in this browser only, and AI requests go directly to the provider."
         title: AI Assistant
         description: "Provider, API key and model for recognising box contents from a photo."
         enable: Enable AI features
@@ -215,7 +215,8 @@ topos:
       commit: "Add {count} items"
       committed: "{count} items added"
       commit_partial: "{failed} of {total} rows failed"
-      offline: "Photo recognition needs a backend connection."
+      commit_offline: "Committing items needs a backend connection."
+      offline: "Photo recognition needs a backend connection or AI settings saved in this browser (Settings: AI assistant)."
       privacy_title: "Send the photo to the AI provider?"
       privacy_notice: "The photo is sent to {provider} for analysis."
       decode_failed: "Could not read the image (unsupported format, e.g. HEIC)."

@@ -164,7 +164,7 @@ topos:
       backend_current: "Aktuell verbunden: {url}"
       backend_same_origin: "Aktuell: gleicher Host (/api)"
       ai:
-        offline: "KI-Einstellungen benötigen eine Backend-Verbindung. Backend-URL oben konfigurieren und die Seite neu laden."
+        local_mode: "Kein Backend verbunden: Einstellungen und API-Schlüssel werden nur in diesem Browser gespeichert, KI-Anfragen gehen direkt an den Anbieter."
         title: KI-Assistent
         description: "Anbieter, API-Schlüssel und Modell für die Bilderkennung von Box-Inhalten."
         enable: KI-Funktionen aktivieren
@@ -215,7 +215,8 @@ topos:
       commit: "{count} Items übernehmen"
       committed: "{count} Items übernommen"
       commit_partial: "{failed} von {total} Zeilen fehlgeschlagen"
-      offline: "Foto-Erkennung benötigt eine Backend-Verbindung."
+      commit_offline: "Übernehmen benötigt eine Backend-Verbindung."
+      offline: "Foto-Erkennung benötigt eine Backend-Verbindung oder gespeicherte KI-Einstellungen (Einstellungen: KI-Assistent)."
       privacy_title: "Foto an AI-Provider senden?"
       privacy_notice: "Das Foto wird zur Analyse an {provider} gesendet."
       decode_failed: "Bild konnte nicht gelesen werden (Format nicht unterstützt, z. B. HEIC)."
