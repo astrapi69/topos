@@ -22,26 +22,42 @@ vi.mock("../components/AppDialog", () => ({
     }),
 }));
 
+const BASE_CONTAINER = {
+    id: 42,
+    externalId: 7,
+    type: "box",
+    owner: "self",
+    label: "Kellerbox",
+    description: null,
+    location: null,
+    sizeGroup: null,
+    createdAt: "",
+    updatedAt: "",
+};
+
+const CREATED_CONTAINER = {
+    ...BASE_CONTAINER,
+    id: 43,
+    externalId: 12,
+    label: "Neue Box",
+};
+
+// Mutable so the refresh mock can make the freshly created container
+// show up in the select, mirroring the real read-through cache.
+const containersData = [BASE_CONTAINER];
+const refreshContainersMock = vi.fn(async () => {
+    if (!containersData.some((row) => row.id === CREATED_CONTAINER.id)) {
+        containersData.push(CREATED_CONTAINER);
+    }
+});
+
 vi.mock("../hooks/useTopos", () => ({
     refreshAll: vi.fn(async () => {}),
     useContainers: () => ({
-        data: [
-            {
-                id: 42,
-                externalId: 7,
-                type: "box",
-                owner: "self",
-                label: "Kellerbox",
-                description: null,
-                location: null,
-                sizeGroup: null,
-                createdAt: "",
-                updatedAt: "",
-            },
-        ],
+        data: containersData,
         loading: false,
         error: null,
-        refresh: vi.fn(),
+        refresh: refreshContainersMock,
     }),
     useCategories: () => ({
         data: [
@@ -97,6 +113,7 @@ vi.mock("../utils/imageResize", () => {
 
 vi.mock("../search/buildIndex", () => ({
     rebuildSearchIndex: vi.fn(async () => {}),
+    indexUpsertContainer: vi.fn(),
 }));
 
 vi.mock("../utils/notify", () => ({
@@ -141,6 +158,20 @@ vi.mock("../api/client", () => ({
                 errors: [],
             })),
         },
+        containers: {
+            create: vi.fn(async () => ({
+                id: 43,
+                externalId: 12,
+                type: "box",
+                owner: "self",
+                label: "Neue Box",
+                description: null,
+                location: null,
+                sizeGroup: null,
+                createdAt: "",
+                updatedAt: "",
+            })),
+        },
         i18n: {get: vi.fn(async () => ({}))},
     },
 }));
@@ -183,6 +214,7 @@ beforeEach(() => {
     (isBackendAvailable as ReturnType<typeof vi.fn>).mockResolvedValue(true);
     localAiConfiguredMock.mockReturnValue(false);
     resolveLocalMock.mockReturnValue(null);
+    containersData.splice(1); // drop containers added by the refresh mock
     URL.createObjectURL = vi.fn(() => "blob:preview");
     URL.revokeObjectURL = vi.fn();
 });
@@ -365,5 +397,40 @@ describe("PhotoIntake", () => {
         expect(
             screen.getByTestId("photo-intake-commit-offline-hint"),
         ).toBeInTheDocument();
+    });
+
+    it("creates a container inline and auto-selects it", async () => {
+        renderPage();
+        // The toggle enables once the backend probe resolves.
+        await waitFor(() =>
+            expect(screen.getByTestId("container-quick-create-toggle")).not.toBeDisabled(),
+        );
+        fireEvent.click(screen.getByTestId("container-quick-create-toggle"));
+        fireEvent.change(screen.getByTestId("container-quick-create-external-id"), {
+            target: {value: "12"},
+        });
+        fireEvent.change(screen.getByTestId("container-quick-create-label"), {
+            target: {value: "Neue Box"},
+        });
+        fireEvent.submit(screen.getByTestId("container-quick-create-form"));
+
+        await waitFor(() => expect(api.containers.create).toHaveBeenCalled());
+        expect(refreshContainersMock).toHaveBeenCalled();
+        // The fresh container is selected as the photo target right away.
+        await waitFor(() =>
+            expect(screen.getByTestId("photo-intake-container-select")).toHaveValue("43"),
+        );
+        expect(screen.getByText("12 - Neue Box")).toBeInTheDocument();
+        expect(
+            screen.queryByTestId("container-quick-create-form"),
+        ).not.toBeInTheDocument();
+    });
+
+    it("disables the inline container creation without a backend", async () => {
+        (isBackendAvailable as ReturnType<typeof vi.fn>).mockResolvedValue(false);
+        renderPage();
+        await waitFor(() =>
+            expect(screen.getByTestId("container-quick-create-toggle")).toBeDisabled(),
+        );
     });
 });

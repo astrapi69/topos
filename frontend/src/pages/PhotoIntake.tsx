@@ -17,13 +17,16 @@
  *
  * Testid namespace: `photo-intake-*`; per-row ids are
  * `photo-intake-row-{index}` plus `-checkbox`, `-label`, `-category`,
- * `-description`, `-confidence`, `-remove` suffixes.
+ * `-description`, `-confidence`, `-remove` suffixes. The inline
+ * container creation uses the `container-quick-create-*` namespace
+ * (see components/ContainerQuickCreate).
  */
 
 import {useEffect, useMemo, useRef, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {Camera, Plus, Trash2, Upload} from "lucide-react";
 
+import ContainerQuickCreate from "../components/ContainerQuickCreate";
 import NavBar from "../components/NavBar";
 import {
     getLocalAiConfig,
@@ -98,7 +101,7 @@ export default function PhotoIntake() {
     const {confirm} = useDialog();
     const navigate = useNavigate();
     const online = useOnlineStatus();
-    const {data: containers} = useContainers();
+    const {data: containers, refresh: refreshContainers} = useContainers();
     const {data: categories} = useCategories();
 
     const [backendUp, setBackendUp] = useState<boolean | null>(null);
@@ -354,6 +357,16 @@ export default function PhotoIntake() {
                             ))}
                         </select>
                     </label>
+
+                    <div className="flex flex-col items-start gap-2">
+                        <ContainerQuickCreate
+                            disabled={!backendReady}
+                            onCreated={(created) => {
+                                setContainerId(String(created.id));
+                                void refreshContainers();
+                            }}
+                        />
+                    </div>
 
                     <div className="flex flex-wrap gap-2">
                         <input

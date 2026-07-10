@@ -147,6 +147,38 @@ test("photo intake: staging edits - deselect, remove, manual row", async ({page}
     expect(contents).toEqual(["Handnotiz", "Steuerbescheid 2023"]);
 });
 
+test("photo intake: inline container creation selects the new container", async ({
+    page,
+}) => {
+    await page.goto("/photo-intake");
+    await expect(page.getByTestId("photo-intake-title")).toBeVisible();
+
+    // Expand the quick-create form (required fields only).
+    await expect(page.getByTestId("container-quick-create-toggle")).toBeEnabled();
+    await page.getByTestId("container-quick-create-toggle").click();
+    await page.getByTestId("container-quick-create-external-id").fill("9002");
+    await page.getByTestId("container-quick-create-label").fill("Inline angelegte Box");
+    await page.getByTestId("container-quick-create-submit").click();
+
+    // The form collapses and the fresh container is the selected target.
+    await expect(page.getByTestId("container-quick-create-form")).toHaveCount(0);
+    await expect(page.getByTestId("photo-intake-container-select")).toContainText(
+        "9002 - Inline angelegte Box",
+    );
+    const selectedId = await page
+        .getByTestId("photo-intake-container-select")
+        .inputValue();
+    expect(Number(selectedId)).toBeGreaterThan(0);
+
+    // The container really exists in the backend.
+    const containers = await (await fetch(`${API}/containers`)).json();
+    const created = containers.find(
+        (container: {external_id: number}) => container.external_id === 9002,
+    );
+    expect(created.label).toBe("Inline angelegte Box");
+    expect(String(created.id)).toBe(selectedId);
+});
+
 for (const width of [600, 800, 1080]) {
     test(`photo intake: layout at ${width}px keeps all controls reachable`, async ({
         page,
