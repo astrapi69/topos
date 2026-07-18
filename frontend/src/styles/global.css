@@ -736,6 +736,13 @@ html {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Keyboard focus: one visible ring everywhere, shown instantly
+   (never animated - keyboard users need the indicator at once). */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 body {
     font-family: var(--font-body);
     color: var(--text-primary);

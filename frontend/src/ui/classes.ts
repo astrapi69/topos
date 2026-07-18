@@ -40,6 +40,11 @@ export const badge =
     "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-line " +
     "text-xs text-ink-secondary bg-surface-2 cursor-pointer";
 
+// Non-interactive status pill (e.g. action status).
+export const pill =
+    "inline-flex items-center px-2 py-0.5 rounded-full border border-line " +
+    "text-xs text-ink-secondary bg-surface-2";
+
 // Form controls. Taller tap target on mobile (44px), compact on desktop.
 // dark:bg-page drops the field one step below the card surface, the
 // same figure/ground relation the light mode gets from white-on-slate.

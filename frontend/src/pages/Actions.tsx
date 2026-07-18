@@ -20,7 +20,7 @@ import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
 import {indexRemove, indexUpsertAction} from "../search/buildIndex";
-import {btn, btnPrimary, btnDanger, input, muted, link} from "../ui/classes";
+import {btn, btnPrimary, btnDanger, input, muted, link, pill} from "../ui/classes";
 import type {ActionRow, ActionStatus} from "../types/topos";
 
 type StatusFilter = ActionStatus | "all";
@@ -370,10 +370,10 @@ export default function Actions() {
                                                             </span>
                                                         )}
                                                         <span
-                                                            className={muted}
-                                                            style={{marginLeft: "0.5rem", fontSize: "0.8125rem"}}
+                                                            className={`${pill} ml-2`}
+                                                            data-testid={`action-status-${action.id}`}
                                                         >
-                                                            [{t(`topos.action.status.${action.status}`, action.status)}]
+                                                            {t(`topos.action.status.${action.status}`, action.status)}
                                                         </span>
                                                         <br />
                                                         {item ? (

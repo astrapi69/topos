@@ -6,6 +6,7 @@
 
 import {useEffect, useMemo, useState} from "react";
 import {useParams, Link, useNavigate, useLocation} from "react-router-dom";
+import {ChevronDown, ChevronRight} from "lucide-react";
 
 import NavBar from "../components/NavBar";
 import {useActions, useContainer, useItems} from "../hooks/useTopos";
@@ -399,8 +400,13 @@ export default function ContainerDetail() {
                                             data-testid={`item-actions-badge-${item.id}`}
                                             onClick={() => toggleExpanded(item.id)}
                                         >
-                                            {t("topos.page.container_detail.item_actions", "Aktionen")}: {itemActions.length}{" "}
-                                            {itemActions.length > 0 ? (isOpen ? "▾" : "▸") : ""}
+                                            {t("topos.page.container_detail.item_actions", "Aktionen")}: {itemActions.length}
+                                            {itemActions.length > 0 &&
+                                                (isOpen ? (
+                                                    <ChevronDown size={14} aria-hidden />
+                                                ) : (
+                                                    <ChevronRight size={14} aria-hidden />
+                                                ))}
                                         </button>
                                         {isOpen && itemActions.length > 0 && (
                                             <ul

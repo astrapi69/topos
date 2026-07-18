@@ -105,6 +105,8 @@ topos:
       content_required: Inhalt ist erforderlich.
     categories:
       title: Kategorien
+      expand: Aufklappen
+      collapse: Zuklappen
       uncategorized: Ohne Kategorie
       no_items: Keine Einträge.
       empty: Noch keine Kategorien.

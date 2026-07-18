@@ -106,6 +106,8 @@ topos:
       content_required: Content is required.
     categories:
       title: Categories
+      expand: Expand
+      collapse: Collapse
       uncategorized: Uncategorized
       no_items: No items.
       empty: No categories yet.
