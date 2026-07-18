@@ -3,7 +3,7 @@
  * browser-direct provider calls for the no-backend (Dexie-only) mode.
  */
 
-export {AI_PROVIDER_PRESETS, getProviderPreset} from "./providerPresets";
+export {AI_PROVIDER_PRESETS, getProviderPreset, supportsBrowserDirect} from "./providerPresets";
 export {
     getLocalAiConfig,
     isLocalAiConfigured,

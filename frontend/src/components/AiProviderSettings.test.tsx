@@ -125,6 +125,36 @@ describe("AiProviderSettings", () => {
         expect(screen.getByText("Custom (OpenAI-compatible)")).toBeInTheDocument();
     });
 
+    it("gates non-anthropic providers behind a backend in local mode", async () => {
+        mockGetProviders.mockRejectedValue(new Error("offline"));
+        render(<AiProviderSettings />);
+        await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
+
+        // Anthropic: browser-direct works, controls enabled.
+        expect(screen.queryByTestId("ai-requires-backend")).not.toBeInTheDocument();
+        expect(screen.getByTestId("ai-save-button")).not.toBeDisabled();
+        expect(screen.getByTestId("ai-test-button")).not.toBeDisabled();
+
+        // OpenAI: CORS-blocked in the browser -> gated.
+        fireEvent.change(screen.getByTestId("ai-provider-select"), {
+            target: {value: "openai"},
+        });
+        expect(screen.getByTestId("ai-requires-backend")).toBeInTheDocument();
+        expect(screen.getByTestId("ai-save-button")).toBeDisabled();
+        expect(screen.getByTestId("ai-test-button")).toBeDisabled();
+    });
+
+    it("does not gate providers in backend mode", async () => {
+        // Default beforeEach resolves the endpoints (backend mode).
+        render(<AiProviderSettings />);
+        await waitFor(() => screen.getByTestId("ai-provider-select"));
+        fireEvent.change(screen.getByTestId("ai-provider-select"), {
+            target: {value: "openai"},
+        });
+        expect(screen.queryByTestId("ai-requires-backend")).not.toBeInTheDocument();
+        expect(screen.getByTestId("ai-save-button")).not.toBeDisabled();
+    });
+
     it("saves the local config including the typed key to localStorage", async () => {
         mockGetProviders.mockRejectedValue(new Error("offline"));
         render(<AiProviderSettings />);

@@ -167,6 +167,8 @@ topos:
       backend_current: "Aktuell verbunden: {url}"
       backend_same_origin: "Aktuell: gleicher Host (/api)"
       ai:
+        provider_requires_backend: Dieser Provider benötigt eine Backend-Verbindung
+        connect_backend_hint: Verbinde ein Backend in den Einstellungen für alle Provider.
         local_mode: "Kein Backend verbunden: Einstellungen und API-Schlüssel werden nur in diesem Browser gespeichert, KI-Anfragen gehen direkt an den Anbieter."
         title: KI-Assistent
         description: "Anbieter, API-Schlüssel und Modell für die Bilderkennung von Box-Inhalten."

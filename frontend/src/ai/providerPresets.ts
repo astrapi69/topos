@@ -73,3 +73,19 @@ export const AI_PROVIDER_PRESETS: AiProvider[] = [
 export function getProviderPreset(providerId: string): AiProvider | undefined {
     return AI_PROVIDER_PRESETS.find((preset) => preset.id === providerId);
 }
+
+/**
+ * Whether a provider can be called straight from the browser in the
+ * no-backend (Dexie-only) PWA mode.
+ *
+ * Only Anthropic ships CORS support for direct browser access
+ * (``anthropic-dangerous-direct-browser-access``). OpenAI and Google
+ * (and therefore custom OpenAI-compatible endpoints in general) return
+ * no CORS headers, so a cross-origin browser fetch is blocked - those
+ * providers need a backend proxy. This gates the Settings UI honestly
+ * instead of letting the user configure a provider that will always
+ * fail with a network error.
+ */
+export function supportsBrowserDirect(providerId: string): boolean {
+    return providerId === "anthropic";
+}

@@ -167,6 +167,8 @@ topos:
       backend_current: "Currently connected: {url}"
       backend_same_origin: "Currently: same host (/api)"
       ai:
+        provider_requires_backend: This provider requires a backend connection
+        connect_backend_hint: Connect a backend in Settings to use all providers.
         local_mode: "No backend connected: settings and API keys are stored in this browser only, and AI requests go directly to the provider."
         title: AI Assistant
         description: "Provider, API key and model for recognising box contents from a photo."

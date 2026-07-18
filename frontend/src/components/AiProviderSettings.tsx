@@ -29,6 +29,7 @@ import {
     AI_PROVIDER_PRESETS,
     getLocalAiConfig,
     setLocalAiConfig,
+    supportsBrowserDirect,
     testAiConnectionDirect,
 } from "../ai";
 import {useI18n} from "../hooks/useI18n";
@@ -114,6 +115,9 @@ export default function AiProviderSettings() {
     const externallyManaged = status?.externallyManaged ?? false;
     const configured = status?.configured ?? false;
     const selectedModel = models[activeProvider] ?? provider?.defaultModel ?? "";
+    // In local (no-backend) mode only Anthropic can be reached from the
+    // browser; OpenAI/Gemini/custom are blocked by CORS and need a backend.
+    const requiresBackend = mode === "local" && !supportsBrowserDirect(activeProvider);
 
     function onProviderChange(id: string) {
         setActiveProvider(id);
@@ -147,6 +151,7 @@ export default function AiProviderSettings() {
     }
 
     async function handleSave() {
+        if (requiresBackend) return;
         setSaving(true);
         try {
             if (mode === "backend") {
@@ -188,6 +193,7 @@ export default function AiProviderSettings() {
     }
 
     async function handleTest() {
+        if (requiresBackend) return;
         setTesting(true);
         const request = {
             provider: activeProvider,
@@ -279,6 +285,23 @@ export default function AiProviderSettings() {
                     </select>
                 </label>
 
+                {requiresBackend && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
+                        <span className={badge} data-testid="ai-requires-backend">
+                            {t(
+                                "topos.page.settings.ai.provider_requires_backend",
+                                "Dieser Provider benoetigt eine Backend-Verbindung",
+                            )}
+                        </span>
+                        <p className={`${muted} text-sm`} data-testid="ai-requires-backend-hint">
+                            {t(
+                                "topos.page.settings.ai.connect_backend_hint",
+                                "Verbinde ein Backend in den Einstellungen fuer alle Provider.",
+                            )}
+                        </p>
+                    </div>
+                )}
+
                 {provider?.requiresBaseUrl && (
                     <label style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
                         {t("topos.page.settings.ai.base_url", "Basis-URL")}
@@ -359,7 +382,7 @@ export default function AiProviderSettings() {
                         type="button"
                         className={btnPrimary}
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={saving || requiresBackend}
                         data-testid="ai-save-button"
                     >
                         {saving
@@ -370,7 +393,7 @@ export default function AiProviderSettings() {
                         type="button"
                         className={btn}
                         onClick={handleTest}
-                        disabled={testing}
+                        disabled={testing || requiresBackend}
                         data-testid="ai-test-button"
                     >
                         {testing
