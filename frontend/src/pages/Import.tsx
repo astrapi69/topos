@@ -149,13 +149,7 @@ export default function Import() {
                 {report && (
                     <section
                         data-testid="import-report"
-                        style={{
-                            border: "1px solid var(--accent)",
-                            borderRadius: 6,
-                            padding: "1rem",
-                            marginTop: "1.5rem",
-                            background: "var(--accent-light)",
-                        }}
+                        className="rounded border border-accent bg-accent-light p-4 mt-6"
                     >
                         <h2>{t("topos.page.import.report_title", "Importbericht")}</h2>
                         <dl

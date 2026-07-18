@@ -12,13 +12,14 @@ import {useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 
 import NavBar from "../components/NavBar";
+import FormField from "../components/FormField";
 import {useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
 import {indexRemove, indexUpsertContainer} from "../search/buildIndex";
-import {btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
+import {btn, btnPrimary, btnDanger, card, input, muted, danger, link} from "../ui/classes";
 import type {Container, ContainerType, Owner} from "../types/topos";
 
 interface FormState {
@@ -211,16 +212,7 @@ export default function ContainerList() {
                     <form
                         data-testid="container-form"
                         onSubmit={handleSubmit}
-                        style={{
-                            border: "1px solid var(--border)",
-                            borderRadius: 6,
-                            padding: "1rem",
-                            margin: "1rem 0",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.5rem",
-                            maxWidth: 640,
-                        }}
+                        className={`${card} p-4 my-4 flex flex-col gap-2 max-w-2xl`}
                     >
                         <h2 style={{margin: 0, fontSize: "1rem"}} data-testid="container-form-title">
                             {editingId === null
@@ -335,8 +327,7 @@ export default function ContainerList() {
                         ]}
                         testId="filter-type"
                     />
-                    <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
-                        {t("topos.filter.search", "Suche")}
+                    <FormField label={t("topos.filter.search", "Suche")}>
                         <input
                             type="text"
                             className={input}
@@ -348,7 +339,7 @@ export default function ContainerList() {
                                 "Bezeichnung oder Ort",
                             )}
                         />
-                    </label>
+                    </FormField>
                 </section>
 
                 {loading && data.length === 0 && (
@@ -454,8 +445,7 @@ function FilterSelect({
     testId: string;
 }) {
     return (
-        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
-            {label}
+        <FormField label={label}>
             <select
                 className={input}
                 value={value}
@@ -468,15 +458,6 @@ function FilterSelect({
                     </option>
                 ))}
             </select>
-        </label>
-    );
-}
-
-function FormField({label, children}: {label: string; children: React.ReactNode}) {
-    return (
-        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem", gap: 2}}>
-            {label}
-            {children}
-        </label>
+        </FormField>
     );
 }

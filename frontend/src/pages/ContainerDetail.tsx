@@ -9,13 +9,14 @@ import {useParams, Link, useNavigate, useLocation} from "react-router-dom";
 import {ChevronDown, ChevronRight} from "lucide-react";
 
 import NavBar from "../components/NavBar";
+import FormField from "../components/FormField";
 import {useActions, useContainer, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
 import {indexRemove, indexUpsertContainer} from "../search/buildIndex";
-import {badge, btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
+import {badge, btn, btnPrimary, btnDanger, card, input, muted, danger, link} from "../ui/classes";
 import type {ActionRow, ContainerType, Owner} from "../types/topos";
 
 // Mobile-only inline field label inside each stacked item card; hidden
@@ -234,18 +235,9 @@ export default function ContainerDetail() {
                     <form
                         data-testid="container-edit-form"
                         onSubmit={handleSaveContainer}
-                        style={{
-                            border: "1px solid var(--border)",
-                            borderRadius: 6,
-                            padding: "1rem",
-                            margin: "1rem 0",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.5rem",
-                            maxWidth: 640,
-                        }}
+                        className={`${card} p-4 my-4 flex flex-col gap-2 max-w-2xl`}
                     >
-                        <EditField label={t("topos.container.type_label", "Typ")}>
+                        <FormField label={t("topos.container.type_label", "Typ")}>
                             <select
                                 className={input}
                                 data-testid="container-edit-type"
@@ -255,8 +247,8 @@ export default function ContainerDetail() {
                                 <option value="folder">{t("topos.container.type.folder", "Ordner")}</option>
                                 <option value="box">{t("topos.container.type.box", "Box")}</option>
                             </select>
-                        </EditField>
-                        <EditField label={t("topos.container.owner", "Eigentümer")}>
+                        </FormField>
+                        <FormField label={t("topos.container.owner", "Eigentümer")}>
                             <select
                                 className={input}
                                 data-testid="container-edit-owner"
@@ -267,8 +259,8 @@ export default function ContainerDetail() {
                                 <option value="parents">{t("topos.owner.parents", "Eltern")}</option>
                                 <option value="shared">{t("topos.owner.shared", "Geteilt")}</option>
                             </select>
-                        </EditField>
-                        <EditField label={t("topos.container.label", "Bezeichnung")}>
+                        </FormField>
+                        <FormField label={t("topos.container.label", "Bezeichnung")}>
                             <input
                                 type="text"
                                 className={input}
@@ -277,8 +269,8 @@ export default function ContainerDetail() {
                                 onChange={(e) => setEdit({...edit, label: e.target.value})}
                                 required
                             />
-                        </EditField>
-                        <EditField label={t("topos.container.description", "Beschreibung")}>
+                        </FormField>
+                        <FormField label={t("topos.container.description", "Beschreibung")}>
                             <textarea
                                 className={input}
                                 data-testid="container-edit-description"
@@ -286,8 +278,8 @@ export default function ContainerDetail() {
                                 onChange={(e) => setEdit({...edit, description: e.target.value})}
                                 rows={2}
                             />
-                        </EditField>
-                        <EditField label={t("topos.container.location", "Ort")}>
+                        </FormField>
+                        <FormField label={t("topos.container.location", "Ort")}>
                             <input
                                 type="text"
                                 className={input}
@@ -295,8 +287,8 @@ export default function ContainerDetail() {
                                 value={edit.location}
                                 onChange={(e) => setEdit({...edit, location: e.target.value})}
                             />
-                        </EditField>
-                        <EditField label={t("topos.container.size_group", "Größengruppe")}>
+                        </FormField>
+                        <FormField label={t("topos.container.size_group", "Größengruppe")}>
                             <input
                                 type="text"
                                 className={input}
@@ -304,7 +296,7 @@ export default function ContainerDetail() {
                                 value={edit.sizeGroup}
                                 onChange={(e) => setEdit({...edit, sizeGroup: e.target.value})}
                             />
-                        </EditField>
+                        </FormField>
                         <div style={{display: "flex", gap: "0.5rem"}}>
                             <button type="submit" className={btnPrimary} data-testid="container-edit-save" disabled={saving}>
                                 {saving ? t("topos.common.saving", "Speichere...") : t("topos.common.save", "Speichern")}
@@ -464,14 +456,5 @@ export default function ContainerDetail() {
                 </section>
             </main>
         </>
-    );
-}
-
-function EditField({label, children}: {label: string; children: React.ReactNode}) {
-    return (
-        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem", gap: 2}}>
-            {label}
-            {children}
-        </label>
     );
 }
