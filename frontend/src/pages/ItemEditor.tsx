@@ -13,6 +13,7 @@ import {useEffect, useState} from "react";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 
 import NavBar from "../components/NavBar";
+import FormField from "../components/FormField";
 import {api} from "../api/client";
 import {useCategories, useContainers} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
@@ -115,7 +116,7 @@ export default function ItemEditor() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif", maxWidth: 720}}>
+            <main className="p-4 sm:p-6 max-w-3xl">
                 <h1 data-testid="item-editor-title">
                     {isNew
                         ? t("topos.page.item_editor.new_title", "Neuer Eintrag")
@@ -125,7 +126,8 @@ export default function ItemEditor() {
                 {loading && <p data-testid="item-editor-loading">{t("topos.common.loading", "Lade...")}</p>}
 
                 <form onSubmit={handleSubmit} data-testid="item-editor-form">
-                    <Field
+                    <FormField
+                        className="mb-3"
                         label={t("topos.item.container", "Container")}
                         testId="item-editor-container"
                     >
@@ -144,9 +146,10 @@ export default function ItemEditor() {
                                 </option>
                             ))}
                         </select>
-                    </Field>
+                    </FormField>
 
-                    <Field
+                    <FormField
+                        className="mb-3"
                         label={t("topos.item.content", "Inhalt")}
                         testId="item-editor-content"
                     >
@@ -158,9 +161,10 @@ export default function ItemEditor() {
                             data-testid="item-editor-content-input"
                             required
                         />
-                    </Field>
+                    </FormField>
 
-                    <Field
+                    <FormField
+                        className="mb-3"
                         label={t("topos.item.priority", "Priorität")}
                         testId="item-editor-priority"
                     >
@@ -176,9 +180,10 @@ export default function ItemEditor() {
                                 </option>
                             ))}
                         </select>
-                    </Field>
+                    </FormField>
 
-                    <Field
+                    <FormField
+                        className="mb-3"
                         label={t("topos.item.category", "Kategorie")}
                         testId="item-editor-category"
                     >
@@ -196,9 +201,10 @@ export default function ItemEditor() {
                                 <option key={c.id} value={c.path} />
                             ))}
                         </datalist>
-                    </Field>
+                    </FormField>
 
-                    <Field
+                    <FormField
+                        className="mb-3"
                         label={t("topos.item.notes", "Notizen")}
                         testId="item-editor-notes"
                     >
@@ -209,7 +215,7 @@ export default function ItemEditor() {
                             data-testid="item-editor-notes-input"
                             rows={3}
                         />
-                    </Field>
+                    </FormField>
 
                     <div style={{display: "flex", gap: "0.5rem"}}>
                         <button
@@ -234,25 +240,5 @@ export default function ItemEditor() {
                 </form>
             </main>
         </>
-    );
-}
-
-function Field({
-    label,
-    testId,
-    children,
-}: {
-    label: string;
-    testId: string;
-    children: React.ReactNode;
-}) {
-    return (
-        <label
-            data-testid={testId}
-            style={{display: "flex", flexDirection: "column", marginBottom: "0.75rem", gap: 4}}
-        >
-            <span>{label}</span>
-            {children}
-        </label>
     );
 }

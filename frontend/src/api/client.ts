@@ -279,6 +279,44 @@ export interface AiConfig {
     keys?: Record<string, string>;
 }
 
+// --- photo intake (vision + bulk items) ---
+
+/** One item suggestion from ``POST /api/ai/vision``. */
+export interface RecognizedItem {
+    label: string;
+    categoryPath: string;
+    newCategoryHint: string;
+    description: string;
+    /** Visual certainty in [0, 1]; uncalibrated, display-only. */
+    confidence: number;
+}
+
+export interface VisionResult {
+    provider: string;
+    model: string;
+    items: RecognizedItem[];
+}
+
+export interface BulkItemCreate {
+    containerId: number;
+    content: string;
+    priority?: Priority;
+    categoryPath?: string | null;
+    notes?: string | null;
+    /** Only set after the user explicitly confirmed creating it. */
+    newCategoryPath?: string | null;
+}
+
+export interface BulkItemError {
+    index: number;
+    reason: string;
+}
+
+export interface BulkItemsResult {
+    created: Item[];
+    errors: BulkItemError[];
+}
+
 export type SecretSourceKind =
     | "env"
     | "secrets_yaml"
@@ -318,6 +356,21 @@ export const api = {
         update: (id: number, payload: ItemUpdate) =>
             request<Item>(`/items/${id}`, {method: "PATCH", body: payload}),
         delete: (id: number) => request<void>(`/items/${id}`, {method: "DELETE"}),
+        bulkCreate: (bulkItems: BulkItemCreate[]) =>
+            request<BulkItemsResult>("/items/bulk", {method: "POST", body: {items: bulkItems}}),
+    },
+    ai: {
+        /** Photo -> recognized item suggestions. Multipart, not base64-in-JSON. */
+        recognize: (
+            photo: Blob,
+            opts: {containerId: number; containerType?: string; fileName?: string},
+        ) => {
+            const fd = new FormData();
+            fd.append("file", photo, opts.fileName ?? "photo.jpg");
+            fd.append("container_id", String(opts.containerId));
+            if (opts.containerType) fd.append("container_type", opts.containerType);
+            return request<VisionResult>("/ai/vision", {method: "POST", rawBody: fd});
+        },
     },
     categories: {
         list: () => request<Category[]>("/categories"),

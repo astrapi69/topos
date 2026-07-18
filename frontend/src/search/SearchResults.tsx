@@ -52,15 +52,15 @@ export default function SearchResults({
                             type="button"
                             onClick={() => onSelect(r)}
                             data-testid={`search-hit-${r.type}-${r.refId}`}
-                            className="flex w-full items-center gap-3 rounded px-2 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                            className="flex w-full items-center gap-3 rounded px-2 py-2 text-left hover:bg-surface-hover cursor-pointer"
                         >
-                            <span className="shrink-0 text-gray-500 dark:text-gray-400">{iconFor(r.type)}</span>
+                            <span className="shrink-0 text-ink-muted">{iconFor(r.type)}</span>
                             <span className="min-w-0">
-                                <span className="block truncate text-gray-900 dark:text-gray-100">
+                                <span className="block truncate text-ink">
                                     {r.displayTitle}
                                 </span>
                                 {subtitle && (
-                                    <span className="block truncate text-sm text-gray-500 dark:text-gray-400">
+                                    <span className="block truncate text-sm text-ink-muted">
                                         {subtitle}
                                     </span>
                                 )}

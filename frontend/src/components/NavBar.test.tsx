@@ -68,24 +68,49 @@ describe("NavBar global search", () => {
         );
     });
 
-    it("toggles the mobile menu via the hamburger button", async () => {
+    it("renders the bottom tab bar with the four primary tabs", () => {
         render(
             <MemoryRouter>
                 <NavBar />
             </MemoryRouter>,
         );
-        // The stacked mobile menu is collapsed by default.
-        expect(screen.queryByTestId("nav-mobile-menu")).not.toBeInTheDocument();
+        expect(screen.getByTestId("topos-tabbar")).toBeInTheDocument();
+        expect(screen.getByTestId("nav-tab-dashboard")).toBeInTheDocument();
+        expect(screen.getByTestId("nav-tab-containers")).toBeInTheDocument();
+        expect(screen.getByTestId("nav-tab-photo-intake")).toBeInTheDocument();
+        expect(screen.getByTestId("nav-tab-search")).toBeInTheDocument();
+        expect(screen.getByTestId("nav-tab-more")).toBeInTheDocument();
+    });
 
-        fireEvent.click(screen.getByTestId("nav-menu-toggle"));
-        expect(screen.getByTestId("nav-mobile-menu")).toBeInTheDocument();
+    it("toggles the Mehr sheet via the more tab", async () => {
+        render(
+            <MemoryRouter>
+                <NavBar />
+            </MemoryRouter>,
+        );
+        // The sheet with the secondary destinations is closed by default.
+        expect(screen.queryByTestId("nav-more-menu")).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId("nav-tab-more"));
+        expect(screen.getByTestId("nav-more-menu")).toBeInTheDocument();
         expect(screen.getByTestId("nav-import-mobile")).toBeInTheDocument();
+        expect(screen.getByTestId("nav-settings-mobile")).toBeInTheDocument();
 
-        // Selecting a link closes the menu again.
+        // Selecting a link closes the sheet again.
         fireEvent.click(screen.getByTestId("nav-import-mobile"));
         await waitFor(() =>
-            expect(screen.queryByTestId("nav-mobile-menu")).not.toBeInTheDocument(),
+            expect(screen.queryByTestId("nav-more-menu")).not.toBeInTheDocument(),
         );
+    });
+
+    it("opens the spotlight from the search tab", () => {
+        render(
+            <MemoryRouter>
+                <NavBar />
+            </MemoryRouter>,
+        );
+        fireEvent.click(screen.getByTestId("nav-tab-search"));
+        expect(screen.getByTestId("global-search-overlay")).toBeInTheDocument();
     });
 
     it("closes the spotlight on Escape", async () => {

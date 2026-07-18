@@ -51,26 +51,32 @@ export default function Dashboard() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <h1 data-testid="dashboard-title">
                     {t("topos.page.dashboard.title", "Übersicht")}
                 </h1>
 
+                {/*
+                 * Asymmetric stat block: the item count is the lead
+                 * value (the inventory's actual size), the other three
+                 * are secondary. One emphasis, not four equal tiles.
+                 */}
                 <section
                     data-testid="dashboard-counts"
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+                    className="grid grid-cols-3 gap-3 mb-6 max-w-2xl"
                 >
-                    <Stat
-                        label={t("topos.nav.containers", "Container")}
-                        value={containers.data.length}
-                        href="/containers"
-                        testId="stat-containers"
-                    />
                     <Stat
                         label={t("topos.page.dashboard.items", "Einträge")}
                         value={items.data.length}
                         href="/containers"
                         testId="stat-items"
+                        emphasis
+                    />
+                    <Stat
+                        label={t("topos.nav.containers", "Container")}
+                        value={containers.data.length}
+                        href="/containers"
+                        testId="stat-containers"
                     />
                     <Stat
                         label={t("topos.page.dashboard.categories", "Kategorien")}
@@ -136,21 +142,30 @@ function Stat({
     value,
     href,
     testId,
+    emphasis = false,
 }: {
     label: string;
     value: number;
     href: string;
     testId: string;
+    emphasis?: boolean;
 }) {
     return (
         <Link
             to={href}
             data-testid={testId}
-            className="flex flex-col rounded border border-gray-300 dark:border-gray-700 no-underline text-inherit"
-            style={{padding: "1rem 1.25rem", minWidth: 140}}
+            className={`flex flex-col rounded border border-line bg-surface no-underline text-inherit p-4 ${
+                emphasis ? "col-span-3" : "col-span-3 sm:col-span-1"
+            }`}
         >
-            <span className={muted} style={{fontSize: "0.875rem"}}>{label}</span>
-            <span style={{fontSize: "2rem", fontWeight: 600}}>{value}</span>
+            <span className={`${muted} text-sm`}>{label}</span>
+            <span
+                className={`font-display tabular-nums ${
+                    emphasis ? "text-4xl" : "text-xl"
+                }`}
+            >
+                {value}
+            </span>
         </Link>
     );
 }

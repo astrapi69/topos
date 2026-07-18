@@ -6,20 +6,22 @@
 
 import {useEffect, useMemo, useState} from "react";
 import {useParams, Link, useNavigate, useLocation} from "react-router-dom";
+import {ChevronDown, ChevronRight} from "lucide-react";
 
 import NavBar from "../components/NavBar";
+import FormField from "../components/FormField";
 import {useActions, useContainer, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
 import {indexRemove, indexUpsertContainer} from "../search/buildIndex";
-import {btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
+import {badge, btn, btnPrimary, btnDanger, card, input, muted, danger, link} from "../ui/classes";
 import type {ActionRow, ContainerType, Owner} from "../types/topos";
 
 // Mobile-only inline field label inside each stacked item card; hidden
 // from md up where the column header carries the label instead.
-const cellLabel = "md:hidden font-medium text-gray-500 dark:text-gray-400";
+const cellLabel = "md:hidden font-medium text-ink-muted";
 
 interface EditState {
     type: ContainerType;
@@ -53,8 +55,8 @@ export default function ContainerDetail() {
         const el = document.getElementById(hash.slice(1));
         if (el) {
             el.scrollIntoView({behavior: "smooth", block: "center"});
-            el.classList.add("ring-2", "ring-blue-500");
-            const timer = setTimeout(() => el.classList.remove("ring-2", "ring-blue-500"), 1600);
+            el.classList.add("ring-2", "ring-accent");
+            const timer = setTimeout(() => el.classList.remove("ring-2", "ring-accent"), 1600);
             return () => clearTimeout(timer);
         }
     }, [hash, items.data]);
@@ -73,7 +75,7 @@ export default function ContainerDetail() {
         return (
             <>
                 <NavBar />
-                <main style={{padding: "1.5rem"}}>
+                <main className="p-4 sm:p-6">
                     <p>{t("topos.page.container_detail.no_id", "Kein Container ausgewählt.")}</p>
                 </main>
             </>
@@ -196,7 +198,7 @@ export default function ContainerDetail() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <Link to="/containers" className={link} data-testid="container-detail-back">
                     {t("topos.common.back", "Zurück")}
                 </Link>
@@ -233,18 +235,9 @@ export default function ContainerDetail() {
                     <form
                         data-testid="container-edit-form"
                         onSubmit={handleSaveContainer}
-                        style={{
-                            border: "1px solid var(--border)",
-                            borderRadius: 6,
-                            padding: "1rem",
-                            margin: "1rem 0",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.5rem",
-                            maxWidth: 640,
-                        }}
+                        className={`${card} p-4 my-4 flex flex-col gap-2 max-w-2xl`}
                     >
-                        <EditField label={t("topos.container.type_label", "Typ")}>
+                        <FormField label={t("topos.container.type_label", "Typ")}>
                             <select
                                 className={input}
                                 data-testid="container-edit-type"
@@ -254,8 +247,8 @@ export default function ContainerDetail() {
                                 <option value="folder">{t("topos.container.type.folder", "Ordner")}</option>
                                 <option value="box">{t("topos.container.type.box", "Box")}</option>
                             </select>
-                        </EditField>
-                        <EditField label={t("topos.container.owner", "Eigentümer")}>
+                        </FormField>
+                        <FormField label={t("topos.container.owner", "Eigentümer")}>
                             <select
                                 className={input}
                                 data-testid="container-edit-owner"
@@ -266,8 +259,8 @@ export default function ContainerDetail() {
                                 <option value="parents">{t("topos.owner.parents", "Eltern")}</option>
                                 <option value="shared">{t("topos.owner.shared", "Geteilt")}</option>
                             </select>
-                        </EditField>
-                        <EditField label={t("topos.container.label", "Bezeichnung")}>
+                        </FormField>
+                        <FormField label={t("topos.container.label", "Bezeichnung")}>
                             <input
                                 type="text"
                                 className={input}
@@ -276,8 +269,8 @@ export default function ContainerDetail() {
                                 onChange={(e) => setEdit({...edit, label: e.target.value})}
                                 required
                             />
-                        </EditField>
-                        <EditField label={t("topos.container.description", "Beschreibung")}>
+                        </FormField>
+                        <FormField label={t("topos.container.description", "Beschreibung")}>
                             <textarea
                                 className={input}
                                 data-testid="container-edit-description"
@@ -285,8 +278,8 @@ export default function ContainerDetail() {
                                 onChange={(e) => setEdit({...edit, description: e.target.value})}
                                 rows={2}
                             />
-                        </EditField>
-                        <EditField label={t("topos.container.location", "Ort")}>
+                        </FormField>
+                        <FormField label={t("topos.container.location", "Ort")}>
                             <input
                                 type="text"
                                 className={input}
@@ -294,8 +287,8 @@ export default function ContainerDetail() {
                                 value={edit.location}
                                 onChange={(e) => setEdit({...edit, location: e.target.value})}
                             />
-                        </EditField>
-                        <EditField label={t("topos.container.size_group", "Größengruppe")}>
+                        </FormField>
+                        <FormField label={t("topos.container.size_group", "Größengruppe")}>
                             <input
                                 type="text"
                                 className={input}
@@ -303,7 +296,7 @@ export default function ContainerDetail() {
                                 value={edit.sizeGroup}
                                 onChange={(e) => setEdit({...edit, sizeGroup: e.target.value})}
                             />
-                        </EditField>
+                        </FormField>
                         <div style={{display: "flex", gap: "0.5rem"}}>
                             <button type="submit" className={btnPrimary} data-testid="container-edit-save" disabled={saving}>
                                 {saving ? t("topos.common.saving", "Speichere...") : t("topos.common.save", "Speichern")}
@@ -375,7 +368,7 @@ export default function ContainerDetail() {
                      * `item-${id}` anchor id for deep links from search.
                      */}
                     <div data-testid="container-detail-items" className="mt-2">
-                        <div className="hidden md:grid md:grid-cols-[1fr_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-gray-300 dark:border-gray-700 text-left font-medium text-gray-600 dark:text-gray-300">
+                        <div className="hidden md:grid md:grid-cols-[1fr_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-line text-left font-medium text-ink-secondary">
                             <span>{t("topos.item.content", "Inhalt")}</span>
                             <span>{t("topos.item.priority", "Priorität")}</span>
                             <span>{t("topos.item.category", "Kategorie")}</span>
@@ -389,18 +382,23 @@ export default function ContainerDetail() {
                                     key={item.id}
                                     id={`item-${item.id}`}
                                     data-testid={`item-row-${item.id}`}
-                                    className="grid grid-cols-1 md:grid-cols-[1fr_7rem_1fr_auto] gap-1 md:gap-2 md:items-start border md:border-0 md:border-b border-gray-200 dark:border-gray-700 rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
+                                    className="grid grid-cols-1 md:grid-cols-[1fr_7rem_1fr_auto] gap-1 md:gap-2 md:items-start border md:border-0 md:border-b border-line rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
                                 >
                                     <div>
                                         <div>{item.content}</div>
                                         <button
                                             type="button"
-                                            className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border border-gray-300 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 cursor-pointer"
+                                            className={`${badge} mt-1`}
                                             data-testid={`item-actions-badge-${item.id}`}
                                             onClick={() => toggleExpanded(item.id)}
                                         >
-                                            {t("topos.page.container_detail.item_actions", "Aktionen")}: {itemActions.length}{" "}
-                                            {itemActions.length > 0 ? (isOpen ? "▾" : "▸") : ""}
+                                            {t("topos.page.container_detail.item_actions", "Aktionen")}: {itemActions.length}
+                                            {itemActions.length > 0 &&
+                                                (isOpen ? (
+                                                    <ChevronDown size={14} aria-hidden />
+                                                ) : (
+                                                    <ChevronRight size={14} aria-hidden />
+                                                ))}
                                         </button>
                                         {isOpen && itemActions.length > 0 && (
                                             <ul
@@ -458,14 +456,5 @@ export default function ContainerDetail() {
                 </section>
             </main>
         </>
-    );
-}
-
-function EditField({label, children}: {label: string; children: React.ReactNode}) {
-    return (
-        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem", gap: 2}}>
-            {label}
-            {children}
-        </label>
     );
 }

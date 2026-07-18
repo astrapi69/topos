@@ -29,7 +29,7 @@ export default function PwaPrompts() {
                     type="button"
                     data-testid="pwa-install"
                     onClick={() => void promptInstall()}
-                    className="fixed bottom-4 left-4 z-40 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-lg hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                    className="fixed bottom-4 left-4 z-40 inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink shadow-lg hover:bg-surface-hover cursor-pointer"
                 >
                     <Download size={16} aria-hidden />
                     {t("pwa.install_app", "App installieren")}
@@ -40,9 +40,9 @@ export default function PwaPrompts() {
                 <div
                     data-testid="pwa-update-bar"
                     role="status"
-                    className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2 shadow-lg dark:border-gray-700 dark:bg-gray-900"
+                    className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-line bg-surface px-4 py-2 shadow-lg"
                 >
-                    <span className="text-sm text-gray-900 dark:text-gray-100">
+                    <span className="text-sm text-ink">
                         {t("pwa.update_available", "Neue Version verfügbar")}
                     </span>
                     <button

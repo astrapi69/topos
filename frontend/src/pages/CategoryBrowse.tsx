@@ -9,6 +9,7 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import {useEffect, useMemo, useState} from "react";
 import {Link} from "react-router-dom";
+import {ChevronDown, ChevronRight} from "lucide-react";
 
 import NavBar from "../components/NavBar";
 import {api} from "../api/client";
@@ -67,7 +68,7 @@ export default function CategoryBrowse() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <h1 data-testid="category-browse-title">
                     {t("topos.page.categories.title", "Kategorien")}
                 </h1>
@@ -82,12 +83,9 @@ export default function CategoryBrowse() {
                             type="button"
                             data-testid="category-show-uncategorized"
                             onClick={() => setSelected(null)}
-                            className={`${text} ${selected === null ? selectedCls : ""} w-full text-left rounded cursor-pointer`}
-                            style={{
-                                background: selected === null ? undefined : "none",
-                                border: "none",
-                                padding: "0.25rem 0.5rem",
-                            }}
+                            className={`${text} ${
+                                selected === null ? selectedCls : "bg-transparent"
+                            } w-full text-left rounded cursor-pointer border-0 px-2 py-2.5 md:py-1 min-h-[44px] md:min-h-0`}
                         >
                             {t("topos.page.categories.uncategorized", "Ohne Kategorie")}
                         </button>
@@ -154,6 +152,7 @@ function TreeNode({
     counts: Map<string, Item[]>;
     depth?: number;
 }) {
+    const {t} = useI18n();
     const [open, setOpen] = useState(false);
     const isSelected = selected === node.path;
     const count = counts.get(node.path)?.length ?? 0;
@@ -172,29 +171,27 @@ function TreeNode({
                 {hasChildren ? (
                     <Collapsible.Trigger
                         data-testid={`category-toggle-${node.path.replace(/\//g, "-")}`}
-                        className={`${text} cursor-pointer`}
-                        style={{
-                            background: "none",
-                            border: "none",
-                            width: 20,
-                            padding: 0,
-                        }}
+                        aria-label={
+                            open
+                                ? t("topos.page.categories.collapse", "Zuklappen")
+                                : t("topos.page.categories.expand", "Aufklappen")
+                        }
+                        className={`${text} cursor-pointer bg-transparent border-0 p-0 flex items-center justify-center w-8 md:w-5 min-h-[44px] md:min-h-0 shrink-0`}
                     >
-                        {open ? "v" : ">"}
+                        {open ? (
+                            <ChevronDown size={16} aria-hidden />
+                        ) : (
+                            <ChevronRight size={16} aria-hidden />
+                        )}
                     </Collapsible.Trigger>
                 ) : (
-                    <span style={{width: 20}} />
+                    <span className="w-8 md:w-5 shrink-0" />
                 )}
                 <button
                     type="button"
                     onClick={() => setSelected(node.path)}
                     data-testid={`category-select-${node.path.replace(/\//g, "-")}`}
-                    className={`${text} flex-1 text-left cursor-pointer`}
-                    style={{
-                        background: "none",
-                        border: "none",
-                        padding: "0.25rem 0.5rem",
-                    }}
+                    className={`${text} flex-1 text-left cursor-pointer bg-transparent border-0 px-2 py-2.5 md:py-1 min-h-[44px] md:min-h-0`}
                 >
                     {node.displayName}{" "}
                     <small className={muted}>({count})</small>

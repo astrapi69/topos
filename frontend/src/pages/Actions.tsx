@@ -14,13 +14,14 @@ import {useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 
 import NavBar from "../components/NavBar";
+import FormField from "../components/FormField";
 import {api} from "../api/client";
 import {useActions, useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
 import {indexRemove, indexUpsertAction} from "../search/buildIndex";
-import {btn, btnPrimary, btnDanger, input, muted, link} from "../ui/classes";
+import {btn, btnPrimary, btnDanger, card, input, muted, link, pill} from "../ui/classes";
 import type {ActionRow, ActionStatus} from "../types/topos";
 
 type StatusFilter = ActionStatus | "all";
@@ -175,7 +176,7 @@ export default function Actions() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <header style={{display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem"}}>
                     <h1 data-testid="actions-title">{t("topos.page.actions.title", "Aktionen")}</h1>
                     <button
@@ -210,22 +211,12 @@ export default function Actions() {
                     <form
                         data-testid="actions-create-form"
                         onSubmit={handleCreate}
-                        className="border border-gray-300 dark:border-gray-700"
-                        style={{
-                            borderRadius: 6,
-                            padding: "1rem",
-                            marginBottom: "1.5rem",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.5rem",
-                            maxWidth: 560,
-                        }}
+                        className={`${card} p-4 mb-6 flex flex-col gap-2 max-w-xl`}
                     >
                         <h2 style={{margin: 0, fontSize: "1rem"}}>
                             {t("topos.page.actions.create_title", "Neue Aktion")}
                         </h2>
-                        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
-                            {t("topos.page.actions.item", "Eintrag")}
+                        <FormField label={t("topos.page.actions.item", "Eintrag")}>
                             <select
                                 className={input}
                                 data-testid="action-create-item"
@@ -239,9 +230,8 @@ export default function Actions() {
                                     </option>
                                 ))}
                             </select>
-                        </label>
-                        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
-                            {t("topos.page.actions.text", "Text")}
+                        </FormField>
+                        <FormField label={t("topos.page.actions.text", "Text")}>
                             <input
                                 type="text"
                                 className={input}
@@ -249,9 +239,8 @@ export default function Actions() {
                                 value={newText}
                                 onChange={(e) => setNewText(e.target.value)}
                             />
-                        </label>
-                        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
-                            {t("topos.page.actions.due_date", "Fälligkeitsdatum")}
+                        </FormField>
+                        <FormField label={t("topos.page.actions.due_date", "Fälligkeitsdatum")}>
                             <input
                                 type="date"
                                 className={input}
@@ -259,7 +248,7 @@ export default function Actions() {
                                 value={newDue}
                                 onChange={(e) => setNewDue(e.target.value)}
                             />
-                        </label>
+                        </FormField>
                         <div style={{display: "flex", gap: "0.5rem"}}>
                             <button type="submit" className={btnPrimary} data-testid="action-create-submit">
                                 {t("topos.common.save", "Speichern")}
@@ -370,10 +359,10 @@ export default function Actions() {
                                                             </span>
                                                         )}
                                                         <span
-                                                            className={muted}
-                                                            style={{marginLeft: "0.5rem", fontSize: "0.8125rem"}}
+                                                            className={`${pill} ml-2`}
+                                                            data-testid={`action-status-${action.id}`}
                                                         >
-                                                            [{t(`topos.action.status.${action.status}`, action.status)}]
+                                                            {t(`topos.action.status.${action.status}`, action.status)}
                                                         </span>
                                                         <br />
                                                         {item ? (

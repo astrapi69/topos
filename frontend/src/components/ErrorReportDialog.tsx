@@ -146,7 +146,7 @@ export default function ErrorReportDialog() {
                         </summary>
                         <pre
                             data-testid="error-report-preview"
-                            className="mt-2 max-h-60 overflow-y-auto whitespace-pre-wrap break-words rounded border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-2"
+                            className="mt-2 max-h-60 overflow-y-auto whitespace-pre-wrap break-words rounded border border-line bg-surface-2 p-2"
                         >
                             {issueBody}
                         </pre>

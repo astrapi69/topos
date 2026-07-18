@@ -72,7 +72,7 @@ export default function Import() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif", maxWidth: 720}}>
+            <main className="p-4 sm:p-6 max-w-3xl">
                 <h1 data-testid="import-title">{t("topos.page.import.title", "Excel-Import")}</h1>
                 <p>
                     {t(
@@ -91,7 +91,7 @@ export default function Import() {
                         onDragLeave={() => setDragging(false)}
                         onDrop={onDrop}
                         style={{
-                            border: `2px dashed ${dragging ? "#0066cc" : "var(--border)"}`,
+                            border: `2px dashed ${dragging ? "var(--accent)" : "var(--border)"}`,
                             padding: "2rem",
                             textAlign: "center",
                             borderRadius: 6,
@@ -149,13 +149,7 @@ export default function Import() {
                 {report && (
                     <section
                         data-testid="import-report"
-                        style={{
-                            border: "1px solid var(--accent)",
-                            borderRadius: 6,
-                            padding: "1rem",
-                            marginTop: "1.5rem",
-                            background: "var(--accent-light)",
-                        }}
+                        className="rounded border border-accent bg-accent-light p-4 mt-6"
                     >
                         <h2>{t("topos.page.import.report_title", "Importbericht")}</h2>
                         <dl

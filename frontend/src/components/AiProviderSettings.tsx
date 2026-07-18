@@ -2,14 +2,18 @@
  * AI provider settings: pick a provider, choose a (vision-capable)
  * model, store an API key, and test the connection.
  *
- * Keys are never read back from the server - the input is write-only.
- * When a provider's key is managed via env var or secrets.yaml the
- * input is replaced by a read-only source card (the same pattern as the
- * application secret key), and the backend strips such keys from any
- * PATCH defensively.
+ * Two modes, following the adaptive-learner pattern:
  *
- * The whole section hides itself when the AI settings endpoints are not
- * reachable (PWA / offline mode with no backend).
+ * - Backend mode (a backend answers): the backend config chain is the
+ *   source of truth. Keys are never read back from the server - the
+ *   input is write-only. When a provider's key is managed via env var
+ *   or secrets.yaml the input is replaced by a read-only source card,
+ *   and the backend strips such keys from any PATCH defensively.
+ * - Local mode (no backend: GitHub Pages PWA / Dexie-only): the SAME
+ *   form stays fully functional. Provider presets come from the
+ *   client-side mirror, the configuration and API keys persist in
+ *   localStorage (this browser only), and "Test connection" probes
+ *   the provider directly from the browser.
  */
 
 import {useEffect, useState} from "react";
@@ -19,25 +23,50 @@ import {
     type AiConfig,
     type AiKeyStatus,
     type AiProvider,
+    type AiTestResult,
 } from "../api/client";
+import {
+    AI_PROVIDER_PRESETS,
+    getLocalAiConfig,
+    setLocalAiConfig,
+    supportsBrowserDirect,
+    testAiConnectionDirect,
+} from "../ai";
 import {useI18n} from "../hooks/useI18n";
 import {notify, errorMessage} from "../utils/notify";
 import {btn, btnPrimary, input, muted, badge, danger} from "../ui/classes";
+
+type SettingsMode = "backend" | "local";
 
 function statusByProvider(statuses: AiKeyStatus[]): Record<string, AiKeyStatus> {
     return Object.fromEntries(statuses.map((s) => [s.provider, s]));
 }
 
+function localStatuses(keys: Record<string, string>): Record<string, AiKeyStatus> {
+    return Object.fromEntries(
+        AI_PROVIDER_PRESETS.map((preset) => [
+            preset.id,
+            {
+                provider: preset.id,
+                configured: Boolean((keys[preset.id] ?? "").trim()),
+                source: "none" as const,
+                externallyManaged: false,
+            },
+        ]),
+    );
+}
+
 export default function AiProviderSettings() {
     const {t} = useI18n();
-    const [loaded, setLoaded] = useState(false);
-    const [available, setAvailable] = useState(false);
+    const [mode, setMode] = useState<SettingsMode | null>(null);
     const [providers, setProviders] = useState<AiProvider[]>([]);
     const [keyStatus, setKeyStatus] = useState<Record<string, AiKeyStatus>>({});
     const [enabled, setEnabled] = useState(false);
     const [activeProvider, setActiveProvider] = useState("anthropic");
     const [models, setModels] = useState<Record<string, string>>({});
     const [baseUrls, setBaseUrls] = useState<Record<string, string>>({});
+    /** Stored key values; only ever populated in local mode. */
+    const [localKeys, setLocalKeys] = useState<Record<string, string>>({});
     const [apiKey, setApiKey] = useState("");
     const [saving, setSaving] = useState(false);
     const [testing, setTesting] = useState(false);
@@ -58,28 +87,37 @@ export default function AiProviderSettings() {
                 setActiveProvider(ai.activeProvider || "anthropic");
                 setModels(ai.models ?? {});
                 setBaseUrls(ai.baseUrls ?? {});
-                setAvailable(true);
-                setLoaded(true);
+                setMode("backend");
             })
             .catch(() => {
-                // No backend (PWA/offline) or transient failure: hide the section.
-                if (!cancelled) {
-                    setAvailable(false);
-                    setLoaded(true);
-                }
+                // No backend (PWA / Dexie-only): switch to the browser-local
+                // store instead of hiding the section.
+                if (cancelled) return;
+                const local = getLocalAiConfig();
+                setProviders(AI_PROVIDER_PRESETS);
+                setKeyStatus(localStatuses(local.keys));
+                setEnabled(local.enabled);
+                setActiveProvider(local.activeProvider);
+                setModels(local.models);
+                setBaseUrls(local.baseUrls);
+                setLocalKeys(local.keys);
+                setMode("local");
             });
         return () => {
             cancelled = true;
         };
     }, []);
 
-    if (!loaded || !available) return null;
+    if (mode === null) return null;
 
     const provider = providers.find((p) => p.id === activeProvider) ?? providers[0];
     const status = keyStatus[activeProvider];
     const externallyManaged = status?.externallyManaged ?? false;
     const configured = status?.configured ?? false;
     const selectedModel = models[activeProvider] ?? provider?.defaultModel ?? "";
+    // In local (no-backend) mode only Anthropic can be reached from the
+    // browser; OpenAI/Gemini/custom are blocked by CORS and need a backend.
+    const requiresBackend = mode === "local" && !supportsBrowserDirect(activeProvider);
 
     function onProviderChange(id: string) {
         setActiveProvider(id);
@@ -94,20 +132,33 @@ export default function AiProviderSettings() {
         setBaseUrls((prev) => ({...prev, [activeProvider]: url}));
     }
 
-    async function refreshKeyStatus() {
-        const statuses = await api.settings.getAiKeyStatus();
-        setKeyStatus(statusByProvider(statuses));
-    }
-
-    async function handleSave() {
-        setSaving(true);
+    async function saveToBackend() {
         const patch: AiConfig = {enabled, activeProvider, models, baseUrls};
         if (apiKey.trim() && !externallyManaged) {
             patch.keys = {[activeProvider]: apiKey.trim()};
         }
+        await api.settings.updateApp({ai: patch});
+        const statuses = await api.settings.getAiKeyStatus();
+        setKeyStatus(statusByProvider(statuses));
+    }
+
+    function saveToLocalStorage() {
+        const keys = {...localKeys};
+        if (apiKey.trim()) keys[activeProvider] = apiKey.trim();
+        setLocalAiConfig({enabled, activeProvider, models, baseUrls, keys});
+        setLocalKeys(keys);
+        setKeyStatus(localStatuses(keys));
+    }
+
+    async function handleSave() {
+        if (requiresBackend) return;
+        setSaving(true);
         try {
-            await api.settings.updateApp({ai: patch});
-            await refreshKeyStatus();
+            if (mode === "backend") {
+                await saveToBackend();
+            } else {
+                saveToLocalStorage();
+            }
             setApiKey("");
             notify.success(
                 t("topos.page.settings.ai.saved", "AI-Einstellungen gespeichert"),
@@ -125,30 +176,36 @@ export default function AiProviderSettings() {
         }
     }
 
+    function reportTestResult(result: AiTestResult) {
+        if (result.ok) {
+            notify.success(
+                t("topos.page.settings.ai.test_ok", "Verbindung erfolgreich"),
+            );
+            return;
+        }
+        const code = result.errorCode || "unknown";
+        notify.error(
+            t(
+                `topos.page.settings.ai.test_err_${code}`,
+                t("topos.page.settings.ai.test_failed", "Verbindung fehlgeschlagen"),
+            ),
+        );
+    }
+
     async function handleTest() {
+        if (requiresBackend) return;
         setTesting(true);
+        const request = {
+            provider: activeProvider,
+            apiKey: apiKey.trim() || (mode === "local" ? localKeys[activeProvider] : undefined),
+            baseUrl: baseUrls[activeProvider] || undefined,
+        };
         try {
-            const result = await api.settings.testAiConnection({
-                provider: activeProvider,
-                apiKey: apiKey.trim() || undefined,
-                baseUrl: baseUrls[activeProvider] || undefined,
-            });
-            if (result.ok) {
-                notify.success(
-                    t("topos.page.settings.ai.test_ok", "Verbindung erfolgreich"),
-                );
-            } else {
-                const code = result.errorCode || "unknown";
-                notify.error(
-                    t(
-                        `topos.page.settings.ai.test_err_${code}`,
-                        t(
-                            "topos.page.settings.ai.test_failed",
-                            "Verbindung fehlgeschlagen",
-                        ),
-                    ),
-                );
-            }
+            const result =
+                mode === "backend"
+                    ? await api.settings.testAiConnection(request)
+                    : await testAiConnectionDirect(request);
+            reportTestResult(result);
         } catch (e) {
             notify.error(
                 errorMessage(
@@ -177,6 +234,14 @@ export default function AiProviderSettings() {
                     "Anbieter, API-Schluessel und Modell fuer die Bilderkennung von Box-Inhalten.",
                 )}
             </p>
+            {mode === "local" && (
+                <p data-testid="ai-settings-local-hint" className={muted}>
+                    {t(
+                        "topos.page.settings.ai.local_mode",
+                        "Kein Backend verbunden: Einstellungen und API-Schluessel werden nur in diesem Browser gespeichert, KI-Anfragen gehen direkt an den Anbieter.",
+                    )}
+                </p>
+            )}
 
             <label
                 style={{
@@ -219,6 +284,23 @@ export default function AiProviderSettings() {
                         ))}
                     </select>
                 </label>
+
+                {requiresBackend && (
+                    <div style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
+                        <span className={badge} data-testid="ai-requires-backend">
+                            {t(
+                                "topos.page.settings.ai.provider_requires_backend",
+                                "Dieser Provider benoetigt eine Backend-Verbindung",
+                            )}
+                        </span>
+                        <p className={`${muted} text-sm`} data-testid="ai-requires-backend-hint">
+                            {t(
+                                "topos.page.settings.ai.connect_backend_hint",
+                                "Verbinde ein Backend in den Einstellungen fuer alle Provider.",
+                            )}
+                        </p>
+                    </div>
+                )}
 
                 {provider?.requiresBaseUrl && (
                     <label style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
@@ -300,7 +382,7 @@ export default function AiProviderSettings() {
                         type="button"
                         className={btnPrimary}
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={saving || requiresBackend}
                         data-testid="ai-save-button"
                     >
                         {saving
@@ -311,7 +393,7 @@ export default function AiProviderSettings() {
                         type="button"
                         className={btn}
                         onClick={handleTest}
-                        disabled={testing}
+                        disabled={testing || requiresBackend}
                         data-testid="ai-test-button"
                     >
                         {testing

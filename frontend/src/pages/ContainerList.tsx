@@ -12,13 +12,14 @@ import {useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 
 import NavBar from "../components/NavBar";
+import FormField from "../components/FormField";
 import {useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {api} from "../api/client";
 import {notify, errorMessage} from "../utils/notify";
 import {indexRemove, indexUpsertContainer} from "../search/buildIndex";
-import {btn, btnPrimary, btnDanger, input, muted, danger, link} from "../ui/classes";
+import {btn, btnPrimary, btnDanger, card, input, muted, danger, link} from "../ui/classes";
 import type {Container, ContainerType, Owner} from "../types/topos";
 
 interface FormState {
@@ -33,7 +34,7 @@ interface FormState {
 
 // Mobile-only inline field label shown inside each stacked card; hidden
 // from md up where the column header carries the label instead.
-const cellLabel = "md:hidden font-medium text-gray-500 dark:text-gray-400";
+const cellLabel = "md:hidden font-medium text-ink-muted";
 
 const EMPTY_FORM: FormState = {
     externalId: "",
@@ -197,7 +198,7 @@ export default function ContainerList() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <header style={{display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem"}}>
                     <h1 data-testid="container-list-title">
                         {t("topos.page.containers.title", "Container")}
@@ -211,16 +212,7 @@ export default function ContainerList() {
                     <form
                         data-testid="container-form"
                         onSubmit={handleSubmit}
-                        style={{
-                            border: "1px solid var(--border)",
-                            borderRadius: 6,
-                            padding: "1rem",
-                            margin: "1rem 0",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.5rem",
-                            maxWidth: 640,
-                        }}
+                        className={`${card} p-4 my-4 flex flex-col gap-2 max-w-2xl`}
                     >
                         <h2 style={{margin: 0, fontSize: "1rem"}} data-testid="container-form-title">
                             {editingId === null
@@ -335,8 +327,7 @@ export default function ContainerList() {
                         ]}
                         testId="filter-type"
                     />
-                    <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
-                        {t("topos.filter.search", "Suche")}
+                    <FormField label={t("topos.filter.search", "Suche")}>
                         <input
                             type="text"
                             className={input}
@@ -348,7 +339,7 @@ export default function ContainerList() {
                                 "Bezeichnung oder Ort",
                             )}
                         />
-                    </label>
+                    </FormField>
                 </section>
 
                 {loading && data.length === 0 && (
@@ -369,7 +360,7 @@ export default function ContainerList() {
                  * stable across breakpoints.
                  */}
                 <div data-testid="container-table" className="mt-2">
-                    <div className="hidden md:grid md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-gray-300 dark:border-gray-700 text-left font-medium text-gray-600 dark:text-gray-300">
+                    <div className="hidden md:grid md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-line text-left font-medium text-ink-secondary">
                         <span>{t("topos.container.external_id", "Nr.")}</span>
                         <span>{t("topos.container.label", "Bezeichnung")}</span>
                         <span>{t("topos.container.type_label", "Typ")}</span>
@@ -381,7 +372,7 @@ export default function ContainerList() {
                         <div
                             key={c.id}
                             data-testid={`container-row-${c.id}`}
-                            className="grid grid-cols-1 md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-1 md:gap-2 md:items-center border md:border-0 md:border-b border-gray-200 dark:border-gray-700 rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
+                            className="grid grid-cols-1 md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-1 md:gap-2 md:items-center border md:border-0 md:border-b border-line rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
                         >
                             <div>
                                 <span className={cellLabel}>{t("topos.container.external_id", "Nr.")}: </span>
@@ -454,8 +445,7 @@ function FilterSelect({
     testId: string;
 }) {
     return (
-        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem"}}>
-            {label}
+        <FormField label={label}>
             <select
                 className={input}
                 value={value}
@@ -468,15 +458,6 @@ function FilterSelect({
                     </option>
                 ))}
             </select>
-        </label>
-    );
-}
-
-function FormField({label, children}: {label: string; children: React.ReactNode}) {
-    return (
-        <label style={{display: "flex", flexDirection: "column", fontSize: "0.875rem", gap: 2}}>
-            {label}
-            {children}
-        </label>
+        </FormField>
     );
 }

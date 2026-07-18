@@ -18,6 +18,8 @@ topos:
     actions: Aktionen
     import: Import
     settings: Einstellungen
+    photo_intake: "Foto-Erfassung"
+    more: Mehr
   offline:
     banner: Offline-Modus - Daten werden nur lokal gespeichert.
   demo:
@@ -103,6 +105,8 @@ topos:
       content_required: Inhalt ist erforderlich.
     categories:
       title: Kategorien
+      expand: Aufklappen
+      collapse: Zuklappen
       uncategorized: Ohne Kategorie
       no_items: Keine Einträge.
       empty: Noch keine Kategorien.
@@ -163,6 +167,9 @@ topos:
       backend_current: "Aktuell verbunden: {url}"
       backend_same_origin: "Aktuell: gleicher Host (/api)"
       ai:
+        provider_requires_backend: Dieser Provider benötigt eine Backend-Verbindung
+        connect_backend_hint: Verbinde ein Backend in den Einstellungen für alle Provider.
+        local_mode: "Kein Backend verbunden: Einstellungen und API-Schlüssel werden nur in diesem Browser gespeichert, KI-Anfragen gehen direkt an den Anbieter."
         title: KI-Assistent
         description: "Anbieter, API-Schlüssel und Modell für die Bilderkennung von Box-Inhalten."
         enable: KI-Funktionen aktivieren
@@ -189,6 +196,38 @@ topos:
         test_err_provider_error: Fehler beim Anbieter
         test_err_network_error: Netzwerkfehler
         test_err_unknown_provider: Unbekannter Anbieter
+    photo_intake:
+      title: "Foto-Erfassung"
+      description: "Fotografiere den Inhalt eines Containers. Die KI schlägt Einträge vor, die du prüfst und übernimmst."
+      select_container: "In welchen Container?"
+      select_container_placeholder: "Container wählen..."
+      take_photo: "Foto aufnehmen"
+      upload_file: "Datei hochladen"
+      photo_ready: "Foto bereit: {name}"
+      recognize: "Erkennen"
+      recognizing: "Inhalte werden erkannt..."
+      no_items: "Keine Einträge erkannt"
+      staging_title: "Aufnahmeliste"
+      accept_all: "Alle auswählen"
+      reject_all: "Alle abwählen"
+      add_manual: "Manuell hinzufügen"
+      remove_row: "Entfernen"
+      label: "Bezeichnung"
+      category: "Kategorie"
+      no_category: "Keine Kategorie"
+      new_category: "Neu: {hint}"
+      item_description: "Beschreibung"
+      commit: "{count} Items übernehmen"
+      committed: "{count} Items übernommen"
+      commit_partial: "{failed} von {total} Zeilen fehlgeschlagen"
+      commit_offline: "Übernehmen benötigt eine Backend-Verbindung."
+      offline: "Foto-Erkennung benötigt eine Backend-Verbindung oder gespeicherte KI-Einstellungen (Einstellungen: KI-Assistent)."
+      privacy_title: "Foto an AI-Provider senden?"
+      privacy_notice: "Das Foto wird zur Analyse an {provider} gesendet."
+      decode_failed: "Bild konnte nicht gelesen werden (Format nicht unterstützt, z. B. HEIC)."
+      confidence_high: "Hoch"
+      confidence_medium: "Mittel"
+      confidence_low: "Niedrig"
   import:
     report:
       containers_created: Container neu
@@ -226,6 +265,8 @@ topos:
     container_deleted: Container gelöscht
     container_save_failed: Container konnte nicht gespeichert werden
     container_delete_failed: Container konnte nicht gelöscht werden
+    photo_recognize_failed: "Erkennung fehlgeschlagen"
+    photo_commit_failed: "Übernahme fehlgeschlagen"
   confirm:
     delete_item_title: Eintrag löschen?
     delete_item_message: Der Eintrag "{content}" wird dauerhaft gelöscht.
