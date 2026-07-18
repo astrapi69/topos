@@ -33,7 +33,7 @@ interface FormState {
 
 // Mobile-only inline field label shown inside each stacked card; hidden
 // from md up where the column header carries the label instead.
-const cellLabel = "md:hidden font-medium text-gray-500 dark:text-gray-400";
+const cellLabel = "md:hidden font-medium text-ink-muted";
 
 const EMPTY_FORM: FormState = {
     externalId: "",
@@ -369,7 +369,7 @@ export default function ContainerList() {
                  * stable across breakpoints.
                  */}
                 <div data-testid="container-table" className="mt-2">
-                    <div className="hidden md:grid md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-gray-300 dark:border-gray-700 text-left font-medium text-gray-600 dark:text-gray-300">
+                    <div className="hidden md:grid md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-line text-left font-medium text-ink-secondary">
                         <span>{t("topos.container.external_id", "Nr.")}</span>
                         <span>{t("topos.container.label", "Bezeichnung")}</span>
                         <span>{t("topos.container.type_label", "Typ")}</span>
@@ -381,7 +381,7 @@ export default function ContainerList() {
                         <div
                             key={c.id}
                             data-testid={`container-row-${c.id}`}
-                            className="grid grid-cols-1 md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-1 md:gap-2 md:items-center border md:border-0 md:border-b border-gray-200 dark:border-gray-700 rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
+                            className="grid grid-cols-1 md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-1 md:gap-2 md:items-center border md:border-0 md:border-b border-line rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
                         >
                             <div>
                                 <span className={cellLabel}>{t("topos.container.external_id", "Nr.")}: </span>

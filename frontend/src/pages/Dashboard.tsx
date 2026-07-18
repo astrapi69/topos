@@ -146,7 +146,7 @@ function Stat({
         <Link
             to={href}
             data-testid={testId}
-            className="flex flex-col rounded border border-gray-300 dark:border-gray-700 no-underline text-inherit"
+            className="flex flex-col rounded border border-line bg-surface no-underline text-inherit"
             style={{padding: "1rem 1.25rem", minWidth: 140}}
         >
             <span className={muted} style={{fontSize: "0.875rem"}}>{label}</span>

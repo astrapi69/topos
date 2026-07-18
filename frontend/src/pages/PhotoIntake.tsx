@@ -412,7 +412,7 @@ export default function PhotoIntake() {
                                 data-testid="photo-intake-preview"
                                 src={photo.previewUrl}
                                 alt={photo.fileName}
-                                className="max-h-40 rounded border border-gray-300 dark:border-gray-700"
+                                className="max-h-40 rounded border border-line"
                             />
                             <span className={muted}>
                                 {t(

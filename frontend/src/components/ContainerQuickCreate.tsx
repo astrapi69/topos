@@ -127,7 +127,7 @@ export default function ContainerQuickCreate({
         <form
             data-testid="container-quick-create-form"
             onSubmit={handleSubmit}
-            className="flex flex-col gap-2 border border-gray-300 dark:border-gray-700 rounded p-3"
+            className="flex flex-col gap-2 border border-line rounded p-3"
         >
             <h3 className="m-0 text-base font-semibold">
                 {t("topos.page.containers.create_title", "Neuer Container")}

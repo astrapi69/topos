@@ -91,7 +91,7 @@ export default function Import() {
                         onDragLeave={() => setDragging(false)}
                         onDrop={onDrop}
                         style={{
-                            border: `2px dashed ${dragging ? "#0066cc" : "var(--border)"}`,
+                            border: `2px dashed ${dragging ? "var(--accent)" : "var(--border)"}`,
                             padding: "2rem",
                             textAlign: "center",
                             borderRadius: 6,

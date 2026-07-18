@@ -57,9 +57,8 @@ function isActive(pathname: string, to: string): boolean {
     return to === "/" ? pathname === "/" : pathname.startsWith(to);
 }
 
-const activeCls = "no-underline font-semibold text-blue-600 dark:text-blue-400";
-const inactiveCls =
-    "no-underline text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100";
+const activeCls = "no-underline font-semibold text-accent";
+const inactiveCls = "no-underline text-ink-secondary hover:text-ink";
 
 export default function NavBar() {
     const {t} = useI18n();
@@ -75,10 +74,10 @@ export default function NavBar() {
     return (
         <nav
             data-testid="topos-navbar"
-            className="bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700"
+            className="bg-surface-2 border-b border-line"
         >
             <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3">
-                <strong className="mr-1 sm:mr-2 font-bold text-gray-900 dark:text-gray-100">
+                <strong className="mr-1 sm:mr-2 font-bold text-ink">
                     {t("topos.app.name", "Topos")}
                 </strong>
 
@@ -102,11 +101,11 @@ export default function NavBar() {
                     onClick={() => setSearchOpen(true)}
                     aria-label={t("topos.nav.search", "Suchen")}
                     title={t("topos.nav.search", "Suchen")}
-                    className="ml-auto inline-flex items-center gap-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-2 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer"
+                    className="ml-auto inline-flex items-center gap-1.5 rounded border border-line bg-surface px-2 py-1.5 text-sm text-ink-secondary hover:text-ink cursor-pointer"
                 >
                     <Search size={16} aria-hidden />
                     <span className="hidden sm:inline">{t("topos.nav.search", "Suchen")}</span>
-                    <kbd className="hidden sm:inline rounded border border-gray-300 dark:border-gray-600 px-1 text-xs">
+                    <kbd className="hidden sm:inline rounded border border-line px-1 text-xs">
                         Ctrl K
                     </kbd>
                 </button>
@@ -118,7 +117,7 @@ export default function NavBar() {
                     onClick={() => setMenuOpen((open) => !open)}
                     aria-label={t("topos.nav.menu", "Menü")}
                     aria-expanded={menuOpen}
-                    className="md:hidden inline-flex items-center justify-center rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 p-2 text-gray-700 dark:text-gray-200 cursor-pointer"
+                    className="md:hidden inline-flex items-center justify-center rounded border border-line bg-surface p-2 text-ink-secondary cursor-pointer"
                 >
                     {menuOpen ? <X size={20} aria-hidden /> : <Menu size={20} aria-hidden />}
                 </button>
@@ -128,7 +127,7 @@ export default function NavBar() {
             {menuOpen && (
                 <div
                     data-testid="nav-mobile-menu"
-                    className="md:hidden flex flex-col gap-1 border-t border-gray-300 dark:border-gray-700 px-2 pb-2"
+                    className="md:hidden flex flex-col gap-1 border-t border-line px-2 pb-2"
                 >
                     {LINKS.map((link) => (
                         <Link

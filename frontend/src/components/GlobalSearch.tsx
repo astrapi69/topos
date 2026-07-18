@@ -71,11 +71,11 @@ export default function GlobalSearch({onClose}: {onClose: () => void}) {
             <div
                 role="dialog"
                 aria-modal="true"
-                className="w-full max-w-xl rounded-lg border border-gray-300 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900"
+                className="w-full max-w-xl rounded-lg border border-line bg-surface p-3 shadow-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center gap-2">
-                    <Search size={18} className="shrink-0 text-gray-500 dark:text-gray-400" aria-hidden />
+                    <Search size={18} className="shrink-0 text-ink-muted" aria-hidden />
                     <input
                         ref={inputRef}
                         type="search"

@@ -210,7 +210,7 @@ export default function Actions() {
                     <form
                         data-testid="actions-create-form"
                         onSubmit={handleCreate}
-                        className="border border-gray-300 dark:border-gray-700"
+                        className="border border-line"
                         style={{
                             borderRadius: 6,
                             padding: "1rem",

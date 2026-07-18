@@ -158,36 +158,42 @@
 }
 
 :root {
-    /* Warm, literary palette */
-    --bg-primary: #faf8f5;
-    --bg-secondary: #f0ece6;
-    --bg-sidebar: #f0ece6;
+    /* Cool utility palette. Anchor: Blue-800 (#1e40af) - matches the
+       PWA theme-color in index.html. Neutrals are slate (cool-tinted),
+       not warm stone: Topos is an inventory tool, not a reading app. */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-sidebar: #f1f5f9;
     --bg-card: #ffffff;
-    --bg-hover: #f5f0ea;
+    --bg-hover: #e2e8f0;
     --bg-editor: #ffffff;
 
     /* Secondary surface for soft panels/cards/code blocks. Sits one
        step "deeper" than --bg-card without flipping to --bg-secondary
        (which is the page/sidebar fill). */
-    --surface-2: #f5f0ea;
+    --surface-2: #f1f5f9;
 
-    --text-primary: #1c1917;
-    --text-secondary: #57534e;
-    --text-muted: #78716c;
-    --text-inverse: #faf8f5;
-    --text-sidebar: #3d2817;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-inverse: #f8fafc;
+    --text-sidebar: #1e293b;
 
-    --accent: #b45309;
-    --accent-hover: #92400e;
-    --accent-light: #fef3c7;
-    --accent-subtle: #fde68a;
+    --accent: #1e40af;
+    --accent-hover: #1e3a8a;
+    --accent-light: #dbeafe;
+    --accent-subtle: #bfdbfe;
 
-    --border: #e7e5e4;
-    --border-strong: #d6d3d1;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
 
     --danger: #dc2626;
     --danger-hover: #b91c1c;
     --danger-bg: #fef2f2;
+    /* Fill for solid destructive buttons. Constant across modes so
+       white button text keeps AA contrast even when --danger lightens
+       for dark-mode text use. */
+    --danger-strong: #dc2626;
 
     /* Status colors for success/warning glyphs. Light-mode defaults;
        all light palettes inherit these via :root. Dark variants
@@ -200,9 +206,9 @@
     --warning-dark: #b45309;
     --bg-warning: #fff8e6;
 
-    --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.05);
-    --shadow-md: 0 4px 12px rgba(28, 25, 23, 0.08);
-    --shadow-lg: 0 8px 24px rgba(28, 25, 23, 0.12);
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.12);
 
     --radius-sm: 4px;
     --radius-md: 8px;
@@ -288,33 +294,35 @@
     --font-display: "DM Sans", system-ui, sans-serif;
 }
 
-/* --- Dark Mode (Warm Literary) --- */
+/* --- Dark Mode (default palette) --- */
 [data-theme="dark"] {
-    --bg-primary: #1a1a1a;
-    --bg-secondary: #252525;
-    --bg-sidebar: #1c1917;
-    --bg-card: #222222;
-    --bg-hover: #2a2a2a;
-    --bg-editor: #1e1e1e;
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-sidebar: #0f172a;
+    --bg-card: #1e293b;
+    --bg-hover: #334155;
+    --bg-editor: #0f172a;
 
-    --surface-2: #2a2a2a;
+    --surface-2: #283548;
 
-    --text-primary: #e8e6e3;
-    --text-secondary: #a8a29e;
-    --text-muted: #6b6560;
-    --text-inverse: #1c1917;
-    --text-sidebar: #d6d3d1;
+    --text-primary: #e2e8f0;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --text-inverse: #0f172a;
+    --text-sidebar: #cbd5e1;
 
-    --accent: #d97706;
-    --accent-hover: #f59e0b;
-    --accent-light: rgba(217, 119, 6, 0.15);
-    --accent-subtle: rgba(217, 119, 6, 0.25);
+    /* Accent lightens for contrast on dark surfaces; --text-inverse
+       flips to dark so accent-filled buttons stay readable. */
+    --accent: #60a5fa;
+    --accent-hover: #93c5fd;
+    --accent-light: rgba(96, 165, 250, 0.15);
+    --accent-subtle: rgba(96, 165, 250, 0.25);
 
-    --border: #333333;
-    --border-strong: #444444;
+    --border: #334155;
+    --border-strong: #475569;
 
     --danger: #ef4444;
-    --danger-hover: #dc2626;
+    --danger-hover: #b91c1c;
     --danger-bg: rgba(239, 68, 68, 0.12);
 
     /* Status colors (dark): brighter to maintain contrast against

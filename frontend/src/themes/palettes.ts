@@ -21,7 +21,11 @@ export interface Palette {
  * the localized source and take precedence.
  */
 export const PALETTES: readonly Palette[] = [
-    {id: "warm-literary", label: "Warm Literary"},
+    // The default palette id predates the 2026-07 token unification;
+    // its values are now the cool Blue-800 utility palette in
+    // global.css :root. The id stays stable so persisted
+    // localStorage["topos-app-theme"] values keep resolving.
+    {id: "warm-literary", label: "Standard"},
     {id: "cool-modern", label: "Cool Modern"},
     {id: "nord", label: "Nord"},
     {id: "classic", label: "Classic"},
