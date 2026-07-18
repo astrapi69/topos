@@ -43,6 +43,11 @@ describe("BackendUrlSettings", () => {
         fireEvent.click(screen.getByTestId("backend-url-test"));
 
         await waitFor(() => expect(notify.success).toHaveBeenCalled());
+        // Wait until handleTest's finally block re-enables the button;
+        // otherwise setTesting(false) fires after teardown (window gone).
+        await waitFor(() =>
+            expect(screen.getByTestId("backend-url-test")).not.toBeDisabled(),
+        );
         expect(getBackendUrl()).toBe("http://vps.example:8010");
         expect(dispatched).toHaveBeenCalled();
         window.removeEventListener("topos:data-refresh", dispatched);
@@ -57,6 +62,9 @@ describe("BackendUrlSettings", () => {
         fireEvent.click(screen.getByTestId("backend-url-test"));
 
         await waitFor(() => expect(notify.error).toHaveBeenCalled());
+        await waitFor(() =>
+            expect(screen.getByTestId("backend-url-test")).not.toBeDisabled(),
+        );
         expect(getBackendUrl()).toBe("");
         expect(notify.success).not.toHaveBeenCalled();
     });
@@ -70,6 +78,9 @@ describe("BackendUrlSettings", () => {
         });
         fireEvent.click(screen.getByTestId("backend-url-test"));
         await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+        await waitFor(() =>
+            expect(screen.getByTestId("backend-url-test")).not.toBeDisabled(),
+        );
         expect(fetchMock.mock.calls[0][0]).toBe("http://vps.example:8010/api/health");
     });
 });
