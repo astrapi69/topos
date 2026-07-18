@@ -20,6 +20,7 @@ topos:
     import: Import
     settings: Settings
     photo_intake: "Photo intake"
+    more: More
   offline:
     banner: Offline mode - data is stored locally only.
   demo:

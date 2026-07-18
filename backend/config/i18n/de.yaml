@@ -19,6 +19,7 @@ topos:
     import: Import
     settings: Einstellungen
     photo_intake: "Foto-Erfassung"
+    more: Mehr
   offline:
     banner: Offline-Modus - Daten werden nur lokal gespeichert.
   demo:
