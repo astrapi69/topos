@@ -126,7 +126,7 @@ topos/
 ├── plugins/               # topos-plugin-excel-import
 ├── frontend/src/
 │   ├── api/client.ts      # typed API client (snake_case↔camelCase boundary)
-│   ├── components/        # NavBar + AppDialog
+│   ├── components/        # NavBar (top bar + mobile bottom tab bar), AppDialog, FormField, ...
 │   ├── db/schema.ts       # Dexie cache
 │   ├── hooks/useTopos.ts  # stale-while-revalidate hooks
 │   ├── pages/             # Dashboard, ContainerList, ContainerDetail, ItemEditor, CategoryBrowse, Actions, Import, Settings
@@ -143,7 +143,7 @@ topos/
 - i18n: 8 languages in `backend/config/i18n/{lang}.yaml`. DE + EN fully populated; the other 6 carry EN as placeholders. DE uses real umlauts.
 - Python: type hints, snake_case, Pydantic v2, SQLAlchemy 2.0 mapped columns
 - TypeScript: strict mode, no `any`, Radix UI for primitives
-- Styling: CSS custom properties drive the 5 app-themes + `.btn` system; Tailwind CSS (v3, Preflight off, `dark:` keyed to `[data-theme="dark"]`) provides per-element utility classes. New components use Tailwind classes from `src/ui/classes.ts` with explicit `dark:` variants; existing ones migrate incrementally. See architecture.md "Theming and styling".
+- Styling: CSS custom properties in `styles/global.css` are the single colour source (default palette: cool slate + Blue-800 accent, matching the PWA theme-color). `tailwind.config.js` bridges them into token utilities (`bg-surface`, `text-ink`, `border-line`, `bg-accent`, ...); `src/ui/classes.ts` composes the shared button/input/badge/card strings from them. Colours flip with `data-theme="dark"` via the variables - `dark:` variants only where the structure differs, not for palette. Fixed-palette Tailwind colours (gray-*/blue-*) are forbidden; semantic status colours (green/yellow/red badges) are the exception. Type pairing: JetBrains Mono (display, headings via the global type scale) + DM Sans (body), both bundled locally. See architecture.md "Theming and styling".
 - Commits: English, conventional (feat/fix/refactor/docs)
 - E2E: `data-testid` selectors only
 - Secrets NEVER in committed config files. Four-layer chain: project `backend/config/app.yaml` < user overlay (`<data_dir>/config/app.yaml`) < `~/.config/topos/secrets.yaml` (gitignored, auto-templated at 0o600) < env-vars. Env-overrides are keyed by `app.secrets_store._ENV_SECRET_OVERRIDES`; plugins extend the map via `register_plugin_secret_override(config_path, env_var)` from their `activate()`. The Settings page renders the resolved source label via `GET /api/settings/secret-source`. Full doc in [docs/configuration.md](docs/configuration.md).
