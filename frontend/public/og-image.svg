@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Open Graph card source (1200x630).
+
+  Design: Topos default palette - Blue-800 (#1e40af) anchor,
+  JetBrains Mono display, DM Sans body (both bundled in
+  public/fonts/). The icon motif mirrors favicon.svg.
+
+  The shipped og-image.png is rendered from this file via
+  frontend/scripts/generate-og-image.mjs (Chromium screenshot, so the
+  bundled woff2 fonts resolve without a system-wide install). Re-run
+  the script after editing this file.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+    <rect width="1200" height="630" fill="#1e40af"/>
+
+    <!-- App icon motif: favicon.svg geometry, inverted and scaled to 88px. -->
+    <g transform="translate(96,88) scale(0.171875)">
+        <rect width="512" height="512" rx="96" fill="#f8fafc"/>
+        <path d="M136 152h240v52h-94v204h-52V204h-94z" fill="#1e40af"/>
+    </g>
+
+    <text x="96" y="372" font-family="'JetBrains Mono', monospace" font-size="128"
+          font-weight="500" fill="#f8fafc">Topos</text>
+
+    <text x="96" y="448" font-family="'DM Sans', sans-serif" font-size="34"
+          fill="#dbeafe">Offline-first inventory for folders, boxes and drawers.</text>
+
+    <line x1="96" y1="518" x2="1104" y2="518" stroke="#f8fafc" stroke-opacity="0.22"
+          stroke-width="1"/>
+
+    <text x="96" y="570" font-family="'JetBrains Mono', monospace" font-size="26"
+          fill="#93c5fd">astrapi69.github.io/topos</text>
+</svg>
