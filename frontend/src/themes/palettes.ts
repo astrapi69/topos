@@ -1,13 +1,14 @@
 /**
- * Central palette registry. Each entry maps a ``data-app-theme`` value
- * to a human-readable label rendered in Settings. Light/dark is an
- * orthogonal dimension handled by the ThemeToggle and is NOT part of
- * this registry.
+ * Palette registry. Topos ships a single palette - the default
+ * light/dark pair in ``styles/global.css`` (``:root`` +
+ * ``[data-theme="dark"]``). There is no palette picker and none is
+ * planned (one anchor colour, done); the five template palettes from
+ * the bibliogon lineage were removed 2026-07-18.
  *
- * The ``id`` must match a CSS selector in ``styles/global.css`` of the
- * form ``[data-app-theme="${id}"]``. Adding a palette here without
- * adding the matching CSS block will leave the base (warm-literary)
- * variables in place and the new option will visually do nothing.
+ * The registry survives as the guard for persisted
+ * ``localStorage["topos-app-theme"]`` values: unknown ids (including
+ * the removed template palettes) fall back to the default in
+ * ``hooks/useTheme.ts``.
  */
 
 export interface Palette {
@@ -15,22 +16,10 @@ export interface Palette {
     label: string;
 }
 
-/**
- * Labels here are English fallbacks only. Settings renders them through
- * `t("ui.themes.<id>", label)`; the YAML keys under `ui.themes.*` are
- * the localized source and take precedence.
- */
 export const PALETTES: readonly Palette[] = [
-    // The default palette id predates the 2026-07 token unification;
-    // its values are now the cool Blue-800 utility palette in
-    // global.css :root. The id stays stable so persisted
-    // localStorage["topos-app-theme"] values keep resolving.
+    // The id predates the 2026-07 token unification; it stays stable
+    // so persisted localStorage values keep resolving.
     {id: "warm-literary", label: "Standard"},
-    {id: "cool-modern", label: "Cool Modern"},
-    {id: "nord", label: "Nord"},
-    {id: "classic", label: "Classic"},
-    {id: "studio", label: "Studio"},
-    {id: "notebook", label: "Notebook"},
 ];
 
 export const DEFAULT_PALETTE = "warm-literary";

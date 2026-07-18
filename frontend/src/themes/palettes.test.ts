@@ -1,34 +1,27 @@
-// TEMPLATE: This test is included as adaptable example.
-// Replace with your domain logic when project domain is finalized.
-
 /**
  * Tests for the palette registry.
  *
  * Pins the set of known palette IDs so a rename or deletion anywhere
  * in the codebase either propagates here (the conscious case) or
- * trips this test (the accidental case).
+ * trips this test (the accidental case). Since the 2026-07-18
+ * cleanup Topos ships exactly ONE palette; the five template
+ * palettes (cool-modern, nord, classic, studio, notebook) were
+ * removed together with their CSS blocks.
  */
 
 import {describe, it, expect} from "vitest";
 import {PALETTES, DEFAULT_PALETTE, isKnownPalette} from "./palettes";
 
 describe("palette registry", () => {
-    it("contains the three existing palettes", () => {
-        const ids = PALETTES.map((p) => p.id);
-        expect(ids).toContain("warm-literary");
-        expect(ids).toContain("cool-modern");
-        expect(ids).toContain("nord");
+    it("has exactly one palette (guards against accidental additions)", () => {
+        expect(PALETTES).toHaveLength(1);
+        expect(PALETTES[0].id).toBe("warm-literary");
     });
 
-    it("contains the three new palettes (Classic, Studio, Notebook)", () => {
-        const ids = PALETTES.map((p) => p.id);
-        expect(ids).toContain("classic");
-        expect(ids).toContain("studio");
-        expect(ids).toContain("notebook");
-    });
-
-    it("has exactly six palettes (guards against accidental additions)", () => {
-        expect(PALETTES).toHaveLength(6);
+    it("no longer registers the removed template palettes", () => {
+        for (const removed of ["cool-modern", "nord", "classic", "studio", "notebook"]) {
+            expect(isKnownPalette(removed)).toBe(false);
+        }
     });
 
     it("uses kebab-case IDs with no whitespace", () => {

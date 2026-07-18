@@ -82,10 +82,10 @@ describe("useTheme", () => {
       expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
     })
 
-    it("reads stored palette from localStorage", () => {
-      localStorage.setItem("topos-app-theme", "nord")
+    it("reads a stored known palette from localStorage", () => {
+      localStorage.setItem("topos-app-theme", DEFAULT_PALETTE)
       const {result} = renderHook(() => useTheme())
-      expect(result.current.appTheme).toBe("nord")
+      expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
     })
 
     it("falls back to default for unknown stored palette", () => {
@@ -94,22 +94,25 @@ describe("useTheme", () => {
       expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
     })
 
-    it("setAppTheme updates the palette", () => {
+    it("falls back to default for a removed template palette", () => {
+      // "nord" was one of the five template palettes removed on
+      // 2026-07-18; installations that persisted it must not keep a
+      // dangling data-app-theme without CSS behind it.
+      localStorage.setItem("topos-app-theme", "nord")
       const {result} = renderHook(() => useTheme())
-      act(() => result.current.setAppTheme("cool-modern"))
-      expect(result.current.appTheme).toBe("cool-modern")
+      expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
     })
 
     it("persists palette to localStorage", () => {
       const {result} = renderHook(() => useTheme())
-      act(() => result.current.setAppTheme("nord"))
-      expect(localStorage.getItem("topos-app-theme")).toBe("nord")
+      act(() => result.current.setAppTheme(DEFAULT_PALETTE))
+      expect(localStorage.getItem("topos-app-theme")).toBe(DEFAULT_PALETTE)
     })
 
     it("sets data-app-theme attribute on document element", () => {
       const {result} = renderHook(() => useTheme())
-      act(() => result.current.setAppTheme("classic"))
-      expect(document.documentElement.getAttribute("data-app-theme")).toBe("classic")
+      act(() => result.current.setAppTheme(DEFAULT_PALETTE))
+      expect(document.documentElement.getAttribute("data-app-theme")).toBe(DEFAULT_PALETTE)
     })
   })
 })
