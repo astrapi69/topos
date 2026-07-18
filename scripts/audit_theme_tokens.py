@@ -7,8 +7,8 @@ in ``--enforce`` mode.
 
 Why this exists
 ---------------
-Topos ships 5 palettes (`classic`, `cool-modern`, `nord`,
-`notebook`, `studio`) × light + dark = 10 theme variants. Every
+Topos ships one palette: the ``:root`` (light) +
+``[data-theme="dark"]`` (dark) default blocks. Every
 CSS custom property referenced via ``var(--token, #fallback)``
 silently falls through to the hex value when ``--token`` is not
 defined in the active palette × mode combination. Symptom: one
@@ -82,10 +82,14 @@ VAR_FALLBACK_RE = re.compile(r"var\(\s*(--[a-z0-9-]+)\s*,\s*#[0-9a-fA-F]+")
 # Match ``--token: value;`` inside a CSS block.
 DEF_RE = re.compile(r"^\s*(--[a-z0-9-]+)\s*:\s*([^;]+);", re.MULTILINE)
 
-# 5 palettes × 2 modes = 10 theme variants. Plus two default-
-# inheritance blocks (``:root`` and ``[data-theme="dark"]``) that
-# every palette falls back to when it has not overridden a token.
-PALETTES = ["classic", "cool-modern", "nord", "notebook", "studio"]
+# Since the 2026-07-18 cleanup Topos ships a single palette: the
+# ``:root`` (light) + ``[data-theme="dark"]`` (dark) default blocks.
+# The five template palettes (classic, cool-modern, nord, notebook,
+# studio) were removed - no palette picker exists and none is
+# planned. The list stays as the extension point should per-palette
+# blocks ever return; the default-mode check below carries the
+# audit either way.
+PALETTES: list[str] = []
 
 SELECTORS: dict[tuple[str, str], str] = {}
 for _p in PALETTES:
@@ -162,6 +166,13 @@ def find_gaps(
     dark_root_set = defs.get(("default", "dark"), set())
     for token in callsites:
         token_gaps: list[str] = []
+        # Default palette: light must come from :root, dark from the
+        # dark block or :root. Without this check an empty PALETTES
+        # list would let every token pass unaudited.
+        if token not in root_set:
+            token_gaps.append("default/L")
+        if token not in dark_root_set and token not in root_set:
+            token_gaps.append("default/D")
         for p in PALETTES:
             light_has = token in defs[(p, "light")] or token in root_set
             if not light_has:
@@ -184,13 +195,21 @@ def print_coverage_table(
     callsites: dict[str, list[tuple[str, int]]],
     defs: dict[tuple[str, str], set[str]],
 ) -> None:
-    header = ["token"] + [f"{p}/L" for p in PALETTES] + [f"{p}/D" for p in PALETTES]
+    header = (
+        ["token", "default/L", "default/D"]
+        + [f"{p}/L" for p in PALETTES]
+        + [f"{p}/D" for p in PALETTES]
+    )
     widths = [max(len(c), 14) for c in header]
     print("  ".join(c.ljust(w) for c, w in zip(header, widths)))
     root_set = defs.get((":root", "default"), set())
     dark_root_set = defs.get(("default", "dark"), set())
     for token in sorted(callsites.keys()):
         row = [token]
+        row.append("OK" if token in root_set else "MISSING")
+        row.append(
+            "OK" if token in dark_root_set or token in root_set else "MISSING"
+        )
         for p in PALETTES:
             ok = token in defs[(p, "light")] or token in root_set
             row.append("OK" if ok else "MISSING")
