@@ -51,7 +51,7 @@ export default function Dashboard() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <h1 data-testid="dashboard-title">
                     {t("topos.page.dashboard.title", "Übersicht")}
                 </h1>

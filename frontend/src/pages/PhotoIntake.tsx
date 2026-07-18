@@ -323,7 +323,7 @@ export default function PhotoIntake() {
         <>
             <NavBar />
             <main className={`p-4 sm:p-6 max-w-3xl ${text}`}>
-                <h1 data-testid="photo-intake-title" className="text-2xl font-bold mb-1">
+                <h1 data-testid="photo-intake-title">
                     {t("topos.page.photo_intake.title", "Foto-Erfassung")}
                 </h1>
                 <p className={`${muted} mb-4`}>
@@ -448,7 +448,7 @@ export default function PhotoIntake() {
 
                 <section data-testid="photo-intake-staging">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <h2 className="text-lg font-semibold mr-auto">
+                        <h2 className="mr-auto mb-0">
                             {t("topos.page.photo_intake.staging_title", "Aufnahmeliste")}
                         </h2>
                         <button

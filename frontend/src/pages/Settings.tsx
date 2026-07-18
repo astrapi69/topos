@@ -80,7 +80,7 @@ export default function Settings() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif", maxWidth: 720}}>
+            <main className="p-4 sm:p-6 max-w-3xl">
                 <h1 data-testid="settings-title">
                     {t("topos.page.settings.title", "Einstellungen")}
                 </h1>

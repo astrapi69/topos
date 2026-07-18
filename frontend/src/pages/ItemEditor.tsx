@@ -115,7 +115,7 @@ export default function ItemEditor() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif", maxWidth: 720}}>
+            <main className="p-4 sm:p-6 max-w-3xl">
                 <h1 data-testid="item-editor-title">
                     {isNew
                         ? t("topos.page.item_editor.new_title", "Neuer Eintrag")

@@ -214,7 +214,11 @@
     --radius-md: 8px;
     --radius-lg: 12px;
 
-    --font-display: "Crimson Pro", Georgia, serif;
+    /* Type pairing: mono display + humanist sans body. The mono
+       display carries the tool character (container numbers, counts);
+       DM Sans keeps running text readable on small screens. Both are
+       bundled locally in public/fonts/. */
+    --font-display: "JetBrains Mono", monospace;
     --font-body: "DM Sans", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", monospace;
 
@@ -737,6 +741,33 @@ body {
     color: var(--text-primary);
     background: var(--bg-primary);
     line-height: 1.6;
+}
+
+/* --- Topos type scale ---
+   Headings use the display face (mono). The universal reset above
+   zeroes all margins, so the small bottom margins here are the only
+   heading rhythm; pages add section spacing themselves. Weight is
+   capped at 500 - the bundled JetBrains Mono carries 400-500 only. */
+h1,
+h2,
+h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+h2 {
+    font-size: 1.0625rem;
+    margin-bottom: 0.5rem;
+}
+
+h3 {
+    font-size: 0.9375rem;
 }
 
 /* --- Scrollbar --- */

@@ -175,7 +175,7 @@ export default function Actions() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <header style={{display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem"}}>
                     <h1 data-testid="actions-title">{t("topos.page.actions.title", "Aktionen")}</h1>
                     <button

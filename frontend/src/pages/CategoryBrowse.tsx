@@ -67,7 +67,7 @@ export default function CategoryBrowse() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <h1 data-testid="category-browse-title">
                     {t("topos.page.categories.title", "Kategorien")}
                 </h1>

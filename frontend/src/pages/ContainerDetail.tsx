@@ -73,7 +73,7 @@ export default function ContainerDetail() {
         return (
             <>
                 <NavBar />
-                <main style={{padding: "1.5rem"}}>
+                <main className="p-4 sm:p-6">
                     <p>{t("topos.page.container_detail.no_id", "Kein Container ausgewählt.")}</p>
                 </main>
             </>
@@ -196,7 +196,7 @@ export default function ContainerDetail() {
     return (
         <>
             <NavBar />
-            <main style={{padding: "1.5rem", fontFamily: "system-ui, sans-serif"}}>
+            <main className="p-4 sm:p-6">
                 <Link to="/containers" className={link} data-testid="container-detail-back">
                     {t("topos.common.back", "Zurück")}
                 </Link>
