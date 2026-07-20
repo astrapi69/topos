@@ -80,7 +80,7 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
         }
         if (pass !== confirmPass) {
             notify.warning(
-                t("topos.page.settings.ai.vault_pass_mismatch", "Passphrasen stimmen nicht überein."),
+                t("topos.page.settings.ai.vault_pass_mismatch", "Passphrasen stimmen nicht ueberein."),
             );
             return;
         }
@@ -88,7 +88,7 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
         try {
             await vault.createVault(pass);
             notify.success(
-                t("topos.page.settings.ai.vault_created", "Schlüssel-Tresor angelegt."),
+                t("topos.page.settings.ai.vault_created", "Schluessel-Tresor angelegt."),
             );
             onReady();
         } catch (err) {
@@ -106,7 +106,7 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
             <p className={muted}>
                 {t(
                     "topos.page.settings.ai.vault_create_hint",
-                    "Wähle eine Passphrase, um die API-Schlüssel in diesem Browser verschlüsselt zu speichern. Ohne die Passphrase sind die Schlüssel nicht wiederherstellbar.",
+                    "Waehle eine Passphrase, um die API-Schluessel in diesem Browser verschluesselt zu speichern. Ohne die Passphrase sind die Schluessel nicht wiederherstellbar.",
                 )}
             </p>
             <input
@@ -122,7 +122,7 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
                 className={input}
                 type="password"
                 autoComplete="new-password"
-                placeholder={t("topos.page.settings.ai.vault_pass_confirm", "Passphrase bestätigen")}
+                placeholder={t("topos.page.settings.ai.vault_pass_confirm", "Passphrase bestaetigen")}
                 value={confirmPass}
                 onChange={(e) => setConfirmPass(e.target.value)}
                 data-testid="ai-vault-create-confirm"
@@ -167,10 +167,10 @@ function UnlockGate({onReady}: {onReady: () => void}) {
 
     async function forget() {
         const ok = await dialog.confirm(
-            t("topos.page.settings.ai.vault_forget_title", "Tresor zurücksetzen?"),
+            t("topos.page.settings.ai.vault_forget_title", "Tresor zuruecksetzen?"),
             t(
                 "topos.page.settings.ai.vault_forget_message",
-                "Ohne die Passphrase sind die gespeicherten Schlüssel nicht wiederherstellbar. Der Tresor wird geleert und du kannst eine neue Passphrase festlegen.",
+                "Ohne die Passphrase sind die gespeicherten Schluessel nicht wiederherstellbar. Der Tresor wird geleert und du kannst eine neue Passphrase festlegen.",
             ),
             "danger",
         );
@@ -184,7 +184,7 @@ function UnlockGate({onReady}: {onReady: () => void}) {
             <p className={muted}>
                 {t(
                     "topos.page.settings.ai.vault_unlock_hint",
-                    "Gib die Passphrase ein, um die gespeicherten API-Schlüssel für diese Sitzung zu entsperren.",
+                    "Gib die Passphrase ein, um die gespeicherten API-Schluessel fuer diese Sitzung zu entsperren.",
                 )}
             </p>
             <input
@@ -236,7 +236,7 @@ export default function AiProviderSettings() {
     const confirmFn = useCallback<ConfirmFn>(
         (options) =>
             dialog.confirm(
-                t("topos.page.settings.ai.confirm_title", "Bestätigen"),
+                t("topos.page.settings.ai.confirm_title", "Bestaetigen"),
                 options.message,
                 options.variant === "danger" ? "danger" : undefined,
                 {confirmLabel: options.confirmLabel},
@@ -386,7 +386,7 @@ export default function AiProviderSettings() {
                 <p className={danger} style={{fontSize: "0.8125rem", marginTop: "0.5rem"}}>
                     {t(
                         "topos.page.settings.ai.enable_hint",
-                        "Aktiviere die KI-Funktionen oben, damit die Bilderkennung die gespeicherten Schlüssel nutzt.",
+                        "Aktiviere die KI-Funktionen oben, damit die Bilderkennung die gespeicherten Schluessel nutzt.",
                     )}
                 </p>
             )}
