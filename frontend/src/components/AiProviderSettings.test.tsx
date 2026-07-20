@@ -33,6 +33,11 @@ vi.mock("../api/client", async (importOriginal) => {
     };
 });
 
+const mockBackendAvailable = vi.fn();
+vi.mock("../utils/backendStatus", () => ({
+    isBackendAvailable: () => mockBackendAvailable(),
+}));
+
 vi.mock("../hooks/useI18n", () => ({
     useI18n: () => ({t: (_k: string, fb?: string) => fb ?? _k}),
 }));
@@ -82,6 +87,7 @@ describe("AiProviderSettings", () => {
         vi.clearAllMocks();
         localStorage.clear();
         vault._resetSessionForTest();
+        mockBackendAvailable.mockResolvedValue(true);
         mockGetApp.mockResolvedValue({
             ai: {enabled: false, activeProvider: "anthropic", models: {}, baseUrls: {}},
         });
@@ -133,7 +139,7 @@ describe("AiProviderSettings", () => {
     });
 
     it("shows the create-passphrase gate in local mode with no vault", async () => {
-        mockGetApp.mockRejectedValue(new Error("offline"));
+        mockBackendAvailable.mockResolvedValue(false);
         renderPanel();
         await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
         expect(screen.getByTestId("ai-vault-create-pass")).toBeInTheDocument();
@@ -142,7 +148,7 @@ describe("AiProviderSettings", () => {
     });
 
     it("creates the vault and reveals the panel + encrypted key vault", async () => {
-        mockGetApp.mockRejectedValue(new Error("offline"));
+        mockBackendAvailable.mockResolvedValue(false);
         renderPanel();
         await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
         await fillCreateGate();
@@ -157,7 +163,7 @@ describe("AiProviderSettings", () => {
     });
 
     it("rejects mismatched passphrases without creating a vault", async () => {
-        mockGetApp.mockRejectedValue(new Error("offline"));
+        mockBackendAvailable.mockResolvedValue(false);
         renderPanel();
         await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
         fireEvent.change(screen.getByTestId("ai-vault-create-pass"), {target: {value: PASS}});
@@ -172,7 +178,7 @@ describe("AiProviderSettings", () => {
     it("unlocks an existing vault with the correct passphrase", async () => {
         await vault.createVault(PASS);
         vault.lock();
-        mockGetApp.mockRejectedValue(new Error("offline"));
+        mockBackendAvailable.mockResolvedValue(false);
         renderPanel();
         await waitFor(() => screen.getByTestId("ai-vault-unlock-pass"));
         fireEvent.change(screen.getByTestId("ai-vault-unlock-pass"), {target: {value: PASS}});
@@ -185,7 +191,7 @@ describe("AiProviderSettings", () => {
     it("reports a wrong passphrase and stays locked", async () => {
         await vault.createVault(PASS);
         vault.lock();
-        mockGetApp.mockRejectedValue(new Error("offline"));
+        mockBackendAvailable.mockResolvedValue(false);
         renderPanel();
         await waitFor(() => screen.getByTestId("ai-vault-unlock-pass"));
         fireEvent.change(screen.getByTestId("ai-vault-unlock-pass"), {
@@ -197,7 +203,7 @@ describe("AiProviderSettings", () => {
     });
 
     it("locks the vault again on demand", async () => {
-        mockGetApp.mockRejectedValue(new Error("offline"));
+        mockBackendAvailable.mockResolvedValue(false);
         renderPanel();
         await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
         await fillCreateGate();

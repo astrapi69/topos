@@ -27,6 +27,12 @@ vi.mock("../api/client", () => ({
     ApiError: class extends Error {},
 }));
 
+// These tests exercise backend mode (the secret-source card + AI panel read
+// the backend), so the health probe reports a reachable backend.
+vi.mock("../utils/backendStatus", () => ({
+    isBackendAvailable: () => Promise.resolve(true),
+}));
+
 describe("Settings", () => {
     beforeEach(() => {
         vi.clearAllMocks();

@@ -13,8 +13,11 @@ import {ChevronDown, ChevronRight} from "lucide-react";
 
 import NavBar from "../components/NavBar";
 import {api} from "../api/client";
+import {db} from "../db/schema";
 import {useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
+import {isBackendAvailable} from "../utils/backendStatus";
+import {buildCategoryTree} from "../utils/categoryTree";
 import {notify, errorMessage} from "../utils/notify";
 import {text, muted, link, selected as selectedCls} from "../ui/classes";
 import type {CategoryNode, Item} from "../types/topos";
@@ -27,19 +30,26 @@ export default function CategoryBrowse() {
 
     useEffect(() => {
         let cancelled = false;
-        api.categories
-            .tree()
-            .then((data) => {
+        void (async () => {
+            // Offline (no-backend PWA): never call the API - it would 404.
+            // Build the tree from the Dexie cache (empty cache -> empty tree).
+            if (!(await isBackendAvailable())) {
+                const cached = await db.categories.toArray();
+                if (!cancelled) setTree(buildCategoryTree(cached));
+                return;
+            }
+            try {
+                const data = await api.categories.tree();
                 if (!cancelled) setTree(data);
-            })
-            .catch((e) => {
+            } catch (e) {
                 if (!cancelled) {
                     notify.error(
                         errorMessage(e, t("topos.toast.categories_load_failed", "Kategorien konnten nicht geladen werden")),
                         e,
                     );
                 }
-            });
+            }
+        })();
         return () => {
             cancelled = true;
         };
