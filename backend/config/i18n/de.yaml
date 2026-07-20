@@ -1,6 +1,13 @@
 # Topos i18n catalog (DE). Default UI language.
 
 ui:
+  api_key:
+    open_settings: Einstellungen öffnen
+    required: API-Schlüssel erforderlich.
+    required_long: Konfiguriere einen Anbieter-Schlüssel in den Einstellungen, um diese Aktion zu aktivieren.
+    required_with_feature: API-Schlüssel erforderlich {feature}.
+  hide_secret: Wert verbergen
+  show_secret: Wert anzeigen
   app:
     name: Topos
     description: Persönliche Inventarverwaltung
@@ -182,6 +189,7 @@ topos:
         configured: Schlüssel gespeichert
         vision_badge: Vision
         custom_vision_hint: "Vision-Unterstützung hängt vom gewählten Modell ab."
+        custom_base_url_hint: "Endpunkt-URL des OpenAI-kompatiblen Servers (z. B. LM Studio, Ollama)."
         save: Speichern
         saving: Speichern...
         saved: KI-Einstellungen gespeichert
@@ -302,3 +310,96 @@ pwa:
   update_available: Neue Version verfügbar
   update_action: Aktualisieren
   install_app: App installieren
+common:
+  error: Etwas ist schiefgelaufen.
+  loading: Wird geladen…
+  remove: Entfernen
+settings:
+  active_provider_missing_key: Das ist dein aktiver Anbieter, aber es ist kein API-Schlüssel gespeichert. KI-Antworten werden übersprungen, bis ein Schlüssel gespeichert ist.
+  api_key:
+    format_invalid: Ungültiges Format.
+    rollback_restore: Letzten funktionierenden Schlüssel wiederherstellen
+    test: Testen
+    test_error: Test fehlgeschlagen. Der Anbieter hat die Anfrage abgelehnt.
+    test_invalid: Schlüssel ungültig oder abgelaufen.
+    test_network: Verbindung fehlgeschlagen. Prüfe deine Internetverbindung.
+    test_no_key: Kein Schlüssel zum Testen.
+    test_rate_limit: Ratenlimit erreicht. Versuche es später.
+    test_success: Schlüssel funktioniert!
+    testing: Wird getestet…
+  api_key_confirm_delete: Diesen API-Schlüssel wirklich entfernen?
+  api_key_delete: Schlüssel entfernen
+  api_key_external_hint_env: Dieser Schlüssel wird über eine Umgebungsvariable konfiguriert und kann hier nicht bearbeitet werden.
+  api_key_external_hint_file: In einer Secrets-Datei gespeichert. Speichern hier überschreibt sie.
+  api_key_label: API-Schlüssel
+  api_key_missing: Nicht gesetzt
+  api_key_placeholder: Hier einfügen…
+  api_key_placeholder_replace: Neuen Schlüssel einfügen, um den gespeicherten zu ersetzen…
+  api_key_saved: Schlüssel gespeichert
+  api_key_set: Schlüssel speichern
+  api_key_source_env: 'Schlüssel aus: Umgebungsvariable'
+  api_key_source_file: 'Schlüssel aus: Secrets-Datei'
+  api_key_source_none: Kein Schlüssel konfiguriert
+  api_key_source_settings: 'Schlüssel aus: Einstellungen'
+  key_export_link:
+    button: Zum Schlüssel-Export
+    heading: KI-Schlüssel - verschlüsselter Export
+    hint: Exportiere oder importiere deine KI-Schlüssel als eine verschlüsselte Datei.
+  key_vault:
+    api_export_disabled: Im Server-Modus können Schlüssel nicht exportiert werden - sie werden verschlüsselt auf dem Server verwaltet. Der Import einer Schlüsseldatei funktioniert weiterhin.
+    busy: Wird bearbeitet…
+    confirm_label: Passphrase bestätigen
+    error_decrypt: Passphrase falsch oder Datei beschädigt.
+    error_export: Export konnte nicht erstellt werden.
+    error_import: Schlüsseldatei konnte nicht importiert werden.
+    error_mismatch: Die Passphrasen stimmen nicht überein.
+    export_button: Verschlüsselte Datei exportieren
+    export_heading: Export
+    import_button: Schlüsseldatei importieren
+    import_file_label: Verschlüsselte Schlüsseldatei
+    import_heading: Import
+    import_hint: Wähle die verschlüsselte Schlüsseldatei oder füge ihren Inhalt unten ein. Beides funktioniert.
+    import_text_invalid: Das sieht nicht nach einer gültigen Schlüsseldatei aus. Prüfe, ob du den gesamten Inhalt eingefügt hast.
+    import_text_label: …oder den Inhalt der Schlüsseldatei einfügen
+    import_text_placeholder: '{ "format": "…", … }'
+    intro: Verschiebe deine KI-Schlüssel in einer verschlüsselten Datei auf ein anderes Gerät, getrennt vom normalen Backup (das nie Schlüssel enthält).
+    min_length: Mindestens {n} Zeichen.
+    no_keys: Es gibt noch keine KI-Schlüssel zum Exportieren.
+    passphrase_hint: Wähle eine starke Passphrase. Sie kann nicht wiederhergestellt werden - ohne sie lässt sich die Datei nicht öffnen.
+    passphrase_label: Passphrase
+    success_export: Verschlüsselte Schlüsseldatei heruntergeladen.
+    success_import: Schlüssel importiert. KI-Funktionen sind wieder bereit.
+    title: KI-Schlüssel - verschlüsselter Export
+  model_override_clear: Standard verwenden
+  model_override_default: Standardmodell
+  model_override_label: Modell
+  model_override_save: Modell speichern
+  model_override_set: Überschreibung aktiv
+  model_overrides_hint: Leer lassen, um für jeden Anbieter das Standardmodell zu verwenden. Ein nicht-leerer Wert ersetzt den Standard zur Laufzeit.
+  provider_active: Aktiv
+  provider_label: Aktiver Anbieter
+  providers:
+    add: Schlüssel hinzufügen
+    edit: Bearbeiten
+    hint: Gespeicherte Schlüssel bleiben gespeichert. Es wird nur eine maskierte Vorschau angezeigt - nie der vollständige Schlüssel.
+    import_keys: Importieren
+    set_active: Als aktiven Anbieter verwenden
+    status_active: Aktiv
+    status_desktop_only: Nur Desktop
+    status_empty: Leer
+    status_external: Extern
+    test: Testen
+    test_backend_only: Nur mit dem Backend testbar
+    test_connection_ok: Verbindung ok
+    test_key_invalid: Schlüssel ungültig
+    test_network_error: Netzwerkfehler
+    testing: Wird getestet…
+    title: Konfigurierte KI-Anbieter
+  saved: Gespeichert.
+  section_api_keys: API-Schlüssel
+  section_model_overrides: Modell-Überschreibungen
+  section_provider: KI-Anbieter
+toast:
+  api_key_deleted: API-Schlüssel entfernt.
+  api_key_restored: Letzter funktionierender Schlüssel wiederhergestellt.
+  api_key_saved: API-Schlüssel gespeichert.

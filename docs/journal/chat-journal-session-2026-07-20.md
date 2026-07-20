@@ -103,3 +103,46 @@ local-PWA-only feature, backend mode keeps YAML/secrets.
   an empty app-overlay value; no dedicated delete route exists).
 - E2E smoke for the local vault gate (create → unlock → lock) under
   Playwright.
+
+---
+
+## Follow-up session (post-merge, same day)
+
+After PR #5 merged, the four documented follow-ups were implemented on a
+branch restarted from the updated `main`:
+
+1. **Dedicated delete-key endpoint.** `DELETE /api/settings/ai/keys/{provider}`
+   removes a user-managed key from the app overlay and 409s for
+   externally-managed (env / secrets) keys; the backend adapter's
+   `deleteApiKey` calls it instead of writing an empty string. 3 backend
+   tests + a new `backendAdapter` unit test (mapping / set / delete /
+   patch / test-classification).
+2. **Custom OpenAI-compatible provider re-added.** Back in the registry;
+   because the kit's 0.1.x panel has no base-URL input, Topos renders
+   `CustomEndpointField` (a base-URL field wired through the adapter's
+   `baseUrlOverride`) when `custom` is active. `corsBlocked`
+   (backend/desktop mode).
+3. **Kit i18n translated (backend mode).** The panel/key-vault's 92 keys
+   (`common`/`settings`/`toast`/`ui`) plus `custom_base_url_hint` added to
+   all 8 catalogs - real-umlaut German in `de.yaml`, English elsewhere.
+   Parity/structure/placeholder tests green (75 passed). Local PWA mode
+   still shows the kit's English fallbacks (no catalog fetch offline).
+4. **E2E vault-gate smoke rewritten.** `e2e/smoke/ai-settings.spec.ts`
+   now drives the packaged panel + the create -> lock -> unlock lifecycle
+   (asserting the localStorage envelope is ciphertext); old-UI selectors
+   removed. Run by the maintainer (e2e is off the CI path).
+
+Verification: frontend 234 Vitest + tsc; backend ruff + mypy clean; 136
+backend AI/settings/i18n tests pass.
+
+### Lesson: the kit's `useApiKeyStatus` per-userId CACHE leaks across Vitest tests
+
+`useApiKeyStatus` reads a module-level `CACHE` keyed by userId. Topos
+uses one userId (`"topos"`), so the first test's snapshot (active
+provider `anthropic`) leaked into a later test that needed `custom`
+active, and the custom base-URL field never rendered. Fix: call the
+kit's `refreshApiKeyStatus(adapter, registry, userId)` to clear+refetch
+the cache with the test's own mock before rendering. Same family as the
+existing "Module-level caches survive test boundaries" rule - the cache
+is production-correct (shared snapshot across AI gates); tests must
+reset it, not the kit.
