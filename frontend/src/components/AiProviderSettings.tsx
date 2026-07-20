@@ -1,106 +1,262 @@
 /**
- * AI provider settings: pick a provider, choose a (vision-capable)
- * model, store an API key, and test the connection.
+ * AI provider settings, built on ``@astrapi69/ai-key-vault-react``.
  *
- * Two modes, following the adaptive-learner pattern:
+ * Two modes, same as before, now driven by the kit's ``AiSettingsPanel``:
  *
- * - Backend mode (a backend answers): the backend config chain is the
- *   source of truth. Keys are never read back from the server - the
- *   input is write-only. When a provider's key is managed via env var
- *   or secrets.yaml the input is replaced by a read-only source card,
- *   and the backend strips such keys from any PATCH defensively.
- * - Local mode (no backend: GitHub Pages PWA / Dexie-only): the SAME
- *   form stays fully functional. Provider presets come from the
- *   client-side mirror, the configuration and API keys persist in
- *   localStorage (this browser only), and "Test connection" probes
- *   the provider directly from the browser.
+ * - **Backend mode** (a backend answers): keys live in the server config
+ *   chain (env / ``secrets.yaml`` / ``app.yaml`` overlay), write-only from the
+ *   client. The ``backendAdapter`` maps the panel onto ``/api/settings/*``.
+ *   No encrypted key vault here - ``secrets.yaml`` is the backup.
+ * - **Local mode** (no backend: GitHub Pages PWA / Dexie-only): keys live in
+ *   a passphrase-encrypted vault in this browser. The section renders an
+ *   unlock / create-passphrase gate; once unlocked, the same panel plus the
+ *   encrypted ``.alk`` key-vault export/import (for moving keys between
+ *   devices) are shown.
+ *
+ * The ``enabled`` flag is a Topos concept the kit has no notion of, so it
+ * stays a wrapper-level toggle (persisted to the backend ``ai.enabled`` or the
+ * local vault metadata).
  */
 
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 
 import {
-    api,
-    type AiConfig,
-    type AiKeyStatus,
-    type AiProvider,
-    type AiTestResult,
-} from "../api/client";
-import {
-    AI_PROVIDER_PRESETS,
-    getLocalAiConfig,
-    setLocalAiConfig,
-    supportsBrowserDirect,
-    testAiConnectionDirect,
-} from "../ai";
+    AiSettingsPanel,
+    AiSettingsProvider,
+    KeyVaultSection,
+    type ConfirmFn,
+    type NotifyApi,
+} from "@astrapi69/ai-key-vault-react";
+import {emitSettingsRefresh} from "@astrapi69/ai-key-vault";
+import {VaultDecryptError} from "@astrapi69/passphrase-vault";
+
+import {api} from "../api/client";
+import {createBackendAdapter} from "../ai/backendAdapter";
+import {createLocalVaultAdapter} from "../ai/localVaultAdapter";
+import {TOPOS_REGISTRY} from "../ai/registry";
+import {ToposButton, ToposInput, ToposLink} from "../ai/settingsSlots";
+import {TOPOS_VAULT_FORMAT} from "../ai/localVaultStore";
+import * as vault from "../ai/localVaultStore";
+import {useDialog} from "./AppDialog";
 import {useI18n} from "../hooks/useI18n";
 import {notify, errorMessage} from "../utils/notify";
-import {btn, btnPrimary, input, muted, badge, danger} from "../ui/classes";
+import {btn, btnText, input, muted, danger} from "../ui/classes";
 
 type SettingsMode = "backend" | "local";
+type LocalGate = "create" | "locked" | "unlocked";
 
-function statusByProvider(statuses: AiKeyStatus[]): Record<string, AiKeyStatus> {
-    return Object.fromEntries(statuses.map((s) => [s.provider, s]));
+const USER_ID = "topos"; // single-user app; the adapters ignore this
+
+/** Which local-vault gate to show, derived from the store singleton. */
+function computeGate(): LocalGate {
+    if (!vault.hasVault()) return "create";
+    return vault.isUnlocked() ? "unlocked" : "locked";
 }
 
-function localStatuses(keys: Record<string, string>): Record<string, AiKeyStatus> {
-    return Object.fromEntries(
-        AI_PROVIDER_PRESETS.map((preset) => [
-            preset.id,
-            {
-                provider: preset.id,
-                configured: Boolean((keys[preset.id] ?? "").trim()),
-                source: "none" as const,
-                externallyManaged: false,
-            },
-        ]),
+const notifyApi: NotifyApi = {
+    success: (message) => void notify.success(message),
+    error: (message) => void notify.error(message),
+    warning: (message) => void notify.warning(message),
+};
+
+const MIN_PASSPHRASE = 8;
+
+/** First-run gate: choose a passphrase that protects the local key vault. */
+function CreatePassphraseGate({onReady}: {onReady: () => void}) {
+    const {t} = useI18n();
+    const [pass, setPass] = useState("");
+    const [confirmPass, setConfirmPass] = useState("");
+    const [busy, setBusy] = useState(false);
+
+    async function submit() {
+        if (pass.length < MIN_PASSPHRASE) {
+            notify.warning(
+                t(
+                    "topos.page.settings.ai.vault_pass_too_short",
+                    `Passphrase zu kurz (mindestens ${MIN_PASSPHRASE} Zeichen).`,
+                ),
+            );
+            return;
+        }
+        if (pass !== confirmPass) {
+            notify.warning(
+                t("topos.page.settings.ai.vault_pass_mismatch", "Passphrasen stimmen nicht überein."),
+            );
+            return;
+        }
+        setBusy(true);
+        try {
+            await vault.createVault(pass);
+            notify.success(
+                t("topos.page.settings.ai.vault_created", "Schlüssel-Tresor angelegt."),
+            );
+            onReady();
+        } catch (err) {
+            notify.error(
+                errorMessage(err, t("topos.page.settings.ai.vault_create_failed", "Tresor konnte nicht angelegt werden.")),
+                err,
+            );
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    return (
+        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 420}}>
+            <p className={muted}>
+                {t(
+                    "topos.page.settings.ai.vault_create_hint",
+                    "Wähle eine Passphrase, um die API-Schlüssel in diesem Browser verschlüsselt zu speichern. Ohne die Passphrase sind die Schlüssel nicht wiederherstellbar.",
+                )}
+            </p>
+            <input
+                className={input}
+                type="password"
+                autoComplete="new-password"
+                placeholder={t("topos.page.settings.ai.vault_pass", "Passphrase")}
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+                data-testid="ai-vault-create-pass"
+            />
+            <input
+                className={input}
+                type="password"
+                autoComplete="new-password"
+                placeholder={t("topos.page.settings.ai.vault_pass_confirm", "Passphrase bestätigen")}
+                value={confirmPass}
+                onChange={(e) => setConfirmPass(e.target.value)}
+                data-testid="ai-vault-create-confirm"
+            />
+            <button
+                type="button"
+                className={btn}
+                onClick={submit}
+                disabled={busy}
+                data-testid="ai-vault-create-button"
+            >
+                {t("topos.page.settings.ai.vault_create", "Tresor anlegen")}
+            </button>
+        </div>
+    );
+}
+
+/** Unlock gate: decrypt the local key vault for this session. */
+function UnlockGate({onReady}: {onReady: () => void}) {
+    const {t} = useI18n();
+    const dialog = useDialog();
+    const [pass, setPass] = useState("");
+    const [busy, setBusy] = useState(false);
+
+    async function submit() {
+        if (!pass) return;
+        setBusy(true);
+        try {
+            await vault.unlock(pass);
+            setPass("");
+            onReady();
+        } catch (err) {
+            const message =
+                err instanceof VaultDecryptError
+                    ? t("topos.page.settings.ai.vault_wrong_pass", "Falsche Passphrase.")
+                    : errorMessage(err, t("topos.page.settings.ai.vault_unlock_failed", "Entsperren fehlgeschlagen."));
+            notify.error(message, err);
+        } finally {
+            setBusy(false);
+        }
+    }
+
+    async function forget() {
+        const ok = await dialog.confirm(
+            t("topos.page.settings.ai.vault_forget_title", "Tresor zurücksetzen?"),
+            t(
+                "topos.page.settings.ai.vault_forget_message",
+                "Ohne die Passphrase sind die gespeicherten Schlüssel nicht wiederherstellbar. Der Tresor wird geleert und du kannst eine neue Passphrase festlegen.",
+            ),
+            "danger",
+        );
+        if (!ok) return;
+        vault.destroyVault();
+        onReady();
+    }
+
+    return (
+        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 420}}>
+            <p className={muted}>
+                {t(
+                    "topos.page.settings.ai.vault_unlock_hint",
+                    "Gib die Passphrase ein, um die gespeicherten API-Schlüssel für diese Sitzung zu entsperren.",
+                )}
+            </p>
+            <input
+                className={input}
+                type="password"
+                autoComplete="current-password"
+                placeholder={t("topos.page.settings.ai.vault_pass", "Passphrase")}
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") void submit();
+                }}
+                data-testid="ai-vault-unlock-pass"
+            />
+            <div style={{display: "flex", gap: "0.5rem"}}>
+                <button
+                    type="button"
+                    className={btn}
+                    onClick={submit}
+                    disabled={busy || !pass}
+                    data-testid="ai-vault-unlock-button"
+                >
+                    {t("topos.page.settings.ai.vault_unlock", "Entsperren")}
+                </button>
+                <button
+                    type="button"
+                    className={btnText}
+                    onClick={forget}
+                    data-testid="ai-vault-forgot-button"
+                >
+                    {t("topos.page.settings.ai.vault_forgot", "Passphrase vergessen?")}
+                </button>
+            </div>
+        </div>
     );
 }
 
 export default function AiProviderSettings() {
     const {t} = useI18n();
+    const dialog = useDialog();
     const [mode, setMode] = useState<SettingsMode | null>(null);
-    const [providers, setProviders] = useState<AiProvider[]>([]);
-    const [keyStatus, setKeyStatus] = useState<Record<string, AiKeyStatus>>({});
     const [enabled, setEnabled] = useState(false);
-    const [activeProvider, setActiveProvider] = useState("anthropic");
-    const [models, setModels] = useState<Record<string, string>>({});
-    const [baseUrls, setBaseUrls] = useState<Record<string, string>>({});
-    /** Stored key values; only ever populated in local mode. */
-    const [localKeys, setLocalKeys] = useState<Record<string, string>>({});
-    const [apiKey, setApiKey] = useState("");
-    const [saving, setSaving] = useState(false);
-    const [testing, setTesting] = useState(false);
+    // Re-derived on create / unlock / lock; only meaningful in local mode.
+    const [gate, setGate] = useState<LocalGate>("create");
+
+    const backendAdapter = useMemo(() => createBackendAdapter(), []);
+    const localAdapter = useMemo(() => createLocalVaultAdapter(), []);
+
+    const confirmFn = useCallback<ConfirmFn>(
+        (options) =>
+            dialog.confirm(
+                t("topos.page.settings.ai.confirm_title", "Bestätigen"),
+                options.message,
+                options.variant === "danger" ? "danger" : undefined,
+                {confirmLabel: options.confirmLabel},
+            ),
+        [dialog, t],
+    );
 
     useEffect(() => {
         let cancelled = false;
-        Promise.all([
-            api.settings.getAiProviders(),
-            api.settings.getAiKeyStatus(),
-            api.settings.getApp(),
-        ])
-            .then(([provs, statuses, appCfg]) => {
+        api.settings
+            .getApp()
+            .then((cfg) => {
                 if (cancelled) return;
-                const ai = appCfg.ai ?? {};
-                setProviders(provs);
-                setKeyStatus(statusByProvider(statuses));
-                setEnabled(Boolean(ai.enabled));
-                setActiveProvider(ai.activeProvider || "anthropic");
-                setModels(ai.models ?? {});
-                setBaseUrls(ai.baseUrls ?? {});
+                setEnabled(Boolean(cfg.ai?.enabled));
                 setMode("backend");
             })
             .catch(() => {
-                // No backend (PWA / Dexie-only): switch to the browser-local
-                // store instead of hiding the section.
                 if (cancelled) return;
-                const local = getLocalAiConfig();
-                setProviders(AI_PROVIDER_PRESETS);
-                setKeyStatus(localStatuses(local.keys));
-                setEnabled(local.enabled);
-                setActiveProvider(local.activeProvider);
-                setModels(local.models);
-                setBaseUrls(local.baseUrls);
-                setLocalKeys(local.keys);
+                setEnabled(vault.isEnabled());
+                setGate(computeGate());
                 setMode("local");
             });
         return () => {
@@ -108,122 +264,31 @@ export default function AiProviderSettings() {
         };
     }, []);
 
-    if (mode === null) return null;
-
-    const provider = providers.find((p) => p.id === activeProvider) ?? providers[0];
-    const status = keyStatus[activeProvider];
-    const externallyManaged = status?.externallyManaged ?? false;
-    const configured = status?.configured ?? false;
-    const selectedModel = models[activeProvider] ?? provider?.defaultModel ?? "";
-    // In local (no-backend) mode only Anthropic can be reached from the
-    // browser; OpenAI/Gemini/custom are blocked by CORS and need a backend.
-    const requiresBackend = mode === "local" && !supportsBrowserDirect(activeProvider);
-
-    function onProviderChange(id: string) {
-        setActiveProvider(id);
-        setApiKey(""); // never carry a typed key across providers
-    }
-
-    function onModelChange(model: string) {
-        setModels((prev) => ({...prev, [activeProvider]: model}));
-    }
-
-    function onBaseUrlChange(url: string) {
-        setBaseUrls((prev) => ({...prev, [activeProvider]: url}));
-    }
-
-    async function saveToBackend() {
-        const patch: AiConfig = {enabled, activeProvider, models, baseUrls};
-        if (apiKey.trim() && !externallyManaged) {
-            patch.keys = {[activeProvider]: apiKey.trim()};
-        }
-        await api.settings.updateApp({ai: patch});
-        const statuses = await api.settings.getAiKeyStatus();
-        setKeyStatus(statusByProvider(statuses));
-    }
-
-    function saveToLocalStorage() {
-        const keys = {...localKeys};
-        if (apiKey.trim()) keys[activeProvider] = apiKey.trim();
-        setLocalAiConfig({enabled, activeProvider, models, baseUrls, keys});
-        setLocalKeys(keys);
-        setKeyStatus(localStatuses(keys));
-    }
-
-    async function handleSave() {
-        if (requiresBackend) return;
-        setSaving(true);
+    async function onToggleEnabled(next: boolean) {
+        setEnabled(next);
         try {
             if (mode === "backend") {
-                await saveToBackend();
+                await api.settings.updateApp({ai: {enabled: next}});
             } else {
-                saveToLocalStorage();
+                vault.setEnabled(next);
             }
-            setApiKey("");
-            notify.success(
-                t("topos.page.settings.ai.saved", "AI-Einstellungen gespeichert"),
-            );
-        } catch (e) {
+        } catch (err) {
             notify.error(
-                errorMessage(
-                    e,
-                    t("topos.page.settings.ai.save_failed", "Speichern fehlgeschlagen"),
-                ),
-                e,
+                errorMessage(err, t("topos.page.settings.ai.save_failed", "Speichern fehlgeschlagen")),
+                err,
             );
-        } finally {
-            setSaving(false);
+            setEnabled(!next); // revert optimistic flip
         }
     }
 
-    function reportTestResult(result: AiTestResult) {
-        if (result.ok) {
-            notify.success(
-                t("topos.page.settings.ai.test_ok", "Verbindung erfolgreich"),
-            );
-            return;
-        }
-        const code = result.errorCode || "unknown";
-        notify.error(
-            t(
-                `topos.page.settings.ai.test_err_${code}`,
-                t("topos.page.settings.ai.test_failed", "Verbindung fehlgeschlagen"),
-            ),
-        );
+    function afterVaultChange() {
+        setGate(computeGate());
+        emitSettingsRefresh();
     }
 
-    async function handleTest() {
-        if (requiresBackend) return;
-        setTesting(true);
-        const request = {
-            provider: activeProvider,
-            apiKey: apiKey.trim() || (mode === "local" ? localKeys[activeProvider] : undefined),
-            baseUrl: baseUrls[activeProvider] || undefined,
-        };
-        try {
-            const result =
-                mode === "backend"
-                    ? await api.settings.testAiConnection(request)
-                    : await testAiConnectionDirect(request);
-            reportTestResult(result);
-        } catch (e) {
-            notify.error(
-                errorMessage(
-                    e,
-                    t("topos.page.settings.ai.test_failed", "Test fehlgeschlagen"),
-                ),
-                e,
-            );
-        } finally {
-            setTesting(false);
-        }
-    }
+    if (mode === null) return null;
 
-    const visionLabel = t("topos.page.settings.ai.vision_badge", "Vision");
-    const sourceLabel = t(
-        `topos.page.settings.secret_key_source_${status?.source ?? "none"}`,
-        `Key from: ${status?.source ?? "none"}`,
-    );
+    const localReady = mode === "local" && gate === "unlocked";
 
     return (
         <section style={{marginBottom: "1.5rem"}} data-testid="ai-settings-section">
@@ -254,162 +319,77 @@ export default function AiProviderSettings() {
                 <input
                     type="checkbox"
                     checked={enabled}
-                    onChange={(e) => setEnabled(e.target.checked)}
+                    onChange={(e) => onToggleEnabled(e.target.checked)}
                     data-testid="ai-enable-toggle"
                     style={{width: 20, height: 20}}
                 />
                 {t("topos.page.settings.ai.enable", "KI-Funktionen aktivieren")}
             </label>
 
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.75rem",
-                    maxWidth: 420,
-                }}
-            >
-                <label style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
-                    {t("topos.page.settings.ai.provider", "Anbieter")}
-                    <select
-                        className={input}
-                        value={activeProvider}
-                        onChange={(e) => onProviderChange(e.target.value)}
-                        data-testid="ai-provider-select"
+            {mode === "backend" && (
+                <AiSettingsProvider
+                    adapter={backendAdapter}
+                    registry={TOPOS_REGISTRY}
+                    userId={USER_ID}
+                    t={t}
+                    notify={notifyApi}
+                    confirm={confirmFn}
+                    browserRuntime={false}
+                    Button={ToposButton}
+                    Input={ToposInput}
+                    Link={ToposLink}
+                >
+                    <AiSettingsPanel />
+                </AiSettingsProvider>
+            )}
+
+            {mode === "local" && gate === "create" && (
+                <CreatePassphraseGate onReady={afterVaultChange} />
+            )}
+
+            {mode === "local" && gate === "locked" && (
+                <UnlockGate onReady={afterVaultChange} />
+            )}
+
+            {localReady && (
+                <AiSettingsProvider
+                    adapter={localAdapter}
+                    registry={TOPOS_REGISTRY}
+                    userId={USER_ID}
+                    t={t}
+                    notify={notifyApi}
+                    confirm={confirmFn}
+                    vaultFormat={TOPOS_VAULT_FORMAT}
+                    browserRuntime={true}
+                    Button={ToposButton}
+                    Input={ToposInput}
+                    Link={ToposLink}
+                >
+                    <AiSettingsPanel />
+                    <KeyVaultSection />
+                    <button
+                        type="button"
+                        className={btnText}
+                        style={{marginTop: "1rem"}}
+                        onClick={() => {
+                            vault.lock();
+                            afterVaultChange();
+                        }}
+                        data-testid="ai-vault-lock-button"
                     >
-                        {providers.map((p) => (
-                            <option key={p.id} value={p.id}>
-                                {p.label}
-                            </option>
-                        ))}
-                    </select>
-                </label>
+                        {t("topos.page.settings.ai.vault_lock", "Tresor sperren")}
+                    </button>
+                </AiSettingsProvider>
+            )}
 
-                {requiresBackend && (
-                    <div style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
-                        <span className={badge} data-testid="ai-requires-backend">
-                            {t(
-                                "topos.page.settings.ai.provider_requires_backend",
-                                "Dieser Provider benoetigt eine Backend-Verbindung",
-                            )}
-                        </span>
-                        <p className={`${muted} text-sm`} data-testid="ai-requires-backend-hint">
-                            {t(
-                                "topos.page.settings.ai.connect_backend_hint",
-                                "Verbinde ein Backend in den Einstellungen fuer alle Provider.",
-                            )}
-                        </p>
-                    </div>
-                )}
-
-                {provider?.requiresBaseUrl && (
-                    <label style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
-                        {t("topos.page.settings.ai.base_url", "Basis-URL")}
-                        <input
-                            className={input}
-                            type="url"
-                            placeholder="http://localhost:11434/v1"
-                            value={baseUrls[activeProvider] ?? ""}
-                            onChange={(e) => onBaseUrlChange(e.target.value)}
-                            data-testid="ai-base-url-input"
-                        />
-                    </label>
-                )}
-
-                <label style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
-                    {t("topos.page.settings.ai.model", "Modell")}
-                    {provider && provider.models.length > 0 ? (
-                        <select
-                            className={input}
-                            value={selectedModel}
-                            onChange={(e) => onModelChange(e.target.value)}
-                            data-testid="ai-model-select"
-                        >
-                            {provider.models.map((m) => (
-                                <option key={m.id} value={m.id}>
-                                    {m.label}
-                                    {m.vision ? ` - ${visionLabel}` : ""}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <input
-                            className={input}
-                            type="text"
-                            value={selectedModel}
-                            onChange={(e) => onModelChange(e.target.value)}
-                            data-testid="ai-model-input"
-                        />
+            {mode === "local" && !enabled && (
+                <p className={danger} style={{fontSize: "0.8125rem", marginTop: "0.5rem"}}>
+                    {t(
+                        "topos.page.settings.ai.enable_hint",
+                        "Aktiviere die KI-Funktionen oben, damit die Bilderkennung die gespeicherten Schlüssel nutzt.",
                     )}
-                </label>
-
-                {externallyManaged ? (
-                    <p className={muted} data-testid="ai-key-source">
-                        {sourceLabel}
-                    </p>
-                ) : (
-                    <label style={{display: "flex", flexDirection: "column", gap: "0.25rem"}}>
-                        {t("topos.page.settings.ai.api_key", "API-Schluessel")}
-                        <input
-                            className={input}
-                            type="password"
-                            autoComplete="off"
-                            placeholder={
-                                configured
-                                    ? t("topos.page.settings.ai.key_set", "Gespeichert")
-                                    : t(
-                                          "topos.page.settings.ai.key_placeholder",
-                                          "API-Schluessel eingeben",
-                                      )
-                            }
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            data-testid="ai-key-input"
-                        />
-                        {configured && (
-                            <span className={badge} data-testid="ai-key-configured">
-                                {t(
-                                    "topos.page.settings.ai.configured",
-                                    "Schluessel gespeichert",
-                                )}
-                            </span>
-                        )}
-                    </label>
-                )}
-
-                <div style={{display: "flex", gap: "0.5rem"}}>
-                    <button
-                        type="button"
-                        className={btnPrimary}
-                        onClick={handleSave}
-                        disabled={saving || requiresBackend}
-                        data-testid="ai-save-button"
-                    >
-                        {saving
-                            ? t("topos.page.settings.ai.saving", "Speichern...")
-                            : t("topos.page.settings.ai.save", "Speichern")}
-                    </button>
-                    <button
-                        type="button"
-                        className={btn}
-                        onClick={handleTest}
-                        disabled={testing || requiresBackend}
-                        data-testid="ai-test-button"
-                    >
-                        {testing
-                            ? t("topos.page.settings.ai.testing", "Teste...")
-                            : t("topos.page.settings.ai.test", "Verbindung testen")}
-                    </button>
-                </div>
-                {provider?.note === "vision_depends_on_model" && (
-                    <p className={danger} style={{fontSize: "0.8125rem"}}>
-                        {t(
-                            "topos.page.settings.ai.custom_vision_hint",
-                            "Vision-Unterstuetzung haengt vom gewaehlten Modell ab.",
-                        )}
-                    </p>
-                )}
-            </div>
+                </p>
+            )}
         </section>
     );
 }

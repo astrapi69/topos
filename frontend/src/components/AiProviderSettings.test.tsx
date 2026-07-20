@@ -1,276 +1,187 @@
 import {render, screen, waitFor, fireEvent} from "@testing-library/react";
+import {MemoryRouter} from "react-router-dom";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import AiProviderSettings from "./AiProviderSettings";
 import {notify} from "../utils/notify";
+import * as vault from "../ai/localVaultStore";
 
-const mockGetProviders = vi.fn();
-const mockGetKeyStatus = vi.fn();
 const mockGetApp = vi.fn();
+const mockGetKeyStatus = vi.fn();
 const mockUpdateApp = vi.fn();
 const mockTest = vi.fn();
-const mockTestDirect = vi.fn();
 
-vi.mock("../api/client", () => ({
-    api: {
-        settings: {
-            getAiProviders: () => mockGetProviders(),
-            getAiKeyStatus: () => mockGetKeyStatus(),
-            getApp: () => mockGetApp(),
-            updateApp: (patch: unknown) => mockUpdateApp(patch),
-            testAiConnection: (body: unknown) => mockTest(body),
+// Preserve ApiError + types; only the settings network calls are faked.
+vi.mock("../api/client", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("../api/client")>();
+    return {
+        ...actual,
+        api: {
+            ...actual.api,
+            settings: {
+                ...actual.api.settings,
+                getApp: () => mockGetApp(),
+                getAiKeyStatus: () => mockGetKeyStatus(),
+                updateApp: (patch: unknown) => mockUpdateApp(patch),
+                testAiConnection: (body: unknown) => mockTest(body),
+            },
         },
-    },
-}));
-
-// Keep the real presets + localStorage store; only the network probe is faked.
-vi.mock("../ai", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("../ai")>()),
-    testAiConnectionDirect: (body: unknown) => mockTestDirect(body),
-}));
+    };
+});
 
 vi.mock("../hooks/useI18n", () => ({
     useI18n: () => ({t: (_k: string, fb?: string) => fb ?? _k}),
 }));
 
+const mockConfirm = vi.fn(async () => true);
+vi.mock("./AppDialog", () => ({
+    useDialog: () => ({
+        confirm: mockConfirm,
+        prompt: vi.fn(),
+        alert: vi.fn(),
+        choose: vi.fn(),
+    }),
+}));
+
 vi.mock("../utils/notify", () => ({
-    notify: {success: vi.fn(), error: vi.fn()},
+    notify: {success: vi.fn(), error: vi.fn(), warning: vi.fn(), info: vi.fn()},
     errorMessage: (_e: unknown, fb: string) => fb,
 }));
 
-const PROVIDERS = [
-    {
-        id: "anthropic",
-        label: "Anthropic (Claude)",
-        baseUrl: "https://api.anthropic.com/v1",
-        defaultModel: "claude-sonnet-4-6",
-        models: [{id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", vision: true}],
-        envVar: "TOPOS_ANTHROPIC_API_KEY",
-        requiresApiKey: true,
-        requiresBaseUrl: false,
-        note: "",
-    },
-    {
-        id: "custom",
-        label: "Custom (OpenAI-compatible)",
-        baseUrl: "",
-        defaultModel: "",
-        models: [],
-        envVar: "TOPOS_CUSTOM_API_KEY",
-        requiresApiKey: true,
-        requiresBaseUrl: true,
-        note: "vision_depends_on_model",
-    },
-];
+function keyStatuses() {
+    return ["anthropic", "openai", "google"].map((provider) => ({
+        provider,
+        configured: false,
+        source: "none",
+        externallyManaged: false,
+    }));
+}
 
-function statuses(overrides: Record<string, unknown> = {}) {
-    return [
-        {
-            provider: "anthropic",
-            configured: false,
-            source: "none",
-            externallyManaged: false,
-            ...overrides,
-        },
-        {provider: "custom", configured: false, source: "none", externallyManaged: false},
-    ];
+function renderPanel() {
+    return render(
+        <MemoryRouter>
+            <AiProviderSettings />
+        </MemoryRouter>,
+    );
+}
+
+const PASS = "correct horse battery";
+
+async function fillCreateGate() {
+    fireEvent.change(screen.getByTestId("ai-vault-create-pass"), {target: {value: PASS}});
+    fireEvent.change(screen.getByTestId("ai-vault-create-confirm"), {target: {value: PASS}});
+    fireEvent.click(screen.getByTestId("ai-vault-create-button"));
 }
 
 describe("AiProviderSettings", () => {
     beforeEach(() => {
         vi.clearAllMocks();
         localStorage.clear();
-        // mockResolvedValue (not Once) survives React 18 strict double-mount.
-        mockGetProviders.mockResolvedValue(PROVIDERS);
-        mockGetKeyStatus.mockResolvedValue(statuses());
+        vault._resetSessionForTest();
         mockGetApp.mockResolvedValue({
             ai: {enabled: false, activeProvider: "anthropic", models: {}, baseUrls: {}},
         });
+        mockGetKeyStatus.mockResolvedValue(keyStatuses());
         mockUpdateApp.mockResolvedValue({});
         mockTest.mockResolvedValue({ok: true, errorCode: null});
-        mockTestDirect.mockResolvedValue({ok: true, errorCode: null});
+        mockConfirm.mockResolvedValue(true);
     });
 
-    it("renders the provider, model and key controls after load", async () => {
-        render(<AiProviderSettings />);
+    it("renders the packaged AI settings panel in backend mode", async () => {
+        renderPanel();
         await waitFor(() => {
             expect(screen.getByTestId("ai-settings-section")).toBeInTheDocument();
         });
-        expect(screen.getByTestId("ai-provider-select")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-model-select")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-key-input")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-save-button")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-test-button")).toBeInTheDocument();
+        expect(await screen.findByTestId("settings-panel-ai")).toBeInTheDocument();
+        // Backend mode has no encrypted vault section and no unlock gate.
+        expect(screen.queryByTestId("ai-vault-create-pass")).not.toBeInTheDocument();
+        expect(screen.queryByTestId("key-vault-section")).not.toBeInTheDocument();
     });
 
-    it("marks vision-capable models in the dropdown", async () => {
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-model-select"));
-        expect(screen.getByText(/Claude Sonnet 4.6 - Vision/)).toBeInTheDocument();
-    });
-
-    it("falls back to a fully functional local form when the endpoints are unreachable", async () => {
-        mockGetProviders.mockRejectedValue(new Error("offline"));
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
-        // No backend: the SAME controls stay usable, backed by localStorage
-        // (adaptive-learner pattern) - never a dead "needs a backend" stub.
-        expect(screen.getByTestId("ai-enable-toggle")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-provider-select")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-save-button")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-test-button")).toBeInTheDocument();
-        // The client-side preset mirror fills the provider dropdown.
-        expect(screen.getByText("Anthropic (Claude)")).toBeInTheDocument();
-        expect(screen.getByText("Google (Gemini)")).toBeInTheDocument();
-        expect(screen.getByText("Custom (OpenAI-compatible)")).toBeInTheDocument();
-    });
-
-    it("gates non-anthropic providers behind a backend in local mode", async () => {
-        mockGetProviders.mockRejectedValue(new Error("offline"));
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
-
-        // Anthropic: browser-direct works, controls enabled.
-        expect(screen.queryByTestId("ai-requires-backend")).not.toBeInTheDocument();
-        expect(screen.getByTestId("ai-save-button")).not.toBeDisabled();
-        expect(screen.getByTestId("ai-test-button")).not.toBeDisabled();
-
-        // OpenAI: CORS-blocked in the browser -> gated.
-        fireEvent.change(screen.getByTestId("ai-provider-select"), {
-            target: {value: "openai"},
-        });
-        expect(screen.getByTestId("ai-requires-backend")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-save-button")).toBeDisabled();
-        expect(screen.getByTestId("ai-test-button")).toBeDisabled();
-    });
-
-    it("does not gate providers in backend mode", async () => {
-        // Default beforeEach resolves the endpoints (backend mode).
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-provider-select"));
-        fireEvent.change(screen.getByTestId("ai-provider-select"), {
-            target: {value: "openai"},
-        });
-        expect(screen.queryByTestId("ai-requires-backend")).not.toBeInTheDocument();
-        expect(screen.getByTestId("ai-save-button")).not.toBeDisabled();
-    });
-
-    it("saves the local config including the typed key to localStorage", async () => {
-        mockGetProviders.mockRejectedValue(new Error("offline"));
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
+    it("persists the enable flag to the backend", async () => {
+        renderPanel();
+        await waitFor(() => screen.getByTestId("ai-enable-toggle"));
         fireEvent.click(screen.getByTestId("ai-enable-toggle"));
-        fireEvent.change(screen.getByTestId("ai-key-input"), {
-            target: {value: "sk-local"},
-        });
-        fireEvent.click(screen.getByTestId("ai-save-button"));
         await waitFor(() => {
-            expect(screen.getByTestId("ai-key-configured")).toBeInTheDocument();
+            expect(mockUpdateApp).toHaveBeenCalledWith({ai: {enabled: true}});
         });
-        const stored = JSON.parse(localStorage.getItem("topos.ai_config") ?? "{}");
-        expect(stored.enabled).toBe(true);
-        expect(stored.keys).toEqual({anthropic: "sk-local"});
-        expect(notify.success).toHaveBeenCalled();
-        expect(mockUpdateApp).not.toHaveBeenCalled();
     });
 
-    it("loads a previously stored local config on mount", async () => {
-        localStorage.setItem(
-            "topos.ai_config",
-            JSON.stringify({
-                enabled: true,
-                activeProvider: "google",
-                models: {},
-                baseUrls: {},
-                keys: {google: "g-key"},
-            }),
-        );
-        mockGetProviders.mockRejectedValue(new Error("offline"));
-        render(<AiProviderSettings />);
+    it("shows the create-passphrase gate in local mode with no vault", async () => {
+        mockGetApp.mockRejectedValue(new Error("offline"));
+        renderPanel();
         await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
-        expect(screen.getByTestId("ai-provider-select")).toHaveValue("google");
-        expect(screen.getByTestId("ai-enable-toggle")).toBeChecked();
-        expect(screen.getByTestId("ai-key-configured")).toBeInTheDocument();
+        expect(screen.getByTestId("ai-vault-create-pass")).toBeInTheDocument();
+        // The panel is not shown until the vault is unlocked.
+        expect(screen.queryByTestId("settings-panel-ai")).not.toBeInTheDocument();
     });
 
-    it("tests the connection browser-direct with the stored key in local mode", async () => {
-        localStorage.setItem(
-            "topos.ai_config",
-            JSON.stringify({
-                enabled: true,
-                activeProvider: "anthropic",
-                models: {},
-                baseUrls: {},
-                keys: {anthropic: "sk-stored"},
-            }),
-        );
-        mockGetProviders.mockRejectedValue(new Error("offline"));
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-test-button"));
-        fireEvent.click(screen.getByTestId("ai-test-button"));
+    it("creates the vault and reveals the panel + encrypted key vault", async () => {
+        mockGetApp.mockRejectedValue(new Error("offline"));
+        renderPanel();
+        await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
+        await fillCreateGate();
+
         await waitFor(() => {
-            expect(mockTestDirect).toHaveBeenCalledWith(
-                expect.objectContaining({provider: "anthropic", apiKey: "sk-stored"}),
-            );
+            expect(screen.getByTestId("ai-vault-lock-button")).toBeInTheDocument();
         });
-        expect(mockTest).not.toHaveBeenCalled();
-        expect(notify.success).toHaveBeenCalled();
+        expect(await screen.findByTestId("settings-panel-ai")).toBeInTheDocument();
+        expect(screen.getByTestId("key-vault-section")).toBeInTheDocument();
+        expect(vault.hasVault()).toBe(true);
+        expect(vault.isUnlocked()).toBe(true);
     });
 
-    it("shows a read-only source card for an externally-managed key", async () => {
-        mockGetKeyStatus.mockResolvedValue(
-            statuses({source: "env", externallyManaged: true, configured: true}),
-        );
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-settings-section"));
-        expect(screen.getByTestId("ai-key-source")).toBeInTheDocument();
-        expect(screen.queryByTestId("ai-key-input")).not.toBeInTheDocument();
-    });
-
-    it("shows base-url and free-text model inputs for the custom provider", async () => {
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-provider-select"));
-        fireEvent.change(screen.getByTestId("ai-provider-select"), {
-            target: {value: "custom"},
+    it("rejects mismatched passphrases without creating a vault", async () => {
+        mockGetApp.mockRejectedValue(new Error("offline"));
+        renderPanel();
+        await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
+        fireEvent.change(screen.getByTestId("ai-vault-create-pass"), {target: {value: PASS}});
+        fireEvent.change(screen.getByTestId("ai-vault-create-confirm"), {
+            target: {value: "different"},
         });
-        expect(screen.getByTestId("ai-base-url-input")).toBeInTheDocument();
-        expect(screen.getByTestId("ai-model-input")).toBeInTheDocument();
-        expect(screen.queryByTestId("ai-model-select")).not.toBeInTheDocument();
+        fireEvent.click(screen.getByTestId("ai-vault-create-button"));
+        await waitFor(() => expect(notify.warning).toHaveBeenCalled());
+        expect(vault.hasVault()).toBe(false);
     });
 
-    it("tests the connection and reports success", async () => {
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-test-button"));
-        fireEvent.click(screen.getByTestId("ai-test-button"));
+    it("unlocks an existing vault with the correct passphrase", async () => {
+        await vault.createVault(PASS);
+        vault.lock();
+        mockGetApp.mockRejectedValue(new Error("offline"));
+        renderPanel();
+        await waitFor(() => screen.getByTestId("ai-vault-unlock-pass"));
+        fireEvent.change(screen.getByTestId("ai-vault-unlock-pass"), {target: {value: PASS}});
+        fireEvent.click(screen.getByTestId("ai-vault-unlock-button"));
         await waitFor(() => {
-            expect(mockTest).toHaveBeenCalledWith(
-                expect.objectContaining({provider: "anthropic"}),
-            );
+            expect(screen.getByTestId("ai-vault-lock-button")).toBeInTheDocument();
         });
-        expect(notify.success).toHaveBeenCalled();
     });
 
-    it("saves the typed key in the ai patch", async () => {
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-key-input"));
-        fireEvent.change(screen.getByTestId("ai-key-input"), {
-            target: {value: "sk-typed"},
+    it("reports a wrong passphrase and stays locked", async () => {
+        await vault.createVault(PASS);
+        vault.lock();
+        mockGetApp.mockRejectedValue(new Error("offline"));
+        renderPanel();
+        await waitFor(() => screen.getByTestId("ai-vault-unlock-pass"));
+        fireEvent.change(screen.getByTestId("ai-vault-unlock-pass"), {
+            target: {value: "wrong passphrase"},
         });
-        fireEvent.click(screen.getByTestId("ai-save-button"));
+        fireEvent.click(screen.getByTestId("ai-vault-unlock-button"));
+        await waitFor(() => expect(notify.error).toHaveBeenCalled());
+        expect(screen.queryByTestId("ai-vault-lock-button")).not.toBeInTheDocument();
+    });
+
+    it("locks the vault again on demand", async () => {
+        mockGetApp.mockRejectedValue(new Error("offline"));
+        renderPanel();
+        await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
+        await fillCreateGate();
+        await waitFor(() => screen.getByTestId("ai-vault-lock-button"));
+
+        fireEvent.click(screen.getByTestId("ai-vault-lock-button"));
         await waitFor(() => {
-            expect(mockUpdateApp).toHaveBeenCalled();
+            expect(screen.getByTestId("ai-vault-unlock-pass")).toBeInTheDocument();
         });
-        const patch = mockUpdateApp.mock.calls[0][0];
-        expect(patch.ai.keys).toEqual({anthropic: "sk-typed"});
-        expect(patch.ai.activeProvider).toBe("anthropic");
-    });
-
-    it("does not send a key when the field is empty", async () => {
-        render(<AiProviderSettings />);
-        await waitFor(() => screen.getByTestId("ai-save-button"));
-        fireEvent.click(screen.getByTestId("ai-save-button"));
-        await waitFor(() => expect(mockUpdateApp).toHaveBeenCalled());
-        const patch = mockUpdateApp.mock.calls[0][0];
-        expect(patch.ai.keys).toBeUndefined();
+        expect(vault.isUnlocked()).toBe(false);
     });
 });
