@@ -16,6 +16,7 @@ import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useTheme} from "../hooks/useTheme";
 import {useDialog} from "../components/AppDialog";
+import {isBackendAvailable} from "../utils/backendStatus";
 import {notify, errorMessage} from "../utils/notify";
 import {btn, input, muted} from "../ui/classes";
 
@@ -30,14 +31,16 @@ export default function Settings() {
 
     useEffect(() => {
         let cancelled = false;
-        api.settings
-            .getSecretSource()
-            .then((src) => {
+        void (async () => {
+            // Skip the request entirely in offline mode (no backend to answer).
+            if (!(await isBackendAvailable())) return;
+            try {
+                const src = await api.settings.getSecretSource();
                 if (!cancelled) setSecretSource(src);
-            })
-            .catch(() => {
-                /* PWA mode (no backend) or transient failure - hide the card. */
-            });
+            } catch {
+                /* Transient failure - hide the card. */
+            }
+        })();
         return () => {
             cancelled = true;
         };

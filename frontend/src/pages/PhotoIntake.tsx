@@ -29,11 +29,10 @@ import {Camera, Plus, Trash2, Upload} from "lucide-react";
 import ContainerQuickCreate from "../components/ContainerQuickCreate";
 import NavBar from "../components/NavBar";
 import {
-    getLocalAiConfig,
-    getProviderPreset,
-    isLocalAiConfigured,
+    getMeta,
     recognizePhotoDirect,
-    resolveLocalAiProvider,
+    resolveActiveProvider,
+    TOPOS_REGISTRY,
 } from "../ai";
 import {api, type BulkItemCreate, type RecognizedItem, type VisionResult} from "../api/client";
 import type {Container} from "../types/topos";
@@ -124,11 +123,12 @@ export default function PhotoIntake() {
             if (cancelled) return;
             setBackendUp(available);
             if (!available) {
-                // No backend: the browser-local AI settings drive recognition.
-                const localConfig = getLocalAiConfig();
-                setLocalAiReady(isLocalAiConfigured());
-                const preset = getProviderPreset(localConfig.activeProvider);
-                setProviderLabel(preset?.label ?? localConfig.activeProvider);
+                // No backend: the browser-local key vault drives recognition.
+                // A key is only usable once the vault is unlocked this session.
+                const active = getMeta().activeProvider;
+                setLocalAiReady(resolveActiveProvider() !== null);
+                const descriptor = TOPOS_REGISTRY.find(active);
+                setProviderLabel(descriptor?.label ?? active);
                 return;
             }
             void Promise.all([api.settings.getApp(), api.settings.getAiProviders()])
@@ -193,7 +193,7 @@ export default function PhotoIntake() {
                 fileName: photoData.fileName,
             });
         }
-        const resolved = resolveLocalAiProvider();
+        const resolved = resolveActiveProvider();
         if (!resolved) {
             throw new Error(
                 t(

@@ -1,17 +1,25 @@
 /**
- * Browser-local AI module: provider presets, localStorage config and
- * browser-direct provider calls for the no-backend (Dexie-only) mode.
+ * Browser-local AI module: the provider registry, the passphrase-encrypted
+ * key vault and the browser-direct provider calls for the no-backend
+ * (Dexie-only PWA) mode.
  */
 
-export {AI_PROVIDER_PRESETS, getProviderPreset, supportsBrowserDirect} from "./providerPresets";
 export {
-    getLocalAiConfig,
-    isLocalAiConfigured,
-    resolveLocalAiProvider,
-    setLocalAiConfig,
-    type LocalAiConfig,
+    TOPOS_PROVIDERS,
+    TOPOS_REGISTRY,
+    supportsBrowserDirect,
+    type ToposProviderId,
+} from "./registry";
+export {
+    getMeta,
+    hasVault,
+    isEnabled,
+    isUnlocked,
+    resolveActiveProvider,
     type ResolvedLocalProvider,
-} from "./localAiConfig";
+    type VaultMeta,
+    type VaultSettings,
+} from "./localVaultStore";
 export {
     recognizePhotoDirect,
     testAiConnectionDirect,

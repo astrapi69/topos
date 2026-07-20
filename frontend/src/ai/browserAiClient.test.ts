@@ -7,7 +7,7 @@ import {
     recognizePhotoDirect,
     testAiConnectionDirect,
 } from "./browserAiClient";
-import type {ResolvedLocalProvider} from "./localAiConfig";
+import type {ResolvedLocalProvider} from "./localVaultStore";
 
 const fetchMock = vi.fn();
 
@@ -80,13 +80,6 @@ describe("testAiConnectionDirect", () => {
             errorCode: "unknown_provider",
         });
         expect(fetchMock).not.toHaveBeenCalled();
-    });
-
-    it("returns missing_base_url for custom without a base URL", async () => {
-        expect(await testAiConnectionDirect({provider: "custom", apiKey: "k"})).toEqual({
-            ok: false,
-            errorCode: "missing_base_url",
-        });
     });
 
     it("returns missing_key when the provider requires one", async () => {
@@ -173,7 +166,7 @@ describe("recognizePhotoDirect", () => {
                 }),
             );
         const result = await recognizePhotoDirect(
-            resolved({providerId: "custom", baseUrl: "http://localhost:11434/v1", model: "llava"}),
+            resolved({providerId: "openai", baseUrl: "http://localhost:11434/v1", model: "llava"}),
             RECOGNIZE_OPTIONS,
         );
         expect(result.items).toHaveLength(1);

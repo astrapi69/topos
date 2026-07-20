@@ -2,6 +2,13 @@
 # full UI string set referenced by the frontend pages.
 
 ui:
+  api_key:
+    open_settings: Open Settings
+    required: API key required.
+    required_long: Configure a provider key in Settings to enable this action.
+    required_with_feature: API key required {feature}.
+  hide_secret: Hide value
+  show_secret: Show value
   app:
     name: Topos
     description: Personal inventory tracker
@@ -182,6 +189,7 @@ topos:
         configured: Key stored
         vision_badge: Vision
         custom_vision_hint: "Vision support depends on the selected model."
+        custom_base_url_hint: "Endpoint URL of the OpenAI-compatible server (e.g. LM Studio, Ollama)."
         save: Save
         saving: Saving...
         saved: AI settings saved
@@ -196,6 +204,24 @@ topos:
         test_err_provider_error: Provider error
         test_err_network_error: Network error
         test_err_unknown_provider: Unknown provider
+        vault_create_hint: "Choose a passphrase to store the API keys encrypted in this browser. Without the passphrase the keys cannot be recovered."
+        vault_pass: "Passphrase"
+        vault_pass_confirm: "Confirm passphrase"
+        vault_create: "Create vault"
+        vault_created: "Key vault created."
+        vault_create_failed: "Could not create the vault."
+        vault_pass_too_short: "Passphrase too short (at least 8 characters)."
+        vault_pass_mismatch: "Passphrases do not match."
+        vault_unlock_hint: "Enter the passphrase to unlock the stored API keys for this session."
+        vault_unlock: "Unlock"
+        vault_wrong_pass: "Wrong passphrase."
+        vault_unlock_failed: "Unlock failed."
+        vault_forgot: "Forgot passphrase?"
+        vault_forget_title: "Reset vault?"
+        vault_forget_message: "Without the passphrase the stored keys cannot be recovered. The vault will be emptied and you can set a new passphrase."
+        vault_lock: "Lock vault"
+        confirm_title: "Confirm"
+        enable_hint: "Enable the AI features above so image recognition uses the stored keys."
     photo_intake:
       title: "Photo intake"
       description: "Take a photo of a container's contents. The AI suggests entries for you to review and accept."
@@ -284,3 +310,96 @@ pwa:
   update_available: New version available
   update_action: Update
   install_app: Install app
+common:
+  error: Something went wrong.
+  loading: Loading…
+  remove: Remove
+settings:
+  active_provider_missing_key: This is your active provider but no API key is stored. AI replies will be skipped until a key is saved.
+  api_key:
+    format_invalid: Invalid format.
+    rollback_restore: Restore last working key
+    test: Test
+    test_error: Test failed. The provider rejected the request.
+    test_invalid: Key invalid or expired.
+    test_network: Connection failed. Check your internet connection.
+    test_no_key: No key to test.
+    test_rate_limit: Rate limit hit. Try later.
+    test_success: Key works!
+    testing: Testing…
+  api_key_confirm_delete: Really remove this API key?
+  api_key_delete: Remove key
+  api_key_external_hint_env: This key is configured via an environment variable and cannot be edited here.
+  api_key_external_hint_file: Stored in a secrets file. Saving here overwrites it.
+  api_key_label: API key
+  api_key_missing: Not set
+  api_key_placeholder: Paste here…
+  api_key_placeholder_replace: Paste a new key to replace the stored one…
+  api_key_saved: Key stored
+  api_key_set: Save key
+  api_key_source_env: 'Key from: environment'
+  api_key_source_file: 'Key from: secrets file'
+  api_key_source_none: No key configured
+  api_key_source_settings: 'Key from: Settings'
+  key_export_link:
+    button: Go to key export
+    heading: AI keys - encrypted export
+    hint: Export or import your AI keys as a single encrypted file.
+  key_vault:
+    api_export_disabled: In server mode keys cannot be exported - they are managed encrypted on the server. Importing a key file still works.
+    busy: Working…
+    confirm_label: Confirm passphrase
+    error_decrypt: Passphrase incorrect or file corrupted.
+    error_export: Could not create the export.
+    error_import: Could not import the key file.
+    error_mismatch: The passphrases do not match.
+    export_button: Export encrypted file
+    export_heading: Export
+    import_button: Import key file
+    import_file_label: Encrypted key file
+    import_heading: Import
+    import_hint: Choose the encrypted key file, or paste its contents below. Either way works.
+    import_text_invalid: This does not look like a valid key file. Check that you pasted the whole contents.
+    import_text_label: …or paste the key file contents
+    import_text_placeholder: '{ "format": "…", … }'
+    intro: Move your AI keys to another device in one encrypted file, separate from the normal backup (which never contains keys).
+    min_length: At least {n} characters.
+    no_keys: There are no AI keys to export yet.
+    passphrase_hint: Choose a strong passphrase. It cannot be recovered - without it the file cannot be opened.
+    passphrase_label: Passphrase
+    success_export: Encrypted key file downloaded.
+    success_import: Keys imported. AI features are ready again.
+    title: AI keys - encrypted export
+  model_override_clear: Use default
+  model_override_default: Default model
+  model_override_label: Model
+  model_override_save: Save model
+  model_override_set: Override active
+  model_overrides_hint: Leave blank to use the default model for each provider. A non-empty value replaces the default at chat time.
+  provider_active: Active
+  provider_label: Active provider
+  providers:
+    add: Add key
+    edit: Edit
+    hint: Keys you have saved stay stored. Only a masked preview is shown - never the full key.
+    import_keys: Import
+    set_active: Use as active provider
+    status_active: Active
+    status_desktop_only: Desktop only
+    status_empty: Empty
+    status_external: External
+    test: Test
+    test_backend_only: Only testable with the backend
+    test_connection_ok: Connection ok
+    test_key_invalid: Key invalid
+    test_network_error: Network error
+    testing: Testing…
+    title: Configured AI providers
+  saved: Saved.
+  section_api_keys: API keys
+  section_model_overrides: Model overrides
+  section_provider: AI provider
+toast:
+  api_key_deleted: API key removed.
+  api_key_restored: Last working key restored.
+  api_key_saved: API key saved.

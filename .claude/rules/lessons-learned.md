@@ -3175,3 +3175,100 @@ both `useViewMode` and the new `useTrashViewMode` simultaneously).
 - "End-to-end behavior tests are not 'kwarg passes through'
   tests" — both rules pin "test the OBSERVABLE OUTPUT through
   the full component tree", not just the new code's inputs.
+
+## Integrating a storage-agnostic kit: implement the adapter seam, don't fork the UI
+
+Replacing Topos's hand-rolled AI provider config (provider preset
+mirror, plaintext-localStorage key store, ~415-LOC settings form)
+with the ``@astrapi69/ai-key-vault`` kit (core + ``-react`` +
+``passphrase-vault``) confirmed a clean shape for adopting a
+"bring your own storage / bring your own design system" library:
+
+- **The kit ships a storage SEAM, not storage.** ``AiKeyStoreAdapter``
+  is an interface the app implements over whatever persistence it
+  already has. Topos ships TWO adapters behind one UI: a backend
+  adapter over ``/api/settings/*`` (keys server-side, write-only,
+  ``clientReadableKeys: false`` so the encrypted export is hidden)
+  and a local adapter over a passphrase-encrypted browser vault
+  (``clientReadableKeys: true``). The panel is identical; only the
+  adapter + the ``browserRuntime`` flag differ. Do NOT fork the UI
+  per mode — inject the adapter.
+
+- **The kit's UI takes design-system SLOTS.** ``AiSettingsProvider``
+  accepts ``Button`` / ``Input`` / ``Link`` / ``notify`` / ``confirm``
+  / ``t``. Map them onto the app's own primitives
+  (``ui/classes`` + react-router ``Link`` + ``useDialog`` +
+  ``useI18n``) and define the slot components at MODULE level so their
+  identities stay stable across renders (a fresh ``Input`` identity per
+  render remounts and blurs the field).
+
+- **Provider ids are DATA; keep the app's ids, don't inherit the
+  kit's.** The kit's built-ins use id ``gemini``; Topos's backend
+  chain, ``/settings/ai/*`` and the vision client all key on
+  ``google``. Building the registry via ``createProviderRegistry`` with
+  explicit descriptors (ids ``anthropic``/``openai``/``google``) avoided
+  a translation layer at every boundary. Same reason to keep explicit
+  ``corsBlocked`` flags instead of the built-ins' defaults: Topos
+  deliberately gates openai/google behind the backend in browser-direct
+  mode, and the built-in descriptors set no ``corsBlocked`` at all.
+
+- **What the kit does NOT ship, the app still owns.** The kit's 0.1.x
+  panel has no base-URL field (so the custom OpenAI-compatible provider
+  was dropped — it stays backend-YAML-only until upstream adds the UI)
+  and no "AI enabled" toggle (a Topos concept, kept as a wrapper-level
+  checkbox writing ``ai.enabled`` / vault metadata). Audit the packaged
+  UI's actual rendered fields (grep the dist for ``data-testid`` +
+  the props it reads) BEFORE assuming a data-model field is editable —
+  ``baseUrlOverride`` is in the snapshot TYPE but no input renders it.
+
+## At-rest encryption needs an unlock SESSION the export/import vault doesn't provide
+
+The ``passphrase-vault`` primitive (PBKDF2 + AES-GCM) and the kit's
+``.alk`` key-vault io are built for device-to-device EXPORT/IMPORT: a
+passphrase per file operation. "No plaintext keys in localStorage"
+(at-rest encryption) is a DIFFERENT requirement and the kit does not
+ship it. There is no middle ground: a key that must be USABLE without a
+prompt cannot also be encrypted at rest (the passphrase would have to be
+stored, defeating the point). So encrypting keys at rest necessarily
+means an in-memory unlock SESSION:
+
+- ``localVaultStore`` keeps the keys only as a ciphertext envelope in
+  localStorage; ``unlock(passphrase)`` decrypts into memory for the tab
+  session; the passphrase is never persisted; ``lock()`` clears it.
+- A plaintext, secret-free METADATA mirror (enabled flag, active
+  provider, model/base-URL overrides, a per-provider *has-key* boolean)
+  lets the locked UI and the photo-intake gate reflect state WITHOUT a
+  passphrase. The metadata carries zero key material (regression-pinned:
+  a test asserts the serialized metadata never contains a key).
+- Consequence for every downstream AI gate: a stored key is only usable
+  after an unlock this session. ``PhotoIntake`` therefore treats "ready"
+  as ``resolveActiveProvider() !== null`` (which requires the unlocked
+  session), and a page reload requires re-unlocking. This is the
+  accepted tradeoff for at-rest encryption, and the reason the decision
+  to encrypt was made explicitly with the user first.
+- The at-rest envelope and the exportable ``.alk`` file share ONE format
+  string (``topos-ai-keys``), so a vault exported on device A imports on
+  device B; a foreign app's envelope is rejected on decrypt.
+
+Verification note: ``crypto.subtle`` (WebCrypto) works under
+happy-dom + Vitest on Node 22, so the vault store + the create/unlock
+gate lifecycle are testable in the normal frontend suite — no
+node-environment carve-out needed.
+
+## A packaged UI renders its OWN i18n fallbacks; catalog translation only reaches backend-fetched locales
+
+``useI18n`` fetches the whole catalog from ``GET /api/i18n/{lang}`` and
+``t(key, fallback)`` returns the inline fallback when the fetch fails or
+the key is missing. Two consequences when swapping in a packaged UI:
+
+- In the no-backend PWA mode the catalog fetch fails, so EVERY string
+  (Topos wrapper AND the packaged panel) renders its inline/kit
+  fallback. The kit's fallbacks are English, so the local-mode panel is
+  English regardless of what the YAML catalog contains. Only
+  backend-mode users get catalog translations.
+- Therefore adding the kit's ~44-key namespace to ``de.yaml`` only helps
+  backend-mode German users and was deferred; the Topos-owned wrapper
+  keys (the vault gate) WERE added to all 8 catalogs. When adopting a
+  packaged UI in a catalog-fetched i18n system, budget the kit's own key
+  namespace as a separate translation task and be explicit that
+  local/offline mode always shows the kit's shipped fallbacks.
