@@ -23,8 +23,8 @@
  */
 
 import {ApiError, type AiTestResult, type VisionResult} from "../api/client";
-import type {ResolvedLocalProvider} from "./localAiConfig";
-import {getProviderPreset} from "./providerPresets";
+import type {ResolvedLocalProvider} from "./localVaultStore";
+import {TOPOS_REGISTRY} from "./registry";
 import {parseItemsPayload} from "./visionParsing";
 import {buildVisionPrompt, selectCategoriesForPrompt} from "./visionPrompt";
 
@@ -205,23 +205,25 @@ export async function testAiConnectionDirect(options: {
     apiKey?: string;
     baseUrl?: string;
 }): Promise<AiTestResult> {
-    const preset = getProviderPreset(options.provider);
-    if (!preset) return {ok: false, errorCode: "unknown_provider"};
+    const descriptor = TOPOS_REGISTRY.find(options.provider);
+    if (!descriptor) return {ok: false, errorCode: "unknown_provider"};
 
-    const effectiveBase = (options.baseUrl || preset.baseUrl).trim().replace(/\/+$/, "");
-    if (preset.requiresBaseUrl && !effectiveBase) {
-        return {ok: false, errorCode: "missing_base_url"};
-    }
+    const effectiveBase = (options.baseUrl || descriptor.baseUrl || "")
+        .trim()
+        .replace(/\/+$/, "");
+    if (!effectiveBase) return {ok: false, errorCode: "missing_base_url"};
     const apiKey = (options.apiKey ?? "").trim();
-    if (preset.requiresApiKey && !apiKey) return {ok: false, errorCode: "missing_key"};
+    if (descriptor.requiresApiKey !== false && !apiKey) {
+        return {ok: false, errorCode: "missing_key"};
+    }
 
     let url = `${effectiveBase}/models`;
     const headers: Record<string, string> = {};
-    if (preset.id === "anthropic") {
+    if (descriptor.id === "anthropic") {
         headers["x-api-key"] = apiKey;
         headers["anthropic-version"] = ANTHROPIC_VERSION;
         headers["anthropic-dangerous-direct-browser-access"] = "true";
-    } else if (preset.id === "google") {
+    } else if (descriptor.id === "google") {
         url = `${url}?${new URLSearchParams({key: apiKey})}`;
     } else {
         headers.Authorization = `Bearer ${apiKey}`;
