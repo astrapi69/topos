@@ -42,7 +42,7 @@ On a conflict between CLAUDE.md and the rules, the rules win.
 ## Tech stack
 
 - **Backend:** Python 3.11+, FastAPI, SQLAlchemy 2.0, SQLite, Pydantic v2, Alembic, Poetry
-- **Frontend:** React 18+, TypeScript (strict), Vite, Radix UI, Tailwind CSS (v3, Preflight off), Dexie, Lucide, react-toastify
+- **Frontend:** React 18+, TypeScript (strict), Vite, Radix UI, Tailwind CSS (v3, Preflight off), Dexie, Lucide, react-toastify, `@astrapi69/ai-key-vault` (+`-react`, `passphrase-vault`) for AI provider settings + the passphrase-encrypted local key vault
 - **Plugins:** pluginforge ^0.10.0 (PyPI), entry-point group `topos.plugins`. Host passes `app_id="topos"` + `app_version`; plugins must declare `target_application = "topos"` or are filtered at activation. User-overlay applied via `config_overlay.refresh_manager_overlay(manager)`.
 - **Launcher:** PyInstaller cross-OS desktop launcher (`launcher/`)
 - **Testing:** pytest (backend + plugins), Vitest (frontend), Playwright (e2e)

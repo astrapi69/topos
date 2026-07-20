@@ -80,21 +80,20 @@ vi.mock("../utils/backendStatus", () => ({
     isBackendAvailable: vi.fn(async () => true),
 }));
 
-const localAiConfiguredMock = vi.fn(() => false);
 const resolveLocalMock = vi.fn();
 const recognizeDirectMock = vi.fn();
 
 vi.mock("../ai", () => ({
-    getLocalAiConfig: vi.fn(() => ({
+    getMeta: vi.fn(() => ({
         enabled: true,
         activeProvider: "anthropic",
         models: {},
         baseUrls: {},
-        keys: {},
+        hasKey: {},
     })),
-    getProviderPreset: vi.fn((id: string) => ({id, label: "Anthropic (Claude)"})),
-    isLocalAiConfigured: () => localAiConfiguredMock(),
-    resolveLocalAiProvider: () => resolveLocalMock(),
+    TOPOS_REGISTRY: {find: (id: string) => ({id, label: "Anthropic (Claude)"})},
+    // Readiness is "the active provider resolves to a usable key" (unlocked).
+    resolveActiveProvider: () => resolveLocalMock(),
     recognizePhotoDirect: (...args: unknown[]) => recognizeDirectMock(...args),
 }));
 
@@ -212,7 +211,6 @@ beforeEach(() => {
     vi.clearAllMocks();
     confirmMock.mockResolvedValue(true);
     (isBackendAvailable as ReturnType<typeof vi.fn>).mockResolvedValue(true);
-    localAiConfiguredMock.mockReturnValue(false);
     resolveLocalMock.mockReturnValue(null);
     containersData.splice(1); // drop containers added by the refresh mock
     URL.createObjectURL = vi.fn(() => "blob:preview");
@@ -357,7 +355,6 @@ describe("PhotoIntake", () => {
 
     it("recognizes browser-direct without a backend when local AI is configured", async () => {
         (isBackendAvailable as ReturnType<typeof vi.fn>).mockResolvedValue(false);
-        localAiConfiguredMock.mockReturnValue(true);
         const resolved = {
             providerId: "anthropic",
             apiKey: "sk-local",
