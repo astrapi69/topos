@@ -196,6 +196,24 @@ topos:
         test_err_provider_error: Provider error
         test_err_network_error: Network error
         test_err_unknown_provider: Unknown provider
+        vault_create_hint: "Choose a passphrase to store the API keys encrypted in this browser. Without the passphrase the keys cannot be recovered."
+        vault_pass: "Passphrase"
+        vault_pass_confirm: "Confirm passphrase"
+        vault_create: "Create vault"
+        vault_created: "Key vault created."
+        vault_create_failed: "Could not create the vault."
+        vault_pass_too_short: "Passphrase too short (at least 8 characters)."
+        vault_pass_mismatch: "Passphrases do not match."
+        vault_unlock_hint: "Enter the passphrase to unlock the stored API keys for this session."
+        vault_unlock: "Unlock"
+        vault_wrong_pass: "Wrong passphrase."
+        vault_unlock_failed: "Unlock failed."
+        vault_forgot: "Forgot passphrase?"
+        vault_forget_title: "Reset vault?"
+        vault_forget_message: "Without the passphrase the stored keys cannot be recovered. The vault will be emptied and you can set a new passphrase."
+        vault_lock: "Lock vault"
+        confirm_title: "Confirm"
+        enable_hint: "Enable the AI features above so image recognition uses the stored keys."
     photo_intake:
       title: "Photo intake"
       description: "Take a photo of a container's contents. The AI suggests entries for you to review and accept."

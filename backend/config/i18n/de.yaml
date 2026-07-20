@@ -196,6 +196,24 @@ topos:
         test_err_provider_error: Fehler beim Anbieter
         test_err_network_error: Netzwerkfehler
         test_err_unknown_provider: Unbekannter Anbieter
+        vault_create_hint: "Wähle eine Passphrase, um die API-Schlüssel in diesem Browser verschlüsselt zu speichern. Ohne die Passphrase sind die Schlüssel nicht wiederherstellbar."
+        vault_pass: "Passphrase"
+        vault_pass_confirm: "Passphrase bestätigen"
+        vault_create: "Tresor anlegen"
+        vault_created: "Schlüssel-Tresor angelegt."
+        vault_create_failed: "Tresor konnte nicht angelegt werden."
+        vault_pass_too_short: "Passphrase zu kurz (mindestens 8 Zeichen)."
+        vault_pass_mismatch: "Passphrasen stimmen nicht überein."
+        vault_unlock_hint: "Gib die Passphrase ein, um die gespeicherten API-Schlüssel für diese Sitzung zu entsperren."
+        vault_unlock: "Entsperren"
+        vault_wrong_pass: "Falsche Passphrase."
+        vault_unlock_failed: "Entsperren fehlgeschlagen."
+        vault_forgot: "Passphrase vergessen?"
+        vault_forget_title: "Tresor zurücksetzen?"
+        vault_forget_message: "Ohne die Passphrase sind die gespeicherten Schlüssel nicht wiederherstellbar. Der Tresor wird geleert und du kannst eine neue Passphrase festlegen."
+        vault_lock: "Tresor sperren"
+        confirm_title: "Bestätigen"
+        enable_hint: "Aktiviere die KI-Funktionen oben, damit die Bilderkennung die gespeicherten Schlüssel nutzt."
     photo_intake:
       title: "Foto-Erfassung"
       description: "Fotografiere den Inhalt eines Containers. Die KI schlägt Einträge vor, die du prüfst und übernimmst."
