@@ -38,6 +38,7 @@ import {TOPOS_REGISTRY} from "../ai/registry";
 import {ToposButton, ToposInput, ToposLink} from "../ai/settingsSlots";
 import {TOPOS_VAULT_FORMAT} from "../ai/localVaultStore";
 import * as vault from "../ai/localVaultStore";
+import {isBackendAvailable} from "../utils/backendStatus";
 import {useDialog} from "./AppDialog";
 import {useI18n} from "../hooks/useI18n";
 import {notify, errorMessage} from "../utils/notify";
@@ -247,19 +248,29 @@ export default function AiProviderSettings() {
 
     useEffect(() => {
         let cancelled = false;
-        api.settings
-            .getApp()
-            .then((cfg) => {
+        function toLocal() {
+            if (cancelled) return;
+            setEnabled(vault.isEnabled());
+            setGate(computeGate());
+            setMode("local");
+        }
+        void (async () => {
+            // Offline (no-backend PWA): go straight to local mode without
+            // touching the API. The health probe is the single source of
+            // truth for "is a backend reachable".
+            if (!(await isBackendAvailable())) {
+                toLocal();
+                return;
+            }
+            try {
+                const cfg = await api.settings.getApp();
                 if (cancelled) return;
                 setEnabled(Boolean(cfg.ai?.enabled));
                 setMode("backend");
-            })
-            .catch(() => {
-                if (cancelled) return;
-                setEnabled(vault.isEnabled());
-                setGate(computeGate());
-                setMode("local");
-            });
+            } catch {
+                toLocal();
+            }
+        })();
         return () => {
             cancelled = true;
         };

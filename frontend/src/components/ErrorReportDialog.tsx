@@ -26,6 +26,24 @@ const ISSUES_URL = "https://github.com/astrapi69/topos/issues/new";
 // URL fits comfortably.
 const MAX_ENCODED_URL = 7800;
 
+/**
+ * Open a URL in a new tab reliably. ``window.open`` with a features string
+ * (``"noopener,noreferrer"``) is treated as a popup by many browsers and gets
+ * blocked; a programmatic anchor click is a genuine navigation that the popup
+ * blocker allows, while ``rel="noopener noreferrer"`` keeps the same
+ * security posture.
+ */
+function openInNewTab(url: string): void {
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.style.display = "none";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+}
+
 interface ReportState {
     open: boolean;
     message: string;
@@ -75,7 +93,7 @@ export default function ErrorReportDialog() {
             body += `\n\n*(${t("topos.error_report.truncated", "Bericht gekürzt, um GitHubs URL-Längenlimit einzuhalten.")})*`;
         }
         const url = `${ISSUES_URL}?title=${encodedTitle}&body=${encodeURIComponent(body)}&labels=bug`;
-        window.open(url, "_blank", "noopener,noreferrer");
+        openInNewTab(url);
         close();
     }
 
@@ -209,8 +227,10 @@ function buildIssueBody(
         sections.push(`## Umgebung\n${env.join("\n")}`);
     }
 
+    // Only include reproduction steps the user actually wrote - an empty
+    // "1.\n2.\n3." placeholder is noise and wastes the URL-length budget.
     const steps = description.trim();
-    sections.push(steps ? `## Reproduktion\n${steps}` : "## Reproduktion\n1.\n2.\n3.");
+    if (steps) sections.push(`## Reproduktion\n${steps}`);
 
     sections.push(
         "---\n*Automatisch von Topos vorbereitet. Es wurden keine sensiblen Daten übermittelt.*",

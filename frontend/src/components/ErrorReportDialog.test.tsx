@@ -36,31 +36,53 @@ describe("ErrorReportDialog", () => {
         );
     });
 
-    it("opens a prefilled GitHub issue URL on submit", async () => {
-        const openSpy = vi.fn();
-        vi.stubGlobal("open", openSpy);
+    it("opens a prefilled GitHub issue URL in a new tab on submit", async () => {
+        // The issue opens via a programmatic anchor click (not window.open,
+        // whose features string gets popup-blocked). Capture the anchor href.
+        let openedHref = "";
+        let openedTarget = "";
+        const clickSpy = vi
+            .spyOn(HTMLAnchorElement.prototype, "click")
+            .mockImplementation(function (this: HTMLAnchorElement) {
+                openedHref = this.href;
+                openedTarget = this.target;
+            });
         render(<ErrorReportDialog />);
         fireOpen("Boom");
         await waitFor(() => screen.getByTestId("error-report-submit"));
 
         fireEvent.click(screen.getByTestId("error-report-submit"));
 
-        expect(openSpy).toHaveBeenCalledTimes(1);
-        const url = openSpy.mock.calls[0][0] as string;
-        expect(url).toContain("https://github.com/astrapi69/topos/issues/new");
-        expect(url).toContain("title=");
-        expect(url).toContain(encodeURIComponent("Bug: Boom"));
-        expect(url).toContain("labels=bug");
+        expect(clickSpy).toHaveBeenCalledTimes(1);
+        expect(openedTarget).toBe("_blank");
+        expect(openedHref).toContain("https://github.com/astrapi69/topos/issues/new");
+        expect(openedHref).toContain("title=");
+        expect(openedHref).toContain(encodeURIComponent("Bug: Boom"));
+        expect(openedHref).toContain("labels=bug");
+        clickSpy.mockRestore();
     });
 
     it("closes after submitting", async () => {
-        vi.stubGlobal("open", vi.fn());
+        const clickSpy = vi
+            .spyOn(HTMLAnchorElement.prototype, "click")
+            .mockImplementation(() => {});
         render(<ErrorReportDialog />);
         fireOpen("Boom");
         await waitFor(() => screen.getByTestId("error-report-submit"));
         fireEvent.click(screen.getByTestId("error-report-submit"));
         await waitFor(() =>
             expect(screen.queryByTestId("error-report-dialog")).not.toBeInTheDocument(),
+        );
+        clickSpy.mockRestore();
+    });
+
+    it("omits the reproduction section when no steps are entered", async () => {
+        render(<ErrorReportDialog />);
+        fireOpen("Boom");
+        await waitFor(() => screen.getByTestId("error-report-preview"));
+        // No empty "1.\n2.\n3." placeholder in the generated body.
+        expect(screen.getByTestId("error-report-preview").textContent).not.toContain(
+            "## Reproduktion",
         );
     });
 });
