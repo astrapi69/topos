@@ -102,7 +102,7 @@ def recognize_photo(
         len(categories),
     )
 
-    client_kwargs = {
+    client_kwargs: dict[str, Any] = {
         "api_key": api_key,
         "base_url": base_url,
         "model": model,
