@@ -187,3 +187,37 @@ def test_patch_writes_overlay_editable_key(client, temp_base):
     client.patch("/api/settings/app", json={"ai": {"keys": {"openai": "sk-ui"}}})
     on_disk = yaml.safe_load((temp_base / "config" / "app.yaml").read_text())
     assert on_disk["ai"]["keys"]["openai"] == "sk-ui"
+
+
+# --- DELETE /settings/ai/keys/{provider} ---
+
+
+def test_delete_ai_key_removes_overlay_key(client, temp_base):
+    """Deleting a user-managed key drops it from the overlay and status."""
+    client.patch("/api/settings/app", json={"ai": {"keys": {"openai": "sk-ui"}}})
+    resp = client.delete("/api/settings/ai/keys/openai")
+    assert resp.status_code == 200
+    assert resp.json()["source"] == "none"
+    assert resp.json()["configured"] is False
+
+    on_disk = yaml.safe_load((temp_base / "config" / "app.yaml").read_text())
+    assert "openai" not in on_disk["ai"]["keys"]
+
+
+def test_delete_ai_key_refuses_externally_managed(client, monkeypatch):
+    """An env-managed key cannot be deleted through the UI endpoint."""
+    monkeypatch.setenv("TOPOS_GEMINI_API_KEY", "sk-env")
+    resp = client.delete("/api/settings/ai/keys/google")
+    assert resp.status_code == 409
+    # The env key is untouched.
+    status = next(
+        s for s in client.get("/api/settings/ai/key-status").json() if s["provider"] == "google"
+    )
+    assert status["source"] == "env"
+
+
+def test_delete_ai_key_is_idempotent(client):
+    """Deleting an absent key is a no-op that still returns the status."""
+    resp = client.delete("/api/settings/ai/keys/openai")
+    assert resp.status_code == 200
+    assert resp.json()["source"] == "none"
