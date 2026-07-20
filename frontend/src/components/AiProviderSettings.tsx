@@ -33,6 +33,7 @@ import {VaultDecryptError} from "@astrapi69/passphrase-vault";
 import {api} from "../api/client";
 import {createBackendAdapter} from "../ai/backendAdapter";
 import {createLocalVaultAdapter} from "../ai/localVaultAdapter";
+import CustomEndpointField from "../ai/CustomEndpointField";
 import {TOPOS_REGISTRY} from "../ai/registry";
 import {ToposButton, ToposInput, ToposLink} from "../ai/settingsSlots";
 import {TOPOS_VAULT_FORMAT} from "../ai/localVaultStore";
@@ -340,6 +341,7 @@ export default function AiProviderSettings() {
                     Link={ToposLink}
                 >
                     <AiSettingsPanel />
+                    <CustomEndpointField />
                 </AiSettingsProvider>
             )}
 
@@ -366,6 +368,7 @@ export default function AiProviderSettings() {
                     Link={ToposLink}
                 >
                     <AiSettingsPanel />
+                    <CustomEndpointField />
                     <KeyVaultSection />
                     <button
                         type="button"

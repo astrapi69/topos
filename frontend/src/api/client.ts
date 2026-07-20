@@ -423,6 +423,8 @@ export const api = {
             apiKey?: string;
             baseUrl?: string;
         }) => request<AiTestResult>("/settings/ai/test", {method: "POST", body}),
+        deleteAiKey: (provider: string) =>
+            request<AiKeyStatus>(`/settings/ai/keys/${provider}`, {method: "DELETE"}),
     },
     health: () =>
         request<{status: string; version: string; debug: boolean}>("/health"),

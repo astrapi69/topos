@@ -18,10 +18,14 @@
  *    them ``desktop_only`` there instead of letting the user configure a
  *    provider that a browser fetch cannot reach (deliberate Topos decision,
  *    see commit e225221).
- *  - **No ``custom`` OpenAI-compatible provider.** The kit's 0.1.x settings
- *    panel has no base-URL field, so a user base URL cannot be entered; the
- *    custom provider stays configurable via the backend YAML only. Re-adding
- *    it here needs upstream base-URL UI support (tracked as a follow-up).
+ *  - **``custom`` OpenAI-compatible provider.** The backend chain supports a
+ *    custom (self-hosted / OpenAI-compatible) provider. The kit's 0.1.x panel
+ *    has no base-URL field, so Topos renders its own ``CustomEndpointField``
+ *    (a base-URL input wired through the adapter's ``baseUrlOverride``) next to
+ *    the panel when ``custom`` is the active provider. ``custom`` is
+ *    ``corsBlocked`` so browser-direct mode reports it desktop-only; it is
+ *    primarily a backend-mode provider (an https PWA cannot reach a local
+ *    http endpoint anyway).
  */
 
 import {
@@ -31,7 +35,7 @@ import {
 } from "@astrapi69/ai-key-vault";
 
 /** The provider ids Topos knows. Kept in sync with the backend chain. */
-export type ToposProviderId = "anthropic" | "openai" | "google";
+export type ToposProviderId = "anthropic" | "openai" | "google" | "custom";
 
 /** Provider descriptors in UI order (drives the settings select). */
 export const TOPOS_PROVIDERS: readonly AiProviderDescriptor<ToposProviderId>[] = [
@@ -67,6 +71,18 @@ export const TOPOS_PROVIDERS: readonly AiProviderDescriptor<ToposProviderId>[] =
         defaultModel: "gemini-2.0-flash",
         recommendedModels: ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"],
         baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+        requiresApiKey: true,
+        corsBlocked: true,
+    },
+    {
+        id: "custom",
+        label: "Custom (OpenAI-compatible)",
+        // Self-hosted keys have no reliable shape; only reject inner whitespace.
+        keyFormat: {minLength: 0},
+        keyFormatHint: "Any token accepted by your endpoint",
+        defaultModel: "",
+        // The user supplies the base URL via CustomEndpointField.
+        baseUrl: "",
         requiresApiKey: true,
         corsBlocked: true,
     },

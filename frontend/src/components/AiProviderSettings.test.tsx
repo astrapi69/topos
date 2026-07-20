@@ -2,8 +2,12 @@ import {render, screen, waitFor, fireEvent} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 
+import {refreshApiKeyStatus} from "@astrapi69/ai-key-vault-react";
+
 import AiProviderSettings from "./AiProviderSettings";
 import {notify} from "../utils/notify";
+import {createBackendAdapter} from "../ai/backendAdapter";
+import {TOPOS_REGISTRY} from "../ai/registry";
 import * as vault from "../ai/localVaultStore";
 
 const mockGetApp = vi.fn();
@@ -96,6 +100,27 @@ describe("AiProviderSettings", () => {
         // Backend mode has no encrypted vault section and no unlock gate.
         expect(screen.queryByTestId("ai-vault-create-pass")).not.toBeInTheDocument();
         expect(screen.queryByTestId("key-vault-section")).not.toBeInTheDocument();
+        // The custom base-URL field only shows when custom is active.
+        expect(screen.queryByTestId("ai-custom-base-url")).not.toBeInTheDocument();
+    });
+
+    it("shows the custom base-URL field when custom is the active provider", async () => {
+        mockGetApp.mockResolvedValue({
+            ai: {enabled: true, activeProvider: "custom", models: {}, baseUrls: {}},
+        });
+        // useApiKeyStatus caches per-userId across tests; prime it with the
+        // custom snapshot so the active provider is "custom" on mount.
+        await refreshApiKeyStatus(createBackendAdapter(), TOPOS_REGISTRY, "topos");
+        renderPanel();
+        const input = await screen.findByTestId("ai-custom-base-url");
+        expect(input).toBeInTheDocument();
+        fireEvent.change(input, {target: {value: "http://localhost:1234/v1"}});
+        fireEvent.click(screen.getByTestId("ai-custom-base-url-save"));
+        await waitFor(() => {
+            expect(mockUpdateApp).toHaveBeenCalledWith({
+                ai: {baseUrls: {custom: "http://localhost:1234/v1"}},
+            });
+        });
     });
 
     it("persists the enable flag to the backend", async () => {

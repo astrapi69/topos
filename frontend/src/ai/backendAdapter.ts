@@ -152,10 +152,9 @@ export function createBackendAdapter(): AiKeyStoreAdapter<ToposProviderId> {
         },
 
         async deleteApiKey(_userId, provider) {
-            // No dedicated delete endpoint: an empty app-overlay value clears
-            // the key. Externally-managed keys are stripped by the backend and
-            // stay untouched.
-            await api.settings.updateApp({ai: {keys: {[provider]: ""}}});
+            // Dedicated endpoint removes the key from the app overlay and
+            // returns 409 for externally-managed keys (env / secrets.yaml).
+            await api.settings.deleteAiKey(provider);
             return readSettings();
         },
 

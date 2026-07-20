@@ -232,6 +232,39 @@ def update_app_settings(body: AppSettingsUpdate) -> dict[str, Any]:
     return current
 
 
+@router.delete("/ai/keys/{provider}")
+def delete_ai_key(provider: str) -> dict[str, Any]:
+    """Remove a user-managed AI provider key from the app-overlay config.
+
+    Refuses externally-managed keys (env var / ``secrets.yaml``): those
+    are stripped from writes, so deleting them here would silently do
+    nothing and mislead the user into thinking the key was cleared.
+    Idempotent - deleting an absent key is a no-op and still returns the
+    current key status.
+    """
+    from app.ai.config import get_ai_key_status, is_ai_key_externally_managed
+    from app.main import _get_user_override_path
+
+    secrets_path = _get_user_override_path()
+    if is_ai_key_externally_managed(provider, secrets_yaml_path=secrets_path):
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"AI key for '{provider}' is managed externally "
+                "(environment variable or secrets file) and cannot be deleted here."
+            ),
+        )
+
+    current = config_overlay.load_app_config_for_edit()
+    keys = current.get("ai", {}).get("keys")
+    if isinstance(keys, dict) and provider in keys:
+        del keys[provider]
+        config_overlay.write_user_app_config(current)
+        config_overlay.refresh_manager_overlay(_manager)
+
+    return get_ai_key_status(provider, secrets_yaml_path=secrets_path)
+
+
 # --- Plugin Settings ---
 
 
