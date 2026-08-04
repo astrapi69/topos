@@ -1,0 +1,251 @@
+/*
+ * Styles for @astrapi69/ai-key-vault-react.
+ *
+ * The kit ships NO stylesheet: its components render semantic class
+ * names (.configured-provider-row, .api-key-row-head, .settings-section,
+ * ...) and expect the host app to style them (it only uses a handful of
+ * Tailwind utilities inline, handled by the tailwind safelist). Without
+ * these rules the panel rows collapse with no layout/spacing. Mapped to
+ * Topos theme vars (src/styles/global.css), light/dark aware.
+ */
+
+.settings-tabpanel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    min-width: 0;
+}
+
+.settings-section-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.settings-section :is(select, input, textarea) {
+    max-width: 100%;
+    min-width: 0;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Kit uses a bare `.muted` helper for secondary text. */
+.settings-section .muted,
+.settings-tabpanel .muted {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+/* --- Configured providers list --- */
+
+.configured-providers-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.configured-provider-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.configured-provider-active {
+    display: inline-flex;
+    align-items: center;
+}
+
+.configured-provider-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+}
+
+.configured-provider-model,
+.configured-provider-preview {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.configured-provider-status {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.configured-provider-actions {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 0.5rem;
+}
+
+.configured-provider-test-result {
+    flex-basis: 100%;
+    font-size: 0.8rem;
+}
+
+/* --- API key rows --- */
+
+.api-key-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.api-key-row:first-of-type {
+    border-top: 0;
+}
+
+.api-key-row-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.api-key-status {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.api-key-status.is-set {
+    color: var(--success);
+}
+
+.api-key-active-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.api-key-source {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.api-key-external-hint,
+.api-key-source-file-hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.api-key-warning {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--warning);
+}
+
+.api-key-row-input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.api-key-input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.api-key-input-wrap input {
+    width: 100%;
+}
+
+.api-key-format-check {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.api-key-format-error,
+.api-key-test-result {
+    flex-basis: 100%;
+    font-size: 0.8rem;
+}
+
+.api-key-test-result.is-error,
+.api-key-format-error {
+    color: var(--danger);
+}
+
+.api-key-test-result.is-ok {
+    color: var(--success);
+}
+
+.api-key-restore-link {
+    font-size: 0.8rem;
+}
+
+/* --- Model override rows --- */
+
+.model-override-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.model-override-row:first-of-type {
+    border-top: 0;
+}
+
+.model-override-row-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.model-override-row-input {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.model-override-row-input input {
+    flex: 1;
+    min-width: 180px;
+}
+
+/* --- Key vault export/import section --- */
+
+.key-vault-import-form,
+.key-export-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
