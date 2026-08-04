@@ -35,6 +35,7 @@ import {createBackendAdapter} from "../ai/backendAdapter";
 import {createLocalVaultAdapter} from "../ai/localVaultAdapter";
 import CustomEndpointField from "../ai/CustomEndpointField";
 import {TOPOS_REGISTRY} from "../ai/registry";
+import {wrapKitT} from "../ai/kitI18n";
 import {ToposButton, ToposInput, ToposLink} from "../ai/settingsSlots";
 import {TOPOS_VAULT_FORMAT} from "../ai/localVaultStore";
 import * as vault from "../ai/localVaultStore";
@@ -225,7 +226,10 @@ function UnlockGate({onReady}: {onReady: () => void}) {
 }
 
 export default function AiProviderSettings() {
-    const {t} = useI18n();
+    const {t, lang} = useI18n();
+    // Layer bundled DE/EN kit strings under t so the panel is localized
+    // even offline (no backend catalog); a loaded catalog still wins.
+    const kitT = useMemo(() => wrapKitT(t, lang), [t, lang]);
     const dialog = useDialog();
     const [mode, setMode] = useState<SettingsMode | null>(null);
     const [enabled, setEnabled] = useState(false);
@@ -343,7 +347,7 @@ export default function AiProviderSettings() {
                     adapter={backendAdapter}
                     registry={TOPOS_REGISTRY}
                     userId={USER_ID}
-                    t={t}
+                    t={kitT}
                     notify={notifyApi}
                     confirm={confirmFn}
                     browserRuntime={false}
@@ -369,7 +373,7 @@ export default function AiProviderSettings() {
                     adapter={localAdapter}
                     registry={TOPOS_REGISTRY}
                     userId={USER_ID}
-                    t={t}
+                    t={kitT}
                     notify={notifyApi}
                     confirm={confirmFn}
                     vaultFormat={TOPOS_VAULT_FORMAT}
