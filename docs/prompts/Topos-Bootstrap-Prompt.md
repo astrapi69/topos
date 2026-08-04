@@ -38,10 +38,11 @@ parser must understand its specific shape (described in Section 8).
    - `https://github.com/astrapi69/bibliogon` — content-authoring sibling.
 3. **Out-of-scope work** (do **not** start, do **not** stub beyond what this
    prompt requires):
-   - The TypeScript port of `astrapi69/tree-api` + `astrapi69/gen-tree`. A
-     separate handover document (`Tree-Portierung-Uebergabe.md`) exists for
-     that. For the bootstrap, `Category.path` as a slash-separated string is
-     sufficient.
+   - Replacing `Category.path` / `Item.category_path` with a real relation.
+     For the bootstrap, the slash-separated string is sufficient. (The
+     TypeScript port of `astrapi69/tree-api` + `astrapi69/gen-tree` is done
+     and published as `@astrapi69/tree-kit`; adopting it in Topos is P5 and
+     deliberately deferred - see ROADMAP.md.)
    - QR-code scanning, photo attachments, multi-device sync server, licensing
      activation.
 
@@ -868,8 +869,10 @@ Replace the template's roadmap with:
 - [x] Frontend scaffolding (dashboard, container/item/category/action views)
 
 ## Next
-- [ ] TypeScript port of tree-api + gen-tree (see Tree-Portierung-Uebergabe.md)
-- [ ] Replace string-based category_path with proper Tree structure in frontend
+- [x] TypeScript port of tree-api + gen-tree (shipped as @astrapi69/tree-kit;
+      adopting it in Topos is P5 and deferred, see ROADMAP.md)
+- [ ] Replace string-based category_path with a real relation (model,
+      migration, backend search, Dexie index, client search index)
 - [ ] QR-code generation plugin (print labels for containers)
 - [ ] Photo-attachment support (one or more photos per container)
 - [ ] PWA installability hardening (manifest, icons, install prompt)
