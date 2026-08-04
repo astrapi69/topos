@@ -72,9 +72,11 @@ def test_full_crud_round_trip(client: TestClient) -> None:
     assert r.status_code == 200
     assert r.json()["display_name"] == "Tools"
 
-    # Delete
+    # Delete - responds with the cascade scope since the
+    # rename/delete-cascade feature (no items, no children here).
     r = client.delete(f"/api/categories/{cid}")
-    assert r.status_code == 204
+    assert r.status_code == 200
+    assert r.json() == {"deleted": True, "items_orphaned": 0, "subcategories_deleted": 0}
     assert client.get(f"/api/categories/{cid}").status_code == 404
 
 

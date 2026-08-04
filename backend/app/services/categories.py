@@ -10,11 +10,19 @@ from __future__ import annotations
 
 import re
 
+from sqlalchemy import String, func, literal, update
 from sqlalchemy.orm import Session
 
 from app.exceptions import ConflictError, NotFoundError, ValidationError
-from app.models import Category
-from app.schemas.category import CategoryCreate, CategoryNode, CategoryUpdate
+from app.models import Category, Item
+from app.schemas.category import (
+    CategoryCreate,
+    CategoryDeleteResult,
+    CategoryNode,
+    CategoryRead,
+    CategoryRenameResult,
+    CategoryUpdate,
+)
 
 _CATEGORY_SEGMENT_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
@@ -70,10 +78,117 @@ def update_category(db: Session, category_id: int, payload: CategoryUpdate) -> C
     return category
 
 
-def delete_category(db: Session, category_id: int) -> None:
+def rename_category(db: Session, category_id: int, new_path: str) -> CategoryRenameResult:
+    """Rename/move a category and cascade the prefix change.
+
+    Rewrites the category row itself (path, parent_path, name, level),
+    every subcategory row under the old prefix, and every
+    ``Item.category_path`` that equals the old path or starts with
+    ``old_path + "/"``. Item paths are rewritten with prefix
+    concatenation (``new || substr(path, len(old)+1)``), NOT with
+    ``replace()`` - replace would also rewrite repeated segments deeper
+    in the path ("finance/finance" must become "money/finance", not
+    "money/money"). ``display_name`` is deliberately untouched: it is
+    the user-facing label and independent of the slug.
+
+    Missing ancestors of the new path are auto-created via
+    ``ensure_category_chain`` so a move under a new parent works in one
+    call.
+
+    Raises:
+        ValidationError: On invalid paths or a move into the category's
+            own subtree.
+        ConflictError: When the target path already exists.
+    """
     category = get_category(db, category_id)
+    old_path = category.path
+    segments = validate_category_path(new_path)
+    normalized = "/".join(segments)
+    if normalized == old_path:
+        return CategoryRenameResult(
+            renamed=False,
+            items_updated=0,
+            subcategories_updated=0,
+            category=CategoryRead.model_validate(category),
+        )
+    if normalized.startswith(old_path + "/"):
+        raise ValidationError(f"Cannot move {old_path!r} into its own subtree {normalized!r}")
+    existing = db.query(Category).filter(Category.path == normalized).one_or_none()
+    if existing is not None:
+        raise ConflictError(f"Category {normalized!r} already exists")
+
+    parent_path = "/".join(segments[:-1]) or None
+    if parent_path is not None:
+        ensure_category_chain(db, parent_path)
+
+    # Subcategory rows: few per tree - rewrite in Python so parent_path
+    # and level stay consistent even when the move changes the depth.
+    children = db.query(Category).filter(Category.path.like(f"{old_path}/%")).all()
+    for child in children:
+        child.path = normalized + child.path[len(old_path) :]
+        if child.parent_path is not None and (
+            child.parent_path == old_path or child.parent_path.startswith(old_path + "/")
+        ):
+            child.parent_path = normalized + child.parent_path[len(old_path) :]
+        child.level = child.path.count("/")
+
+    category.path = normalized
+    category.parent_path = parent_path
+    category.name = segments[-1]
+    category.level = len(segments) - 1
+
+    # Item references: potentially many rows - two bulk UPDATEs.
+    exact = db.execute(
+        update(Item)
+        .where(Item.category_path == old_path)
+        .values(category_path=normalized)
+        .execution_options(synchronize_session=False)
+    )
+    prefixed = db.execute(
+        update(Item)
+        .where(Item.category_path.like(f"{old_path}/%"))
+        .values(
+            category_path=literal(normalized, String)
+            + func.substr(Item.category_path, len(old_path) + 1)
+        )
+        .execution_options(synchronize_session=False)
+    )
+    db.commit()
+    db.refresh(category)
+    return CategoryRenameResult(
+        renamed=True,
+        items_updated=(exact.rowcount or 0) + (prefixed.rowcount or 0),
+        subcategories_updated=len(children),
+        category=CategoryRead.model_validate(category),
+    )
+
+
+def delete_category(db: Session, category_id: int) -> CategoryDeleteResult:
+    """Delete a category subtree and null out the item references.
+
+    Items are never deleted - their ``category_path`` becomes NULL so
+    they show up under "no category" instead of pointing at a path that
+    no longer exists.
+    """
+    category = get_category(db, category_id)
+    old_path = category.path
+
+    orphaned = db.execute(
+        update(Item)
+        .where((Item.category_path == old_path) | (Item.category_path.like(f"{old_path}/%")))
+        .values(category_path=None)
+        .execution_options(synchronize_session=False)
+    )
+    children = db.query(Category).filter(Category.path.like(f"{old_path}/%")).all()
+    for child in children:
+        db.delete(child)
     db.delete(category)
     db.commit()
+    return CategoryDeleteResult(
+        deleted=True,
+        items_orphaned=orphaned.rowcount or 0,
+        subcategories_deleted=len(children),
+    )
 
 
 def validate_category_path(path: str) -> list[str]:

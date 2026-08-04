@@ -12,6 +12,11 @@ class CategoryCreate(BaseModel):
 
 
 class CategoryUpdate(BaseModel):
+    """Partial update. Setting ``path`` renames/moves the category and
+    cascades the new prefix into every subcategory and every
+    ``Item.category_path`` carrying the old prefix."""
+
+    path: str | None = None
     name: str | None = None
     display_name: str | None = None
 
@@ -25,6 +30,23 @@ class CategoryRead(BaseModel):
     name: str
     display_name: str
     level: int
+
+
+class CategoryRenameResult(BaseModel):
+    """Response of a path-changing PATCH: the cascade's scope."""
+
+    renamed: bool
+    items_updated: int
+    subcategories_updated: int
+    category: CategoryRead
+
+
+class CategoryDeleteResult(BaseModel):
+    """Response of DELETE: how many references were orphaned."""
+
+    deleted: bool
+    items_orphaned: int
+    subcategories_deleted: int
 
 
 class CategoryNode(BaseModel):
