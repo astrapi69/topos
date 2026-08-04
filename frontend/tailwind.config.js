@@ -4,7 +4,15 @@ export default {
   // <html> (see hooks/useTheme.ts), NOT a `.dark` class. Map Tailwind's
   // `dark:` variant onto that attribute so the prefix works as-is.
   darkMode: ["class", '[data-theme="dark"]'],
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  // Include the ai-key-vault-react dist: the kit ships its layout as
+  // Tailwind utility classes in the compiled JS, so Tailwind must scan
+  // it or those classes get purged and the AI settings panel renders
+  // unstyled (raw divs).
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx}",
+    "./node_modules/@astrapi69/ai-key-vault-react/dist/**/*.{js,mjs}",
+  ],
   // The app already ships a large hand-written global.css with its own
   // resets and the .btn / dialog component system. Disable Tailwind's
   // Preflight so it does not clobber those base styles; we only want the
