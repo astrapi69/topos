@@ -56,6 +56,28 @@ export default {
           bg: "var(--danger-bg)",
           strong: "var(--danger-strong)",
         },
+        // Compat aliases for @astrapi69/ai-key-vault-react: the kit's
+        // markup uses shadcn-style token names. Map them onto Topos's
+        // CSS vars so the panel inherits the app theme (light/dark).
+        background: "var(--bg-primary)",
+        foreground: "var(--text-primary)",
+        border: "var(--border)",
+        muted: {
+          DEFAULT: "var(--surface-2)",
+          foreground: "var(--text-muted)",
+        },
+        fg: {
+          muted: "var(--text-muted)",
+          secondary: "var(--text-secondary)",
+        },
+        destructive: "var(--danger)",
+        success: "#16a34a",
+        warning: "#d97706",
+        error: "var(--danger)",
+        info: "var(--accent)",
+      },
+      borderRadius: {
+        app: "var(--radius, 0.5rem)",
       },
       fontFamily: {
         display: "var(--font-display)",
