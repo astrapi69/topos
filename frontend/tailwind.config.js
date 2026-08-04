@@ -23,6 +23,10 @@ export default {
     "text-fg-muted", "text-fg-secondary", "text-foreground", "text-info",
     "text-muted-foreground", "text-sm", "text-success", "text-warning", "text-xs",
     "underline", "w-5", "w-7", "w-full",
+    // SecretInput masks its value with this arbitrary class and drops it
+    // on reveal; without it the field never masks and the eye toggle
+    // appears to do nothing.
+    "[-webkit-text-security:disc]",
   ],
   // The app already ships a large hand-written global.css with its own
   // resets and the .btn / dialog component system. Disable Tailwind's
