@@ -49,6 +49,22 @@ class CategoryDeleteResult(BaseModel):
     subcategories_deleted: int
 
 
+class OrphanedItem(BaseModel):
+    """An item whose ``category_path`` resolves to no ``Category`` row."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    content: str
+    category_path: str
+    container_id: int
+
+
+class OrphanReport(BaseModel):
+    orphaned_items: list[OrphanedItem]
+    count: int
+
+
 class CategoryNode(BaseModel):
     """A node in the nested category tree returned by ``GET /categories/tree``."""
 

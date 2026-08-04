@@ -22,6 +22,8 @@ from app.schemas.category import (
     CategoryRead,
     CategoryRenameResult,
     CategoryUpdate,
+    OrphanedItem,
+    OrphanReport,
 )
 
 _CATEGORY_SEGMENT_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -188,6 +190,26 @@ def delete_category(db: Session, category_id: int) -> CategoryDeleteResult:
         deleted=True,
         items_orphaned=orphaned.rowcount or 0,
         subcategories_deleted=len(children),
+    )
+
+
+def list_orphaned_items(db: Session) -> OrphanReport:
+    """Items whose ``category_path`` is set but matches no ``Category.path``.
+
+    Cascade delete nulls its references, so orphans come from other
+    channels: imports carrying unknown paths, free-text edits, or data
+    predating the cascade feature.
+    """
+    known_paths = db.query(Category.path)
+    rows = (
+        db.query(Item)
+        .filter(Item.category_path.isnot(None), ~Item.category_path.in_(known_paths))
+        .order_by(Item.category_path, Item.id)
+        .all()
+    )
+    return OrphanReport(
+        orphaned_items=[OrphanedItem.model_validate(row) for row in rows],
+        count=len(rows),
     )
 
 

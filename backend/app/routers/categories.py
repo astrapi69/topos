@@ -13,6 +13,7 @@ from app.schemas.category import (
     CategoryRead,
     CategoryRenameResult,
     CategoryUpdate,
+    OrphanReport,
 )
 from app.services import categories as service
 
@@ -36,6 +37,12 @@ def get_children(
 ) -> list[CategoryRead]:
     rows = service.list_children(db, parent_path)
     return [CategoryRead.model_validate(row) for row in rows]
+
+
+@router.get("/orphans", response_model=OrphanReport)
+def get_orphans(db: Session = Depends(get_db)) -> OrphanReport:
+    """Items whose ``category_path`` no longer resolves to a category."""
+    return service.list_orphaned_items(db)
 
 
 @router.get("/{category_id}", response_model=CategoryRead)
