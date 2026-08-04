@@ -27,16 +27,17 @@
 
 ## Next (P2 - high-value features)
 
-- [ ] **`Item.category_path` as a real relation instead of a
-      slash-joined string**. Today the path is a loose string
-      reference in three places at once: the backend
-      substring-searches it (`backend/app/services/items.py`),
-      Dexie indexes it (`frontend/src/db/schema.ts`), and the
-      client search reads it as secondary text
-      (`frontend/src/search/index.ts`). Replacing it touches the
-      model, a migration, both search paths and the frontend.
-      Start with an as-is audit of every read and write, not with
-      a rewrite.
+- [x] **Category rename cascade + orphan report** (was: "real
+      relation instead of a slash-joined string"). The as-is audit
+      (issue #11) showed no tree structure is needed - the hierarchy
+      already lives in the `Category` table and every
+      `Item.category_path` consumer needs only string operations.
+      Shipped instead: rename/move cascade (prefix rewrite over
+      subcategories + item paths), delete cascade (items nulled, not
+      deleted), `GET /api/categories/orphans` + Settings UI for
+      reassign/remove. No schema migration. Remaining non-urgent
+      findings (dead Dexie `categoryPath` index, backend-vs-client
+      search-semantics divergence) stay documented in #11.
 - [ ] **QR-label-print plugin**. Generate a printable PDF with one
       QR code per container, keyed by `Container.external_id`.
       Scan from a phone -> jump to `/containers/{id}`.
