@@ -214,6 +214,34 @@ export interface CategoryUpdate {
     displayName?: string;
 }
 
+/** Cascade scope returned by a path-changing PATCH (rename/move). */
+export interface CategoryRenameResult {
+    renamed: boolean;
+    itemsUpdated: number;
+    subcategoriesUpdated: number;
+    category: Category;
+}
+
+/** Cascade scope returned by DELETE /categories/{id}. */
+export interface CategoryDeleteResult {
+    deleted: boolean;
+    itemsOrphaned: number;
+    subcategoriesDeleted: number;
+}
+
+/** Item whose categoryPath resolves to no Category row. */
+export interface OrphanedItem {
+    id: number;
+    content: string;
+    categoryPath: string;
+    containerId: number;
+}
+
+export interface OrphanReport {
+    orphanedItems: OrphanedItem[];
+    count: number;
+}
+
 export interface ActionCreate {
     itemId: number;
     text: string;
@@ -384,8 +412,15 @@ export const api = {
             request<Category>("/categories", {method: "POST", body: payload}),
         update: (id: number, payload: CategoryUpdate) =>
             request<Category>(`/categories/${id}`, {method: "PATCH", body: payload}),
+        /** Rename/move: PATCH with a path triggers the backend cascade. */
+        rename: (id: number, path: string) =>
+            request<CategoryRenameResult>(`/categories/${id}`, {
+                method: "PATCH",
+                body: {path},
+            }),
         delete: (id: number) =>
-            request<void>(`/categories/${id}`, {method: "DELETE"}),
+            request<CategoryDeleteResult>(`/categories/${id}`, {method: "DELETE"}),
+        orphans: () => request<OrphanReport>("/categories/orphans"),
     },
     actions: {
         list: (filters: {status?: ActionStatus} = {}) =>

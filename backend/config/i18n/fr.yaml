@@ -47,6 +47,21 @@ topos:
     type: Type
     search: Search
     search_placeholder: Label or location
+  category:
+    rename: "Rename"
+    rename_message: "New path (english-kebab-case, '/' separates levels). Items and subcategories move along."
+    rename_success: "Category renamed. {count} items updated."
+    delete_confirm: "{count} items will lose their category. Continue?"
+    delete_success: "Category deleted. {count} items uncategorized."
+    orphans_title: "Orphaned category paths"
+    orphans_description: "These items point at categories that no longer exist."
+    orphans_empty: "No orphaned paths."
+    orphans_reassign: "Reassign"
+    orphans_reassigned: "Category assigned."
+    orphans_remove: "Remove path"
+    orphans_removed: "Path removed."
+    orphans_remove_all: "Remove all paths"
+    orphans_remove_all_confirm: "{count} items will lose their orphaned category path."
   container:
     label: Label
     location: Location
@@ -274,6 +289,8 @@ topos:
     action_done: Action marked as done
     action_done_failed: Could not complete the action
     categories_load_failed: Could not load categories
+    category_rename_failed: "Category could not be renamed"
+    category_delete_failed: "Category could not be deleted"
     import_done: Import complete
     import_failed: Import failed
     cache_cleared: Local cache cleared

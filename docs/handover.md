@@ -227,11 +227,15 @@ revisit, STOP and ask the user.
 See [ROADMAP.md](ROADMAP.md) for the full list. P2 items the
 next session can pick up:
 
-- **TypeScript port of `astrapi69/tree-api` +
-  `astrapi69/gen-tree`**. Replace string-based
-  `Item.category_path` with a proper Tree on the frontend.
-  Separate handover doc exists (`Tree-Portierung-Uebergabe.md`)
-  for that session.
+- **`Item.category_path` as a real relation** instead of a
+  slash-joined string. The path is read as a loose string in the
+  backend search, the Dexie index and the client search index at
+  once, so this is a model + migration + search change. Start
+  with an as-is audit of every read and write.
+  (The TypeScript port of `astrapi69/tree-api` + `gen-tree` is a
+  separate, already finished matter: it shipped as
+  `@astrapi69/tree-kit`. Adopting it here is P5 and deliberately
+  deferred - see ROADMAP.md for why.)
 - **QR-label-print plugin.** Generate a printable PDF, one QR
   per container, keyed by `Container.external_id`.
 - **Photo attachments.** Multi-image upload per container.

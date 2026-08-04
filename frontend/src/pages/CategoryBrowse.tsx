@@ -4,17 +4,23 @@
  * Each node shows the count of items under it (inclusive of
  * descendants). Clicking a node filters the right pane to items
  * whose ``categoryPath`` starts with that node's path.
+ *
+ * With a reachable backend every node carries rename + delete
+ * actions; both cascade server-side into subcategories and
+ * ``Item.category_path`` references (issue #11). Offline mode is
+ * read-only - the mutations need the backend as source of truth.
  */
 
 import * as Collapsible from "@radix-ui/react-collapsible";
 import {useEffect, useMemo, useState} from "react";
 import {Link} from "react-router-dom";
-import {ChevronDown, ChevronRight} from "lucide-react";
+import {ChevronDown, ChevronRight, Pencil, Trash2} from "lucide-react";
 
 import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {db} from "../db/schema";
-import {useItems} from "../hooks/useTopos";
+import {useDialog} from "../components/AppDialog";
+import {refreshAll, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {isBackendAvailable} from "../utils/backendStatus";
 import {buildCategoryTree} from "../utils/categoryTree";
@@ -24,16 +30,21 @@ import type {CategoryNode, Item} from "../types/topos";
 
 export default function CategoryBrowse() {
     const {t} = useI18n();
+    const {prompt, confirm} = useDialog();
     const items = useItems();
     const [tree, setTree] = useState<CategoryNode[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
+    const [backendUp, setBackendUp] = useState(false);
+    const [reloadKey, setReloadKey] = useState(0);
 
     useEffect(() => {
         let cancelled = false;
         void (async () => {
             // Offline (no-backend PWA): never call the API - it would 404.
             // Build the tree from the Dexie cache (empty cache -> empty tree).
-            if (!(await isBackendAvailable())) {
+            const available = await isBackendAvailable();
+            if (!cancelled) setBackendUp(available);
+            if (!available) {
                 const cached = await db.categories.toArray();
                 if (!cancelled) setTree(buildCategoryTree(cached));
                 return;
@@ -54,7 +65,94 @@ export default function CategoryBrowse() {
             cancelled = true;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [reloadKey]);
+
+    async function findCategoryId(path: string): Promise<number | null> {
+        const rows = await api.categories.list();
+        return rows.find((row) => row.path === path)?.id ?? null;
+    }
+
+    async function refreshAfterMutation(): Promise<void> {
+        await refreshAll();
+        await items.refresh();
+        setReloadKey((key) => key + 1);
+    }
+
+    async function handleRename(node: CategoryNode): Promise<void> {
+        const newPath = await prompt(
+            t("topos.category.rename", "Umbenennen"),
+            t(
+                "topos.category.rename_message",
+                "Neuer Pfad (english-kebab-case, '/' trennt Ebenen). Einträge und Unterkategorien ziehen mit um.",
+            ),
+            "finance/bank",
+            node.path,
+        );
+        if (newPath === null || newPath.trim() === "" || newPath.trim() === node.path) return;
+        try {
+            const categoryId = await findCategoryId(node.path);
+            if (categoryId === null) {
+                notify.error(t("topos.toast.categories_load_failed", "Kategorien konnten nicht geladen werden"));
+                return;
+            }
+            const result = await api.categories.rename(categoryId, newPath.trim());
+            notify.success(
+                t(
+                    "topos.category.rename_success",
+                    "Kategorie umbenannt. {count} Items aktualisiert.",
+                ).replace("{count}", String(result.itemsUpdated)),
+            );
+            if (selected === node.path || selected?.startsWith(`${node.path}/`)) {
+                setSelected(result.category.path + (selected?.slice(node.path.length) ?? ""));
+            }
+            await refreshAfterMutation();
+        } catch (e) {
+            notify.error(
+                errorMessage(e, t("topos.toast.category_rename_failed", "Kategorie konnte nicht umbenannt werden")),
+                e,
+            );
+        }
+    }
+
+    async function handleDelete(node: CategoryNode): Promise<void> {
+        const affected = itemsByPathPrefix.get(node.path)?.length ?? 0;
+        const ok = await confirm(
+            t("topos.common.delete", "Löschen"),
+            t(
+                "topos.category.delete_confirm",
+                "{count} Items verlieren ihre Kategorie. Fortfahren?",
+            ).replace("{count}", String(affected)),
+            "danger",
+            {
+                confirmLabel: t("topos.common.delete", "Löschen"),
+                cancelLabel: t("topos.common.cancel", "Abbrechen"),
+            },
+        );
+        if (!ok) return;
+        try {
+            const categoryId = await findCategoryId(node.path);
+            if (categoryId === null) {
+                notify.error(t("topos.toast.categories_load_failed", "Kategorien konnten nicht geladen werden"));
+                return;
+            }
+            const result = await api.categories.delete(categoryId);
+            notify.success(
+                t(
+                    "topos.category.delete_success",
+                    "Kategorie gelöscht. {count} Items ohne Kategorie.",
+                ).replace("{count}", String(result.itemsOrphaned)),
+            );
+            if (selected === node.path || selected?.startsWith(`${node.path}/`)) {
+                setSelected(null);
+            }
+            await refreshAfterMutation();
+        } catch (e) {
+            notify.error(
+                errorMessage(e, t("topos.toast.category_delete_failed", "Kategorie konnte nicht gelöscht werden")),
+                e,
+            );
+        }
+    }
 
     const itemsByPathPrefix = useMemo(() => {
         const map = new Map<string, Item[]>();
@@ -106,6 +204,8 @@ export default function CategoryBrowse() {
                                 selected={selected}
                                 setSelected={setSelected}
                                 counts={itemsByPathPrefix}
+                                onRename={backendUp ? handleRename : undefined}
+                                onDelete={backendUp ? handleDelete : undefined}
                             />
                         ))}
                         {tree.length === 0 && (
@@ -154,12 +254,17 @@ function TreeNode({
     selected,
     setSelected,
     counts,
+    onRename,
+    onDelete,
     depth = 0,
 }: {
     node: CategoryNode;
     selected: string | null;
     setSelected: (path: string) => void;
     counts: Map<string, Item[]>;
+    /** Absent in offline mode - mutations need the backend. */
+    onRename?: (node: CategoryNode) => void;
+    onDelete?: (node: CategoryNode) => void;
     depth?: number;
 }) {
     const {t} = useI18n();
@@ -206,6 +311,30 @@ function TreeNode({
                     {node.displayName}{" "}
                     <small className={muted}>({count})</small>
                 </button>
+                {onRename && (
+                    <button
+                        type="button"
+                        data-testid={`category-rename-${node.path.replace(/\//g, "-")}`}
+                        aria-label={t("topos.category.rename", "Umbenennen")}
+                        title={t("topos.category.rename", "Umbenennen")}
+                        onClick={() => onRename(node)}
+                        className="text-ink-muted hover:text-ink bg-transparent border-0 cursor-pointer p-1 min-h-[44px] md:min-h-0 shrink-0"
+                    >
+                        <Pencil size={15} aria-hidden />
+                    </button>
+                )}
+                {onDelete && (
+                    <button
+                        type="button"
+                        data-testid={`category-delete-${node.path.replace(/\//g, "-")}`}
+                        aria-label={t("topos.common.delete", "Löschen")}
+                        title={t("topos.common.delete", "Löschen")}
+                        onClick={() => onDelete(node)}
+                        className="text-ink-muted hover:text-danger bg-transparent border-0 cursor-pointer p-1 min-h-[44px] md:min-h-0 shrink-0"
+                    >
+                        <Trash2 size={15} aria-hidden />
+                    </button>
+                )}
             </div>
             <Collapsible.Content>
                 {node.children.map((child) => (
@@ -215,6 +344,8 @@ function TreeNode({
                         selected={selected}
                         setSelected={setSelected}
                         counts={counts}
+                        onRename={onRename}
+                        onDelete={onDelete}
                         depth={depth + 1}
                     />
                 ))}

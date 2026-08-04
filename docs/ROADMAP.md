@@ -27,11 +27,16 @@
 
 ## Next (P2 - high-value features)
 
-- [ ] **TypeScript port of `astrapi69/tree-api` +
-      `astrapi69/gen-tree`**. Replace the string-based
-      `Item.category_path` with a proper Tree structure on the
-      frontend. Tracking handover doc:
-      `Tree-Portierung-Uebergabe.md` (separate session).
+- [ ] **`Item.category_path` as a real relation instead of a
+      slash-joined string**. Today the path is a loose string
+      reference in three places at once: the backend
+      substring-searches it (`backend/app/services/items.py`),
+      Dexie indexes it (`frontend/src/db/schema.ts`), and the
+      client search reads it as secondary text
+      (`frontend/src/search/index.ts`). Replacing it touches the
+      model, a migration, both search paths and the frontend.
+      Start with an as-is audit of every read and write, not with
+      a rewrite.
 - [ ] **QR-label-print plugin**. Generate a printable PDF with one
       QR code per container, keyed by `Container.external_id`.
       Scan from a phone -> jump to `/containers/{id}`.
@@ -60,6 +65,18 @@
 
 ## Speculative (P5 - nice-to-have, no concrete trigger)
 
+- [ ] **Adopt `@astrapi69/tree-kit` for the category tree**. The
+      TypeScript port of `astrapi69/tree-api` + `astrapi69/gen-tree`
+      is done and published (0.1.0, MIT, zero dependencies);
+      `adaptive-learner` consumes it. Deferred here deliberately:
+      `frontend/src/utils/categoryTree.ts` already builds pure data
+      through an O(n) `Map` index and carries none of the defects
+      the port fixed, and `CategoryNode` is the response type of
+      `GET /api/categories/tree`, so switching means a mapping
+      layer on the online and the offline path both. The trade
+      turns favourable with a second tree use case, or once
+      breadcrumb / depth logic makes `TreeCursor` pay for itself -
+      `CategoryBrowse` currently threads `depth` through as a prop.
 - [ ] Family-shared mode: multi-user backend behind auth
 - [ ] Export plugin (back to xlsx for offline backup)
 - [ ] Calendar integration for action `due_date` reminders
