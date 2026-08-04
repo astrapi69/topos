@@ -12,7 +12,12 @@ vi.mock("../api/client", () => ({
     api: {
         containers: {list: vi.fn().mockResolvedValue([])},
         items: {list: vi.fn().mockResolvedValue([])},
-        categories: {list: vi.fn().mockResolvedValue([])},
+        categories: {
+            list: vi.fn().mockResolvedValue([]),
+            // Reject -> the OrphanPathsSection hides itself, keeping the
+            // page shape these tests assert against.
+            orphans: vi.fn().mockRejectedValue(new Error("offline")),
+        },
         actions: {list: vi.fn().mockResolvedValue([])},
         i18n: {get: vi.fn().mockResolvedValue({})},
         settings: {

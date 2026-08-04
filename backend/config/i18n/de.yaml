@@ -46,6 +46,21 @@ topos:
     type: Typ
     search: Suche
     search_placeholder: Bezeichnung oder Ort
+  category:
+    rename: "Umbenennen"
+    rename_message: "Neuer Pfad (english-kebab-case, '/' trennt Ebenen). Einträge und Unterkategorien ziehen mit um."
+    rename_success: "Kategorie umbenannt. {count} Items aktualisiert."
+    delete_confirm: "{count} Items verlieren ihre Kategorie. Fortfahren?"
+    delete_success: "Kategorie gelöscht. {count} Items ohne Kategorie."
+    orphans_title: "Verwaiste Kategorienpfade"
+    orphans_description: "Diese Einträge zeigen auf Kategorien, die nicht mehr existieren."
+    orphans_empty: "Keine verwaisten Pfade."
+    orphans_reassign: "Neu zuordnen"
+    orphans_reassigned: "Kategorie zugeordnet."
+    orphans_remove: "Pfad entfernen"
+    orphans_removed: "Pfad entfernt."
+    orphans_remove_all: "Alle Pfade entfernen"
+    orphans_remove_all_confirm: "{count} Items verlieren ihren verwaisten Kategorienpfad."
   container:
     label: Bezeichnung
     location: Ort
@@ -274,6 +289,8 @@ topos:
     action_done: Aktion als erledigt markiert
     action_done_failed: Aktion konnte nicht abgeschlossen werden
     categories_load_failed: Kategorien konnten nicht geladen werden
+    category_rename_failed: "Kategorie konnte nicht umbenannt werden"
+    category_delete_failed: "Kategorie konnte nicht gelöscht werden"
     import_done: Import abgeschlossen
     import_failed: Import fehlgeschlagen
     cache_cleared: Lokaler Cache geleert
