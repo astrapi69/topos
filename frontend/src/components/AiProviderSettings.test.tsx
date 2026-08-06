@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { refreshApiKeyStatus } from "@astrapi69/ai-key-vault-react";
 
-import AiProviderSettings from "./AiProviderSettings";
+import AiProviderSettings, { VaultPassphraseForm } from "./AiProviderSettings";
 import { notify } from "../utils/notify";
 import { createBackendAdapter } from "../ai/backendAdapter";
 import { TOPOS_REGISTRY } from "../ai/registry";
@@ -76,16 +76,6 @@ function renderPanel() {
 
 const PASS = "correct horse battery";
 
-async function fillCreateGate() {
-  fireEvent.change(screen.getByTestId("ai-vault-create-pass"), {
-    target: { value: PASS },
-  });
-  fireEvent.change(screen.getByTestId("ai-vault-create-confirm"), {
-    target: { value: PASS },
-  });
-  fireEvent.click(screen.getByTestId("ai-vault-create-button"));
-}
-
 describe("AiProviderSettings", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -149,34 +139,118 @@ describe("AiProviderSettings", () => {
     });
   });
 
-  it("shows the create-passphrase gate in local mode with no vault", async () => {
+  it("shows the provider panel immediately in local mode - no passphrase wall", async () => {
     mockBackendAvailable.mockResolvedValue(false);
     renderPanel();
     await waitFor(() => screen.getByTestId("ai-settings-local-hint"));
-    expect(screen.getByTestId("ai-vault-create-pass")).toBeInTheDocument();
-    // The panel is not shown until the vault is unlocked.
-    expect(screen.queryByTestId("settings-panel-ai")).not.toBeInTheDocument();
+    // The packaged provider panel is visible with no vault created.
+    expect(await screen.findByTestId("settings-panel-ai")).toBeInTheDocument();
+    // No passphrase prompt is shown until a key is actually saved.
+    expect(screen.queryByTestId("ai-vault-prompt")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("ai-vault-create-pass"),
+    ).not.toBeInTheDocument();
+    // No unlock CTA either, because no vault exists yet.
+    expect(screen.queryByTestId("ai-vault-unlock-cta")).not.toBeInTheDocument();
   });
 
-  it("creates the vault and reveals the panel + encrypted key vault", async () => {
+  it("offers an unlock CTA for an existing locked vault and unlocks via the prompt", async () => {
+    await vault.createVault(PASS);
+    vault.lock();
     mockBackendAvailable.mockResolvedValue(false);
     renderPanel();
-    await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
-    await fillCreateGate();
+    // Panel stays visible; the CTA does not block it.
+    expect(await screen.findByTestId("settings-panel-ai")).toBeInTheDocument();
+    fireEvent.click(await screen.findByTestId("ai-vault-unlock-cta"));
 
+    fireEvent.change(await screen.findByTestId("ai-vault-unlock-pass"), {
+      target: { value: PASS },
+    });
+    fireEvent.click(screen.getByTestId("ai-vault-unlock-button"));
     await waitFor(() => {
       expect(screen.getByTestId("ai-vault-lock-button")).toBeInTheDocument();
     });
-    expect(await screen.findByTestId("settings-panel-ai")).toBeInTheDocument();
     expect(screen.getByTestId("key-vault-section")).toBeInTheDocument();
-    expect(vault.hasVault()).toBe(true);
     expect(vault.isUnlocked()).toBe(true);
   });
 
-  it("rejects mismatched passphrases without creating a vault", async () => {
+  it("reports a wrong passphrase in the unlock prompt and stays locked", async () => {
+    await vault.createVault(PASS);
+    vault.lock();
     mockBackendAvailable.mockResolvedValue(false);
     renderPanel();
-    await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
+    fireEvent.click(await screen.findByTestId("ai-vault-unlock-cta"));
+    fireEvent.change(await screen.findByTestId("ai-vault-unlock-pass"), {
+      target: { value: "wrong passphrase" },
+    });
+    fireEvent.click(screen.getByTestId("ai-vault-unlock-button"));
+    await waitFor(() => expect(notify.error).toHaveBeenCalled());
+    expect(
+      screen.queryByTestId("ai-vault-lock-button"),
+    ).not.toBeInTheDocument();
+    expect(vault.isUnlocked()).toBe(false);
+  });
+
+  it("locks the vault again on demand", async () => {
+    await vault.createVault(PASS); // starts unlocked
+    mockBackendAvailable.mockResolvedValue(false);
+    renderPanel();
+    await waitFor(() => screen.getByTestId("ai-vault-lock-button"));
+
+    fireEvent.click(screen.getByTestId("ai-vault-lock-button"));
+    await waitFor(() => {
+      expect(screen.getByTestId("ai-vault-unlock-cta")).toBeInTheDocument();
+    });
+    expect(vault.isUnlocked()).toBe(false);
+  });
+
+  it("persists the enable flag to the local vault metadata", async () => {
+    mockBackendAvailable.mockResolvedValue(false);
+    renderPanel();
+    await waitFor(() => screen.getByTestId("ai-enable-toggle"));
+    fireEvent.click(screen.getByTestId("ai-enable-toggle"));
+    await waitFor(() => expect(vault.isEnabled()).toBe(true));
+  });
+
+  it("closes the unlock prompt on cancel without unlocking", async () => {
+    await vault.createVault(PASS);
+    vault.lock();
+    mockBackendAvailable.mockResolvedValue(false);
+    renderPanel();
+    fireEvent.click(await screen.findByTestId("ai-vault-unlock-cta"));
+    expect(await screen.findByTestId("ai-vault-prompt")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("ai-vault-cancel-button"));
+    await waitFor(() =>
+      expect(screen.queryByTestId("ai-vault-prompt")).not.toBeInTheDocument(),
+    );
+    expect(vault.isUnlocked()).toBe(false);
+  });
+});
+
+describe("VaultPassphraseForm (create)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    vault._resetSessionForTest();
+  });
+
+  function renderCreate() {
+    const onReady = vi.fn();
+    const onCancel = vi.fn();
+    render(
+      <MemoryRouter>
+        <VaultPassphraseForm
+          kind="create"
+          onReady={onReady}
+          onCancel={onCancel}
+        />
+      </MemoryRouter>,
+    );
+    return { onReady, onCancel };
+  }
+
+  it("rejects mismatched passphrases without creating a vault", async () => {
+    const { onReady } = renderCreate();
     fireEvent.change(screen.getByTestId("ai-vault-create-pass"), {
       target: { value: PASS },
     });
@@ -186,50 +260,34 @@ describe("AiProviderSettings", () => {
     fireEvent.click(screen.getByTestId("ai-vault-create-button"));
     await waitFor(() => expect(notify.warning).toHaveBeenCalled());
     expect(vault.hasVault()).toBe(false);
+    expect(onReady).not.toHaveBeenCalled();
   });
 
-  it("unlocks an existing vault with the correct passphrase", async () => {
-    await vault.createVault(PASS);
-    vault.lock();
-    mockBackendAvailable.mockResolvedValue(false);
-    renderPanel();
-    await waitFor(() => screen.getByTestId("ai-vault-unlock-pass"));
-    fireEvent.change(screen.getByTestId("ai-vault-unlock-pass"), {
+  it("rejects a too-short passphrase", async () => {
+    const { onReady } = renderCreate();
+    fireEvent.change(screen.getByTestId("ai-vault-create-pass"), {
+      target: { value: "short" },
+    });
+    fireEvent.change(screen.getByTestId("ai-vault-create-confirm"), {
+      target: { value: "short" },
+    });
+    fireEvent.click(screen.getByTestId("ai-vault-create-button"));
+    await waitFor(() => expect(notify.warning).toHaveBeenCalled());
+    expect(vault.hasVault()).toBe(false);
+    expect(onReady).not.toHaveBeenCalled();
+  });
+
+  it("creates the vault on matching passphrases", async () => {
+    const { onReady } = renderCreate();
+    fireEvent.change(screen.getByTestId("ai-vault-create-pass"), {
       target: { value: PASS },
     });
-    fireEvent.click(screen.getByTestId("ai-vault-unlock-button"));
-    await waitFor(() => {
-      expect(screen.getByTestId("ai-vault-lock-button")).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId("ai-vault-create-confirm"), {
+      target: { value: PASS },
     });
-  });
-
-  it("reports a wrong passphrase and stays locked", async () => {
-    await vault.createVault(PASS);
-    vault.lock();
-    mockBackendAvailable.mockResolvedValue(false);
-    renderPanel();
-    await waitFor(() => screen.getByTestId("ai-vault-unlock-pass"));
-    fireEvent.change(screen.getByTestId("ai-vault-unlock-pass"), {
-      target: { value: "wrong passphrase" },
-    });
-    fireEvent.click(screen.getByTestId("ai-vault-unlock-button"));
-    await waitFor(() => expect(notify.error).toHaveBeenCalled());
-    expect(
-      screen.queryByTestId("ai-vault-lock-button"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("locks the vault again on demand", async () => {
-    mockBackendAvailable.mockResolvedValue(false);
-    renderPanel();
-    await waitFor(() => screen.getByTestId("ai-vault-create-pass"));
-    await fillCreateGate();
-    await waitFor(() => screen.getByTestId("ai-vault-lock-button"));
-
-    fireEvent.click(screen.getByTestId("ai-vault-lock-button"));
-    await waitFor(() => {
-      expect(screen.getByTestId("ai-vault-unlock-pass")).toBeInTheDocument();
-    });
-    expect(vault.isUnlocked()).toBe(false);
+    fireEvent.click(screen.getByTestId("ai-vault-create-button"));
+    await waitFor(() => expect(onReady).toHaveBeenCalled());
+    expect(vault.hasVault()).toBe(true);
+    expect(vault.isUnlocked()).toBe(true);
   });
 });

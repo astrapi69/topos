@@ -1,24 +1,25 @@
 /**
  * AI provider settings, built on ``@astrapi69/ai-key-vault-react``.
  *
- * Two modes, same as before, now driven by the kit's ``AiSettingsPanel``:
+ * Two modes:
  *
  * - **Backend mode** (a backend answers): keys live in the server config
  *   chain (env / ``secrets.yaml`` / ``app.yaml`` overlay), write-only from the
  *   client. The ``backendAdapter`` maps the panel onto ``/api/settings/*``.
- *   No encrypted key vault here - ``secrets.yaml`` is the backup.
- * - **Local mode** (no backend: GitHub Pages PWA / Dexie-only): keys live in
- *   a passphrase-encrypted vault in this browser. The section renders an
- *   unlock / create-passphrase gate; once unlocked, the same panel plus the
- *   encrypted ``.alk`` key-vault export/import (for moving keys between
- *   devices) are shown.
+ * - **Local mode** (no backend: GitHub Pages PWA / Dexie-only): keys live in a
+ *   passphrase-encrypted vault in this browser. The provider panel is shown
+ *   immediately - the user can pick a provider and model with no passphrase.
+ *   A passphrase is requested LAZILY, only when the first API key is saved
+ *   (or an existing locked vault is edited); keys are never persisted
+ *   unencrypted. Once unlocked, the encrypted ``.alk`` key-vault export/import
+ *   (for moving keys between devices) is also shown.
  *
  * The ``enabled`` flag is a Topos concept the kit has no notion of, so it
  * stays a wrapper-level toggle (persisted to the backend ``ai.enabled`` or the
  * local vault metadata).
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   AiSettingsPanel,
@@ -32,7 +33,10 @@ import { VaultDecryptError } from "@astrapi69/passphrase-vault";
 
 import { api } from "../api/client";
 import { createBackendAdapter } from "../ai/backendAdapter";
-import { createLocalVaultAdapter } from "../ai/localVaultAdapter";
+import {
+  createLocalVaultAdapter,
+  type EnsureUnlocked,
+} from "../ai/localVaultAdapter";
 import CustomEndpointField from "../ai/CustomEndpointField";
 import { TOPOS_REGISTRY } from "../ai/registry";
 import { wrapKitT } from "../ai/kitI18n";
@@ -46,15 +50,10 @@ import { notify, errorMessage } from "../utils/notify";
 import { btn, btnText, input, muted, danger } from "../ui/classes";
 
 type SettingsMode = "backend" | "local";
-type LocalGate = "create" | "locked" | "unlocked";
+type PromptMode = "create" | "unlock";
 
 const USER_ID = "topos"; // single-user app; the adapters ignore this
-
-/** Which local-vault gate to show, derived from the store singleton. */
-function computeGate(): LocalGate {
-  if (!vault.hasVault()) return "create";
-  return vault.isUnlocked() ? "unlocked" : "locked";
-}
+const MIN_PASSPHRASE = 8;
 
 const notifyApi: NotifyApi = {
   success: (message) => void notify.success(message),
@@ -62,136 +61,55 @@ const notifyApi: NotifyApi = {
   warning: (message) => void notify.warning(message),
 };
 
-const MIN_PASSPHRASE = 8;
-
-/** First-run gate: choose a passphrase that protects the local key vault. */
-function CreatePassphraseGate({ onReady }: { onReady: () => void }) {
+/**
+ * Passphrase form used inside the lazy prompt modal. ``kind`` picks create
+ * (choose + confirm a new passphrase) vs unlock (enter the existing one).
+ * On success it opens the session and calls ``onReady``; ``onCancel`` aborts.
+ */
+export function VaultPassphraseForm({
+  kind,
+  onReady,
+  onCancel,
+}: {
+  kind: PromptMode;
+  onReady: () => void;
+  onCancel: () => void;
+}) {
   const { t } = useI18n();
+  const dialog = useDialog();
   const [pass, setPass] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function submit() {
-    if (pass.length < MIN_PASSPHRASE) {
-      notify.warning(
-        t(
-          "topos.page.settings.ai.vault_pass_too_short",
-          `Passphrase zu kurz (mindestens ${MIN_PASSPHRASE} Zeichen).`,
-        ),
-      );
-      return;
-    }
-    if (pass !== confirmPass) {
-      notify.warning(
-        t(
-          "topos.page.settings.ai.vault_pass_mismatch",
-          "Passphrasen stimmen nicht ueberein.",
-        ),
-      );
-      return;
-    }
-    setBusy(true);
-    try {
-      await vault.createVault(pass);
-      notify.success(
-        t(
-          "topos.page.settings.ai.vault_created",
-          "Schluessel-Tresor angelegt.",
-        ),
-      );
-      onReady();
-    } catch (err) {
-      notify.error(
-        errorMessage(
-          err,
+    if (kind === "create") {
+      if (pass.length < MIN_PASSPHRASE) {
+        notify.warning(
           t(
-            "topos.page.settings.ai.vault_create_failed",
-            "Tresor konnte nicht angelegt werden.",
+            "topos.page.settings.ai.vault_pass_too_short",
+            `Passphrase zu kurz (mindestens ${MIN_PASSPHRASE} Zeichen).`,
           ),
-        ),
-        err,
-      );
-    } finally {
-      setBusy(false);
+        );
+        return;
+      }
+      if (pass !== confirmPass) {
+        notify.warning(
+          t(
+            "topos.page.settings.ai.vault_pass_mismatch",
+            "Passphrasen stimmen nicht ueberein.",
+          ),
+        );
+        return;
+      }
+    } else if (!pass) {
+      return;
     }
-  }
-
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        void submit();
-      }}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        maxWidth: 420,
-      }}
-      data-testid="ai-vault-create-gate"
-    >
-      <p style={{ margin: 0, fontWeight: 600 }} className="text-ink">
-        {t(
-          "topos.page.settings.ai.vault_create_heading",
-          "Schritt 1: Passphrase anlegen - danach erscheinen Anbieter und Schluesselfelder",
-        )}
-      </p>
-      <p className={muted}>
-        {t(
-          "topos.page.settings.ai.vault_create_hint",
-          "Ohne Backend werden die API-Schluessel in diesem Browser verschluesselt gespeichert. Waehle dazu eine Passphrase; ohne sie sind die Schluessel nicht wiederherstellbar.",
-        )}
-      </p>
-      <input
-        id="ai-vault-create-pass"
-        name="new-passphrase"
-        className={input}
-        type="password"
-        autoComplete="new-password"
-        placeholder={t("topos.page.settings.ai.vault_pass", "Passphrase")}
-        value={pass}
-        onChange={(e) => setPass(e.target.value)}
-        data-testid="ai-vault-create-pass"
-      />
-      <input
-        id="ai-vault-create-confirm"
-        name="confirm-passphrase"
-        className={input}
-        type="password"
-        autoComplete="new-password"
-        placeholder={t(
-          "topos.page.settings.ai.vault_pass_confirm",
-          "Passphrase bestaetigen",
-        )}
-        value={confirmPass}
-        onChange={(e) => setConfirmPass(e.target.value)}
-        data-testid="ai-vault-create-confirm"
-      />
-      <button
-        type="submit"
-        className={btn}
-        disabled={busy}
-        data-testid="ai-vault-create-button"
-      >
-        {t("topos.page.settings.ai.vault_create", "Tresor anlegen")}
-      </button>
-    </form>
-  );
-}
-
-/** Unlock gate: decrypt the local key vault for this session. */
-function UnlockGate({ onReady }: { onReady: () => void }) {
-  const { t } = useI18n();
-  const dialog = useDialog();
-  const [pass, setPass] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  async function submit() {
-    if (!pass) return;
     setBusy(true);
     try {
-      await vault.unlock(pass);
+      if (kind === "create") await vault.createVault(pass);
+      else await vault.unlock(pass);
       setPass("");
+      setConfirmPass("");
       onReady();
     } catch (err) {
       const message =
@@ -199,10 +117,15 @@ function UnlockGate({ onReady }: { onReady: () => void }) {
           ? t("topos.page.settings.ai.vault_wrong_pass", "Falsche Passphrase.")
           : errorMessage(
               err,
-              t(
-                "topos.page.settings.ai.vault_unlock_failed",
-                "Entsperren fehlgeschlagen.",
-              ),
+              kind === "create"
+                ? t(
+                    "topos.page.settings.ai.vault_create_failed",
+                    "Tresor konnte nicht angelegt werden.",
+                  )
+                : t(
+                    "topos.page.settings.ai.vault_unlock_failed",
+                    "Entsperren fehlgeschlagen.",
+                  ),
             );
       notify.error(message, err);
     } finally {
@@ -221,7 +144,7 @@ function UnlockGate({ onReady }: { onReady: () => void }) {
     );
     if (!ok) return;
     vault.destroyVault();
-    onReady();
+    onCancel();
   }
 
   return (
@@ -230,47 +153,91 @@ function UnlockGate({ onReady }: { onReady: () => void }) {
         e.preventDefault();
         void submit();
       }}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        maxWidth: 420,
-      }}
+      style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+      data-testid={
+        kind === "create" ? "ai-vault-create-gate" : "ai-vault-unlock-gate"
+      }
     >
+      <p style={{ margin: 0, fontWeight: 600 }} className="text-ink">
+        {kind === "create"
+          ? t(
+              "topos.page.settings.ai.vault_create_heading",
+              "Passphrase festlegen, um den Schluessel verschluesselt zu speichern",
+            )
+          : t(
+              "topos.page.settings.ai.vault_unlock_heading",
+              "Passphrase eingeben, um die gespeicherten Schluessel zu entsperren",
+            )}
+      </p>
       <p className={muted}>
-        {t(
-          "topos.page.settings.ai.vault_unlock_hint",
-          "Gib die Passphrase ein, um die gespeicherten API-Schluessel fuer diese Sitzung zu entsperren.",
-        )}
+        {kind === "create"
+          ? t(
+              "topos.page.settings.ai.vault_create_hint",
+              "Ohne Backend werden die API-Schluessel in diesem Browser verschluesselt gespeichert. Waehle dazu eine Passphrase; ohne sie sind die Schluessel nicht wiederherstellbar.",
+            )
+          : t(
+              "topos.page.settings.ai.vault_unlock_hint",
+              "Gib die Passphrase ein, um die gespeicherten API-Schluessel fuer diese Sitzung zu entsperren.",
+            )}
       </p>
       <input
-        id="ai-vault-unlock-pass"
-        name="current-passphrase"
         className={input}
         type="password"
-        autoComplete="current-password"
+        autoComplete={kind === "create" ? "new-password" : "current-password"}
         placeholder={t("topos.page.settings.ai.vault_pass", "Passphrase")}
         value={pass}
         onChange={(e) => setPass(e.target.value)}
-        data-testid="ai-vault-unlock-pass"
+        data-testid={
+          kind === "create" ? "ai-vault-create-pass" : "ai-vault-unlock-pass"
+        }
       />
-      <div style={{ display: "flex", gap: "0.5rem" }}>
+      {kind === "create" && (
+        <input
+          className={input}
+          type="password"
+          autoComplete="new-password"
+          placeholder={t(
+            "topos.page.settings.ai.vault_pass_confirm",
+            "Passphrase bestaetigen",
+          )}
+          value={confirmPass}
+          onChange={(e) => setConfirmPass(e.target.value)}
+          data-testid="ai-vault-create-confirm"
+        />
+      )}
+      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
         <button
           type="submit"
           className={btn}
-          disabled={busy || !pass}
-          data-testid="ai-vault-unlock-button"
+          disabled={busy || (kind === "unlock" && !pass)}
+          data-testid={
+            kind === "create"
+              ? "ai-vault-create-button"
+              : "ai-vault-unlock-button"
+          }
         >
-          {t("topos.page.settings.ai.vault_unlock", "Entsperren")}
+          {kind === "create"
+            ? t("topos.page.settings.ai.vault_create", "Tresor anlegen")
+            : t("topos.page.settings.ai.vault_unlock", "Entsperren")}
         </button>
         <button
           type="button"
           className={btnText}
-          onClick={forget}
-          data-testid="ai-vault-forgot-button"
+          onClick={onCancel}
+          data-testid="ai-vault-cancel-button"
         >
-          {t("topos.page.settings.ai.vault_forgot", "Passphrase vergessen?")}
+          {t("topos.page.settings.ai.vault_cancel", "Abbrechen")}
         </button>
+        {kind === "unlock" && (
+          <button
+            type="button"
+            className={btnText}
+            onClick={forget}
+            data-testid="ai-vault-forgot-button"
+          >
+            {t("topos.page.settings.ai.vault_forgot", "Passphrase vergessen?")}
+          </button>
+        )}
       </div>
     </form>
   );
@@ -284,11 +251,22 @@ export default function AiProviderSettings() {
   const dialog = useDialog();
   const [mode, setMode] = useState<SettingsMode | null>(null);
   const [enabled, setEnabled] = useState(false);
-  // Re-derived on create / unlock / lock; only meaningful in local mode.
-  const [gate, setGate] = useState<LocalGate>("create");
+  // Bumped on any vault lifecycle change (create / unlock / lock / destroy)
+  // to re-derive unlocked-ness for the export section + lock/unlock controls.
+  const [vaultTick, setVaultTick] = useState(0);
+  const [promptMode, setPromptMode] = useState<PromptMode | null>(null);
+  const promptResolve = useRef<((ok: boolean) => void) | null>(null);
 
   const backendAdapter = useMemo(() => createBackendAdapter(), []);
-  const localAdapter = useMemo(() => createLocalVaultAdapter(), []);
+  // The adapter calls back into requestUnlock (via the ref) when a key save
+  // needs a passphrase; the ref indirection keeps the adapter identity stable.
+  const requestUnlockRef = useRef<EnsureUnlocked>(async () =>
+    vault.isUnlocked(),
+  );
+  const localAdapter = useMemo(
+    () => createLocalVaultAdapter(() => requestUnlockRef.current()),
+    [],
+  );
 
   const confirmFn = useCallback<ConfirmFn>(
     (options) =>
@@ -303,18 +281,13 @@ export default function AiProviderSettings() {
 
   useEffect(() => {
     let cancelled = false;
-    function toLocal() {
-      if (cancelled) return;
-      setEnabled(vault.isEnabled());
-      setGate(computeGate());
-      setMode("local");
-    }
     void (async () => {
-      // Offline (no-backend PWA): go straight to local mode without
-      // touching the API. The health probe is the single source of
-      // truth for "is a backend reachable".
+      // Offline (no-backend PWA): go straight to local mode without touching
+      // the API. The health probe is the single source of truth.
       if (!(await isBackendAvailable())) {
-        toLocal();
+        if (cancelled) return;
+        setEnabled(vault.isEnabled());
+        setMode("local");
         return;
       }
       try {
@@ -323,13 +296,43 @@ export default function AiProviderSettings() {
         setEnabled(Boolean(cfg.ai?.enabled));
         setMode("backend");
       } catch {
-        toLocal();
+        if (cancelled) return;
+        setEnabled(vault.isEnabled());
+        setMode("local");
       }
     })();
     return () => {
       cancelled = true;
     };
   }, []);
+
+  function afterVaultChange() {
+    setVaultTick((n) => n + 1);
+    emitSettingsRefresh();
+  }
+
+  /**
+   * Ensure an open vault session, prompting for a passphrase if needed. Passed
+   * to the local adapter; resolves true once unlocked, false on cancel.
+   */
+  const requestUnlock = useCallback<EnsureUnlocked>(async () => {
+    if (vault.isUnlocked()) return true;
+    setPromptMode(vault.hasVault() ? "unlock" : "create");
+    return await new Promise<boolean>((resolve) => {
+      promptResolve.current = resolve;
+    });
+  }, []);
+
+  useEffect(() => {
+    requestUnlockRef.current = requestUnlock;
+  }, [requestUnlock]);
+
+  function resolvePrompt(ok: boolean) {
+    if (ok) afterVaultChange();
+    promptResolve.current?.(ok);
+    promptResolve.current = null;
+    setPromptMode(null);
+  }
 
   async function onToggleEnabled(next: boolean) {
     setEnabled(next);
@@ -351,14 +354,12 @@ export default function AiProviderSettings() {
     }
   }
 
-  function afterVaultChange() {
-    setGate(computeGate());
-    emitSettingsRefresh();
-  }
-
   if (mode === null) return null;
 
-  const localReady = mode === "local" && gate === "unlocked";
+  // ``vaultTick`` is read so this recomputes after every lifecycle change.
+  void vaultTick;
+  const unlocked = mode === "local" && vault.isUnlocked();
+  const lockedVaultExists = mode === "local" && !unlocked && vault.hasVault();
 
   return (
     <section
@@ -417,56 +418,101 @@ export default function AiProviderSettings() {
         </AiSettingsProvider>
       )}
 
-      {mode === "local" && gate === "create" && (
-        <CreatePassphraseGate onReady={afterVaultChange} />
-      )}
-
-      {mode === "local" && gate === "locked" && (
-        <UnlockGate onReady={afterVaultChange} />
-      )}
-
-      {localReady && (
-        <AiSettingsProvider
-          adapter={localAdapter}
-          registry={TOPOS_REGISTRY}
-          userId={USER_ID}
-          t={kitT}
-          notify={notifyApi}
-          confirm={confirmFn}
-          vaultFormat={TOPOS_VAULT_FORMAT}
-          browserRuntime={true}
-          Button={ToposButton}
-          Input={ToposInput}
-          Link={ToposLink}
-        >
-          <AiSettingsPanel />
-          <CustomEndpointField />
-          <KeyVaultSection />
-          <button
-            type="button"
-            className={btnText}
-            style={{ marginTop: "1rem" }}
-            onClick={() => {
-              vault.lock();
-              afterVaultChange();
-            }}
-            data-testid="ai-vault-lock-button"
-          >
-            {t("topos.page.settings.ai.vault_lock", "Tresor sperren")}
-          </button>
-        </AiSettingsProvider>
-      )}
-
-      {mode === "local" && !enabled && (
-        <p
-          className={danger}
-          style={{ fontSize: "0.8125rem", marginTop: "0.5rem" }}
-        >
-          {t(
-            "topos.page.settings.ai.enable_hint",
-            "Aktiviere die KI-Funktionen oben, damit die Bilderkennung die gespeicherten Schluessel nutzt.",
+      {mode === "local" && (
+        <>
+          {lockedVaultExists && (
+            <button
+              type="button"
+              className={btn}
+              style={{ marginBottom: "0.75rem" }}
+              onClick={() => void requestUnlock()}
+              data-testid="ai-vault-unlock-cta"
+            >
+              {t(
+                "topos.page.settings.ai.vault_unlock_cta",
+                "Tresor entsperren",
+              )}
+            </button>
           )}
-        </p>
+
+          <AiSettingsProvider
+            adapter={localAdapter}
+            registry={TOPOS_REGISTRY}
+            userId={USER_ID}
+            t={kitT}
+            notify={notifyApi}
+            confirm={confirmFn}
+            vaultFormat={TOPOS_VAULT_FORMAT}
+            browserRuntime={true}
+            Button={ToposButton}
+            Input={ToposInput}
+            Link={ToposLink}
+          >
+            <AiSettingsPanel />
+            <CustomEndpointField />
+            {unlocked && (
+              <>
+                <KeyVaultSection />
+                <button
+                  type="button"
+                  className={btnText}
+                  style={{ marginTop: "1rem" }}
+                  onClick={() => {
+                    vault.lock();
+                    afterVaultChange();
+                  }}
+                  data-testid="ai-vault-lock-button"
+                >
+                  {t("topos.page.settings.ai.vault_lock", "Tresor sperren")}
+                </button>
+              </>
+            )}
+          </AiSettingsProvider>
+
+          {!enabled && (
+            <p
+              className={danger}
+              style={{ fontSize: "0.8125rem", marginTop: "0.5rem" }}
+            >
+              {t(
+                "topos.page.settings.ai.enable_hint",
+                "Aktiviere die KI-Funktionen oben, damit die Bilderkennung die gespeicherten Schluessel nutzt.",
+              )}
+            </p>
+          )}
+        </>
+      )}
+
+      {promptMode && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          data-testid="ai-vault-prompt"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--bg-overlay, rgba(15,23,42,0.55))",
+            padding: "1rem",
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) resolvePrompt(false);
+          }}
+        >
+          <div
+            className="bg-surface border border-line rounded"
+            style={{ maxWidth: 440, width: "100%", padding: "1.25rem" }}
+          >
+            <VaultPassphraseForm
+              kind={promptMode}
+              onReady={() => resolvePrompt(true)}
+              onCancel={() => resolvePrompt(false)}
+            />
+          </div>
+        </div>
       )}
     </section>
   );
