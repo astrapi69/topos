@@ -35,9 +35,18 @@ export function setBackendUrl(url: string): void {
 }
 
 /** Base for ``/api`` requests: ``"{configured}/api"`` when a backend
- *  origin is configured, ``"/api"`` for same-origin. ``origin`` overrides
- *  the stored value (used by the "test connection" probe before saving). */
+ *  origin is configured, else same-origin ``"{app-base}api"``. ``origin``
+ *  overrides the stored value (used by the "test connection" probe before
+ *  saving).
+ *
+ *  The same-origin case respects the Vite base path (``import.meta.env
+ *  .BASE_URL``), so a subpath deployment like GitHub Pages ``/topos/``
+ *  targets ``/topos/api`` instead of the wrong root ``/api``. Matches how
+ *  ``pwa/update-store`` already builds ``version.json``. At root
+ *  (``make dev``, Docker) BASE_URL is ``/`` so this stays ``/api``. */
 export function apiBase(origin?: string): string {
     const base = (origin ?? getBackendUrl()).trim().replace(/\/+$/, "");
-    return base ? `${base}/api` : "/api";
+    if (base) return `${base}/api`;
+    const appBase = import.meta.env.BASE_URL.replace(/\/+$/, "");
+    return `${appBase}/api`;
 }
