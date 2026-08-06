@@ -8,6 +8,7 @@
 import {useEffect, useState} from "react";
 
 import NavBar from "../components/NavBar";
+import AboutSection from "../components/AboutSection";
 import AiProviderSettings from "../components/AiProviderSettings";
 import BackendUrlSettings from "../components/BackendUrlSettings";
 import OrphanPathsSection from "../components/OrphanPathsSection";
@@ -164,6 +165,8 @@ export default function Settings() {
                             : t("topos.page.settings.reset", "Cache zurücksetzen")}
                     </button>
                 </section>
+
+                <AboutSection />
             </main>
         </>
     );

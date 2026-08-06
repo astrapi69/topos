@@ -24,6 +24,21 @@ function resolveBuildHash(): string {
 }
 const buildHash = resolveBuildHash();
 
+// Build date: committer date (ISO 8601) of the built commit, so it is
+// deterministic to the commit rather than to when the build ran.
+// "unknown" outside a git checkout; the About section's VersionCard omits
+// the row when this is falsy and prints "unknown" verbatim otherwise.
+function resolveBuildDate(): string {
+    try {
+        return execSync("git log -1 --format=%cI", {stdio: ["ignore", "pipe", "ignore"]})
+            .toString()
+            .trim();
+    } catch {
+        return "unknown";
+    }
+}
+const buildDate = resolveBuildDate();
+
 // Emit the deployed version manifest that @astrapi69/pwa-update fetches to
 // detect a newer build. Served at "<base>version.json". In dev a tiny
 // middleware serves it so the update store's fetch does not 404; at build
@@ -83,6 +98,9 @@ export default defineConfig({
         // Short git SHA of the built commit; read by pwa/update-store.ts to
         // build the running-build manifest for @astrapi69/pwa-update.
         __BUILD_HASH__: JSON.stringify(buildHash),
+        // Committer date (ISO) of the built commit; shown in the About
+        // section's VersionCard.
+        __BUILD_DATE__: JSON.stringify(buildDate),
     },
     plugins: [
         react(),
