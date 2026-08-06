@@ -97,8 +97,18 @@ function lockedSnapshot(): Snapshot {
   };
 }
 
+/**
+ * Ensure the vault has an open session, prompting the user for a passphrase
+ * when needed (create on first use, unlock for an existing vault). Resolves
+ * ``true`` once a session is open, ``false`` if the user cancelled. Injected
+ * by the React layer, which owns the passphrase dialog.
+ */
+export type EnsureUnlocked = () => Promise<boolean>;
+
 /** Adapter backed by the passphrase-encrypted local vault. */
-export function createLocalVaultAdapter(): AiKeyStoreAdapter<ToposProviderId> {
+export function createLocalVaultAdapter(
+  ensureUnlocked: EnsureUnlocked = async () => vault.isUnlocked(),
+): AiKeyStoreAdapter<ToposProviderId> {
   const capabilities: AiKeyStoreCapabilities = {
     clientReadableKeys: true,
     keyBackup: false,
@@ -116,20 +126,38 @@ export function createLocalVaultAdapter(): AiKeyStoreAdapter<ToposProviderId> {
     },
 
     async patchSettings(_userId, patch) {
-      await vault.patchSettings({
-        activeProvider: patch.activeProvider ?? undefined,
-        models: patch.modelOverride,
-        baseUrls: patch.baseUrlOverride,
-      });
+      // Provider / model / base-URL are non-secret. When the vault is open we
+      // write them into the encrypted envelope; when it is still locked (lazy
+      // path: no passphrase yet) they go straight to the plaintext metadata so
+      // the user can configure a provider before committing to a passphrase.
+      if (vault.isUnlocked()) {
+        await vault.patchSettings({
+          activeProvider: patch.activeProvider ?? undefined,
+          models: patch.modelOverride,
+          baseUrls: patch.baseUrlOverride,
+        });
+      } else {
+        vault.patchMetaSettings({
+          activeProvider: patch.activeProvider ?? undefined,
+          models: patch.modelOverride,
+          baseUrls: patch.baseUrlOverride,
+        });
+      }
       return snapshot();
     },
 
     async setApiKey(_userId, provider, key) {
+      // Saving a key is the moment a passphrase becomes necessary. Prompt for
+      // it lazily; abort quietly (return the current snapshot) if cancelled.
+      if (!vault.isUnlocked() && !(await ensureUnlocked())) return snapshot();
       await vault.setKey(provider, key);
       return snapshot();
     },
 
     async deleteApiKey(_userId, provider) {
+      // Removing a stored key edits the encrypted envelope, so it needs a
+      // session too. A locked vault with no session is unlocked first.
+      if (!vault.isUnlocked() && !(await ensureUnlocked())) return snapshot();
       await vault.deleteKey(provider);
       return snapshot();
     },

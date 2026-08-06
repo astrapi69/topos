@@ -90,10 +90,6 @@ function removeRaw(key: string): void {
   }
 }
 
-function defaultSettings(): VaultSettings {
-  return { activeProvider: DEFAULT_PROVIDER, models: {}, baseUrls: {} };
-}
-
 function knownProvider(value: unknown): ToposProviderId {
   return typeof value === "string" && TOPOS_REGISTRY.has(value)
     ? (value as ToposProviderId)
@@ -171,6 +167,38 @@ export function setEnabled(enabled: boolean): void {
   writeMeta({ ...getMeta(), enabled });
 }
 
+/**
+ * Patch the non-secret provider settings (active provider, model / base-URL
+ * overrides) straight into the plaintext metadata, WITHOUT an unlock session.
+ *
+ * This is the lazy-passphrase path: before any key exists the user can still
+ * pick a provider and a model, and those choices survive into the vault the
+ * moment a passphrase is set ({@link createVault} seeds its session from this
+ * metadata). Keys are never routed through here - they always require a
+ * session. Ignored while a session is open; the adapter routes to
+ * {@link patchSettings} then so the envelope stays authoritative.
+ */
+export function patchMetaSettings(patch: {
+  activeProvider?: ToposProviderId | null;
+  models?: Partial<Record<ToposProviderId, string | null>>;
+  baseUrls?: Partial<Record<ToposProviderId, string | null>>;
+}): void {
+  const meta = getMeta();
+  if (patch.activeProvider)
+    meta.activeProvider = knownProvider(patch.activeProvider);
+  for (const [id, value] of Object.entries(patch.models ?? {})) {
+    if (!TOPOS_REGISTRY.has(id)) continue;
+    if (value) meta.models[id as ToposProviderId] = value;
+    else delete meta.models[id as ToposProviderId];
+  }
+  for (const [id, value] of Object.entries(patch.baseUrls ?? {})) {
+    if (!TOPOS_REGISTRY.has(id)) continue;
+    if (value) meta.baseUrls[id as ToposProviderId] = value;
+    else delete meta.baseUrls[id as ToposProviderId];
+  }
+  writeMeta(meta);
+}
+
 /** Whether AI features are enabled in local mode. */
 export function isEnabled(): boolean {
   return getMeta().enabled;
@@ -229,9 +257,16 @@ async function persist(): Promise<void> {
 export async function createVault(passphrase: string): Promise<void> {
   if (!passphrase) throw new Error("Passphrase must not be empty");
   if (hasVault()) throw new Error("A vault already exists");
+  // Seed from any pre-passphrase choices the user already made (lazy path:
+  // provider + model picked before a vault existed live in the metadata).
+  const meta = getMeta();
   sessionPassphrase = passphrase;
   sessionKeys = {};
-  sessionSettings = defaultSettings();
+  sessionSettings = {
+    activeProvider: meta.activeProvider,
+    models: { ...meta.models },
+    baseUrls: { ...meta.baseUrls },
+  };
   await persist();
 }
 
