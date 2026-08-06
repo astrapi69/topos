@@ -5,6 +5,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import CategoryBrowse from "./CategoryBrowse";
 import {DialogProvider} from "../components/AppDialog";
+import AppFeatureProvider from "../features/AppFeatureProvider";
 import {db} from "../db/schema";
 import {notify} from "../utils/notify";
 
@@ -35,17 +36,26 @@ vi.mock("../utils/backendStatus", () => ({
     isBackendAvailable: () => backendAvailableMock(),
 }));
 
+// AppFeatureProvider reads the local-vault AI state; no vault in this test.
+vi.mock("../ai", () => ({
+    resolveActiveProvider: () => null,
+}));
+
 vi.mock("../utils/notify", () => ({
     notify: {success: vi.fn(), error: vi.fn(), warning: vi.fn()},
     errorMessage: (_e: unknown, fallback: string) => fallback,
 }));
 
 function renderPage() {
+    // AppFeatureProvider drives the category-edit gate off the same mocked
+    // isBackendAvailable() the page reads for its tree source.
     return render(
         <MemoryRouter>
-            <DialogProvider>
-                <CategoryBrowse />
-            </DialogProvider>
+            <AppFeatureProvider>
+                <DialogProvider>
+                    <CategoryBrowse />
+                </DialogProvider>
+            </AppFeatureProvider>
         </MemoryRouter>,
     );
 }

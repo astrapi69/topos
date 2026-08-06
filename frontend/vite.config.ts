@@ -1,5 +1,6 @@
 /// <reference types="vitest" />
-import {copyFileSync, existsSync} from "node:fs";
+import {execSync} from "node:child_process";
+import {copyFileSync, existsSync, writeFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {defineConfig, type Plugin} from "vite";
@@ -7,6 +8,45 @@ import react from "@vitejs/plugin-react";
 import {VitePWA} from "vite-plugin-pwa";
 
 import pkg from "./package.json" with {type: "json"};
+
+// Build hash for @astrapi69/pwa-update's version manifest. The short git
+// SHA of the built commit; "unknown" outside a git checkout (e.g. a
+// tarball build). Paired with pkg.version so a deploy is detectable even
+// when the version string itself did not change.
+function resolveBuildHash(): string {
+    try {
+        return execSync("git rev-parse --short HEAD", {stdio: ["ignore", "pipe", "ignore"]})
+            .toString()
+            .trim();
+    } catch {
+        return "unknown";
+    }
+}
+const buildHash = resolveBuildHash();
+
+// Emit the deployed version manifest that @astrapi69/pwa-update fetches to
+// detect a newer build. Served at "<base>version.json". In dev a tiny
+// middleware serves it so the update store's fetch does not 404; at build
+// it is written into dist/ alongside index.html.
+function versionManifest(): Plugin {
+    const body = JSON.stringify({version: pkg.version, buildHash});
+    return {
+        name: "topos-version-manifest",
+        configureServer(server) {
+            server.middlewares.use((req, res, next) => {
+                if (req.url && req.url.replace(/\?.*$/, "").endsWith("/version.json")) {
+                    res.setHeader("Content-Type", "application/json");
+                    res.end(body);
+                    return;
+                }
+                next();
+            });
+        },
+        closeBundle() {
+            writeFileSync(resolve(process.cwd(), "dist", "version.json"), body);
+        },
+    };
+}
 
 // GitHub Pages has no SPA rewrite: a deep link like /topos/containers/5
 // would 404. Serving a copy of index.html as 404.html makes GH Pages
@@ -40,10 +80,14 @@ export default defineConfig({
         // Downstream code reads __APP_VERSION__ instead of
         // re-declaring a hardcoded constant.
         __APP_VERSION__: JSON.stringify(pkg.version),
+        // Short git SHA of the built commit; read by pwa/update-store.ts to
+        // build the running-build manifest for @astrapi69/pwa-update.
+        __BUILD_HASH__: JSON.stringify(buildHash),
     },
     plugins: [
         react(),
         spa404Fallback(),
+        versionManifest(),
         VitePWA({
             // "prompt" (not autoUpdate) so a new service worker WAITS and we
             // can show a "new version available" toast with an update button

@@ -8,14 +8,17 @@
 
 import {useState} from "react";
 
+import {useFeature} from "@astrapi69/feature-strategy-react";
+
 import NavBar from "../components/NavBar";
 import {api} from "../api/client";
+import {FEATURES} from "../features/featureConfig";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
 import {notify, errorMessage} from "../utils/notify";
 import {rebuildSearchIndex} from "../search/buildIndex";
-import {btnPrimary} from "../ui/classes";
+import {btnPrimary, muted} from "../ui/classes";
 import type {ImportReport} from "../types/topos";
 
 export default function Import() {
@@ -26,10 +29,14 @@ export default function Import() {
     const [submitting, setSubmitting] = useState(false);
     const [dragging, setDragging] = useState(false);
     const {confirm} = useDialog();
+    // Excel import posts to the backend; disabled (with a hint) when no
+    // backend is reachable - previously ungated, so offline the button was
+    // enabled and the POST failed with only a toast.
+    const importFeature = useFeature(FEATURES.EXCEL_IMPORT);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!file) return;
+        if (!file || !importFeature.isActive) return;
         if (pruneMissing) {
             const ok = await confirm(
                 t("topos.confirm.prune_title", "Fehlende Einträge löschen?"),
@@ -137,13 +144,22 @@ export default function Import() {
                     <button
                         type="submit"
                         className={btnPrimary}
-                        disabled={!file || submitting}
+                        disabled={!file || submitting || !importFeature.isActive}
                         data-testid="import-submit"
                     >
                         {submitting
                             ? t("topos.page.import.uploading", "Wird hochgeladen...")
                             : t("topos.page.import.upload", "Hochladen")}
                     </button>
+
+                    {!importFeature.isActive && (
+                        <span data-testid="import-backend-hint" className={muted}>
+                            {t(
+                                "topos.page.import.backend_required",
+                                "Der Excel-Import benötigt eine Backend-Verbindung (Einstellungen: Backend).",
+                            )}
+                        </span>
+                    )}
                 </form>
 
                 {report && (
