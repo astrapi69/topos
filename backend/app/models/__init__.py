@@ -15,6 +15,7 @@ mirrors the convention used by sibling PluginForge applications.
 from app.models.action import Action, ActionStatus
 from app.models.category import Category
 from app.models.container import Container, ContainerType, Owner
+from app.models.container_photo import ContainerPhoto
 from app.models.item import Item, Priority
 
 __all__ = [
@@ -22,6 +23,7 @@ __all__ = [
     "ActionStatus",
     "Category",
     "Container",
+    "ContainerPhoto",
     "ContainerType",
     "Item",
     "Owner",

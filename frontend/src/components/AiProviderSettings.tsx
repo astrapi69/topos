@@ -111,11 +111,18 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
                 void submit();
             }}
             style={{display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 420}}
+            data-testid="ai-vault-create-gate"
         >
+            <p style={{margin: 0, fontWeight: 600}} className="text-ink">
+                {t(
+                    "topos.page.settings.ai.vault_create_heading",
+                    "Schritt 1: Passphrase anlegen - danach erscheinen Anbieter und Schluesselfelder",
+                )}
+            </p>
             <p className={muted}>
                 {t(
                     "topos.page.settings.ai.vault_create_hint",
-                    "Waehle eine Passphrase, um die API-Schluessel in diesem Browser verschluesselt zu speichern. Ohne die Passphrase sind die Schluessel nicht wiederherstellbar.",
+                    "Ohne Backend werden die API-Schluessel in diesem Browser verschluesselt gespeichert. Waehle dazu eine Passphrase; ohne sie sind die Schluessel nicht wiederherstellbar.",
                 )}
             </p>
             <input
