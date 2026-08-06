@@ -4,7 +4,17 @@ export default {
   // <html> (see hooks/useTheme.ts), NOT a `.dark` class. Map Tailwind's
   // `dark:` variant onto that attribute so the prefix works as-is.
   darkMode: ["class", '[data-theme="dark"]'],
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx}",
+    // @astrapi69/pwa-update-react composes its layout from LITERAL Tailwind
+    // class strings inside arrays (unlike ai-key-vault-react's interpolated
+    // template literals), so the regex content scanner CAN extract them from
+    // the compiled dist. Scanning it here generates the banner/control
+    // utilities (incl. arbitrary values like z-[9999], text-[var(--error)])
+    // without a hand-maintained safelist. Update path if the kit bumps.
+    "./node_modules/@astrapi69/pwa-update-react/dist/**/*.{js,mjs}",
+  ],
   // @astrapi69/ai-key-vault-react builds its classNames with template
   // literals (`flex ${cond}`), which Tailwind's regex content scanner
   // cannot extract from the compiled dist - so scanning node_modules is
@@ -27,6 +37,14 @@ export default {
     // on reveal; without it the field never masks and the eye toggle
     // appears to do nothing.
     "[-webkit-text-security:disc]",
+    // @astrapi69/pwa-update-react UpdateBanner arbitrary-value utilities: the
+    // content scanner extracts the kit's plain utilities from its dist, but
+    // NOT the bracket-arbitrary ones. Safelist the two the banner uses so it
+    // keeps its stacking and iOS safe-area padding. (VersionCard /
+    // UpdateCheckControl are not mounted; their arbitrary utilities are not
+    // safelisted until they are.)
+    "z-[9999]",
+    "pb-[max(0.75rem,env(safe-area-inset-bottom))]",
   ],
   // The app already ships a large hand-written global.css with its own
   // resets and the .btn / dialog component system. Disable Tailwind's
@@ -60,6 +78,9 @@ export default {
           hover: "var(--accent-hover)",
           light: "var(--accent-light)",
           subtle: "var(--accent-subtle)",
+          // text-accent-foreground: readable text on an accent background
+          // (pwa-update-react's primary button).
+          foreground: "var(--text-inverse)",
         },
         line: {
           DEFAULT: "var(--border)",
@@ -82,9 +103,16 @@ export default {
           foreground: "var(--text-muted)",
         },
         fg: {
+          // pwa-update-react uses text-fg-primary/secondary; ai-key-vault
+          // uses fg-muted/secondary. All map onto the Topos text vars.
+          primary: "var(--text-primary)",
           muted: "var(--text-muted)",
           secondary: "var(--text-secondary)",
         },
+        // pwa-update-react surfaces: bg-bg-surface (banner background) and
+        // hover:bg-bg-elevated (control hover). Map onto Topos surface vars.
+        "bg-surface": "var(--bg-card)",
+        "bg-elevated": "var(--bg-hover)",
         destructive: "var(--danger)",
         success: "#16a34a",
         warning: "#d97706",

@@ -187,6 +187,9 @@
     --danger: #dc2626;
     --danger-hover: #b91c1c;
     --danger-bg: #fef2f2;
+    /* Alias for @astrapi69/pwa-update-react's text-[var(--error)] arbitrary
+       class. Resolves at use-site, so it follows --danger across themes. */
+    --error: var(--danger);
     /* Fill for solid destructive buttons. Constant across modes so
        white button text keeps AA contrast even when --danger lightens
        for dark-mode text use. */

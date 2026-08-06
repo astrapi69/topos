@@ -1,31 +1,23 @@
 import {render, screen, fireEvent, waitFor, act} from "@testing-library/react";
-import {beforeEach, describe, expect, it, vi} from "vitest";
+import {describe, expect, it, vi} from "vitest";
 
 import PwaPrompts from "./PwaPrompts";
 
-const {mockUpdate} = vi.hoisted(() => ({mockUpdate: vi.fn()}));
-
-vi.mock("virtual:pwa-register/react", () => ({
-    useRegisterSW: () => ({
-        needRefresh: [true, vi.fn()],
-        offlineReady: [false, vi.fn()],
-        updateServiceWorker: mockUpdate,
-    }),
+// PwaPrompts is now the install affordance only; the SW update prompt moved
+// to @astrapi69/pwa-update's UpdateBanner (see AppUpdateProvider). i18n is
+// mocked so the test does not need the backend catalog.
+vi.mock("../hooks/useI18n", () => ({
+    useI18n: () => ({t: (_key: string, fallback?: string) => fallback ?? _key, lang: "de"}),
 }));
 
-beforeEach(() => vi.clearAllMocks());
-
 describe("PwaPrompts", () => {
-    it("shows the update bar when a new SW is waiting and updates on click", () => {
+    it("renders nothing until beforeinstallprompt fires", () => {
         render(<PwaPrompts />);
-        expect(screen.getByTestId("pwa-update-bar")).toBeInTheDocument();
-        fireEvent.click(screen.getByTestId("pwa-update-action"));
-        expect(mockUpdate).toHaveBeenCalledWith(true);
+        expect(screen.queryByTestId("pwa-install")).not.toBeInTheDocument();
     });
 
     it("offers an install button after beforeinstallprompt and prompts on click", async () => {
         render(<PwaPrompts />);
-        expect(screen.queryByTestId("pwa-install")).not.toBeInTheDocument();
 
         const evt = new Event("beforeinstallprompt") as Event & {
             prompt: () => Promise<void>;
