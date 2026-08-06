@@ -1,40 +1,51 @@
 import {useEffect, useState} from "react";
 
-import {DEFAULT_PALETTE, isKnownPalette} from "../themes/palettes";
+import {
+    DEFAULT_THEME,
+    familyOf,
+    isKnownTheme,
+    type ThemeFamily,
+    type ThemeId,
+} from "../themes/themes";
 
-type Theme = "light" | "dark";
+const STORAGE_KEY = "topos-app-theme";
+// Pre-multi-theme key: held "light" | "dark". Read once for migration so an
+// existing install keeps its light/dark choice on first load after the swap.
+const LEGACY_LIGHT_DARK_KEY = "topos-theme";
 
-function getInitialTheme(): Theme {
-    const stored = localStorage.getItem("topos-theme");
-    if (stored === "dark" || stored === "light") return stored;
+function getInitialTheme(): ThemeId {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (isKnownTheme(stored)) return stored;
+    // Migrate the old light/dark key (its values are valid theme ids).
+    const legacy = localStorage.getItem(LEGACY_LIGHT_DARK_KEY);
+    if (isKnownTheme(legacy)) return legacy;
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
-    return "light";
+    return DEFAULT_THEME;
 }
 
-function getInitialAppTheme(): string {
-    // Guard against a stale localStorage value left over from a removed
-    // or renamed palette. Unknown values fall back to the default so
-    // the CSS always matches a real rule block.
-    const stored = localStorage.getItem("topos-app-theme");
-    if (stored && isKnownPalette(stored)) return stored;
-    return DEFAULT_PALETTE;
-}
-
+/**
+ * Theme state. `theme` is the chosen theme id; `family` is its light/dark
+ * class. The effect writes BOTH attributes on <html>: `data-theme` (family,
+ * for the Tailwind `dark:` variant) and `data-app-theme` (identity, for the
+ * per-theme token blocks). Mirrors the pre-paint IIFE in index.html.
+ */
 export function useTheme() {
-    const [theme, setTheme] = useState<Theme>(getInitialTheme);
-    const [appTheme, setAppTheme] = useState<string>(getInitialAppTheme);
+    const [theme, setThemeState] = useState<ThemeId>(getInitialTheme);
+    const family: ThemeFamily = familyOf(theme);
 
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
-        localStorage.setItem("topos-theme", theme);
-    }, [theme]);
+        const root = document.documentElement;
+        root.setAttribute("data-theme", family);
+        root.setAttribute("data-app-theme", theme);
+        localStorage.setItem(STORAGE_KEY, theme);
+    }, [theme, family]);
 
-    useEffect(() => {
-        document.documentElement.setAttribute("data-app-theme", appTheme);
-        localStorage.setItem("topos-app-theme", appTheme);
-    }, [appTheme]);
+    const setTheme = (next: ThemeId) => setThemeState(next);
 
-    const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+    // Quick light/dark flip (kept for the interim Settings toggle): jump to
+    // the base theme of the opposite family.
+    const toggle = () =>
+        setThemeState((current) => (familyOf(current) === "dark" ? "light" : "dark"));
 
-    return {theme, toggle, appTheme, setAppTheme};
+    return {theme, family, setTheme, toggle};
 }
