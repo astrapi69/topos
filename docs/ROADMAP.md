@@ -61,12 +61,14 @@
       share, ContainerList label sheet (select N -> print HTML grid via
       hidden-iframe `window.print()`, save-as-PDF or Avery), About-section
       app-share QR. URLs base-aware (respect the deployment origin).
+- [x] **Photo attachments**. Multi-image per container: camera + gallery
+      upload, thumbnail grid on ContainerDetail, lightbox (prev/next/zoom),
+      per-photo delete. Client-side Canvas downscale (full + thumb, EXIF
+      stripped). Dual-mode: backend files under `<upload_dir>/containers/{id}/`
+      (new endpoints + ContainerPhoto model) / offline Dexie blobs.
 
 ## Next (P2 - high-value features)
 
-- [ ] **Photo attachments**. Multi-image upload per container,
-      thumbnails on ContainerDetail, full-size view, EXIF strip,
-      stored under the data dir.
 - [ ] **PWA installability hardening**. Manifest icons, install
       prompt, offline shell, service-worker precache audit.
 - [ ] **Desktop launcher build pipeline verified**. Per-OS GitHub
