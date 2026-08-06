@@ -68,3 +68,7 @@ def delete_container(db: Session, container_id: int) -> None:
     container = get_container(db, container_id)
     db.delete(container)
     db.commit()
+    # Photo rows cascade-delete with the container; remove their files too.
+    from app.services.container_photos import remove_container_photo_dir
+
+    remove_container_photo_dir(container_id)

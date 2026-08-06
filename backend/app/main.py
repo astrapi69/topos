@@ -39,6 +39,7 @@ from app.routers import (
     ai_vision,
     backup,
     categories,
+    container_photos,
     containers,
     items,
     licenses,
@@ -287,6 +288,7 @@ app.include_router(ai_vision.router, prefix="/api")
 app.include_router(plugin_install.router, prefix="/api")
 
 app.include_router(containers.router, prefix="/api")
+app.include_router(container_photos.router, prefix="/api")
 app.include_router(items.router, prefix="/api")
 app.include_router(categories.router, prefix="/api")
 app.include_router(actions.router, prefix="/api")

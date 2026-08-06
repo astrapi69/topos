@@ -11,6 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 if TYPE_CHECKING:
+    from app.models.container_photo import ContainerPhoto
     from app.models.item import Item
 
 
@@ -44,5 +45,8 @@ class Container(Base):
     )
 
     items: Mapped[list[Item]] = relationship(
+        back_populates="container", cascade="all, delete-orphan"
+    )
+    photos: Mapped[list[ContainerPhoto]] = relationship(
         back_populates="container", cascade="all, delete-orphan"
     )
