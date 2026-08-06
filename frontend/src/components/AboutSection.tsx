@@ -17,6 +17,7 @@ import {VersionCard} from "@astrapi69/pwa-update-react";
 
 import QrCodeModal from "./QrCodeModal";
 import {useI18n} from "../hooks/useI18n";
+import {usePwaInstall} from "../pwa/usePwaInstall";
 import {appShareUrl} from "../utils/shareUrl";
 import {qrLabels} from "../utils/qrLabels";
 import {card, link, muted, pill} from "../ui/classes";
@@ -65,6 +66,7 @@ function openErrorReport() {
 export default function AboutSection() {
     const {t} = useI18n();
     const [showShare, setShowShare] = useState(false);
+    const {canInstall, promptInstall} = usePwaInstall();
 
     return (
         <section style={{marginBottom: "1.5rem"}} data-testid="about-section">
@@ -132,6 +134,18 @@ export default function AboutSection() {
                         {t("topos.page.settings.about.share_app", "App teilen (QR)")}
                     </button>
                 </li>
+                {canInstall && (
+                    <li>
+                        <button
+                            type="button"
+                            className={link}
+                            onClick={() => void promptInstall()}
+                            data-testid="about-install-app"
+                        >
+                            {t("pwa.install_app", "App installieren")}
+                        </button>
+                    </li>
+                )}
             </ul>
 
             <div className={`${card} mt-3 p-3`} data-testid="about-donations">

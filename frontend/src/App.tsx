@@ -12,7 +12,6 @@ import {DialogProvider} from "./components/AppDialog";
 import DemoSeeder from "./components/DemoSeeder";
 import ErrorReportDialog from "./components/ErrorReportDialog";
 import OfflineBanner from "./components/OfflineBanner";
-import PwaPrompts from "./components/PwaPrompts";
 import {I18nProvider} from "./hooks/useI18n";
 import {useTheme} from "./hooks/useTheme";
 import {lazyWithReload} from "./pwa/lazy-route";
@@ -72,7 +71,6 @@ export default function App() {
                             theme="colored"
                         />
                         <UpdateBanner icon={<RefreshCw size={16} aria-hidden />} />
-                        <PwaPrompts />
                         <ErrorReportDialog />
                     </DialogProvider>
                 </AppFeatureProvider>

@@ -1,4 +1,4 @@
-import {render, screen, fireEvent} from "@testing-library/react";
+import {render, screen, fireEvent, act, waitFor} from "@testing-library/react";
 import {describe, it, expect, vi} from "vitest";
 
 import AboutSection from "./AboutSection";
@@ -64,5 +64,24 @@ describe("AboutSection", () => {
         fireEvent.click(screen.getByTestId("about-report-issue"));
         expect(handler).toHaveBeenCalledOnce();
         window.removeEventListener("topos:open-error-report", handler);
+    });
+
+    it("offers an install button only after beforeinstallprompt fires", async () => {
+        renderAbout();
+        expect(screen.queryByTestId("about-install-app")).not.toBeInTheDocument();
+
+        const evt = new Event("beforeinstallprompt") as Event & {
+            prompt: () => Promise<void>;
+            userChoice: Promise<{outcome: string}>;
+        };
+        evt.prompt = vi.fn().mockResolvedValue(undefined);
+        evt.userChoice = Promise.resolve({outcome: "accepted"});
+        act(() => {
+            window.dispatchEvent(evt);
+        });
+
+        const button = await screen.findByTestId("about-install-app");
+        fireEvent.click(button);
+        await waitFor(() => expect(evt.prompt).toHaveBeenCalled());
     });
 });
