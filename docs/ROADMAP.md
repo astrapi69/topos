@@ -56,12 +56,14 @@
       channels (Liberapay / GitHub Sponsors / Ko-fi).
 - [x] **feature-strategy gates**: `@astrapi69/feature-strategy` for the
       backend-required capabilities (excel-import, category-edit).
+- [x] **QR codes + printable container labels** (core feature - not a
+      plugin). Ported `QrCodeModal` (qrcode@1.5.4). ContainerDetail QR
+      share, ContainerList label sheet (select N -> print HTML grid via
+      hidden-iframe `window.print()`, save-as-PDF or Avery), About-section
+      app-share QR. URLs base-aware (respect the deployment origin).
 
 ## Next (P2 - high-value features)
 
-- [ ] **QR-label-print plugin**. Generate a printable PDF with one
-      QR code per container, keyed by `Container.external_id`.
-      Scan from a phone -> jump to `/containers/{id}`.
 - [ ] **Photo attachments**. Multi-image upload per container,
       thumbnails on ContainerDetail, full-size view, EXIF strip,
       stored under the data dir.
