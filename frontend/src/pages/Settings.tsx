@@ -11,11 +11,11 @@ import NavBar from "../components/NavBar";
 import AiProviderSettings from "../components/AiProviderSettings";
 import BackendUrlSettings from "../components/BackendUrlSettings";
 import OrphanPathsSection from "../components/OrphanPathsSection";
+import ThemePicker from "../components/ThemePicker";
 import {api, type SecretSource} from "../api/client";
 import {db} from "../db/schema";
 import {refreshAll} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
-import {useTheme} from "../hooks/useTheme";
 import {useDialog} from "../components/AppDialog";
 import {isBackendAvailable} from "../utils/backendStatus";
 import {notify, errorMessage} from "../utils/notify";
@@ -25,7 +25,6 @@ const LANGUAGES = ["de", "en", "es", "fr", "el", "pt", "tr", "ja"];
 
 export default function Settings() {
     const {t, lang, setLang} = useI18n();
-    const {theme, toggle} = useTheme();
     const {confirm} = useDialog();
     const [resetting, setResetting] = useState(false);
     const [secretSource, setSecretSource] = useState<SecretSource | null>(null);
@@ -107,14 +106,7 @@ export default function Settings() {
 
                 <section style={{marginBottom: "1.5rem"}}>
                     <h2>{t("topos.page.settings.theme", "Erscheinungsbild")}</h2>
-                    <button
-                        type="button"
-                        className={btn}
-                        onClick={toggle}
-                        data-testid="settings-theme-toggle"
-                    >
-                        {t("topos.page.settings.theme_current", "Theme")}: {theme}
-                    </button>
+                    <ThemePicker />
                 </section>
 
                 {secretSource && (

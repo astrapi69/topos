@@ -16,6 +16,22 @@ topos:
   app:
     name: Topos
     description: Persönliche Inventarverwaltung
+  theme:
+    light:
+      label: Hell
+      desc: Kühles Slate mit Blue-800-Akzent. Standard.
+    dark:
+      label: Dunkel
+      desc: Slate dunkel mit Blue-400-Akzent.
+    graphite:
+      label: Graphit
+      desc: Neutrales Grau, kontrastarmes helles Thema.
+    soft-pop:
+      label: Soft Pop
+      desc: Indigo-Akzent auf reinem Schwarz.
+    high-contrast:
+      label: Hoher Kontrast
+      desc: Gelb auf Schwarz für maximale Lesbarkeit (Barrierefreiheit).
   nav:
     search: Suchen
     menu: Menü
