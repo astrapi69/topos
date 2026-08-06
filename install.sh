@@ -12,7 +12,7 @@ set -e
 #    chmod +x install.sh && ./install.sh
 # ============================================================
 
-VERSION="${TOPOS_VERSION:-v0.0.0-template}"
+VERSION="${TOPOS_VERSION:-v0.1.0}"
 REPO="astrapi69/topos"
 INSTALL_DIR="${TOPOS_DIR:-$HOME/topos}"
 

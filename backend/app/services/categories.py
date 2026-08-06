@@ -9,8 +9,9 @@ materialises a nested ``CategoryNode`` graph for the
 from __future__ import annotations
 
 import re
+from typing import cast
 
-from sqlalchemy import String, func, literal, update
+from sqlalchemy import CursorResult, String, func, literal, update
 from sqlalchemy.orm import Session
 
 from app.exceptions import ConflictError, NotFoundError, ValidationError
@@ -159,7 +160,9 @@ def rename_category(db: Session, category_id: int, new_path: str) -> CategoryRen
     db.refresh(category)
     return CategoryRenameResult(
         renamed=True,
-        items_updated=(exact.rowcount or 0) + (prefixed.rowcount or 0),
+        items_updated=(
+            (cast(CursorResult, exact).rowcount or 0) + (cast(CursorResult, prefixed).rowcount or 0)
+        ),
         subcategories_updated=len(children),
         category=CategoryRead.model_validate(category),
     )
@@ -188,7 +191,7 @@ def delete_category(db: Session, category_id: int) -> CategoryDeleteResult:
     db.commit()
     return CategoryDeleteResult(
         deleted=True,
-        items_orphaned=orphaned.rowcount or 0,
+        items_orphaned=cast(CursorResult, orphaned).rowcount or 0,
         subcategories_deleted=len(children),
     )
 
