@@ -17,6 +17,25 @@ topos:
   app:
     name: Topos
     description: Personal inventory tracker
+  theme:
+    light:
+      label: Light
+      desc: Cool slate with a Blue-800 anchor. The default.
+    dark:
+      label: Dark
+      desc: Slate dark with a Blue-400 anchor.
+    graphite:
+      label: Graphite
+      desc: Neutral grey, low-chroma light theme.
+    soft-pop:
+      label: Soft Pop
+      desc: Indigo accent on pure black.
+    high-contrast:
+      label: High Contrast
+      desc: Yellow on black for maximum legibility (a11y).
+    ocean:
+      label: Ocean
+      desc: Sky accent on deep navy.
   nav:
     search: Search
     menu: Menu

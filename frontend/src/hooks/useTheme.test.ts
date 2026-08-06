@@ -1,118 +1,91 @@
-// TEMPLATE: This test is included as adaptable example.
-// Replace with your domain logic when project domain is finalized.
-
 /**
- * Tests for the useTheme hook.
+ * Tests for the useTheme hook (multi-theme).
  *
- * Covers: localStorage persistence, system preference fallback,
- * dark/light toggle, appTheme validation against known palettes,
- * DOM attribute syncing (data-theme, data-app-theme).
+ * Covers: default, OS fallback, stored theme id, migration from the old
+ * light/dark key, unknown-value guard, setTheme, light/dark toggle, and the
+ * two DOM attributes (data-theme = family, data-app-theme = id) + persistence.
  */
 
-import {describe, it, expect, vi, beforeEach} from "vitest"
-import {renderHook, act} from "@testing-library/react"
+import {describe, it, expect, beforeEach} from "vitest";
+import {renderHook, act} from "@testing-library/react";
 
-import {useTheme} from "./useTheme"
-import {DEFAULT_PALETTE} from "../themes/palettes"
+import {useTheme} from "./useTheme";
+import {DEFAULT_THEME} from "../themes/themes";
 
 beforeEach(() => {
-  localStorage.clear()
-  document.documentElement.removeAttribute("data-theme")
-  document.documentElement.removeAttribute("data-app-theme")
-})
+    localStorage.clear();
+    document.documentElement.removeAttribute("data-theme");
+    document.documentElement.removeAttribute("data-app-theme");
+});
 
 describe("useTheme", () => {
-  describe("initial theme", () => {
-    it("defaults to light when no stored preference and no system dark mode", () => {
-      const {result} = renderHook(() => useTheme())
-      expect(result.current.theme).toBe("light")
-    })
+    describe("initial theme", () => {
+        it("defaults to light with no stored value and no system dark mode", () => {
+            const {result} = renderHook(() => useTheme());
+            expect(result.current.theme).toBe(DEFAULT_THEME);
+            expect(result.current.theme).toBe("light");
+        });
 
-    it("reads stored theme from localStorage", () => {
-      localStorage.setItem("topos-theme", "dark")
-      const {result} = renderHook(() => useTheme())
-      expect(result.current.theme).toBe("dark")
-    })
+        it("reads a stored theme id", () => {
+            localStorage.setItem("topos-app-theme", "soft-pop");
+            const {result} = renderHook(() => useTheme());
+            expect(result.current.theme).toBe("soft-pop");
+        });
 
-    it("falls back to system preference when localStorage is empty", () => {
-      // happy-dom supports matchMedia
-      const mql = window.matchMedia("(prefers-color-scheme: dark)")
-      // In happy-dom, matchMedia always returns matches=false, so light is expected
-      const {result} = renderHook(() => useTheme())
-      expect(result.current.theme).toBe("light")
-    })
+        it("migrates the old light/dark key when no theme id is stored", () => {
+            localStorage.setItem("topos-theme", "dark");
+            const {result} = renderHook(() => useTheme());
+            expect(result.current.theme).toBe("dark");
+        });
 
-    it("ignores invalid localStorage values", () => {
-      localStorage.setItem("topos-theme", "sepia")
-      const {result} = renderHook(() => useTheme())
-      expect(result.current.theme).toBe("light")
-    })
-  })
+        it("falls back to default for an unknown stored value (e.g. removed palette)", () => {
+            localStorage.setItem("topos-app-theme", "warm-literary");
+            const {result} = renderHook(() => useTheme());
+            expect(result.current.theme).toBe("light");
+        });
+    });
 
-  describe("toggle", () => {
-    it("toggles from light to dark", () => {
-      const {result} = renderHook(() => useTheme())
-      act(() => result.current.toggle())
-      expect(result.current.theme).toBe("dark")
-    })
+    describe("family", () => {
+        it("reports dark for a dark-family theme", () => {
+            localStorage.setItem("topos-app-theme", "high-contrast");
+            const {result} = renderHook(() => useTheme());
+            expect(result.current.family).toBe("dark");
+        });
 
-    it("toggles from dark to light", () => {
-      localStorage.setItem("topos-theme", "dark")
-      const {result} = renderHook(() => useTheme())
-      act(() => result.current.toggle())
-      expect(result.current.theme).toBe("light")
-    })
+        it("reports light for a light-family theme", () => {
+            localStorage.setItem("topos-app-theme", "graphite");
+            const {result} = renderHook(() => useTheme());
+            expect(result.current.family).toBe("light");
+        });
+    });
 
-    it("persists toggled theme to localStorage", () => {
-      const {result} = renderHook(() => useTheme())
-      act(() => result.current.toggle())
-      expect(localStorage.getItem("topos-theme")).toBe("dark")
-    })
+    describe("setTheme", () => {
+        it("sets both attributes: data-theme=family, data-app-theme=id", () => {
+            const {result} = renderHook(() => useTheme());
+            act(() => result.current.setTheme("soft-pop"));
+            expect(document.documentElement.getAttribute("data-app-theme")).toBe("soft-pop");
+            expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+        });
 
-    it("sets data-theme attribute on document element", () => {
-      const {result} = renderHook(() => useTheme())
-      act(() => result.current.toggle())
-      expect(document.documentElement.getAttribute("data-theme")).toBe("dark")
-    })
-  })
+        it("persists the theme id to topos-app-theme", () => {
+            const {result} = renderHook(() => useTheme());
+            act(() => result.current.setTheme("graphite"));
+            expect(localStorage.getItem("topos-app-theme")).toBe("graphite");
+        });
+    });
 
-  describe("appTheme (palette)", () => {
-    it("defaults to warm-literary when no stored value", () => {
-      const {result} = renderHook(() => useTheme())
-      expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
-    })
+    describe("toggle", () => {
+        it("flips from a light theme to dark", () => {
+            const {result} = renderHook(() => useTheme());
+            act(() => result.current.toggle());
+            expect(result.current.theme).toBe("dark");
+        });
 
-    it("reads a stored known palette from localStorage", () => {
-      localStorage.setItem("topos-app-theme", DEFAULT_PALETTE)
-      const {result} = renderHook(() => useTheme())
-      expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
-    })
-
-    it("falls back to default for unknown stored palette", () => {
-      localStorage.setItem("topos-app-theme", "nonexistent-theme")
-      const {result} = renderHook(() => useTheme())
-      expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
-    })
-
-    it("falls back to default for a removed template palette", () => {
-      // "nord" was one of the five template palettes removed on
-      // 2026-07-18; installations that persisted it must not keep a
-      // dangling data-app-theme without CSS behind it.
-      localStorage.setItem("topos-app-theme", "nord")
-      const {result} = renderHook(() => useTheme())
-      expect(result.current.appTheme).toBe(DEFAULT_PALETTE)
-    })
-
-    it("persists palette to localStorage", () => {
-      const {result} = renderHook(() => useTheme())
-      act(() => result.current.setAppTheme(DEFAULT_PALETTE))
-      expect(localStorage.getItem("topos-app-theme")).toBe(DEFAULT_PALETTE)
-    })
-
-    it("sets data-app-theme attribute on document element", () => {
-      const {result} = renderHook(() => useTheme())
-      act(() => result.current.setAppTheme(DEFAULT_PALETTE))
-      expect(document.documentElement.getAttribute("data-app-theme")).toBe(DEFAULT_PALETTE)
-    })
-  })
-})
+        it("flips a dark-family theme back to light", () => {
+            localStorage.setItem("topos-app-theme", "soft-pop");
+            const {result} = renderHook(() => useTheme());
+            act(() => result.current.toggle());
+            expect(result.current.theme).toBe("light");
+        });
+    });
+});

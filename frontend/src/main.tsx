@@ -3,6 +3,12 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./styles/global.css";
+// Per-theme token overrides (data-app-theme). Imported after global.css;
+// each uses :root[data-app-theme="<id>"] so it wins by specificity anyway.
+import "./styles/themes/theme-graphite.css";
+import "./styles/themes/theme-soft-pop.css";
+import "./styles/themes/theme-high-contrast.css";
+import "./styles/themes/theme-ocean.css";
 import "./styles/ai-key-vault.css";
 import { verifyBackendVersion } from "./utils/versionCheck";
 

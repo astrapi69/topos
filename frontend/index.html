@@ -71,6 +71,41 @@
     }
     </script>
     <!-- Fonts are bundled locally in public/fonts/ (no CDN dependency) -->
+
+    <!--
+      Pre-paint theme application (anti-flash). Sets data-app-theme (identity)
+      + data-theme (light/dark family) on <html> BEFORE React mounts, so the
+      first paint already carries the user's theme. Mirrors the resolution in
+      src/hooks/useTheme.ts; keep the DARK_IDS / KNOWN sets in sync with
+      src/themes/themes.ts.
+    -->
+    <script>
+        (function () {
+            try {
+                var KEY = "topos-app-theme";
+                var LEGACY = "topos-theme";
+                var DEFAULT = "light";
+                var KNOWN = {light: 1, dark: 1, graphite: 1, "soft-pop": 1, "high-contrast": 1, ocean: 1};
+                var DARK_IDS = {dark: 1, "soft-pop": 1, "high-contrast": 1, ocean: 1};
+                var id = localStorage.getItem(KEY);
+                if (!KNOWN[id]) {
+                    var legacy = localStorage.getItem(LEGACY);
+                    if (KNOWN[legacy]) {
+                        id = legacy;
+                    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                        id = "dark";
+                    } else {
+                        id = DEFAULT;
+                    }
+                }
+                var root = document.documentElement;
+                root.setAttribute("data-app-theme", id);
+                root.setAttribute("data-theme", DARK_IDS[id] ? "dark" : "light");
+            } catch (e) {
+                /* localStorage blocked -> fall through to CSS :root (light). */
+            }
+        })();
+    </script>
 </head>
 <body>
 <div id="root"></div>

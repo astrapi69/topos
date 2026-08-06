@@ -59,7 +59,7 @@ describe("Settings", () => {
         );
         expect(screen.getByTestId("settings-title")).toBeInTheDocument();
         expect(screen.getByTestId("settings-language-select")).toBeInTheDocument();
-        expect(screen.getByTestId("settings-theme-toggle")).toBeInTheDocument();
+        expect(screen.getByTestId("theme-picker")).toBeInTheDocument();
         expect(screen.getByTestId("settings-reset-cache")).toBeInTheDocument();
     });
 
