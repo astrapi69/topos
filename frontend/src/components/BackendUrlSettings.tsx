@@ -69,6 +69,12 @@ export default function BackendUrlSettings() {
         }
     }
 
+    // Hidden on the public GitHub Pages build (served under /topos/): from an
+    // HTTPS PWA a cross-origin http backend is mixed-content-blocked, so
+    // configuring a backend URL there is useless. A same-origin deploy
+    // (make dev, Docker at root, base "/") keeps it.
+    if (import.meta.env.BASE_URL !== "/") return null;
+
     return (
         <section style={{marginBottom: "1.5rem"}} data-testid="backend-url-section">
             <h2>{t("topos.page.settings.backend_title", "Backend-Verbindung")}</h2>
