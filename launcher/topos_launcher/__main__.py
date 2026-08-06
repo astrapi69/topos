@@ -20,7 +20,19 @@ import sys
 import webbrowser
 from pathlib import Path
 
-from topos_launcher import __version__, config, docker, health, i18n, installer, lockfile, manifest, settings, ui, update_check
+from topos_launcher import (
+    __version__,
+    config,
+    docker,
+    health,
+    i18n,
+    installer,
+    lockfile,
+    manifest,
+    settings,
+    ui,
+    update_check,
+)
 
 
 logger = logging.getLogger("topos_launcher")
@@ -38,7 +50,9 @@ def _docker_guide_url() -> str:
 
 
 def _docker_security_url() -> str:
-    return DOCKER_SECURITY_ANCHOR_DE if i18n.active_language() == "de" else DOCKER_SECURITY_ANCHOR_EN
+    return (
+        DOCKER_SECURITY_ANCHOR_DE if i18n.active_language() == "de" else DOCKER_SECURITY_ANCHOR_EN
+    )
 
 
 def main() -> int:
@@ -228,11 +242,14 @@ def _run_launcher() -> int:
         if not opened:
             window.after(0, lambda: ui.ask_copyable_url(url))
 
-        window.after(0, lambda: window.set_running(
-            port,
-            on_stop=lambda: _shutdown(window, repo),
-            on_settings=_open_settings_dialog,
-        ))
+        window.after(
+            0,
+            lambda: window.set_running(
+                port,
+                on_stop=lambda: _shutdown(window, repo),
+                on_settings=_open_settings_dialog,
+            ),
+        )
         # Non-blocking update check: fires after the main UI is running.
         # Any failure is swallowed inside update_check; the callback
         # schedules the notification on the main thread via window.after.
@@ -469,9 +486,7 @@ def _run_install_flow() -> Path | None:
 
     # Show status window during download + extract
     window = ui.StatusWindow()
-    window.set_starting(
-        i18n.t("install.downloading", version=f"v{installer.TOPOS_TARGET_VERSION}")
-    )
+    window.set_starting(i18n.t("install.downloading", version=f"v{installer.TOPOS_TARGET_VERSION}"))
 
     result: dict = {}
 
@@ -536,9 +551,7 @@ def _run_install_flow() -> Path | None:
         if result.get("slow_start"):
             choice = ui.two_button_dialog(
                 title=i18n.t("install.complete.title"),
-                message=i18n.t(
-                    "install.complete.slow_message", version=version_label
-                ),
+                message=i18n.t("install.complete.slow_message", version=version_label),
                 primary_label=i18n.t("common.open_browser"),
                 secondary_label=i18n.t("common.close"),
             )
@@ -687,7 +700,10 @@ def _ensure_env_file(repo: Path) -> tuple[bool, str]:
         return True, "ok"
     example = repo / config.ENV_EXAMPLE_FILENAME
     if not example.is_file():
-        return False, f"neither {config.ENV_FILENAME} nor {config.ENV_EXAMPLE_FILENAME} exist in {repo}"
+        return (
+            False,
+            f"neither {config.ENV_FILENAME} nor {config.ENV_EXAMPLE_FILENAME} exist in {repo}",
+        )
     try:
         shutil.copyfile(example, env_file)
     except OSError as exc:
@@ -701,12 +717,15 @@ def _ensure_env_file(repo: Path) -> tuple[bool, str]:
 
 def _replace_secret_placeholder(env_file: Path) -> None:
     import secrets
+
     text = env_file.read_text(encoding="utf-8")
     text = text.replace("change-me-to-a-random-secret", secrets.token_hex(32))
     env_file.write_text(text, encoding="utf-8")
 
 
-def _handle_compose_failure(window: ui.StatusWindow, port: int, detail: str, show_details: bool) -> None:
+def _handle_compose_failure(
+    window: ui.StatusWindow, port: int, detail: str, show_details: bool
+) -> None:
     ui.error_dialog(
         title=i18n.t("start.compose_failed.title"),
         message=i18n.t("start.compose_failed.message", port=port),
@@ -789,7 +808,10 @@ def _setup_logging() -> None:
         activity_path = manifest.manifest_path().parent / "install.log"
         activity_path.parent.mkdir(parents=True, exist_ok=True)
         activity_handler = RotatingFileHandler(
-            str(activity_path), maxBytes=1_000_000, backupCount=1, encoding="utf-8",
+            str(activity_path),
+            maxBytes=1_000_000,
+            backupCount=1,
+            encoding="utf-8",
         )
         activity_handler.setFormatter(fmt)
         root.addHandler(activity_handler)

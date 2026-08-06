@@ -29,8 +29,10 @@ def is_newer(current: str, latest: str) -> bool:
     compared as integers. Any parse error returns False so the
     launcher does not flag a bogus update on a malformed tag.
     """
+
     def parse(v: str) -> tuple[int, ...]:
         return tuple(int(x) for x in v.lstrip("v").split("."))
+
     try:
         return parse(latest) > parse(current)
     except (ValueError, AttributeError):
@@ -76,6 +78,7 @@ def check_for_update_async(
     thread via ``window.after(0, ...)`` - this module never touches
     tkinter directly.
     """
+
     def _run() -> None:
         result = fetch_latest_version()
         if result is None:

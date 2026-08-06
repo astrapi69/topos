@@ -33,11 +33,7 @@ from pathlib import Path
 
 import pytest
 
-LOCALES_DIR = (
-    Path(__file__).resolve().parent.parent
-    / "topos_launcher"
-    / "locales"
-)
+LOCALES_DIR = Path(__file__).resolve().parent.parent / "topos_launcher" / "locales"
 REFERENCE_LANG = "en"
 USER_VALIDATED_LANGS = ("en", "de", "el", "es", "fr")
 PENDING_REVIEW_LANGS = ("pt", "tr", "ja")
@@ -82,8 +78,7 @@ def test_catalog_values_are_non_empty_strings(lang: str) -> None:
     for key in en_keys:
         value = catalog.get(key)
         assert isinstance(value, str), (
-            f"{lang}.json key {key!r} is {type(value).__name__}, "
-            f"expected str."
+            f"{lang}.json key {key!r} is {type(value).__name__}, expected str."
         )
         assert value.strip(), (
             f"{lang}.json key {key!r} is empty or whitespace-only. "
@@ -166,8 +161,7 @@ def test_all_known_lang_files_exist() -> None:
     for lang in ALL_LANGS:
         path = LOCALES_DIR / f"{lang}.json"
         assert path.exists(), (
-            f"Test declares {lang!r} as a known launcher language "
-            f"but {path} does not exist."
+            f"Test declares {lang!r} as a known launcher language but {path} does not exist."
         )
 
 

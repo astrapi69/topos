@@ -352,7 +352,12 @@ def two_button_dialog(
     result = {"choice": "secondary"}
 
     tk.Label(
-        win, text=message, justify="left", wraplength=440, padx=20, pady=16,
+        win,
+        text=message,
+        justify="left",
+        wraplength=440,
+        padx=20,
+        pady=16,
     ).pack()
 
     buttons = tk.Frame(win)
@@ -364,7 +369,9 @@ def two_button_dialog(
 
     primary = tk.Button(buttons, text=primary_label, width=22, command=lambda: _click("primary"))
     primary.pack(side="left", padx=(0, 8))
-    tk.Button(buttons, text=secondary_label, width=12, command=lambda: _click("secondary")).pack(side="left")
+    tk.Button(buttons, text=secondary_label, width=12, command=lambda: _click("secondary")).pack(
+        side="left"
+    )
 
     primary.focus_set()
     win.bind("<Return>", lambda _e: _click("primary"))
@@ -409,8 +416,12 @@ def three_button_dialog(
 
     primary = tk.Button(buttons, text=primary_label, width=20, command=lambda: _click("primary"))
     primary.pack(side="left", padx=(0, 8))
-    tk.Button(buttons, text=secondary_label, width=20, command=lambda: _click("secondary")).pack(side="left", padx=(0, 8))
-    tk.Button(buttons, text=cancel_label, width=10, command=lambda: _click("cancel")).pack(side="left")
+    tk.Button(buttons, text=secondary_label, width=20, command=lambda: _click("secondary")).pack(
+        side="left", padx=(0, 8)
+    )
+    tk.Button(buttons, text=cancel_label, width=10, command=lambda: _click("cancel")).pack(
+        side="left"
+    )
 
     primary.focus_set()
     win.bind("<Return>", lambda _e: _click("primary"))
@@ -555,9 +566,7 @@ def settings_dialog(current: dict) -> dict | None:
     # Language selector. Maps a friendly label to the ISO code; the
     # active code keeps the JSON-catalog filename so the wiring stays
     # trivial.
-    tk.Label(body, text=i18n.t("settings.language_label"), anchor="w").pack(
-        fill="x", pady=(0, 4)
-    )
+    tk.Label(body, text=i18n.t("settings.language_label"), anchor="w").pack(fill="x", pady=(0, 4))
     language_codes = i18n.available_languages() or ["en"]
     language_label_keys = {
         "de": "settings.language_de",
@@ -669,7 +678,9 @@ class StatusWindow:
         self._button.configure(text="", state="disabled")
         self._root.update_idletasks()
 
-    def set_running(self, port: int, on_stop: callable, on_settings: callable | None = None) -> None:
+    def set_running(
+        self, port: int, on_stop: callable, on_settings: callable | None = None
+    ) -> None:
         self._label.configure(text=f"Topos is running on localhost:{port}")
         self._detail.configure(text="Browser opened. Close this window or click Stop to shut down.")
         self._stop_cb = on_stop

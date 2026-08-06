@@ -26,13 +26,14 @@ def _fake_response(status: int, body: dict | str) -> MagicMock:
 
 
 class TestIsHealthy:
-
     def test_true_when_status_ok(self) -> None:
         with patch("urllib.request.urlopen", return_value=_fake_response(200, {"status": "ok"})):
             assert health.is_healthy(7880) is True
 
     def test_false_when_status_is_not_ok(self) -> None:
-        with patch("urllib.request.urlopen", return_value=_fake_response(200, {"status": "degraded"})):
+        with patch(
+            "urllib.request.urlopen", return_value=_fake_response(200, {"status": "degraded"})
+        ):
             assert health.is_healthy(7880) is False
 
     def test_false_on_non_200(self) -> None:
@@ -53,7 +54,6 @@ class TestIsHealthy:
 
 
 class TestWaitForHealthy:
-
     def test_returns_true_on_first_success(self) -> None:
         with patch("topos_launcher.health.is_healthy", return_value=True) as mock_check:
             assert health.wait_for_healthy(7880, timeout_seconds=10.0) is True
@@ -66,13 +66,16 @@ class TestWaitForHealthy:
         sleeps: list[float] = []
 
         with patch("topos_launcher.health.is_healthy", side_effect=lambda _: next(results)):
-            assert health.wait_for_healthy(
-                7880,
-                timeout_seconds=60.0,
-                interval_seconds=0.5,
-                clock=lambda: next(times),
-                sleep=sleeps.append,
-            ) is True
+            assert (
+                health.wait_for_healthy(
+                    7880,
+                    timeout_seconds=60.0,
+                    interval_seconds=0.5,
+                    clock=lambda: next(times),
+                    sleep=sleeps.append,
+                )
+                is True
+            )
         assert sleeps == [0.5, 0.5]
 
     def test_returns_false_on_timeout(self) -> None:
@@ -81,10 +84,13 @@ class TestWaitForHealthy:
         sleeps: list[float] = []
 
         with patch("topos_launcher.health.is_healthy", return_value=False):
-            assert health.wait_for_healthy(
-                7880,
-                timeout_seconds=1.0,
-                interval_seconds=0.5,
-                clock=lambda: next(times),
-                sleep=sleeps.append,
-            ) is False
+            assert (
+                health.wait_for_healthy(
+                    7880,
+                    timeout_seconds=1.0,
+                    interval_seconds=0.5,
+                    clock=lambda: next(times),
+                    sleep=sleeps.append,
+                )
+                is False
+            )

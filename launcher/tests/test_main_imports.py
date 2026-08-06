@@ -17,9 +17,7 @@ import sys
 from pathlib import Path
 
 
-MAIN_PATH = (
-    Path(__file__).resolve().parent.parent / "topos_launcher" / "__main__.py"
-)
+MAIN_PATH = Path(__file__).resolve().parent.parent / "topos_launcher" / "__main__.py"
 
 
 def test_main_module_imports_clean_when_run_as_script() -> None:
@@ -43,7 +41,7 @@ def test_main_module_imports_clean_when_run_as_script() -> None:
         "    import ast, types\n"
         "    src = open(spec.origin, 'r', encoding='utf-8').read()\n"
         "    tree = ast.parse(src)\n"
-        "    # Strip the trailing `if __name__ == \"__main__\": sys.exit(main())` so\n"
+        '    # Strip the trailing `if __name__ == "__main__": sys.exit(main())` so\n'
         "    # we only run the top-level imports + defs.\n"
         "    tree.body = [n for n in tree.body if not isinstance(n, ast.If)]\n"
         "    exec(compile(tree, spec.origin, 'exec'), module.__dict__)\n"

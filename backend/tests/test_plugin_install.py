@@ -10,9 +10,7 @@ real config and plugins directories are never touched.
 """
 
 import io
-import shutil
 import zipfile
-from pathlib import Path
 
 import pytest
 import yaml
@@ -173,7 +171,9 @@ def test_install_bad_zip_rejected(client):
 def test_install_missing_plugin_yaml_rejected(client):
     """ZIP without plugin.yaml is rejected."""
     zip_buf = _make_plugin_zip(
-        "no-yaml", "no_yaml", include_yaml=False,
+        "no-yaml",
+        "no_yaml",
+        include_yaml=False,
     )
     resp = client.post(
         "/api/plugins/install",
@@ -186,7 +186,9 @@ def test_install_missing_plugin_yaml_rejected(client):
 def test_install_missing_plugin_py_rejected(client):
     """ZIP without plugin.py is rejected."""
     zip_buf = _make_plugin_zip(
-        "no-pluginpy", "no_pluginpy", include_plugin_py=False,
+        "no-pluginpy",
+        "no_pluginpy",
+        include_plugin_py=False,
     )
     resp = client.post(
         "/api/plugins/install",
@@ -199,7 +201,9 @@ def test_install_missing_plugin_py_rejected(client):
 def test_install_missing_init_py_rejected(client):
     """ZIP without __init__.py (no Python package) is rejected."""
     zip_buf = _make_plugin_zip(
-        "no-init", "no_init", include_init=False,
+        "no-init",
+        "no_init",
+        include_init=False,
     )
     resp = client.post(
         "/api/plugins/install",
@@ -226,8 +230,7 @@ def test_install_path_traversal_rejected(client):
 
 def test_install_invalid_plugin_name_rejected(client):
     """Plugin name with invalid characters is rejected."""
-    zip_buf = _make_plugin_zip("INVALID_NAME!")
-    # Override the yaml to have an invalid name
+    # Build a ZIP whose plugin.yaml carries an invalid name.
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:
         zf.writestr(

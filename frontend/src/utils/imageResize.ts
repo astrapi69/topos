@@ -24,17 +24,17 @@ export const JPEG_QUALITY = 0.75;
 
 /** Thrown when the browser cannot decode or re-encode the picked file. */
 export class ImageDecodeError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "ImageDecodeError";
-    }
+  constructor(message: string) {
+    super(message);
+    this.name = "ImageDecodeError";
+  }
 }
 
 export interface DownscaledImage {
-    blob: Blob;
-    fileName: string;
-    width: number;
-    height: number;
+  blob: Blob;
+  fileName: string;
+  width: number;
+  height: number;
 }
 
 /**
@@ -42,15 +42,15 @@ export interface DownscaledImage {
  * Never upscales: images already small enough keep their size.
  */
 export function targetDimensions(
-    width: number,
-    height: number,
-    maxEdge: number = MAX_EDGE_PX,
-): {width: number; height: number} {
-    const scale = Math.min(1, maxEdge / Math.max(width, height));
-    return {
-        width: Math.max(1, Math.round(width * scale)),
-        height: Math.max(1, Math.round(height * scale)),
-    };
+  width: number,
+  height: number,
+  maxEdge: number = MAX_EDGE_PX,
+): { width: number; height: number } {
+  const scale = Math.min(1, maxEdge / Math.max(width, height));
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+  };
 }
 
 /**
@@ -63,35 +63,41 @@ export function targetDimensions(
  *   (undecodable format such as HEIC, or no canvas 2d context).
  */
 export async function downscaleImage(
-    file: File,
-    maxEdge: number = MAX_EDGE_PX,
-    quality: number = JPEG_QUALITY,
+  file: File,
+  maxEdge: number = MAX_EDGE_PX,
+  quality: number = JPEG_QUALITY,
 ): Promise<DownscaledImage> {
-    let bitmap: ImageBitmap;
-    try {
-        bitmap = await createImageBitmap(file, {imageOrientation: "from-image"});
-    } catch {
-        throw new ImageDecodeError(`cannot decode image ${file.name || "(unnamed)"}`);
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    throw new ImageDecodeError(
+      `cannot decode image ${file.name || "(unnamed)"}`,
+    );
+  }
+  try {
+    const { width, height } = targetDimensions(
+      bitmap.width,
+      bitmap.height,
+      maxEdge,
+    );
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new ImageDecodeError("canvas 2d context unavailable");
     }
-    try {
-        const {width, height} = targetDimensions(bitmap.width, bitmap.height, maxEdge);
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext("2d");
-        if (!context) {
-            throw new ImageDecodeError("canvas 2d context unavailable");
-        }
-        context.drawImage(bitmap, 0, 0, width, height);
-        const blob = await new Promise<Blob | null>((resolve) =>
-            canvas.toBlob(resolve, "image/jpeg", quality),
-        );
-        if (!blob) {
-            throw new ImageDecodeError("JPEG encoding failed");
-        }
-        const baseName = (file.name || "photo").replace(/\.[^.]*$/, "") || "photo";
-        return {blob, fileName: `${baseName}.jpg`, width, height};
-    } finally {
-        bitmap.close();
+    context.drawImage(bitmap, 0, 0, width, height);
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality),
+    );
+    if (!blob) {
+      throw new ImageDecodeError("JPEG encoding failed");
     }
+    const baseName = (file.name || "photo").replace(/\.[^.]*$/, "") || "photo";
+    return { blob, fileName: `${baseName}.jpg`, width, height };
+  } finally {
+    bitmap.close();
+  }
 }

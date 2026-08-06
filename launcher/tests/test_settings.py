@@ -20,7 +20,6 @@ def _patch_path(tmp_path: Path):
 
 
 class TestReadSettings:
-
     def test_returns_defaults_when_missing(self, tmp_path: Path) -> None:
         with _patch_path(tmp_path):
             data = settings.read_settings()
@@ -48,7 +47,8 @@ class TestReadSettings:
 
     def test_file_values_override_defaults(self, tmp_path: Path) -> None:
         (tmp_path / "settings.json").write_text(
-            json.dumps({"auto_update_check": False}), encoding="utf-8",
+            json.dumps({"auto_update_check": False}),
+            encoding="utf-8",
         )
         with _patch_path(tmp_path):
             data = settings.read_settings()
@@ -78,7 +78,6 @@ class TestReadSettings:
 
 
 class TestWriteSettings:
-
     def test_creates_parent_dirs(self, tmp_path: Path) -> None:
         target = tmp_path / "nested" / "dir" / "settings.json"
         with patch.object(settings, "settings_path", return_value=target):
@@ -101,7 +100,6 @@ class TestWriteSettings:
 
 
 class TestGetUpdate:
-
     def test_get_default(self, tmp_path: Path) -> None:
         with _patch_path(tmp_path):
             assert settings.get("auto_update_check") is True

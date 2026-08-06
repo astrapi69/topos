@@ -15,44 +15,48 @@
  * which is exactly when the kit re-evaluates every consumer.
  */
 
-import {useEffect, useMemo, useState, type ReactNode} from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
-import {FeatureProvider} from "@astrapi69/feature-strategy-react";
+import { FeatureProvider } from "@astrapi69/feature-strategy-react";
 
-import {resolveActiveProvider} from "../ai";
-import {isBackendAvailable} from "../utils/backendStatus";
-import {featureRegistry, type FeatureContext} from "./featureConfig";
+import { resolveActiveProvider } from "../ai";
+import { isBackendAvailable } from "../utils/backendStatus";
+import { featureRegistry, type FeatureContext } from "./featureConfig";
 
-export default function AppFeatureProvider({children}: {children: ReactNode}) {
-    const [backendAvailable, setBackendAvailable] = useState(false);
-    const [hasAiKey, setHasAiKey] = useState(false);
+export default function AppFeatureProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [backendAvailable, setBackendAvailable] = useState(false);
+  const [hasAiKey, setHasAiKey] = useState(false);
 
-    useEffect(() => {
-        let cancelled = false;
-        const evaluate = () => {
-            // Local vault readiness is synchronous; the backend probe is the
-            // shared, cached /api/health request (no extra network call).
-            if (!cancelled) setHasAiKey(resolveActiveProvider() !== null);
-            void isBackendAvailable().then((available) => {
-                if (!cancelled) setBackendAvailable(available);
-            });
-        };
-        evaluate();
-        window.addEventListener("topos:data-refresh", evaluate);
-        return () => {
-            cancelled = true;
-            window.removeEventListener("topos:data-refresh", evaluate);
-        };
-    }, []);
+  useEffect(() => {
+    let cancelled = false;
+    const evaluate = () => {
+      // Local vault readiness is synchronous; the backend probe is the
+      // shared, cached /api/health request (no extra network call).
+      if (!cancelled) setHasAiKey(resolveActiveProvider() !== null);
+      void isBackendAvailable().then((available) => {
+        if (!cancelled) setBackendAvailable(available);
+      });
+    };
+    evaluate();
+    window.addEventListener("topos:data-refresh", evaluate);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("topos:data-refresh", evaluate);
+    };
+  }, []);
 
-    const context = useMemo<FeatureContext>(
-        () => ({backendAvailable, hasAiKey}),
-        [backendAvailable, hasAiKey],
-    );
+  const context = useMemo<FeatureContext>(
+    () => ({ backendAvailable, hasAiKey }),
+    [backendAvailable, hasAiKey],
+  );
 
-    return (
-        <FeatureProvider registry={featureRegistry} context={context}>
-            {children}
-        </FeatureProvider>
-    );
+  return (
+    <FeatureProvider registry={featureRegistry} context={context}>
+      {children}
+    </FeatureProvider>
+  );
 }

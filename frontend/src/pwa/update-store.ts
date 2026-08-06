@@ -13,21 +13,21 @@
  * gap.
  */
 
-import {createUpdateStore, type VersionManifest} from "@astrapi69/pwa-update";
+import { createUpdateStore, type VersionManifest } from "@astrapi69/pwa-update";
 
 /** The build this tab is running (build-time literals from vite.config.ts). */
 export const CURRENT_BUILD: VersionManifest = {
-    version: typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "unknown",
-    buildHash: typeof __BUILD_HASH__ === "string" ? __BUILD_HASH__ : "unknown",
+  version: typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "unknown",
+  buildHash: typeof __BUILD_HASH__ === "string" ? __BUILD_HASH__ : "unknown",
 };
 
 /** Absolute URL of the deployed version.json (respects the Vite base path). */
 export function versionJsonUrl(): string {
-    const base =
-        typeof import.meta !== "undefined" && import.meta.env?.BASE_URL
-            ? import.meta.env.BASE_URL
-            : "/";
-    return `${base}version.json`;
+  const base =
+    typeof import.meta !== "undefined" && import.meta.env?.BASE_URL
+      ? import.meta.env.BASE_URL
+      : "/";
+  return `${base}version.json`;
 }
 
 /**
@@ -37,7 +37,7 @@ export function versionJsonUrl(): string {
  * `storageNamespace` prefixes the package's localStorage keys.
  */
 export const appUpdateStore = createUpdateStore({
-    build: CURRENT_BUILD,
-    manifestUrl: versionJsonUrl(),
-    storageNamespace: "topos",
+  build: CURRENT_BUILD,
+  manifestUrl: versionJsonUrl(),
+  storageNamespace: "topos",
 });

@@ -7,214 +7,231 @@
  * exportToposData / importToposData - see src/backup/.
  */
 
-import {useRef, useState} from "react";
+import { useRef, useState } from "react";
 
-import {Download, Upload} from "lucide-react";
+import { Download, Upload } from "lucide-react";
 
 import {
-    BackupValidationError,
-    downloadBackup,
-    exportToposData,
-    importToposData,
-    readBackupFile,
-    type ImportMode,
-    type ToposBackup,
+  BackupValidationError,
+  downloadBackup,
+  exportToposData,
+  importToposData,
+  readBackupFile,
+  type ImportMode,
+  type ToposBackup,
 } from "../backup";
-import {useI18n} from "../hooks/useI18n";
-import {useDialog} from "./AppDialog";
-import {notify, errorMessage} from "../utils/notify";
-import {btn, btnDanger, card, muted} from "../ui/classes";
+import { useI18n } from "../hooks/useI18n";
+import { useDialog } from "./AppDialog";
+import { notify, errorMessage } from "../utils/notify";
+import { btn, btnDanger, card, muted } from "../ui/classes";
 
-function fill(template: string, values: Record<string, string | number>): string {
-    return Object.entries(values).reduce(
-        (out, [key, value]) => out.replace(`{${key}}`, String(value)),
-        template,
-    );
+function fill(
+  template: string,
+  values: Record<string, string | number>,
+): string {
+  return Object.entries(values).reduce(
+    (out, [key, value]) => out.replace(`{${key}}`, String(value)),
+    template,
+  );
 }
 
 export default function DataSection() {
-    const {t} = useI18n();
-    const {prompt} = useDialog();
-    const fileRef = useRef<HTMLInputElement>(null);
-    const [pending, setPending] = useState<ToposBackup | null>(null);
-    const [busy, setBusy] = useState(false);
+  const { t } = useI18n();
+  const { prompt } = useDialog();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [pending, setPending] = useState<ToposBackup | null>(null);
+  const [busy, setBusy] = useState(false);
 
-    async function handleExport() {
-        setBusy(true);
-        try {
-            const backup = await exportToposData();
-            const total =
-                backup.stats.containers +
-                backup.stats.items +
-                backup.stats.categories +
-                backup.stats.actions;
-            if (total === 0) {
-                notify.warning(t("topos.page.settings.data.empty", "Keine Daten zum Exportieren"));
-                return;
-            }
-            downloadBackup(backup);
-            notify.success(
-                fill(
-                    t(
-                        "topos.page.settings.data.export_success",
-                        "Export abgeschlossen. {containers} Container, {items} Einträge.",
-                    ),
-                    {containers: backup.stats.containers, items: backup.stats.items},
-                ),
-            );
-        } catch (err) {
-            notify.error(
-                errorMessage(err, t("topos.page.settings.data.invalid_file", "Ungültige Backup-Datei")),
-                err,
-            );
-        } finally {
-            setBusy(false);
-        }
-    }
-
-    async function onFilePicked(event: React.ChangeEvent<HTMLInputElement>) {
-        const file = event.target.files?.[0];
-        event.target.value = "";
-        if (!file) return;
-        try {
-            setPending(await readBackupFile(file));
-        } catch (err) {
-            if (err instanceof BackupValidationError && err.code === "unsupported_version") {
-                notify.error(
-                    fill(
-                        t(
-                            "topos.page.settings.data.unsupported_version",
-                            "Backup-Version {version} wird nicht unterstützt",
-                        ),
-                        {version: err.version ?? "?"},
-                    ),
-                );
-            } else {
-                notify.error(
-                    t("topos.page.settings.data.invalid_file", "Ungültige Backup-Datei"),
-                    err,
-                );
-            }
-        }
-    }
-
-    async function runImport(mode: ImportMode) {
-        if (!pending) return;
-        setBusy(true);
-        try {
-            const result = await importToposData(pending, mode);
-            notify.success(
-                fill(
-                    t(
-                        "topos.page.settings.data.import_success",
-                        "Import abgeschlossen. {count} Einträge importiert.",
-                    ),
-                    {count: result.imported},
-                ),
-            );
-            setPending(null);
-        } catch (err) {
-            notify.error(
-                errorMessage(err, t("topos.page.settings.data.invalid_file", "Ungültige Backup-Datei")),
-                err,
-            );
-        } finally {
-            setBusy(false);
-        }
-    }
-
-    async function handleReplace() {
-        if (!pending) return;
-        const keyword = t("topos.page.settings.data.replace_keyword", "ERSETZEN");
-        const answer = await prompt(
-            t("topos.page.settings.data.import_replace", "Ersetzen"),
-            t(
-                "topos.page.settings.data.import_replace_confirm",
-                "Alle bestehenden Daten werden gelöscht. Tippe ERSETZEN zum Bestätigen.",
-            ),
-            keyword,
+  async function handleExport() {
+    setBusy(true);
+    try {
+      const backup = await exportToposData();
+      const total =
+        backup.stats.containers +
+        backup.stats.items +
+        backup.stats.categories +
+        backup.stats.actions;
+      if (total === 0) {
+        notify.warning(
+          t("topos.page.settings.data.empty", "Keine Daten zum Exportieren"),
         );
-        if (answer != null && answer.trim().toUpperCase() === keyword.toUpperCase()) {
-            await runImport("replace");
-        }
+        return;
+      }
+      downloadBackup(backup);
+      notify.success(
+        fill(
+          t(
+            "topos.page.settings.data.export_success",
+            "Export abgeschlossen. {containers} Container, {items} Einträge.",
+          ),
+          { containers: backup.stats.containers, items: backup.stats.items },
+        ),
+      );
+    } catch (err) {
+      notify.error(
+        errorMessage(
+          err,
+          t("topos.page.settings.data.invalid_file", "Ungültige Backup-Datei"),
+        ),
+        err,
+      );
+    } finally {
+      setBusy(false);
     }
+  }
 
-    return (
-        <section style={{marginBottom: "1.5rem"}} data-testid="data-section">
-            <h2>{t("topos.page.settings.data.title", "Daten")}</h2>
+  async function onFilePicked(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    try {
+      setPending(await readBackupFile(file));
+    } catch (err) {
+      if (
+        err instanceof BackupValidationError &&
+        err.code === "unsupported_version"
+      ) {
+        notify.error(
+          fill(
+            t(
+              "topos.page.settings.data.unsupported_version",
+              "Backup-Version {version} wird nicht unterstützt",
+            ),
+            { version: err.version ?? "?" },
+          ),
+        );
+      } else {
+        notify.error(
+          t("topos.page.settings.data.invalid_file", "Ungültige Backup-Datei"),
+          err,
+        );
+      }
+    }
+  }
 
-            <div className="mt-2 flex flex-wrap gap-2">
-                <button
-                    type="button"
-                    className={btn}
-                    onClick={handleExport}
-                    disabled={busy}
-                    data-testid="data-export"
-                >
-                    <Download size={16} aria-hidden />
-                    {t("topos.page.settings.data.export", "Daten exportieren")}
-                </button>
-                <button
-                    type="button"
-                    className={btn}
-                    onClick={() => fileRef.current?.click()}
-                    disabled={busy}
-                    data-testid="data-import"
-                >
-                    <Upload size={16} aria-hidden />
-                    {t("topos.page.settings.data.import", "Daten importieren")}
-                </button>
-                <input
-                    ref={fileRef}
-                    type="file"
-                    accept=".topos.json,.json,application/json"
-                    hidden
-                    onChange={onFilePicked}
-                    data-testid="data-import-input"
-                />
-            </div>
+  async function runImport(mode: ImportMode) {
+    if (!pending) return;
+    setBusy(true);
+    try {
+      const result = await importToposData(pending, mode);
+      notify.success(
+        fill(
+          t(
+            "topos.page.settings.data.import_success",
+            "Import abgeschlossen. {count} Einträge importiert.",
+          ),
+          { count: result.imported },
+        ),
+      );
+      setPending(null);
+    } catch (err) {
+      notify.error(
+        errorMessage(
+          err,
+          t("topos.page.settings.data.invalid_file", "Ungültige Backup-Datei"),
+        ),
+        err,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
-            {pending && (
-                <div className={`${card} mt-3 p-3`} data-testid="data-import-preview">
-                    <p>
-                        {fill(
-                            t(
-                                "topos.page.settings.data.import_preview",
-                                "{containers} Container, {items} Einträge, {categories} Kategorien, {actions} Aktionen",
-                            ),
-                            {
-                                containers: pending.stats.containers,
-                                items: pending.stats.items,
-                                categories: pending.stats.categories,
-                                actions: pending.stats.actions,
-                            },
-                        )}
-                    </p>
-                    <p className={`${muted} text-sm`} data-testid="data-import-source">
-                        {pending.source}
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                        <button
-                            type="button"
-                            className={btn}
-                            onClick={() => runImport("merge")}
-                            disabled={busy}
-                            data-testid="data-import-merge"
-                        >
-                            {t("topos.page.settings.data.import_merge", "Zusammenführen")}
-                        </button>
-                        <button
-                            type="button"
-                            className={btnDanger}
-                            onClick={handleReplace}
-                            disabled={busy}
-                            data-testid="data-import-replace"
-                        >
-                            {t("topos.page.settings.data.import_replace", "Ersetzen")}
-                        </button>
-                    </div>
-                </div>
-            )}
-        </section>
+  async function handleReplace() {
+    if (!pending) return;
+    const keyword = t("topos.page.settings.data.replace_keyword", "ERSETZEN");
+    const answer = await prompt(
+      t("topos.page.settings.data.import_replace", "Ersetzen"),
+      t(
+        "topos.page.settings.data.import_replace_confirm",
+        "Alle bestehenden Daten werden gelöscht. Tippe ERSETZEN zum Bestätigen.",
+      ),
+      keyword,
     );
+    if (
+      answer != null &&
+      answer.trim().toUpperCase() === keyword.toUpperCase()
+    ) {
+      await runImport("replace");
+    }
+  }
+
+  return (
+    <section style={{ marginBottom: "1.5rem" }} data-testid="data-section">
+      <h2>{t("topos.page.settings.data.title", "Daten")}</h2>
+
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button
+          type="button"
+          className={btn}
+          onClick={handleExport}
+          disabled={busy}
+          data-testid="data-export"
+        >
+          <Download size={16} aria-hidden />
+          {t("topos.page.settings.data.export", "Daten exportieren")}
+        </button>
+        <button
+          type="button"
+          className={btn}
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+          data-testid="data-import"
+        >
+          <Upload size={16} aria-hidden />
+          {t("topos.page.settings.data.import", "Daten importieren")}
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".topos.json,.json,application/json"
+          hidden
+          onChange={onFilePicked}
+          data-testid="data-import-input"
+        />
+      </div>
+
+      {pending && (
+        <div className={`${card} mt-3 p-3`} data-testid="data-import-preview">
+          <p>
+            {fill(
+              t(
+                "topos.page.settings.data.import_preview",
+                "{containers} Container, {items} Einträge, {categories} Kategorien, {actions} Aktionen",
+              ),
+              {
+                containers: pending.stats.containers,
+                items: pending.stats.items,
+                categories: pending.stats.categories,
+                actions: pending.stats.actions,
+              },
+            )}
+          </p>
+          <p className={`${muted} text-sm`} data-testid="data-import-source">
+            {pending.source}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={btn}
+              onClick={() => runImport("merge")}
+              disabled={busy}
+              data-testid="data-import-merge"
+            >
+              {t("topos.page.settings.data.import_merge", "Zusammenführen")}
+            </button>
+            <button
+              type="button"
+              className={btnDanger}
+              onClick={handleReplace}
+              disabled={busy}
+              data-testid="data-import-replace"
+            >
+              {t("topos.page.settings.data.import_replace", "Ersetzen")}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }

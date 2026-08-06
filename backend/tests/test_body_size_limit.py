@@ -27,7 +27,6 @@ from app.middleware.body_size_limit import (
     _resolve_max_bytes_from_config,
 )
 
-
 # --- Resolver helper --------------------------------------------------
 
 
@@ -36,9 +35,7 @@ def test_resolver_returns_default_when_config_is_none() -> None:
 
 
 def test_resolver_returns_default_when_app_key_missing() -> None:
-    assert (
-        _resolve_max_bytes_from_config({}) == DEFAULT_MAX_UPLOAD_MB * 1024 * 1024
-    )
+    assert _resolve_max_bytes_from_config({}) == DEFAULT_MAX_UPLOAD_MB * 1024 * 1024
 
 
 def test_resolver_returns_default_when_max_upload_mb_missing() -> None:
@@ -49,17 +46,11 @@ def test_resolver_returns_default_when_max_upload_mb_missing() -> None:
 
 
 def test_resolver_reads_max_upload_mb_value() -> None:
-    assert (
-        _resolve_max_bytes_from_config({"app": {"max_upload_mb": 250}})
-        == 250 * 1024 * 1024
-    )
+    assert _resolve_max_bytes_from_config({"app": {"max_upload_mb": 250}}) == 250 * 1024 * 1024
 
 
 def test_resolver_coerces_string_integer() -> None:
-    assert (
-        _resolve_max_bytes_from_config({"app": {"max_upload_mb": "10"}})
-        == 10 * 1024 * 1024
-    )
+    assert _resolve_max_bytes_from_config({"app": {"max_upload_mb": "10"}}) == 10 * 1024 * 1024
 
 
 def test_resolver_falls_back_on_non_integer_value() -> None:

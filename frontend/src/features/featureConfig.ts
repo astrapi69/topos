@@ -29,19 +29,19 @@
  */
 
 import {
-    ConditionalFeatureStrategy,
-    type FeatureCondition,
-    type FeatureDescriptor,
-    type FeatureState,
-    FeatureRegistry,
+  ConditionalFeatureStrategy,
+  type FeatureCondition,
+  type FeatureDescriptor,
+  type FeatureState,
+  FeatureRegistry,
 } from "@astrapi69/feature-strategy";
 
 /** Evaluation context passed to the strategy through the FeatureProvider. */
 export interface FeatureContext {
-    /** True when the FastAPI backend answered a /health probe. */
-    backendAvailable: boolean;
-    /** True when a usable AI provider (backend or unlocked local vault) exists. */
-    hasAiKey: boolean;
+  /** True when the FastAPI backend answered a /health probe. */
+  backendAvailable: boolean;
+  /** True when a usable AI provider (backend or unlocked local vault) exists. */
+  hasAiKey: boolean;
 }
 
 /**
@@ -49,10 +49,10 @@ export interface FeatureContext {
  * constant; feature ids are never spelled as string literals.
  */
 export const FEATURES = {
-    /** Excel workbook import (POST /api/import/excel) - needs the backend. */
-    EXCEL_IMPORT: "excel-import",
-    /** Category rename/delete (cascading writes) - needs the backend. */
-    CATEGORY_EDIT: "category-edit",
+  /** Excel workbook import (POST /api/import/excel) - needs the backend. */
+  EXCEL_IMPORT: "excel-import",
+  /** Category rename/delete (cascading writes) - needs the backend. */
+  CATEGORY_EDIT: "category-edit",
 } as const;
 
 /** Union of all registered feature ids. */
@@ -65,31 +65,39 @@ export type FeatureId = (typeof FEATURES)[keyof typeof FEATURES];
 export const REASON_BACKEND_REQUIRED = "backend_required";
 
 /** Backend-required features: disabled when no backend answers. */
-const BACKEND_REQUIRED: readonly FeatureId[] = [FEATURES.EXCEL_IMPORT, FEATURES.CATEGORY_EDIT];
+const BACKEND_REQUIRED: readonly FeatureId[] = [
+  FEATURES.EXCEL_IMPORT,
+  FEATURES.CATEGORY_EDIT,
+];
 
 function backendRequiredRule(): FeatureCondition<FeatureContext> {
-    return {
-        evaluate: (context): FeatureState | undefined => {
-            if (context === undefined) return undefined;
-            return context.backendAvailable ? "active" : "disabled";
-        },
-        reason: REASON_BACKEND_REQUIRED,
-    };
+  return {
+    evaluate: (context): FeatureState | undefined => {
+      if (context === undefined) return undefined;
+      return context.backendAvailable ? "active" : "disabled";
+    },
+    reason: REASON_BACKEND_REQUIRED,
+  };
 }
 
 function buildRegistry(): FeatureRegistry<FeatureContext> {
-    const descriptors: FeatureDescriptor[] = Object.values(FEATURES).map((id) => ({
-        id,
-        defaultState: "active",
-    }));
+  const descriptors: FeatureDescriptor[] = Object.values(FEATURES).map(
+    (id) => ({
+      id,
+      defaultState: "active",
+    }),
+  );
 
-    const rules: Record<string, FeatureCondition<FeatureContext>> = Object.fromEntries(
-        BACKEND_REQUIRED.map((id) => [id, backendRequiredRule()] as const),
-    );
+  const rules: Record<
+    string,
+    FeatureCondition<FeatureContext>
+  > = Object.fromEntries(
+    BACKEND_REQUIRED.map((id) => [id, backendRequiredRule()] as const),
+  );
 
-    return new FeatureRegistry<FeatureContext>()
-        .registerAll(descriptors)
-        .setStrategy(new ConditionalFeatureStrategy<FeatureContext>(rules));
+  return new FeatureRegistry<FeatureContext>()
+    .registerAll(descriptors)
+    .setStrategy(new ConditionalFeatureStrategy<FeatureContext>(rules));
 }
 
 /**

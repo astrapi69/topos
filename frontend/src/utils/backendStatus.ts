@@ -11,31 +11,33 @@
  * lifetime, so every caller shares a single /api/health request.
  */
 
-import {apiBase} from "../api/baseUrl";
+import { apiBase } from "../api/baseUrl";
 
 const PROBE_TIMEOUT_MS = 3000;
 
 let probe: Promise<boolean> | null = null;
 
 export function isBackendAvailable(): Promise<boolean> {
-    if (probe === null) {
-        probe = (async () => {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
-            try {
-                const res = await fetch(`${apiBase()}/health`, {signal: controller.signal});
-                return res.ok;
-            } catch {
-                return false;
-            } finally {
-                clearTimeout(timer);
-            }
-        })();
-    }
-    return probe;
+  if (probe === null) {
+    probe = (async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+      try {
+        const res = await fetch(`${apiBase()}/health`, {
+          signal: controller.signal,
+        });
+        return res.ok;
+      } catch {
+        return false;
+      } finally {
+        clearTimeout(timer);
+      }
+    })();
+  }
+  return probe;
 }
 
 /** Test seam: drop the cached probe so each test starts fresh. */
 export function _resetBackendProbe(): void {
-    probe = null;
+  probe = null;
 }

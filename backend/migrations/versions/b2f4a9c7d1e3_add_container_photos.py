@@ -33,9 +33,7 @@ def upgrade() -> None:
         batch_op.create_index(
             batch_op.f("ix_container_photos_container_id"), ["container_id"], unique=False
         )
-        batch_op.create_index(
-            batch_op.f("ix_container_photos_token"), ["token"], unique=True
-        )
+        batch_op.create_index(batch_op.f("ix_container_photos_token"), ["token"], unique=True)
 
 
 def downgrade() -> None:

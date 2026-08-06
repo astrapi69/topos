@@ -10,19 +10,21 @@
  * the base palettes forces every theme file to declare it too.
  */
 
-import {describe, it, expect} from "vitest";
-import {readFileSync} from "node:fs";
-import {resolve} from "node:path";
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
-import {THEMES} from "../../themes/themes";
+import { THEMES } from "../../themes/themes";
 
 const stylesDir = resolve(__dirname, "..");
 
 function tokensIn(css: string, blockRe: RegExp): Set<string> {
-    const block = css.match(blockRe);
-    expect(block, `block not found for ${blockRe}`).not.toBeNull();
-    const names = [...block![1].matchAll(/--([a-z0-9-]+)\s*:/g)].map((match) => match[1]);
-    return new Set(names);
+  const block = css.match(blockRe);
+  expect(block, `block not found for ${blockRe}`).not.toBeNull();
+  const names = [...block![1].matchAll(/--([a-z0-9-]+)\s*:/g)].map(
+    (match) => match[1],
+  );
+  return new Set(names);
 }
 
 // The contract: exactly the tokens the base dark palette overrides.
@@ -31,25 +33,30 @@ const CONTRACT = tokensIn(globalCss, /\[data-theme="dark"\]\s*\{([^}]*)\}/);
 
 // Themes with a dedicated data-app-theme override file (light + dark are the
 // base palettes in global.css and have no override file).
-const OVERRIDE_THEMES = THEMES.filter((theme) => theme.id !== "light" && theme.id !== "dark");
+const OVERRIDE_THEMES = THEMES.filter(
+  (theme) => theme.id !== "light" && theme.id !== "dark",
+);
 
 describe("theme token parity", () => {
-    it("derives a non-empty contract from the base dark palette", () => {
-        expect(CONTRACT.size).toBeGreaterThan(20);
+  it("derives a non-empty contract from the base dark palette", () => {
+    expect(CONTRACT.size).toBeGreaterThan(20);
+  });
+
+  for (const theme of OVERRIDE_THEMES) {
+    it(`theme "${theme.id}" declares exactly the contract token set`, () => {
+      const css = readFileSync(
+        resolve(stylesDir, "themes", `theme-${theme.id}.css`),
+        "utf-8",
+      );
+      const declared = tokensIn(
+        css,
+        new RegExp(`:root\\[data-app-theme="${theme.id}"\\]\\s*\\{([^}]*)\\}`),
+      );
+
+      const missing = [...CONTRACT].filter((token) => !declared.has(token));
+      const extra = [...declared].filter((token) => !CONTRACT.has(token));
+      expect(missing, `theme ${theme.id} missing tokens`).toEqual([]);
+      expect(extra, `theme ${theme.id} has extra tokens`).toEqual([]);
     });
-
-    for (const theme of OVERRIDE_THEMES) {
-        it(`theme "${theme.id}" declares exactly the contract token set`, () => {
-            const css = readFileSync(resolve(stylesDir, "themes", `theme-${theme.id}.css`), "utf-8");
-            const declared = tokensIn(
-                css,
-                new RegExp(`:root\\[data-app-theme="${theme.id}"\\]\\s*\\{([^}]*)\\}`),
-            );
-
-            const missing = [...CONTRACT].filter((token) => !declared.has(token));
-            const extra = [...declared].filter((token) => !CONTRACT.has(token));
-            expect(missing, `theme ${theme.id} missing tokens`).toEqual([]);
-            expect(extra, `theme ${theme.id} has extra tokens`).toEqual([]);
-        });
-    }
+  }
 });

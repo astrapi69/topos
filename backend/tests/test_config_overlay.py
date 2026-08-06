@@ -8,8 +8,6 @@ PROD-WRITES-ARCHITECTURE-01 promise), and the comment-preserving
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
 from app import config_overlay
@@ -71,9 +69,7 @@ def test_deep_merge_does_not_mutate_inputs():
 
 def test_read_app_config_user_wins_over_project(two_layer_dirs):
     project_cfg, _ = two_layer_dirs
-    (project_cfg / "app.yaml").write_text(
-        "app:\n  language: en\n  theme: warm\n", encoding="utf-8"
-    )
+    (project_cfg / "app.yaml").write_text("app:\n  language: en\n  theme: warm\n", encoding="utf-8")
     config_overlay.write_user_app_config({"app": {"language": "de"}})
 
     merged = config_overlay.read_app_config_merged()
@@ -167,9 +163,7 @@ def test_load_app_config_for_edit_preserves_comments(two_layer_dirs):
 def test_load_plugin_config_for_edit_preserves_comments(two_layer_dirs):
     project_cfg, user_data = two_layer_dirs
     (project_cfg / "plugins" / "y.yaml").write_text(
-        "plugin:\n  name: y\nsettings:\n"
-        "  # INTERNAL: power-user knob\n"
-        "  tweak: 10\n",
+        "plugin:\n  name: y\nsettings:\n  # INTERNAL: power-user knob\n  tweak: 10\n",
         encoding="utf-8",
     )
     loaded = config_overlay.load_plugin_config_for_edit("y")

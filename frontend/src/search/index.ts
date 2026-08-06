@@ -15,83 +15,90 @@
 
 import MiniSearch from "minisearch";
 
-import type {ActionRow, Container, Item} from "../types/topos";
+import type { ActionRow, Container, Item } from "../types/topos";
 
 export type SearchType = "item" | "container" | "action";
 
 export interface SearchDoc {
-    /** Stable composite id, e.g. "item:42". */
-    id: string;
-    type: SearchType;
-    /** Numeric id within its table. */
-    refId: number;
-    /** Concatenated searchable text (the only indexed field). */
-    text: string;
-    /** Human-readable primary title for the hit. */
-    title: string;
-    /** Raw secondary text: categoryPath (item) / status (action) / location (container). */
-    secondary: string;
-    /** Owning container (items) for navigation + label lookup; null otherwise. */
-    containerId: number | null;
-    /** Owning item (actions) for subtitle + the actions view; null otherwise. */
-    itemId: number | null;
+  /** Stable composite id, e.g. "item:42". */
+  id: string;
+  type: SearchType;
+  /** Numeric id within its table. */
+  refId: number;
+  /** Concatenated searchable text (the only indexed field). */
+  text: string;
+  /** Human-readable primary title for the hit. */
+  title: string;
+  /** Raw secondary text: categoryPath (item) / status (action) / location (container). */
+  secondary: string;
+  /** Owning container (items) for navigation + label lookup; null otherwise. */
+  containerId: number | null;
+  /** Owning item (actions) for subtitle + the actions view; null otherwise. */
+  itemId: number | null;
 }
 
 /** Default MiniSearch search options: fuzzy + prefix as the spec requires. */
-export const SEARCH_OPTIONS = {fuzzy: 0.2, prefix: true} as const;
+export const SEARCH_OPTIONS = { fuzzy: 0.2, prefix: true } as const;
 
 /** Build an empty, configured MiniSearch instance. */
 export function createSearchIndex(): MiniSearch<SearchDoc> {
-    return new MiniSearch<SearchDoc>({
-        fields: ["text"],
-        storeFields: ["type", "refId", "title", "secondary", "containerId", "itemId"],
-        searchOptions: {...SEARCH_OPTIONS},
-    });
+  return new MiniSearch<SearchDoc>({
+    fields: ["text"],
+    storeFields: [
+      "type",
+      "refId",
+      "title",
+      "secondary",
+      "containerId",
+      "itemId",
+    ],
+    searchOptions: { ...SEARCH_OPTIONS },
+  });
 }
 
 export function docId(type: SearchType, refId: number): string {
-    return `${type}:${refId}`;
+  return `${type}:${refId}`;
 }
 
 function joinText(parts: Array<string | null | undefined>): string {
-    return parts.filter((p): p is string => Boolean(p && p.trim())).join(" ");
+  return parts.filter((p): p is string => Boolean(p && p.trim())).join(" ");
 }
 
 export function containerToDoc(c: Container): SearchDoc {
-    return {
-        id: docId("container", c.id),
-        type: "container",
-        refId: c.id,
-        text: joinText([c.label, c.description, c.location]),
-        title: c.label,
-        secondary: c.location ?? "",
-        containerId: c.id,
-        itemId: null,
-    };
+  return {
+    id: docId("container", c.id),
+    type: "container",
+    refId: c.id,
+    text: joinText([c.label, c.description, c.location]),
+    title: c.label,
+    secondary: c.location ?? "",
+    containerId: c.id,
+    itemId: null,
+  };
 }
 
 export function itemToDoc(i: Item): SearchDoc {
-    return {
-        id: docId("item", i.id),
-        type: "item",
-        refId: i.id,
-        text: joinText([i.content, i.categoryPath, i.notes]),
-        title: i.content,
-        secondary: i.categoryPath ?? "",
-        containerId: i.containerId,
-        itemId: i.id,
-    };
+  return {
+    id: docId("item", i.id),
+    type: "item",
+    refId: i.id,
+    text: joinText([i.content, i.categoryPath, i.notes]),
+    title: i.content,
+    secondary: i.categoryPath ?? "",
+    containerId: i.containerId,
+    itemId: i.id,
+  };
 }
 
 export function actionToDoc(a: ActionRow): SearchDoc {
-    return {
-        id: docId("action", a.id),
-        type: "action",
-        refId: a.id,
-        text: a.text,
-        title: a.text,
-        secondary: a.status,
-        containerId: null,
-        itemId: a.itemId,
-    };
+  return {
+    id: docId("action", a.id),
+    type: "action",
+    refId: a.id,
+    text: a.text,
+    title: a.text,
+    secondary: a.status,
+    containerId: null,
+    itemId: a.itemId,
+  };
 }

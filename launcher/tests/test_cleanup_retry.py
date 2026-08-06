@@ -67,6 +67,8 @@ class TestRetryResilience:
 
     def test_cleanup_path_not_writable(self, tmp_path: Path) -> None:
         """update_cleanup_step must not raise if the file can't be written."""
-        with patch.object(manifest, "cleanup_path", return_value=tmp_path / "nonexistent" / "cleanup.json"):
+        with patch.object(
+            manifest, "cleanup_path", return_value=tmp_path / "nonexistent" / "cleanup.json"
+        ):
             # read returns None, update is a no-op, no exception
             manifest.update_cleanup_step("compose_down", True)

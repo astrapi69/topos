@@ -9,88 +9,102 @@
  * and closeOnClick must be disabled so the click reaches the link.
  */
 
-import {describe, it, expect, vi, beforeEach} from 'vitest'
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock('react-toastify', () => ({
+vi.mock("react-toastify", () => ({
   toast: {
     error: vi.fn(),
     warning: vi.fn(),
     info: vi.fn(),
     success: vi.fn(),
   },
-}))
+}));
 
-import {toast} from 'react-toastify'
-import {ApiError} from '../api/client'
-import {notify, errorMessage} from './notify'
+import { toast } from "react-toastify";
+import { ApiError } from "../api/client";
+import { notify, errorMessage } from "./notify";
 
 beforeEach(() => {
-  vi.mocked(toast.error).mockReset()
-  vi.mocked(toast.success).mockReset()
-  vi.mocked(toast.info).mockReset()
-})
+  vi.mocked(toast.error).mockReset();
+  vi.mocked(toast.success).mockReset();
+  vi.mocked(toast.info).mockReset();
+});
 
-describe('notify.error', () => {
-  it('calls toast.error with autoClose 15000 and closeOnClick false', () => {
-    notify.error('Something broke')
-    expect(toast.error).toHaveBeenCalledTimes(1)
-    const opts = vi.mocked(toast.error).mock.calls[0][1] as Record<string, unknown>
-    expect(opts.autoClose).toBe(15000)
+describe("notify.error", () => {
+  it("calls toast.error with autoClose 15000 and closeOnClick false", () => {
+    notify.error("Something broke");
+    expect(toast.error).toHaveBeenCalledTimes(1);
+    const opts = vi.mocked(toast.error).mock.calls[0][1] as Record<
+      string,
+      unknown
+    >;
+    expect(opts.autoClose).toBe(15000);
     // closeOnClick must be false so the "Issue melden" link is clickable
-    expect(opts.closeOnClick).toBe(false)
-  })
+    expect(opts.closeOnClick).toBe(false);
+  });
 
-  it('renders a React element as first argument (not a plain string)', () => {
-    notify.error('Test error')
-    const content = vi.mocked(toast.error).mock.calls[0][0]
+  it("renders a React element as first argument (not a plain string)", () => {
+    notify.error("Test error");
+    const content = vi.mocked(toast.error).mock.calls[0][0];
     // React.createElement returns an object with type/props/key
-    expect(typeof content).toBe('object')
-    expect(content).not.toBeNull()
-  })
+    expect(typeof content).toBe("object");
+    expect(content).not.toBeNull();
+  });
 
-  it('accepts an ApiError as second argument without crashing', () => {
-    const apiErr = new ApiError(500, 'DB exploded', '/api/books', 'GET', 'Traceback...')
-    expect(() => notify.error('Import failed', apiErr)).not.toThrow()
-    expect(toast.error).toHaveBeenCalledTimes(1)
-  })
+  it("accepts an ApiError as second argument without crashing", () => {
+    const apiErr = new ApiError(
+      500,
+      "DB exploded",
+      "/api/books",
+      "GET",
+      "Traceback...",
+    );
+    expect(() => notify.error("Import failed", apiErr)).not.toThrow();
+    expect(toast.error).toHaveBeenCalledTimes(1);
+  });
 
-  it('accepts a non-ApiError as second argument without crashing', () => {
-    expect(() => notify.error('oops', new Error('plain'))).not.toThrow()
-    expect(() => notify.error('oops', 'string error')).not.toThrow()
-    expect(() => notify.error('oops', undefined)).not.toThrow()
-  })
-})
+  it("accepts a non-ApiError as second argument without crashing", () => {
+    expect(() => notify.error("oops", new Error("plain"))).not.toThrow();
+    expect(() => notify.error("oops", "string error")).not.toThrow();
+    expect(() => notify.error("oops", undefined)).not.toThrow();
+  });
+});
 
-describe('errorMessage', () => {
-  it('prefers ApiError.detail over the generic message', () => {
-    const apiErr = new ApiError(404, 'Container 5 not found', '/api/containers/5', 'GET')
-    expect(errorMessage(apiErr, 'fallback')).toBe('Container 5 not found')
-  })
+describe("errorMessage", () => {
+  it("prefers ApiError.detail over the generic message", () => {
+    const apiErr = new ApiError(
+      404,
+      "Container 5 not found",
+      "/api/containers/5",
+      "GET",
+    );
+    expect(errorMessage(apiErr, "fallback")).toBe("Container 5 not found");
+  });
 
-  it('uses Error.message for plain errors', () => {
-    expect(errorMessage(new Error('boom'), 'fallback')).toBe('boom')
-  })
+  it("uses Error.message for plain errors", () => {
+    expect(errorMessage(new Error("boom"), "fallback")).toBe("boom");
+  });
 
-  it('falls back for non-error values', () => {
-    expect(errorMessage('a string', 'fallback')).toBe('fallback')
-    expect(errorMessage(undefined, 'fallback')).toBe('fallback')
-    expect(errorMessage(null, 'fallback')).toBe('fallback')
-  })
+  it("falls back for non-error values", () => {
+    expect(errorMessage("a string", "fallback")).toBe("fallback");
+    expect(errorMessage(undefined, "fallback")).toBe("fallback");
+    expect(errorMessage(null, "fallback")).toBe("fallback");
+  });
 
-  it('uses the fallback when the error carries an empty detail/message', () => {
-    const apiErr = new ApiError(500, '', '/api/x', 'POST')
-    expect(errorMessage(apiErr, 'fallback')).toBe('fallback')
-  })
-})
+  it("uses the fallback when the error carries an empty detail/message", () => {
+    const apiErr = new ApiError(500, "", "/api/x", "POST");
+    expect(errorMessage(apiErr, "fallback")).toBe("fallback");
+  });
+});
 
-describe('notify (other levels)', () => {
-  it('success uses 5s autoClose', () => {
-    notify.success('done')
-    expect(toast.success).toHaveBeenCalledWith('done', {autoClose: 5000})
-  })
+describe("notify (other levels)", () => {
+  it("success uses 5s autoClose", () => {
+    notify.success("done");
+    expect(toast.success).toHaveBeenCalledWith("done", { autoClose: 5000 });
+  });
 
-  it('info uses 10s autoClose', () => {
-    notify.info('fyi')
-    expect(toast.info).toHaveBeenCalledWith('fyi', {autoClose: 10000})
-  })
-})
+  it("info uses 10s autoClose", () => {
+    notify.info("fyi");
+    expect(toast.info).toHaveBeenCalledWith("fyi", { autoClose: 10000 });
+  });
+});

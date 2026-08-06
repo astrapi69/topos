@@ -13,25 +13,25 @@ const STORAGE_KEY = "topos.backend_url";
 /** The configured backend origin without a trailing slash, or "" when
  *  the app should use the same-origin ``/api`` path. */
 export function getBackendUrl(): string {
-    try {
-        return (localStorage.getItem(STORAGE_KEY) ?? "").trim();
-    } catch {
-        return "";
-    }
+  try {
+    return (localStorage.getItem(STORAGE_KEY) ?? "").trim();
+  } catch {
+    return "";
+  }
 }
 
 /** Persist (or clear, when empty) the configured backend origin. */
 export function setBackendUrl(url: string): void {
-    const cleaned = url.trim().replace(/\/+$/, "");
-    try {
-        if (cleaned) {
-            localStorage.setItem(STORAGE_KEY, cleaned);
-        } else {
-            localStorage.removeItem(STORAGE_KEY);
-        }
-    } catch {
-        /* localStorage unavailable (private mode); ignore. */
+  const cleaned = url.trim().replace(/\/+$/, "");
+  try {
+    if (cleaned) {
+      localStorage.setItem(STORAGE_KEY, cleaned);
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
     }
+  } catch {
+    /* localStorage unavailable (private mode); ignore. */
+  }
 }
 
 /** Base for ``/api`` requests: ``"{configured}/api"`` when a backend
@@ -45,8 +45,8 @@ export function setBackendUrl(url: string): void {
  *  ``pwa/update-store`` already builds ``version.json``. At root
  *  (``make dev``, Docker) BASE_URL is ``/`` so this stays ``/api``. */
 export function apiBase(origin?: string): string {
-    const base = (origin ?? getBackendUrl()).trim().replace(/\/+$/, "");
-    if (base) return `${base}/api`;
-    const appBase = import.meta.env.BASE_URL.replace(/\/+$/, "");
-    return `${appBase}/api`;
+  const base = (origin ?? getBackendUrl()).trim().replace(/\/+$/, "");
+  if (base) return `${base}/api`;
+  const appBase = import.meta.env.BASE_URL.replace(/\/+$/, "");
+  return `${appBase}/api`;
 }

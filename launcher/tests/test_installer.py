@@ -25,7 +25,6 @@ def _make_zip_bytes(files: dict[str, str], prefix: str = "topos-0.16.0/") -> byt
 
 
 class TestReleaseZipUrl:
-
     def test_default_version(self) -> None:
         url = installer.release_zip_url()
         assert f"/tags/v{installer.TOPOS_TARGET_VERSION}.zip" in url
@@ -41,14 +40,15 @@ class TestReleaseZipUrl:
 
 
 class TestDownloadRelease:
-
     def test_extracts_with_prefix_stripping(self, tmp_path: Path) -> None:
         """Files inside the ZIP's top-level dir land directly in target_dir."""
-        zip_bytes = _make_zip_bytes({
-            "README.md": "# Topos",
-            "backend/pyproject.toml": "[tool.poetry]\nname = 'bib'",
-            "docker-compose.prod.yml": "services:\n  backend:",
-        })
+        zip_bytes = _make_zip_bytes(
+            {
+                "README.md": "# Topos",
+                "backend/pyproject.toml": "[tool.poetry]\nname = 'bib'",
+                "docker-compose.prod.yml": "services:\n  backend:",
+            }
+        )
         mock_resp = MagicMock()
         mock_resp.read = MagicMock(return_value=zip_bytes)
         mock_resp.__enter__ = MagicMock(return_value=io.BytesIO(zip_bytes))
@@ -63,6 +63,7 @@ class TestDownloadRelease:
 
     def test_returns_false_on_network_error(self, tmp_path: Path) -> None:
         from urllib.error import URLError
+
         with patch("topos_launcher.installer.urlopen", side_effect=URLError("no network")):
             ok, detail = installer.download_release(tmp_path / "install")
         assert not ok
@@ -85,6 +86,7 @@ class TestDownloadRelease:
     def test_cleans_up_temp_file_on_failure(self, tmp_path: Path) -> None:
         """Temp ZIP file is removed even on failure."""
         from urllib.error import URLError
+
         with patch("topos_launcher.installer.urlopen", side_effect=URLError("fail")):
             installer.download_release(tmp_path / "install")
         # No .zip files should linger in the system temp dir from this call
@@ -92,10 +94,10 @@ class TestDownloadRelease:
 
 
 class TestCreateEnvFile:
-
     def test_creates_env_from_example(self, tmp_path: Path) -> None:
         (tmp_path / ".env.example").write_text(
-            "SECRET=change-me-to-a-random-secret\nPORT=7880", encoding="utf-8",
+            "SECRET=change-me-to-a-random-secret\nPORT=7880",
+            encoding="utf-8",
         )
         ok, detail = installer.create_env_file(tmp_path)
         assert ok
@@ -118,7 +120,6 @@ class TestCreateEnvFile:
 
 
 class TestRemoveInstall:
-
     def test_removes_directory(self, tmp_path: Path) -> None:
         install_dir = tmp_path / "topos"
         install_dir.mkdir()
