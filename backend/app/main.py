@@ -37,6 +37,7 @@ from app.routers import (
     actions,
     ai_settings,
     ai_vision,
+    backup,
     categories,
     containers,
     items,
@@ -289,6 +290,7 @@ app.include_router(containers.router, prefix="/api")
 app.include_router(items.router, prefix="/api")
 app.include_router(categories.router, prefix="/api")
 app.include_router(actions.router, prefix="/api")
+app.include_router(backup.router, prefix="/api")
 
 
 @app.exception_handler(ToposError)
