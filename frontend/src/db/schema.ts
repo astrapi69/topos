@@ -13,13 +13,17 @@
 
 import Dexie, {type Table} from "dexie";
 
-import type {ActionRow, Category, Container, Item} from "../types/topos";
+import type {ActionRow, Category, Container, Item, PhotoRow} from "../types/topos";
 
 class ToposDB extends Dexie {
     containers!: Table<Container, number>;
     items!: Table<Item, number>;
     categories!: Table<Category, number>;
     actions!: Table<ActionRow, number>;
+    // Photo blobs (offline/PWA mode only; backend mode stores files on the
+    // server). ``++id`` = Dexie-assigned, unlike the other tables which mirror
+    // backend ids.
+    photos!: Table<PhotoRow, number>;
 
     constructor() {
         super("topos");
@@ -28,6 +32,9 @@ class ToposDB extends Dexie {
             items: "id, containerId, priority, categoryPath",
             categories: "id, &path, parentPath, level",
             actions: "id, itemId, status, dueDate",
+        });
+        this.version(2).stores({
+            photos: "++id, containerId",
         });
     }
 }
