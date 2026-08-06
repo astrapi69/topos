@@ -180,6 +180,17 @@ topos:
       uploading: Wird hochgeladen...
       report_title: Importbericht
     settings:
+      about:
+        heading: Über Topos
+        license: Lizenz
+        source: Quellcode auf GitHub
+        report: Problem melden
+        donate_heading: Entwicklung unterstützen
+        donate_intro: Topos ist frei und Open Source. Wenn es dir hilft, freue ich mich über einen Beitrag.
+        donate_preferred: bevorzugt
+        donate_liberapay: Wiederkehrende Spenden, ohne Plattform-Gebühr.
+        donate_github: Über dein bestehendes GitHub-Konto.
+        donate_kofi: Einmalige Trinkgelder, kein Login nötig.
       title: Einstellungen
       language: Sprache
       theme: Erscheinungsbild

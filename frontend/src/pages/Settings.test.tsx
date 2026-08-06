@@ -5,6 +5,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 
 import Settings from "./Settings";
 import {DialogProvider} from "../components/AppDialog";
+import AppUpdateProvider from "../components/AppUpdateProvider";
 
 const mockGetSecretSource = vi.fn();
 
@@ -38,6 +39,20 @@ vi.mock("../utils/backendStatus", () => ({
     isBackendAvailable: () => Promise.resolve(true),
 }));
 
+function renderSettings() {
+    // AppUpdateProvider supplies the PwaUpdateProvider context the About
+    // section's VersionCard reads.
+    return render(
+        <MemoryRouter>
+            <AppUpdateProvider>
+                <DialogProvider>
+                    <Settings />
+                </DialogProvider>
+            </AppUpdateProvider>
+        </MemoryRouter>,
+    );
+}
+
 describe("Settings", () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -50,27 +65,16 @@ describe("Settings", () => {
     });
 
     it("renders language, theme, and reset controls", () => {
-        render(
-            <MemoryRouter>
-                <DialogProvider>
-                    <Settings />
-                </DialogProvider>
-            </MemoryRouter>,
-        );
+        renderSettings();
         expect(screen.getByTestId("settings-title")).toBeInTheDocument();
         expect(screen.getByTestId("settings-language-select")).toBeInTheDocument();
         expect(screen.getByTestId("theme-picker")).toBeInTheDocument();
         expect(screen.getByTestId("settings-reset-cache")).toBeInTheDocument();
+        expect(screen.getByTestId("about-section")).toBeInTheDocument();
     });
 
     it("renders the secret-source label when the endpoint resolves", async () => {
-        render(
-            <MemoryRouter>
-                <DialogProvider>
-                    <Settings />
-                </DialogProvider>
-            </MemoryRouter>,
-        );
+        renderSettings();
         await waitFor(() => {
             expect(screen.getByTestId("settings-secret-source-label")).toBeInTheDocument();
         });
@@ -83,13 +87,7 @@ describe("Settings", () => {
             envVar: "TOPOS_SECRET_KEY",
             secretsYamlPath: "/home/user/.config/topos/secrets.yaml",
         });
-        render(
-            <MemoryRouter>
-                <DialogProvider>
-                    <Settings />
-                </DialogProvider>
-            </MemoryRouter>,
-        );
+        renderSettings();
         await waitFor(() => {
             expect(screen.getByTestId("settings-secret-source-hint")).toBeInTheDocument();
         });
@@ -105,13 +103,7 @@ describe("Settings", () => {
             envVar: "TOPOS_SECRET_KEY",
             secretsYamlPath: "/home/user/.config/topos/secrets.yaml",
         });
-        render(
-            <MemoryRouter>
-                <DialogProvider>
-                    <Settings />
-                </DialogProvider>
-            </MemoryRouter>,
-        );
+        renderSettings();
         await waitFor(() => {
             expect(screen.getByTestId("settings-secret-source-hint").textContent).toContain(
                 "$TOPOS_SECRET_KEY",
@@ -121,13 +113,7 @@ describe("Settings", () => {
 
     it("hides the secret-source card when the endpoint rejects", async () => {
         mockGetSecretSource.mockRejectedValue(new Error("offline"));
-        render(
-            <MemoryRouter>
-                <DialogProvider>
-                    <Settings />
-                </DialogProvider>
-            </MemoryRouter>,
-        );
+        renderSettings();
         // Wait for the rejection to settle, then assert the card never appeared.
         await new Promise((r) => setTimeout(r, 30));
         expect(screen.queryByTestId("settings-secret-source-label")).not.toBeInTheDocument();

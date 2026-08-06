@@ -181,6 +181,17 @@ topos:
       uploading: Uploading...
       report_title: Import report
     settings:
+      about:
+        heading: About Topos
+        license: License
+        source: Source on GitHub
+        report: Report a problem
+        donate_heading: Support development
+        donate_intro: Topos is free and open source. If it helps you, consider chipping in.
+        donate_preferred: preferred
+        donate_liberapay: Recurring donations, no platform fee.
+        donate_github: Via your existing GitHub account.
+        donate_kofi: One-time tips, no login needed.
       title: Settings
       language: Language
       theme: Appearance
