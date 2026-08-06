@@ -89,10 +89,16 @@ export default defineConfig({
         spa404Fallback(),
         versionManifest(),
         VitePWA({
-            // "prompt" (not autoUpdate) so a new service worker WAITS and we
-            // can show a "new version available" toast with an update button
-            // (see usePwaUpdate). autoUpdate would silently reload instead.
-            registerType: "prompt",
+            // "autoUpdate": a new service worker skips waiting, activates, and
+            // the injected registration reloads the page - no confirmation
+            // banner. Chosen for the solo rapid-deploy workflow: every
+            // develop push redeploys GitHub Pages, and the old "prompt" model
+            // left stale precached assets on the client until the user
+            // accepted an update. autoUpdate makes stale-deploy self-heal.
+            // (The @astrapi69/pwa-update UpdateBanner stays mounted but is now
+            // effectively dormant - the auto-reload wins before it matters;
+            // version.json is still emitted for its detection path.)
+            registerType: "autoUpdate",
             devOptions: {
                 enabled: true,
             },
