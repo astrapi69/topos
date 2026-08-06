@@ -398,6 +398,11 @@ pwa:
   update_available: Neue Version verfügbar
   update_action: Aktualisieren
   install_app: App installieren
+  ios:
+    title: Als App installieren
+    steps: 'Tippe auf das Teilen-Symbol, dann „Zum Home-Bildschirm" - Topos öffnet dann ohne Safari-Leiste.'
+    dismiss: Ausblenden
+    aria_label: Auf dem iPhone installieren
 common:
   error: Etwas ist schiefgelaufen.
   loading: Wird geladen…

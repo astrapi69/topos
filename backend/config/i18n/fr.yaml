@@ -398,6 +398,11 @@ pwa:
   update_available: New version available
   update_action: Update
   install_app: Install app
+  ios:
+    title: Install as an app
+    steps: 'Tap the Share icon, then "Add to Home Screen" - it opens without the Safari bar.'
+    dismiss: Dismiss
+    aria_label: Install on your iPhone
 common:
   error: Something went wrong.
   loading: Loading…
