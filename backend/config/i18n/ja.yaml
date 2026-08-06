@@ -147,6 +147,16 @@ topos:
       label_required: A label is required.
       external_id_invalid: The number must be an integer.
     container_detail:
+      photos_title: Photos
+      photos_camera: Camera
+      photos_add: Add photos
+      photos_empty: No photos yet.
+      photos_open: Open photo
+      photos_added: "{count} photo(s) added"
+      photos_add_failed: Could not add photo
+      photos_delete_title: Delete photo?
+      photos_delete_message: This photo will be permanently deleted.
+      photos_delete_failed: Could not delete photo
       share_qr: Share QR
       share_qr_title: Share container
       no_id: No container selected.

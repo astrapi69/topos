@@ -6,6 +6,10 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 import ContainerDetail from "./ContainerDetail";
 import {DialogProvider} from "../components/AppDialog";
 
+// Photos have their own tests; stub the section so this page test does not
+// exercise the photo storage subsystem.
+vi.mock("../components/ContainerPhotos", () => ({default: () => null}));
+
 vi.mock("../api/client", () => ({
     api: {
         containers: {

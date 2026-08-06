@@ -51,6 +51,26 @@ export interface CategoryNode {
     children: CategoryNode[];
 }
 
+/** A container photo as returned by the backend (paths relative to /api). */
+export interface ContainerPhotoRead {
+    id: number;
+    containerId: number;
+    mime: string;
+    createdAt: string;
+    fullUrl: string;
+    thumbUrl: string;
+}
+
+/** A photo blob stored in Dexie (offline/PWA mode). */
+export interface PhotoRow {
+    id?: number;
+    containerId: number;
+    blob: Blob;
+    thumbBlob: Blob;
+    mime: string;
+    createdAt: string;
+}
+
 export interface ActionRow {
     id: number;
     itemId: number;

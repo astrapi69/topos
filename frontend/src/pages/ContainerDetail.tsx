@@ -11,6 +11,7 @@ import {ChevronDown, ChevronRight} from "lucide-react";
 import NavBar from "../components/NavBar";
 import FormField from "../components/FormField";
 import QrCodeModal from "../components/QrCodeModal";
+import ContainerPhotos from "../components/ContainerPhotos";
 import {containerShareUrl} from "../utils/shareUrl";
 import {qrLabels} from "../utils/qrLabels";
 import {useActions, useContainer, useItems} from "../hooks/useTopos";
@@ -466,6 +467,10 @@ export default function ContainerDetail() {
                         )}
                     </div>
                 </section>
+
+                {container && containerId !== null && (
+                    <ContainerPhotos containerId={containerId} />
+                )}
             </main>
             {showQr && container && containerId !== null && (
                 <QrCodeModal

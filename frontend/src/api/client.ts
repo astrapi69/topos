@@ -16,6 +16,7 @@ import type {
     Category,
     CategoryNode,
     Container,
+    ContainerPhotoRead,
     ContainerType,
     ImportReport,
     Item,
@@ -446,6 +447,23 @@ export const api = {
             method: "POST",
             rawBody: fd,
         });
+    },
+    photos: {
+        // Backend-mode container photo storage. Offline/PWA mode uses Dexie -
+        // see src/photos/. Upload sends the client-produced full + thumb JPEGs.
+        list: (containerId: number) =>
+            request<ContainerPhotoRead[]>(`/containers/${containerId}/photos`),
+        upload: (containerId: number, full: Blob, thumb: Blob) => {
+            const fd = new FormData();
+            fd.append("full", full, "full.jpg");
+            fd.append("thumb", thumb, "thumb.jpg");
+            return request<ContainerPhotoRead>(`/containers/${containerId}/photos`, {
+                method: "POST",
+                rawBody: fd,
+            });
+        },
+        remove: (containerId: number, photoId: number) =>
+            request<void>(`/containers/${containerId}/photos/${photoId}`, {method: "DELETE"}),
     },
     backup: {
         // Backend-mode path (local backend running). The offline/PWA path

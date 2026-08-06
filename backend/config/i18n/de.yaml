@@ -146,6 +146,16 @@ topos:
       label_required: Bezeichnung ist erforderlich.
       external_id_invalid: Nr. muss eine ganze Zahl sein.
     container_detail:
+      photos_title: Fotos
+      photos_camera: Kamera
+      photos_add: Fotos hinzufügen
+      photos_empty: Noch keine Fotos.
+      photos_open: Foto öffnen
+      photos_added: "{count} Foto(s) hinzugefügt"
+      photos_add_failed: Foto konnte nicht hinzugefügt werden
+      photos_delete_title: Foto löschen?
+      photos_delete_message: Dieses Foto wird dauerhaft gelöscht.
+      photos_delete_failed: Foto konnte nicht gelöscht werden
       share_qr: QR teilen
       share_qr_title: Container teilen
       no_id: Kein Container ausgewählt.
