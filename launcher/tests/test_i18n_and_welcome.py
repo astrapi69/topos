@@ -104,9 +104,7 @@ class TestWelcomedFlag:
     write happens in ``__main__._run_launcher``. Cover both."""
 
     def _patch_path(self, tmp_path: Path):
-        return patch.object(
-            settings, "settings_path", return_value=tmp_path / "settings.json"
-        )
+        return patch.object(settings, "settings_path", return_value=tmp_path / "settings.json")
 
     def test_default_welcomed_is_false(self, tmp_path: Path) -> None:
         with self._patch_path(tmp_path):
@@ -184,7 +182,9 @@ class TestWelcomeBeforeDockerCheck:
             seen["called"] = True
 
         with (
-            patch.object(main_mod.settings, "get", side_effect=lambda k: False if k == "welcomed" else None),
+            patch.object(
+                main_mod.settings, "get", side_effect=lambda k: False if k == "welcomed" else None
+            ),
             patch.object(main_mod.settings, "update") as update_mock,
             patch.object(main_mod.docker, "docker_installed", return_value=(False, "no")),
             patch.object(main_mod.config, "get_show_details_default", return_value=False),

@@ -5,7 +5,7 @@
  * later iteration.
  */
 
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 import NavBar from "../components/NavBar";
 import AboutSection from "../components/AboutSection";
@@ -14,163 +14,172 @@ import DataSection from "../components/DataSection";
 import BackendUrlSettings from "../components/BackendUrlSettings";
 import OrphanPathsSection from "../components/OrphanPathsSection";
 import ThemePicker from "../components/ThemePicker";
-import {api, type SecretSource} from "../api/client";
-import {db} from "../db/schema";
-import {refreshAll} from "../hooks/useTopos";
-import {useI18n} from "../hooks/useI18n";
-import {useDialog} from "../components/AppDialog";
-import {isBackendAvailable} from "../utils/backendStatus";
-import {notify, errorMessage} from "../utils/notify";
-import {btn, input, muted} from "../ui/classes";
+import { api, type SecretSource } from "../api/client";
+import { db } from "../db/schema";
+import { refreshAll } from "../hooks/useTopos";
+import { useI18n } from "../hooks/useI18n";
+import { useDialog } from "../components/AppDialog";
+import { isBackendAvailable } from "../utils/backendStatus";
+import { notify, errorMessage } from "../utils/notify";
+import { btn, input, muted } from "../ui/classes";
 
 const LANGUAGES = ["de", "en", "es", "fr", "el", "pt", "tr", "ja"];
 
 export default function Settings() {
-    const {t, lang, setLang} = useI18n();
-    const {confirm} = useDialog();
-    const [resetting, setResetting] = useState(false);
-    const [secretSource, setSecretSource] = useState<SecretSource | null>(null);
+  const { t, lang, setLang } = useI18n();
+  const { confirm } = useDialog();
+  const [resetting, setResetting] = useState(false);
+  const [secretSource, setSecretSource] = useState<SecretSource | null>(null);
 
-    useEffect(() => {
-        let cancelled = false;
-        void (async () => {
-            // Skip the request entirely in offline mode (no backend to answer).
-            if (!(await isBackendAvailable())) return;
-            try {
-                const src = await api.settings.getSecretSource();
-                if (!cancelled) setSecretSource(src);
-            } catch {
-                /* Transient failure - hide the card. */
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      // Skip the request entirely in offline mode (no backend to answer).
+      if (!(await isBackendAvailable())) return;
+      try {
+        const src = await api.settings.getSecretSource();
+        if (!cancelled) setSecretSource(src);
+      } catch {
+        /* Transient failure - hide the card. */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-    async function handleResetCache() {
-        const ok = await confirm(
-            t("topos.confirm.reset_cache_title", "Cache zurücksetzen?"),
-            t(
-                "topos.confirm.reset_cache_message",
-                "Der lokale Cache wird geleert und die Daten werden neu vom Server geladen.",
-            ),
-            "danger",
-            {
-                confirmLabel: t("topos.page.settings.reset", "Cache zurücksetzen"),
-                cancelLabel: t("topos.common.cancel", "Abbrechen"),
-            },
-        );
-        if (!ok) return;
-        setResetting(true);
-        try {
-            await Promise.all([
-                db.containers.clear(),
-                db.items.clear(),
-                db.categories.clear(),
-                db.actions.clear(),
-            ]);
-            await refreshAll();
-            notify.success(t("topos.toast.cache_cleared", "Lokaler Cache geleert"));
-        } catch (e) {
-            notify.error(
-                errorMessage(e, t("topos.toast.cache_clear_failed", "Cache konnte nicht geleert werden")),
-                e,
-            );
-        } finally {
-            setResetting(false);
-        }
-    }
-
-    return (
-        <>
-            <NavBar />
-            <main className="p-4 sm:p-6 max-w-3xl">
-                <h1 data-testid="settings-title">
-                    {t("topos.page.settings.title", "Einstellungen")}
-                </h1>
-
-                <section style={{marginBottom: "1.5rem"}}>
-                    <h2>{t("topos.page.settings.language", "Sprache")}</h2>
-                    <select
-                        className={input}
-                        value={lang}
-                        onChange={(e) => setLang(e.target.value)}
-                        data-testid="settings-language-select"
-                    >
-                        {LANGUAGES.map((l) => (
-                            <option key={l} value={l}>
-                                {l.toUpperCase()}
-                            </option>
-                        ))}
-                    </select>
-                </section>
-
-                <section style={{marginBottom: "1.5rem"}}>
-                    <h2>{t("topos.page.settings.theme", "Erscheinungsbild")}</h2>
-                    <ThemePicker />
-                </section>
-
-                {secretSource && (
-                    <section style={{marginBottom: "1.5rem"}}>
-                        <h2>{t("topos.page.settings.secret_key", "Anwendungsschlüssel")}</h2>
-                        <p data-testid="settings-secret-source-label">
-                            {t(
-                                `topos.page.settings.secret_key_source_${secretSource.source}`,
-                                `Key from: ${secretSource.source}`,
-                            )}
-                        </p>
-                        {(secretSource.source === "secrets_yaml" ||
-                            secretSource.source === "env") && (
-                            <p
-                                data-testid="settings-secret-source-hint"
-                                className={muted} style={{fontSize: "0.875rem"}}
-                            >
-                                {t(
-                                    "topos.page.settings.secret_key_external_hint",
-                                    "Dieser Schlüssel wird in {path} konfiguriert. Bearbeiten Sie die Datei, um ihn zu ändern.",
-                                ).replace(
-                                    "{path}",
-                                    secretSource.source === "env"
-                                        ? `$${secretSource.envVar}`
-                                        : secretSource.path ?? secretSource.secretsYamlPath,
-                                )}
-                            </p>
-                        )}
-                    </section>
-                )}
-
-                <BackendUrlSettings />
-
-                <AiProviderSettings />
-
-                <OrphanPathsSection />
-
-                <DataSection />
-
-                <section>
-                    <h2>{t("topos.page.settings.cache", "Lokaler Cache")}</h2>
-                    <p className={muted}>
-                        {t(
-                            "topos.page.settings.cache_description",
-                            "Leert den IndexedDB-Cache und holt die Daten neu vom Server.",
-                        )}
-                    </p>
-                    <button
-                        type="button"
-                        className={btn}
-                        onClick={handleResetCache}
-                        disabled={resetting}
-                        data-testid="settings-reset-cache"
-                    >
-                        {resetting
-                            ? t("topos.page.settings.resetting", "Wird zurückgesetzt...")
-                            : t("topos.page.settings.reset", "Cache zurücksetzen")}
-                    </button>
-                </section>
-
-                <AboutSection />
-            </main>
-        </>
+  async function handleResetCache() {
+    const ok = await confirm(
+      t("topos.confirm.reset_cache_title", "Cache zurücksetzen?"),
+      t(
+        "topos.confirm.reset_cache_message",
+        "Der lokale Cache wird geleert und die Daten werden neu vom Server geladen.",
+      ),
+      "danger",
+      {
+        confirmLabel: t("topos.page.settings.reset", "Cache zurücksetzen"),
+        cancelLabel: t("topos.common.cancel", "Abbrechen"),
+      },
     );
+    if (!ok) return;
+    setResetting(true);
+    try {
+      await Promise.all([
+        db.containers.clear(),
+        db.items.clear(),
+        db.categories.clear(),
+        db.actions.clear(),
+      ]);
+      await refreshAll();
+      notify.success(t("topos.toast.cache_cleared", "Lokaler Cache geleert"));
+    } catch (e) {
+      notify.error(
+        errorMessage(
+          e,
+          t(
+            "topos.toast.cache_clear_failed",
+            "Cache konnte nicht geleert werden",
+          ),
+        ),
+        e,
+      );
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  return (
+    <>
+      <NavBar />
+      <main className="p-4 sm:p-6 max-w-3xl">
+        <h1 data-testid="settings-title">
+          {t("topos.page.settings.title", "Einstellungen")}
+        </h1>
+
+        <section style={{ marginBottom: "1.5rem" }}>
+          <h2>{t("topos.page.settings.language", "Sprache")}</h2>
+          <select
+            className={input}
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
+            data-testid="settings-language-select"
+          >
+            {LANGUAGES.map((l) => (
+              <option key={l} value={l}>
+                {l.toUpperCase()}
+              </option>
+            ))}
+          </select>
+        </section>
+
+        <section style={{ marginBottom: "1.5rem" }}>
+          <h2>{t("topos.page.settings.theme", "Erscheinungsbild")}</h2>
+          <ThemePicker />
+        </section>
+
+        {secretSource && (
+          <section style={{ marginBottom: "1.5rem" }}>
+            <h2>
+              {t("topos.page.settings.secret_key", "Anwendungsschlüssel")}
+            </h2>
+            <p data-testid="settings-secret-source-label">
+              {t(
+                `topos.page.settings.secret_key_source_${secretSource.source}`,
+                `Key from: ${secretSource.source}`,
+              )}
+            </p>
+            {(secretSource.source === "secrets_yaml" ||
+              secretSource.source === "env") && (
+              <p
+                data-testid="settings-secret-source-hint"
+                className={muted}
+                style={{ fontSize: "0.875rem" }}
+              >
+                {t(
+                  "topos.page.settings.secret_key_external_hint",
+                  "Dieser Schlüssel wird in {path} konfiguriert. Bearbeiten Sie die Datei, um ihn zu ändern.",
+                ).replace(
+                  "{path}",
+                  secretSource.source === "env"
+                    ? `$${secretSource.envVar}`
+                    : (secretSource.path ?? secretSource.secretsYamlPath),
+                )}
+              </p>
+            )}
+          </section>
+        )}
+
+        <BackendUrlSettings />
+
+        <AiProviderSettings />
+
+        <OrphanPathsSection />
+
+        <DataSection />
+
+        <section>
+          <h2>{t("topos.page.settings.cache", "Lokaler Cache")}</h2>
+          <p className={muted}>
+            {t(
+              "topos.page.settings.cache_description",
+              "Leert den IndexedDB-Cache und holt die Daten neu vom Server.",
+            )}
+          </p>
+          <button
+            type="button"
+            className={btn}
+            onClick={handleResetCache}
+            disabled={resetting}
+            data-testid="settings-reset-cache"
+          >
+            {resetting
+              ? t("topos.page.settings.resetting", "Wird zurückgesetzt...")
+              : t("topos.page.settings.reset", "Cache zurücksetzen")}
+          </button>
+        </section>
+
+        <AboutSection />
+      </main>
+    </>
+  );
 }

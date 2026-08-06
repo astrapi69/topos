@@ -11,7 +11,6 @@ from topos_launcher import config
 
 
 class TestAppdataDir:
-
     def test_uses_appdata_on_windows_env(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path)}
         assert config.appdata_dir(env) == tmp_path / "Topos"
@@ -29,7 +28,6 @@ class TestAppdataDir:
 
 
 class TestDefaultRepoPath:
-
     def test_uses_userprofile_on_windows(self, tmp_path: Path) -> None:
         env = {"USERPROFILE": str(tmp_path)}
         assert config.default_repo_path(env) == tmp_path / "topos"
@@ -40,7 +38,6 @@ class TestDefaultRepoPath:
 
 
 class TestLoadSaveLauncherConfig:
-
     def test_load_returns_empty_dict_when_file_missing(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path)}
         assert config.load_launcher_config(env) == {}
@@ -59,7 +56,6 @@ class TestLoadSaveLauncherConfig:
 
 
 class TestResolveRepoPath:
-
     def test_uses_configured_path_when_present(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path), "USERPROFILE": "/somewhere/else"}
         configured = tmp_path / "custom" / "topos"
@@ -72,7 +68,6 @@ class TestResolveRepoPath:
 
 
 class TestIsValidRepo:
-
     def test_true_when_compose_file_present(self, tmp_path: Path) -> None:
         (tmp_path / config.COMPOSE_FILENAME).write_text("services: {}", encoding="utf-8")
         assert config.is_valid_repo(tmp_path) is True
@@ -82,7 +77,6 @@ class TestIsValidRepo:
 
 
 class TestGetShowDetailsDefault:
-
     def test_false_when_config_missing(self, tmp_path: Path) -> None:
         env = {"APPDATA": str(tmp_path)}
         assert config.get_show_details_default(env) is False
@@ -105,7 +99,6 @@ class TestGetShowDetailsDefault:
 
 
 class TestReadPort:
-
     def test_returns_default_when_no_env_file(self, tmp_path: Path) -> None:
         assert config.read_port(tmp_path) == config.DEFAULT_PORT
 

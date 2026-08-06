@@ -21,9 +21,7 @@ def client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> TestClient:
     clear the env-var so each test can drive the branch it wants."""
     from app import main as main_module
 
-    monkeypatch.setattr(
-        main_module, "_get_user_override_path", lambda: tmp_path / "secrets.yaml"
-    )
+    monkeypatch.setattr(main_module, "_get_user_override_path", lambda: tmp_path / "secrets.yaml")
     monkeypatch.delenv("TOPOS_SECRET_KEY", raising=False)
     return TestClient(app)
 
@@ -40,9 +38,7 @@ def test_returns_app_yaml_source_when_no_env_and_no_file(client: TestClient) -> 
 def test_returns_secrets_yaml_source_when_file_has_value(
     client: TestClient, tmp_path: Path
 ) -> None:
-    (tmp_path / "secrets.yaml").write_text(
-        'secret_key: "sk-from-file"\n', encoding="utf-8"
-    )
+    (tmp_path / "secrets.yaml").write_text('secret_key: "sk-from-file"\n', encoding="utf-8")
     response = client.get("/api/settings/secret-source")
     body = response.json()
     assert body["source"] == "secrets_yaml"
@@ -62,9 +58,7 @@ def test_returns_env_source_when_env_var_set(
 def test_env_wins_when_both_env_and_file_present(
     client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    (tmp_path / "secrets.yaml").write_text(
-        'secret_key: "from-file"\n', encoding="utf-8"
-    )
+    (tmp_path / "secrets.yaml").write_text('secret_key: "from-file"\n', encoding="utf-8")
     monkeypatch.setenv("TOPOS_SECRET_KEY", "from-env")
     response = client.get("/api/settings/secret-source")
     assert response.json()["source"] == "env"

@@ -47,9 +47,7 @@ def read_canonical_version() -> str:
     return data["tool"]["poetry"]["version"]
 
 
-def update_pyproject_version(
-    path: Path, new_version: str, dry_run: bool
-) -> bool:
+def update_pyproject_version(path: Path, new_version: str, dry_run: bool) -> bool:
     """Update first ``version = "..."`` line under ``[tool.poetry]``.
     Returns True if the file changed (or would change in dry-run)."""
     content = path.read_text(encoding="utf-8")
@@ -67,9 +65,7 @@ def update_pyproject_version(
     return True
 
 
-def update_package_json_version(
-    path: Path, new_version: str, dry_run: bool
-) -> bool:
+def update_package_json_version(path: Path, new_version: str, dry_run: bool) -> bool:
     content = path.read_text(encoding="utf-8")
     data = json.loads(content)
     if data.get("version") == new_version:
@@ -78,16 +74,12 @@ def update_package_json_version(
     data["version"] = new_version
     if not dry_run:
         # Preserve trailing newline + 2-space indent (npm default).
-        path.write_text(
-            json.dumps(data, indent=2) + "\n", encoding="utf-8"
-        )
+        path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     print(f"  {path.relative_to(REPO)}: {old} -> {new_version}")
     return True
 
 
-def update_spec_plist(
-    path: Path, new_version: str, dry_run: bool
-) -> bool:
+def update_spec_plist(path: Path, new_version: str, dry_run: bool) -> bool:
     """Update CFBundleVersion + CFBundleShortVersionString in
     PyInstaller spec. Both keys get the same value (no Apple-style
     separation between user-facing and build-number)."""
@@ -95,18 +87,11 @@ def update_spec_plist(
     changed = False
 
     for key in ("CFBundleVersion", "CFBundleShortVersionString"):
-        pattern = re.compile(
-            rf'("{re.escape(key)}":\s*)["\']([^"\']+)["\']'
-        )
+        pattern = re.compile(rf'("{re.escape(key)}":\s*)["\']([^"\']+)["\']')
         match = pattern.search(content)
         if match and match.group(2) != new_version:
-            content = pattern.sub(
-                rf'\g<1>"{new_version}"', content, count=1
-            )
-            print(
-                f"  {path.relative_to(REPO)} ({key}): "
-                f"{match.group(2)} -> {new_version}"
-            )
+            content = pattern.sub(rf'\g<1>"{new_version}"', content, count=1)
+            print(f"  {path.relative_to(REPO)} ({key}): {match.group(2)} -> {new_version}")
             changed = True
 
     if changed and not dry_run:
@@ -114,9 +99,7 @@ def update_spec_plist(
     return changed
 
 
-def update_init_version_literal(
-    path: Path, new_version: str, dry_run: bool
-) -> bool:
+def update_init_version_literal(path: Path, new_version: str, dry_run: bool) -> bool:
     """Update ``__version__ = "..."`` literal in __init__.py.
 
     Skips files that already use importlib.metadata or tomllib for
@@ -128,9 +111,7 @@ def update_init_version_literal(
     content = path.read_text(encoding="utf-8")
     if "importlib.metadata" in content or "tomllib" in content:
         return False
-    pattern = re.compile(
-        r'^(__version__\s*=\s*)"([^"]+)"', re.MULTILINE
-    )
+    pattern = re.compile(r'^(__version__\s*=\s*)"([^"]+)"', re.MULTILINE)
     match = pattern.search(content)
     if not match:
         return False
@@ -139,10 +120,7 @@ def update_init_version_literal(
     new_content = pattern.sub(rf'\g<1>"{new_version}"', content, count=1)
     if not dry_run:
         path.write_text(new_content, encoding="utf-8")
-    print(
-        f"  {path.relative_to(REPO)}: __version__ "
-        f"{match.group(2)} -> {new_version}"
-    )
+    print(f"  {path.relative_to(REPO)}: __version__ {match.group(2)} -> {new_version}")
     return True
 
 
@@ -192,8 +170,7 @@ def _regenerate_one(artifact: dict, canonical: str, dry_run: bool) -> bool:
 
     if not template_path.is_file():
         print(
-            f"WARN: {template_path.relative_to(REPO)} missing, "
-            f"{label} not regenerated",
+            f"WARN: {template_path.relative_to(REPO)} missing, {label} not regenerated",
             file=sys.stderr,
         )
         return False
@@ -258,13 +235,9 @@ def collect_targets() -> list[tuple[Path, str]]:
             "init_literal",
         )
     )
-    targets.append(
-        (REPO / "launcher" / "topos-launcher.spec", "spec")
-    )
+    targets.append((REPO / "launcher" / "topos-launcher.spec", "spec"))
 
-    for plugin_pyproject in sorted(
-        (REPO / "plugins").glob("*/pyproject.toml")
-    ):
+    for plugin_pyproject in sorted((REPO / "plugins").glob("*/pyproject.toml")):
         targets.append((plugin_pyproject, "pyproject"))
     for plugin_init in sorted((REPO / "plugins").glob("*/*/__init__.py")):
         targets.append((plugin_init, "init_literal"))
@@ -323,14 +296,9 @@ def main() -> int:
 
     print()
     if args.dry_run:
-        print(
-            f"DRY RUN: {changed_count} file(s) would be updated "
-            f"to {canonical}."
-        )
+        print(f"DRY RUN: {changed_count} file(s) would be updated to {canonical}.")
     else:
-        print(
-            f"Synced {changed_count} file(s) to {canonical}."
-        )
+        print(f"Synced {changed_count} file(s) to {canonical}.")
     return 0
 
 

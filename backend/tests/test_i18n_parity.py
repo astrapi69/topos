@@ -97,11 +97,7 @@ def test_no_extra_keys(target_lang: str, reference: dict[str, object]) -> None:
 def test_no_empty_values(lang: str) -> None:
     """No translation value may be empty, None, or whitespace-only."""
     flat = _flatten(_load(lang))
-    empties = [
-        k
-        for k, v in flat.items()
-        if v is None or (isinstance(v, str) and not v.strip())
-    ]
+    empties = [k for k, v in flat.items() if v is None or (isinstance(v, str) and not v.strip())]
     assert not empties, (
         f"{lang}: {len(empties)} empty value(s) in backend/config/i18n/{lang}.yaml. "
         f"Fix: provide a translation for each:\n"
@@ -120,8 +116,7 @@ def test_structural_parity(target_lang: str, reference_raw: dict[str, object]) -
         if isinstance(ref, dict):
             if not isinstance(tgt, dict):
                 errors.append(
-                    f"{path or '<root>'}: EN is an object, {target_lang} is "
-                    f"{type(tgt).__name__}"
+                    f"{path or '<root>'}: EN is an object, {target_lang} is {type(tgt).__name__}"
                 )
                 return errors
             for k, v in ref.items():
@@ -130,9 +125,7 @@ def test_structural_parity(target_lang: str, reference_raw: dict[str, object]) -
                     errors.extend(walk(v, tgt[k], child_path))
         else:
             if isinstance(tgt, dict):
-                errors.append(
-                    f"{path}: EN is a scalar, {target_lang} is an object"
-                )
+                errors.append(f"{path}: EN is a scalar, {target_lang} is an object")
         return errors
 
     errors = walk(reference_raw, target_raw)
@@ -169,11 +162,7 @@ def test_placeholder_parity(target_lang: str, reference: dict[str, object]) -> N
             f"{target_lang} placeholders:  {sorted(tgt_ph)}"
             for k, ref_ph, tgt_ph in mismatches[:10]
         )
-        + (
-            f"\n  ... and {len(mismatches) - 10} more"
-            if len(mismatches) > 10
-            else ""
-        )
+        + (f"\n  ... and {len(mismatches) - 10} more" if len(mismatches) > 10 else "")
     )
 
 
@@ -216,11 +205,7 @@ def test_advisory_untranslated_en(
         tgt_val = target[key]
         if not isinstance(tgt_val, str):
             continue
-        if (
-            ref_val == tgt_val
-            and len(ref_val) > 15
-            and _looks_english(ref_val)
-        ):
+        if ref_val == tgt_val and len(ref_val) > 15 and _looks_english(ref_val):
             suspects.append(key)
 
     if suspects:
@@ -270,9 +255,7 @@ def test_review_status_marker_shape(lang: str) -> None:
         # Catalog has no marker; that's allowed for any catalog the
         # maintainer treats as user-validated. Nothing to assert.
         return
-    assert isinstance(meta, dict), (
-        f"{lang}: _meta must be a mapping, got {type(meta).__name__}."
-    )
+    assert isinstance(meta, dict), f"{lang}: _meta must be a mapping, got {type(meta).__name__}."
     status = meta.get("review_status")
     assert status in _VALID_REVIEW_STATUSES, (
         f"{lang}: _meta.review_status must be one of {sorted(_VALID_REVIEW_STATUSES)}, "

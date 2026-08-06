@@ -11,16 +11,16 @@
 
 import type MiniSearch from "minisearch";
 
-import {db} from "../db/schema";
-import type {ActionRow, Container, Item} from "../types/topos";
+import { db } from "../db/schema";
+import type { ActionRow, Container, Item } from "../types/topos";
 import {
-    actionToDoc,
-    containerToDoc,
-    createSearchIndex,
-    docId,
-    itemToDoc,
-    type SearchDoc,
-    type SearchType,
+  actionToDoc,
+  containerToDoc,
+  createSearchIndex,
+  docId,
+  itemToDoc,
+  type SearchDoc,
+  type SearchType,
 } from "./index";
 
 let index: MiniSearch<SearchDoc> = createSearchIndex();
@@ -28,67 +28,67 @@ let version = 0;
 const subscribers = new Set<() => void>();
 
 function notify(): void {
-    version += 1;
-    for (const cb of subscribers) cb();
+  version += 1;
+  for (const cb of subscribers) cb();
 }
 
 export function getSearchIndex(): MiniSearch<SearchDoc> {
-    return index;
+  return index;
 }
 
 export function getSearchVersion(): number {
-    return version;
+  return version;
 }
 
 export function subscribeSearch(callback: () => void): () => void {
-    subscribers.add(callback);
-    return () => {
-        subscribers.delete(callback);
-    };
+  subscribers.add(callback);
+  return () => {
+    subscribers.delete(callback);
+  };
 }
 
 /** Full rebuild from the Dexie cache. Returns the new index. */
 export async function rebuildSearchIndex(): Promise<MiniSearch<SearchDoc>> {
-    const [containers, items, actions] = await Promise.all([
-        db.containers.toArray(),
-        db.items.toArray(),
-        db.actions.toArray(),
-    ]);
-    const docs: SearchDoc[] = [
-        ...containers.map(containerToDoc),
-        ...items.map(itemToDoc),
-        ...actions.map(actionToDoc),
-    ];
-    const fresh = createSearchIndex();
-    fresh.addAll(docs);
-    index = fresh;
-    notify();
-    return index;
+  const [containers, items, actions] = await Promise.all([
+    db.containers.toArray(),
+    db.items.toArray(),
+    db.actions.toArray(),
+  ]);
+  const docs: SearchDoc[] = [
+    ...containers.map(containerToDoc),
+    ...items.map(itemToDoc),
+    ...actions.map(actionToDoc),
+  ];
+  const fresh = createSearchIndex();
+  fresh.addAll(docs);
+  index = fresh;
+  notify();
+  return index;
 }
 
 function upsert(doc: SearchDoc): void {
-    // replace() = discard + add; safe whether or not the id already exists.
-    if (index.has(doc.id)) index.replace(doc);
-    else index.add(doc);
-    notify();
+  // replace() = discard + add; safe whether or not the id already exists.
+  if (index.has(doc.id)) index.replace(doc);
+  else index.add(doc);
+  notify();
 }
 
 export function indexUpsertContainer(container: Container): void {
-    upsert(containerToDoc(container));
+  upsert(containerToDoc(container));
 }
 
 export function indexUpsertItem(item: Item): void {
-    upsert(itemToDoc(item));
+  upsert(itemToDoc(item));
 }
 
 export function indexUpsertAction(action: ActionRow): void {
-    upsert(actionToDoc(action));
+  upsert(actionToDoc(action));
 }
 
 export function indexRemove(type: SearchType, refId: number): void {
-    const id = docId(type, refId);
-    if (index.has(id)) {
-        index.discard(id);
-        notify();
-    }
+  const id = docId(type, refId);
+  if (index.has(id)) {
+    index.discard(id);
+    notify();
+  }
 }

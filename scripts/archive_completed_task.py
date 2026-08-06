@@ -49,9 +49,7 @@ ARCHIVE_DIR = REPO_ROOT / "docs" / "roadmap-archive"
 # ``- [x] **TASK-ID**: description``  (the optional colon + space matches both
 # styles seen in the wild; the ID prefix mirrors the project's naming
 # convention.)
-DONE_RE = re.compile(
-    r"^(\s*)-\s*\[x\]\s*\*\*([A-Z]+-[0-9]+[a-z]*)\*\*:?\s*(.*)$"
-)
+DONE_RE = re.compile(r"^(\s*)-\s*\[x\]\s*\*\*([A-Z]+-[0-9]+[a-z]*)\*\*:?\s*(.*)$")
 SECTION_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 
 
@@ -175,9 +173,7 @@ def ensure_archive_file(path: Path, today: datetime.date) -> str:
     )
 
 
-def insert_into_archive(
-    archive_text: str, today: datetime.date, block: TaskBlock
-) -> str:
+def insert_into_archive(archive_text: str, today: datetime.date, block: TaskBlock) -> str:
     """Append ``block`` to today's section in ``archive_text``.
 
     If today's ``## Archived YYYY-MM-DD`` section is absent, prepend
@@ -200,12 +196,7 @@ def insert_into_archive(
         end_of_header = archive_text.index("\n", idx) + 1
         if archive_text[end_of_header : end_of_header + 1] == "\n":
             end_of_header += 1
-        return (
-            archive_text[:end_of_header]
-            + block_with_meta
-            + "\n"
-            + archive_text[end_of_header:]
-        )
+        return archive_text[:end_of_header] + block_with_meta + "\n" + archive_text[end_of_header:]
     # Prepend a new day section above the first existing ``## Archived``
     # section (or after the file header if no day sections yet).
     first_day = re.search(r"^## Archived ", archive_text, re.MULTILINE)
@@ -214,11 +205,7 @@ def insert_into_archive(
         if archive_text and not archive_text.endswith("\n"):
             archive_text += "\n"
         return archive_text + insertion
-    return (
-        archive_text[: first_day.start()]
-        + insertion
-        + archive_text[first_day.start() :]
-    )
+    return archive_text[: first_day.start()] + insertion + archive_text[first_day.start() :]
 
 
 def remove_block_from_text(text: str, block: TaskBlock) -> str:
@@ -229,11 +216,7 @@ def remove_block_from_text(text: str, block: TaskBlock) -> str:
     # leave behind; preserves at most one blank between elements.
     cleaned: list[str] = []
     for ln in lines:
-        if (
-            cleaned
-            and cleaned[-1].strip() == ""
-            and ln.strip() == ""
-        ):
+        if cleaned and cleaned[-1].strip() == "" and ln.strip() == "":
             continue
         cleaned.append(ln)
     return "".join(cleaned)
@@ -286,9 +269,7 @@ def apply_archival(
     runs see consistent state before any disk write happens.
     """
     archive_p = archive_path_for(today)
-    archive_text = in_memory.get(
-        archive_p, ensure_archive_file(archive_p, today)
-    )
+    archive_text = in_memory.get(archive_p, ensure_archive_file(archive_p, today))
     archive_text = insert_into_archive(archive_text, today, block)
     in_memory[archive_p] = archive_text
 
@@ -314,9 +295,7 @@ def write_all(in_memory: dict[Path, str]) -> None:
         path.write_text(text, encoding="utf-8")
 
 
-def rescan_after_edit(
-    target_id: str | None, in_memory: dict[Path, str]
-) -> list[TaskBlock]:
+def rescan_after_edit(target_id: str | None, in_memory: dict[Path, str]) -> list[TaskBlock]:
     """Re-scan in-memory state to pick up offset shifts after edits."""
     blocks: list[TaskBlock] = []
     for path in (ROADMAP, BACKLOG):
@@ -472,10 +451,7 @@ def main() -> int:
         write_all(in_memory)
 
     print()
-    print(
-        f"Archived: {len(archived)} task(s) "
-        f"({', '.join(archived) if archived else 'none'})"
-    )
+    print(f"Archived: {len(archived)} task(s) ({', '.join(archived) if archived else 'none'})")
     if skipped:
         print(f"Skipped:  {len(skipped)} task(s) ({', '.join(skipped)})")
     if affected and not args.dry_run:
@@ -484,9 +460,7 @@ def main() -> int:
             print(f"  {path.relative_to(REPO_ROOT)}")
         print()
         print("Next steps:")
-        print(
-            "  git add docs/ROADMAP.md docs/backlog.md docs/roadmap-archive/"
-        )
+        print("  git add docs/ROADMAP.md docs/backlog.md docs/roadmap-archive/")
         print("  git diff --cached")
         print("  git commit")
     return 0

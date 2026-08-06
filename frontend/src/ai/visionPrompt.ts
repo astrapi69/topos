@@ -12,17 +12,21 @@
 export const MAX_PROMPT_CATEGORIES = 100;
 
 const FOCUS_HINTS: Record<string, string> = {
-    box: "Focus on physical objects: tools, devices, household goods, containers.",
-    folder:
-        "Focus on documents: read titles, labels and headings on spines, covers and visible pages.",
+  box: "Focus on physical objects: tools, devices, household goods, containers.",
+  folder:
+    "Focus on documents: read titles, labels and headings on spines, covers and visible pages.",
 };
 const DEFAULT_FOCUS_HINT = "Focus on clearly identifiable items.";
 
 /** Assemble the vision prompt for one recognition request. */
-export function buildVisionPrompt(containerType: string, categories: string[]): string {
-    const joined = categories.length > 0 ? categories.join(", ") : "(none defined yet)";
-    const focusHint = FOCUS_HINTS[containerType] ?? DEFAULT_FOCUS_HINT;
-    return `You are cataloguing the contents of a ${containerType} for a personal inventory.
+export function buildVisionPrompt(
+  containerType: string,
+  categories: string[],
+): string {
+  const joined =
+    categories.length > 0 ? categories.join(", ") : "(none defined yet)";
+  const focusHint = FOCUS_HINTS[containerType] ?? DEFAULT_FOCUS_HINT;
+  return `You are cataloguing the contents of a ${containerType} for a personal inventory.
 ${focusHint}
 
 Report one entry per distinct, clearly visible item. Fields:
@@ -51,13 +55,15 @@ Rules:
  * levels, hard-capped at ``maxCount``.
  */
 export function selectCategoriesForPrompt(
-    paths: string[],
-    maxCount: number = MAX_PROMPT_CATEGORIES,
+  paths: string[],
+  maxCount: number = MAX_PROMPT_CATEGORIES,
 ): string[] {
-    const uniquePaths = [...new Set(paths.map((path) => path.trim()).filter(Boolean))].sort();
-    if (uniquePaths.length <= maxCount) return uniquePaths;
-    const shallowPaths = uniquePaths.filter(
-        (path) => (path.match(/\//g) ?? []).length <= 1,
-    );
-    return shallowPaths.slice(0, maxCount);
+  const uniquePaths = [
+    ...new Set(paths.map((path) => path.trim()).filter(Boolean)),
+  ].sort();
+  if (uniquePaths.length <= maxCount) return uniquePaths;
+  const shallowPaths = uniquePaths.filter(
+    (path) => (path.match(/\//g) ?? []).length <= 1,
+  );
+  return shallowPaths.slice(0, maxCount);
 }

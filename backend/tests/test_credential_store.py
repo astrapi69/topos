@@ -1,7 +1,6 @@
 """Tests for the encrypted credential storage module."""
 
 import json
-import os
 from pathlib import Path
 
 import pytest
@@ -16,12 +15,14 @@ from app.credential_store import (
     validate_service_account_json,
 )
 
-VALID_SA = json.dumps({
-    "type": "service_account",
-    "project_id": "test-project",
-    "private_key": "-----BEGIN RSA PRIVATE KEY-----\nfake\n-----END RSA PRIVATE KEY-----\n",
-    "client_email": "test@test-project.iam.gserviceaccount.com",
-}).encode()
+VALID_SA = json.dumps(
+    {
+        "type": "service_account",
+        "project_id": "test-project",
+        "private_key": "-----BEGIN RSA PRIVATE KEY-----\nfake\n-----END RSA PRIVATE KEY-----\n",
+        "client_email": "test@test-project.iam.gserviceaccount.com",
+    }
+).encode()
 
 
 @pytest.fixture(autouse=True)

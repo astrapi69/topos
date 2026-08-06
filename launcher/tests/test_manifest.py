@@ -18,7 +18,6 @@ def _patch_path(tmp_path: Path):
 
 
 class TestReadManifest:
-
     def test_returns_none_when_file_missing(self, tmp_path: Path) -> None:
         with _patch_path(tmp_path):
             assert manifest.read_manifest() is None
@@ -48,7 +47,6 @@ class TestReadManifest:
 
 
 class TestWriteManifest:
-
     def test_creates_parent_dirs_and_writes(self, tmp_path: Path) -> None:
         target = tmp_path / "nested" / "install.json"
         install_dir = tmp_path / "topos"
@@ -74,7 +72,6 @@ class TestWriteManifest:
 
 
 class TestDeleteManifest:
-
     def test_removes_file(self, tmp_path: Path) -> None:
         target = tmp_path / "install.json"
         target.write_text("{}", encoding="utf-8")
@@ -88,7 +85,6 @@ class TestDeleteManifest:
 
 
 class TestCleanupPersistence:
-
     def _patch_cleanup(self, tmp_path: Path):
         return patch.object(manifest, "cleanup_path", return_value=tmp_path / "cleanup.json")
 
@@ -138,7 +134,6 @@ class TestCleanupPersistence:
 
 
 class TestInstallDirFromManifest:
-
     def test_returns_none_when_no_manifest(self, tmp_path: Path) -> None:
         with _patch_path(tmp_path):
             assert manifest.install_dir_from_manifest() is None
@@ -147,7 +142,8 @@ class TestInstallDirFromManifest:
         with _patch_path(tmp_path):
             manifest.manifest_path().parent.mkdir(parents=True, exist_ok=True)
             manifest.manifest_path().write_text(
-                json.dumps({"version": "0.16.0"}), encoding="utf-8",
+                json.dumps({"version": "0.16.0"}),
+                encoding="utf-8",
             )
             assert manifest.install_dir_from_manifest() is None
 

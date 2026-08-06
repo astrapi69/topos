@@ -27,16 +27,32 @@ def _sample_data() -> dict:
     # does not depend on them.
     return {
         "categories": [
-            {"path": "finance", "parent_path": None, "name": "finance",
-             "display_name": "Finanzen", "level": 0}
+            {
+                "path": "finance",
+                "parent_path": None,
+                "name": "finance",
+                "display_name": "Finanzen",
+                "level": 0,
+            }
         ],
         "containers": [
             {"id": 100, "external_id": 9001, "type": "box", "owner": "self", "label": "Box A"},
-            {"id": 200, "external_id": 9002, "type": "folder", "owner": "self", "label": "Folder B"},
+            {
+                "id": 200,
+                "external_id": 9002,
+                "type": "folder",
+                "owner": "self",
+                "label": "Folder B",
+            },
         ],
         "items": [
-            {"id": 10, "container_id": 100, "content": "Invoice", "priority": "high",
-             "category_path": "finance"},
+            {
+                "id": 10,
+                "container_id": 100,
+                "content": "Invoice",
+                "priority": "high",
+                "category_path": "finance",
+            },
             {"id": 20, "container_id": 200, "content": "Manual", "priority": "none"},
         ],
         "actions": [{"id": 1, "item_id": 10, "text": "review", "status": "open"}],

@@ -4,7 +4,7 @@
  * a ref that consumers can use to bind "ran since last reconnect"
  * logic without re-registering handlers.
  */
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 export function useOnlineStatus(): boolean {
   const [online, setOnline] = useState<boolean>(

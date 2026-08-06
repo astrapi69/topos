@@ -80,7 +80,9 @@ FRONTEND_SRC = REPO_ROOT / "frontend" / "src"
 
 NOTIFY_ERROR_RE = re.compile(r"notify\.error\(")
 CATCH_RE = re.compile(r"\}\s*catch\s*\(\s*(\w+)\s*[):]")  # "} catch (err)"
-ARROW_CATCH_RE = re.compile(r"\.catch\(\s*\(?\s*(\w+)\s*\)?\s*=>")  # ".catch(err =>" or ".catch((err) =>"
+ARROW_CATCH_RE = re.compile(
+    r"\.catch\(\s*\(?\s*(\w+)\s*\)?\s*=>"
+)  # ".catch(err =>" or ".catch((err) =>"
 
 
 def find_callsite_end(text: str, start: int) -> int:
@@ -100,7 +102,7 @@ def find_callsite_end(text: str, start: int) -> int:
                 in_str = None
             i += 1
             continue
-        if ch in '"\'`':
+        if ch in "\"'`":
             in_str = ch
             i += 1
             continue
@@ -137,7 +139,7 @@ def classify_file(path: Path) -> list[tuple[int, str, str]]:
                 if ch == in_str:
                     in_str = None
                 continue
-            if ch in '"\'`':
+            if ch in "\"'`":
                 in_str = ch
                 continue
             if ch in "([{":
@@ -178,7 +180,7 @@ def classify_file(path: Path) -> list[tuple[int, str, str]]:
                         continue
                     if ch == in_str:
                         in_str = None
-                elif ch in '"\'`':
+                elif ch in "\"'`":
                     in_str = ch
                 elif ch == "{":
                     depth += 1
@@ -224,9 +226,7 @@ def main() -> int:
         print(f"error: {FRONTEND_SRC} not found", file=sys.stderr)
         return 2
 
-    files = sorted(
-        list(FRONTEND_SRC.glob("**/*.ts")) + list(FRONTEND_SRC.glob("**/*.tsx"))
-    )
+    files = sorted(list(FRONTEND_SRC.glob("**/*.ts")) + list(FRONTEND_SRC.glob("**/*.tsx")))
     classes: dict[str, int] = {}
     fixable: list[tuple[Path, int, str, str]] = []
     for path in files:

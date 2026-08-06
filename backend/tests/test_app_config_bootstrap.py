@@ -1,7 +1,6 @@
 """Tests for app.yaml auto-creation from app.yaml.example on first startup."""
 
 import shutil
-from pathlib import Path
 
 import yaml
 

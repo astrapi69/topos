@@ -14,7 +14,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 SIZES = (16, 32, 48, 64, 128, 256)
-BG = (43, 37, 31)   # warm dark brown matches the default theme accent
+BG = (43, 37, 31)  # warm dark brown matches the default theme accent
 FG = (222, 199, 167)
 
 

@@ -14,14 +14,17 @@ import pytest
 from topos_launcher import docker
 
 
-def _run_result(returncode: int = 0, stdout: str = "", stderr: str = "") -> subprocess.CompletedProcess:
+def _run_result(
+    returncode: int = 0, stdout: str = "", stderr: str = ""
+) -> subprocess.CompletedProcess:
     return subprocess.CompletedProcess(args=[], returncode=returncode, stdout=stdout, stderr=stderr)
 
 
 class TestDockerInstalled:
-
     def test_true_on_success(self) -> None:
-        with patch("topos_launcher.docker._run", return_value=_run_result(stdout="Docker version 27.1")):
+        with patch(
+            "topos_launcher.docker._run", return_value=_run_result(stdout="Docker version 27.1")
+        ):
             ok, detail = docker.docker_installed()
         assert ok is True
         assert "Docker version" in detail
@@ -33,14 +36,15 @@ class TestDockerInstalled:
         assert "PATH" in detail
 
     def test_false_on_nonzero_exit(self) -> None:
-        with patch("topos_launcher.docker._run", return_value=_run_result(returncode=1, stderr="boom")):
+        with patch(
+            "topos_launcher.docker._run", return_value=_run_result(returncode=1, stderr="boom")
+        ):
             ok, detail = docker.docker_installed()
         assert ok is False
         assert "boom" in detail
 
 
 class TestDockerDaemonRunning:
-
     def test_true_when_info_succeeds(self) -> None:
         with patch("topos_launcher.docker._run", return_value=_run_result(stdout="Server: ...")):
             ok, _ = docker.docker_daemon_running()
@@ -48,22 +52,28 @@ class TestDockerDaemonRunning:
 
     def test_false_when_info_fails(self) -> None:
         stderr = "Cannot connect to the Docker daemon\nadditional noise"
-        with patch("topos_launcher.docker._run", return_value=_run_result(returncode=1, stderr=stderr)):
+        with patch(
+            "topos_launcher.docker._run", return_value=_run_result(returncode=1, stderr=stderr)
+        ):
             ok, detail = docker.docker_daemon_running()
         assert ok is False
         assert detail == "Cannot connect to the Docker daemon"
 
     def test_timeout_surfaces_as_user_message(self) -> None:
-        with patch("topos_launcher.docker._run", side_effect=subprocess.TimeoutExpired(cmd="docker info", timeout=15)):
+        with patch(
+            "topos_launcher.docker._run",
+            side_effect=subprocess.TimeoutExpired(cmd="docker info", timeout=15),
+        ):
             ok, detail = docker.docker_daemon_running()
         assert ok is False
         assert "starting" in detail.lower()
 
 
 class TestComposeUpDown:
-
     def test_compose_up_success(self, tmp_path: Path) -> None:
-        with patch("topos_launcher.docker._run", return_value=_run_result(stdout="done")) as mock_run:
+        with patch(
+            "topos_launcher.docker._run", return_value=_run_result(stdout="done")
+        ) as mock_run:
             ok, _ = docker.compose_up(tmp_path, "docker-compose.prod.yml")
         assert ok is True
         args = mock_run.call_args[0][0]
@@ -71,7 +81,9 @@ class TestComposeUpDown:
 
     def test_compose_up_failure_returns_tail(self, tmp_path: Path) -> None:
         stderr = "\n".join(f"line {i}" for i in range(20))
-        with patch("topos_launcher.docker._run", return_value=_run_result(returncode=1, stderr=stderr)):
+        with patch(
+            "topos_launcher.docker._run", return_value=_run_result(returncode=1, stderr=stderr)
+        ):
             ok, detail = docker.compose_up(tmp_path, "docker-compose.prod.yml")
         assert ok is False
         assert "line 19" in detail
@@ -84,7 +96,6 @@ class TestComposeUpDown:
 
 
 class TestComposeLogsTail:
-
     def test_returns_stdout_by_default(self, tmp_path: Path) -> None:
         with patch("topos_launcher.docker._run", return_value=_run_result(stdout="log lines\n")):
             assert docker.compose_logs_tail(tmp_path, "docker-compose.prod.yml") == "log lines"
@@ -95,11 +106,13 @@ class TestComposeLogsTail:
 
     def test_tolerates_missing_docker(self, tmp_path: Path) -> None:
         with patch("topos_launcher.docker._run", side_effect=FileNotFoundError):
-            assert docker.compose_logs_tail(tmp_path, "docker-compose.prod.yml") == "(logs unavailable)"
+            assert (
+                docker.compose_logs_tail(tmp_path, "docker-compose.prod.yml")
+                == "(logs unavailable)"
+            )
 
 
 class TestRemoveVolumes:
-
     def test_removes_found_volumes(self) -> None:
         ls_result = _run_result(stdout="topos_data\ntopos_cache\n")
         rm_result = _run_result()
@@ -121,7 +134,6 @@ class TestRemoveVolumes:
 
 
 class TestRemoveImages:
-
     def test_removes_found_images(self) -> None:
         ls_result = _run_result(stdout="abc123\ndef456\n")
         rm_result = _run_result()
@@ -138,15 +150,16 @@ class TestRemoveImages:
 
 
 class TestComposeBuild:
-
     def test_success(self, tmp_path: Path) -> None:
         with patch("topos_launcher.docker._run", return_value=_run_result()):
             ok, _ = docker.compose_build(tmp_path, "docker-compose.prod.yml")
         assert ok
 
     def test_failure_returns_detail(self, tmp_path: Path) -> None:
-        with patch("topos_launcher.docker._run",
-                   return_value=_run_result(returncode=1, stderr="build error")):
+        with patch(
+            "topos_launcher.docker._run",
+            return_value=_run_result(returncode=1, stderr="build error"),
+        ):
             ok, detail = docker.compose_build(tmp_path, "docker-compose.prod.yml")
         assert not ok
         assert "build error" in detail

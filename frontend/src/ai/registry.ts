@@ -29,74 +29,79 @@
  */
 
 import {
-    createProviderRegistry,
-    type AiProviderDescriptor,
-    type ProviderRegistry,
+  createProviderRegistry,
+  type AiProviderDescriptor,
+  type ProviderRegistry,
 } from "@astrapi69/ai-key-vault";
 
 /** The provider ids Topos knows. Kept in sync with the backend chain. */
 export type ToposProviderId = "anthropic" | "openai" | "google" | "custom";
 
 /** Provider descriptors in UI order (drives the settings select). */
-export const TOPOS_PROVIDERS: readonly AiProviderDescriptor<ToposProviderId>[] = [
+export const TOPOS_PROVIDERS: readonly AiProviderDescriptor<ToposProviderId>[] =
+  [
     {
-        id: "anthropic",
-        label: "Anthropic (Claude)",
-        keyFormat: {prefix: "sk-ant-", minLength: 40},
-        keyFormatHint: "Starts with sk-ant-",
-        defaultModel: "claude-sonnet-4-6",
-        recommendedModels: ["claude-sonnet-4", "claude-opus-4", "claude-haiku-4"],
-        baseUrl: "https://api.anthropic.com/v1",
-        requiresApiKey: true,
-        // The only provider with a browser-direct opt-in.
-        corsBlocked: false,
+      id: "anthropic",
+      label: "Anthropic (Claude)",
+      keyFormat: { prefix: "sk-ant-", minLength: 40 },
+      keyFormatHint: "Starts with sk-ant-",
+      defaultModel: "claude-sonnet-4-6",
+      recommendedModels: ["claude-sonnet-4", "claude-opus-4", "claude-haiku-4"],
+      baseUrl: "https://api.anthropic.com/v1",
+      requiresApiKey: true,
+      // The only provider with a browser-direct opt-in.
+      corsBlocked: false,
     },
     {
-        id: "openai",
-        label: "OpenAI (GPT)",
-        keyFormat: {prefix: "sk-", minLength: 20, rejectPrefixes: ["sk-ant-"]},
-        keyFormatHint: "Starts with sk-",
-        defaultModel: "gpt-4o-mini",
-        recommendedModels: ["gpt-4o-mini", "gpt-4o"],
-        baseUrl: "https://api.openai.com/v1",
-        requiresApiKey: true,
-        // Open CORS in theory, but Topos gates it behind the backend.
-        corsBlocked: true,
+      id: "openai",
+      label: "OpenAI (GPT)",
+      keyFormat: { prefix: "sk-", minLength: 20, rejectPrefixes: ["sk-ant-"] },
+      keyFormatHint: "Starts with sk-",
+      defaultModel: "gpt-4o-mini",
+      recommendedModels: ["gpt-4o-mini", "gpt-4o"],
+      baseUrl: "https://api.openai.com/v1",
+      requiresApiKey: true,
+      // Open CORS in theory, but Topos gates it behind the backend.
+      corsBlocked: true,
     },
     {
-        id: "google",
-        label: "Google (Gemini)",
-        keyFormat: {minLength: 20, rejectPrefixes: ["sk-"]},
-        keyFormatHint: "At least 20 characters",
-        defaultModel: "gemini-2.0-flash",
-        recommendedModels: ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"],
-        baseUrl: "https://generativelanguage.googleapis.com/v1beta",
-        requiresApiKey: true,
-        corsBlocked: true,
+      id: "google",
+      label: "Google (Gemini)",
+      keyFormat: { minLength: 20, rejectPrefixes: ["sk-"] },
+      keyFormatHint: "At least 20 characters",
+      defaultModel: "gemini-2.0-flash",
+      recommendedModels: [
+        "gemini-2.0-flash",
+        "gemini-1.5-pro",
+        "gemini-1.5-flash",
+      ],
+      baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+      requiresApiKey: true,
+      corsBlocked: true,
     },
     {
-        id: "custom",
-        label: "Custom (OpenAI-compatible)",
-        // Self-hosted keys have no reliable shape; only reject inner whitespace.
-        keyFormat: {minLength: 0},
-        keyFormatHint: "Any token accepted by your endpoint",
-        defaultModel: "",
-        // The user supplies the base URL via CustomEndpointField.
-        baseUrl: "",
-        requiresApiKey: true,
-        corsBlocked: true,
+      id: "custom",
+      label: "Custom (OpenAI-compatible)",
+      // Self-hosted keys have no reliable shape; only reject inner whitespace.
+      keyFormat: { minLength: 0 },
+      keyFormatHint: "Any token accepted by your endpoint",
+      defaultModel: "",
+      // The user supplies the base URL via CustomEndpointField.
+      baseUrl: "",
+      requiresApiKey: true,
+      corsBlocked: true,
     },
-];
+  ];
 
 /** Ready-made registry over the Topos provider set. */
 export const TOPOS_REGISTRY: ProviderRegistry<ToposProviderId> =
-    createProviderRegistry(TOPOS_PROVIDERS);
+  createProviderRegistry(TOPOS_PROVIDERS);
 
 /**
  * Whether a provider can be reached straight from the browser (no backend).
  * Only Anthropic can; mirrors the old ``supportsBrowserDirect`` helper.
  */
 export function supportsBrowserDirect(providerId: string): boolean {
-    const descriptor = TOPOS_REGISTRY.find(providerId);
-    return descriptor ? descriptor.corsBlocked !== true : false;
+  const descriptor = TOPOS_REGISTRY.find(providerId);
+  return descriptor ? descriptor.corsBlocked !== true : false;
 }

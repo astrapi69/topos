@@ -22,7 +22,6 @@ from pathlib import Path
 import pytest
 import yaml
 
-
 I18N_DIR = Path(__file__).resolve().parent.parent / "config" / "i18n"
 REFERENCE = "en"
 TRANSLATIONS = ["de", "es", "fr", "el", "pt", "tr", "ja"]
@@ -63,7 +62,7 @@ def test_no_bool_keys_anywhere(lang: str):
             for k, v in node.items():
                 assert not isinstance(k, bool), (
                     f"{lang}.yaml has a bool YAML key at {path or '<root>'}: "
-                    f"{k!r} -> {v!r}. Quote the key as \"{str(k).lower()}\" "
+                    f'{k!r} -> {v!r}. Quote the key as "{str(k).lower()}" '
                     f"to keep PyYAML from interpreting it as a YAML 1.1 bool."
                 )
                 walk(v, f"{path}.{k}" if path else str(k))
@@ -119,9 +118,7 @@ def test_critical_settings_keys_present(lang: str):
         return
     settings = _ui(_load(lang)).get("settings", {})
     missing = _CRITICAL_SETTINGS_KEYS - set(settings.keys())
-    assert not missing, (
-        f"{lang}.yaml ui.settings is missing critical keys: {sorted(missing)}."
-    )
+    assert not missing, f"{lang}.yaml ui.settings is missing critical keys: {sorted(missing)}."
 
 
 @pytest.mark.parametrize("lang", TRANSLATIONS)

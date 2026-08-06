@@ -136,9 +136,7 @@ def inventory_callsites() -> dict[str, list[tuple[str, int]]]:
         for m in VAR_FALLBACK_RE.finditer(text):
             token = m.group(1)
             line = text[: m.start()].count("\n") + 1
-            by_token.setdefault(token, []).append(
-                (str(path.relative_to(REPO_ROOT)), line)
-            )
+            by_token.setdefault(token, []).append((str(path.relative_to(REPO_ROOT)), line))
     return by_token
 
 
@@ -207,9 +205,7 @@ def print_coverage_table(
     for token in sorted(callsites.keys()):
         row = [token]
         row.append("OK" if token in root_set else "MISSING")
-        row.append(
-            "OK" if token in dark_root_set or token in root_set else "MISSING"
-        )
+        row.append("OK" if token in dark_root_set or token in root_set else "MISSING")
         for p in PALETTES:
             ok = token in defs[(p, "light")] or token in root_set
             row.append("OK" if ok else "MISSING")
@@ -270,7 +266,7 @@ def main() -> int:
             print(f"      ... +{len(sites) - 3} more")
     print()
     print(
-        "Fix: define the token in either ``:root`` (and ``[data-theme=\"dark\"]``\n"
+        'Fix: define the token in either ``:root`` (and ``[data-theme="dark"]``\n'
         "for the dark variant) of ``frontend/src/styles/global.css``, or in\n"
         "the relevant per-palette block when the value should vary. See the\n"
         "lessons-learned ``Periodic theme-token completeness audit`` entry."

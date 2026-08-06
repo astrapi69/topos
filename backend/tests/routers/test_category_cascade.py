@@ -160,9 +160,7 @@ class TestRenameCascade:
     ) -> None:
         moved = _create_item(client, container, "moved", "finance/bank")
 
-        r = client.patch(
-            f"/api/categories/{tree['finance']}", json={"path": "archive/finance"}
-        )
+        r = client.patch(f"/api/categories/{tree['finance']}", json={"path": "archive/finance"})
         assert r.status_code == 200, r.text
         assert _item_path(client, moved) == "archive/finance/bank"
 
@@ -175,9 +173,7 @@ class TestRenameCascade:
     def test_patch_without_path_still_updates_display_name(
         self, client: TestClient, tree: dict[str, int]
     ) -> None:
-        r = client.patch(
-            f"/api/categories/{tree['finance']}", json={"display_name": "Geld"}
-        )
+        r = client.patch(f"/api/categories/{tree['finance']}", json={"display_name": "Geld"})
         assert r.status_code == 200
         assert r.json()["display_name"] == "Geld"
 

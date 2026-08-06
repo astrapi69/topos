@@ -5,23 +5,23 @@
  */
 
 export {
-    TOPOS_PROVIDERS,
-    TOPOS_REGISTRY,
-    supportsBrowserDirect,
-    type ToposProviderId,
+  TOPOS_PROVIDERS,
+  TOPOS_REGISTRY,
+  supportsBrowserDirect,
+  type ToposProviderId,
 } from "./registry";
 export {
-    getMeta,
-    hasVault,
-    isEnabled,
-    isUnlocked,
-    resolveActiveProvider,
-    type ResolvedLocalProvider,
-    type VaultMeta,
-    type VaultSettings,
+  getMeta,
+  hasVault,
+  isEnabled,
+  isUnlocked,
+  resolveActiveProvider,
+  type ResolvedLocalProvider,
+  type VaultMeta,
+  type VaultSettings,
 } from "./localVaultStore";
 export {
-    recognizePhotoDirect,
-    testAiConnectionDirect,
-    type DirectRecognizeOptions,
+  recognizePhotoDirect,
+  testAiConnectionDirect,
+  type DirectRecognizeOptions,
 } from "./browserAiClient";

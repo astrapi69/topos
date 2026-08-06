@@ -24,7 +24,6 @@ from app.licensing import (
     get_license_secret,
 )
 
-
 # --- LicensePayload.is_lifetime / expiry_date / is_expired -----------------
 
 
@@ -171,9 +170,7 @@ def test_validate_license_lifetime_never_expires():
 
 def test_validate_license_author_mismatch_returns_warning_not_error():
     v = _fresh_validator()
-    p = LicensePayload(
-        plugin="audiobook", version="1", expires="lifetime", author="Alice"
-    )
+    p = LicensePayload(plugin="audiobook", version="1", expires="lifetime", author="Alice")
     key = v.create_license(p)
     payload, warning = v.validate_license(key, "audiobook", author_name="Bob")
     assert payload.plugin == "audiobook"

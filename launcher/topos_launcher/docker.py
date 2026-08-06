@@ -17,12 +17,15 @@ _CREATE_NO_WINDOW = 0x08000000
 
 def _creation_flags() -> int:
     import sys
+
     if sys.platform == "win32":
         return _CREATE_NO_WINDOW
     return 0
 
 
-def _run(cmd: list[str], *, cwd: Path | None = None, timeout: float = 10.0) -> subprocess.CompletedProcess:
+def _run(
+    cmd: list[str], *, cwd: Path | None = None, timeout: float = 10.0
+) -> subprocess.CompletedProcess:
     return subprocess.run(
         cmd,
         cwd=str(cwd) if cwd else None,

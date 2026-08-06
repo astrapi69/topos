@@ -25,7 +25,9 @@ def container_id(client: TestClient) -> int:
     return resp.json()["id"]
 
 
-def _upload(client: TestClient, cid: int, full: bytes = FULL, thumb: bytes = THUMB, mime: str = "image/jpeg"):
+def _upload(
+    client: TestClient, cid: int, full: bytes = FULL, thumb: bytes = THUMB, mime: str = "image/jpeg"
+):
     return client.post(
         f"/api/containers/{cid}/photos",
         files={

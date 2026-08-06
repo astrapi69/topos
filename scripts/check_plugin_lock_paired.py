@@ -43,9 +43,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PLUGIN_PYPROJECT_RE = re.compile(
-    r"^plugins/topos-plugin-[^/]+/pyproject\.toml$"
-)
+PLUGIN_PYPROJECT_RE = re.compile(r"^plugins/topos-plugin-[^/]+/pyproject\.toml$")
 
 
 def _staged_files() -> set[str]:

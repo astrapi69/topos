@@ -41,6 +41,7 @@ def clear_lock(path: Path) -> None:
 def pid_is_alive(pid: int) -> bool:
     """Best-effort liveness check. On Windows uses tasklist; on POSIX uses signal 0."""
     import sys
+
     if sys.platform == "win32":
         return _pid_alive_windows(pid)
     return _pid_alive_posix(pid)
@@ -63,6 +64,7 @@ def _pid_alive_posix(pid: int) -> bool:
 
 def _pid_alive_windows(pid: int) -> bool:
     import subprocess
+
     _CREATE_NO_WINDOW = 0x08000000
     try:
         result = subprocess.run(

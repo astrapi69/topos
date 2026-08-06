@@ -68,9 +68,7 @@ def test_category_parent_child_links_via_path():
 
         children = db.query(Category).filter(Category.parent_path == "finance").all()
         assert [c.name for c in children] == ["bank"]
-        grandkids = (
-            db.query(Category).filter(Category.parent_path == "finance/bank").all()
-        )
+        grandkids = db.query(Category).filter(Category.parent_path == "finance/bank").all()
         assert [c.name for c in grandkids] == ["checking-account"]
     finally:
         db.close()

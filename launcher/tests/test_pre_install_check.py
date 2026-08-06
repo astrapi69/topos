@@ -34,48 +34,46 @@ def _patch_target(monkeypatch, target: str) -> None:
 
 
 class TestCheckLauncherTargetStale:
-    def test_latest_newer_than_target_open_download_aborts(
-        self, monkeypatch
-    ) -> None:
+    def test_latest_newer_than_target_open_download_aborts(self, monkeypatch) -> None:
         """Newer release exists; user clicks Open download page.
 
         Expected: webbrowser opens the release URL, helper returns
         False (install aborts).
         """
         _patch_target(monkeypatch, "0.17.0")
-        with patch(
-            "topos_launcher.update_check.fetch_latest_version",
-            return_value=("v0.25.0", "https://example/release/v0.25.0"),
-        ), patch(
-            "topos_launcher.ui.three_button_dialog",
-            return_value="primary",
-        ), patch(
-            "webbrowser.open"
-        ) as mock_open:
+        with (
+            patch(
+                "topos_launcher.update_check.fetch_latest_version",
+                return_value=("v0.25.0", "https://example/release/v0.25.0"),
+            ),
+            patch(
+                "topos_launcher.ui.three_button_dialog",
+                return_value="primary",
+            ),
+            patch("webbrowser.open") as mock_open,
+        ):
             result = launcher_main._check_launcher_target_stale()
         assert result is False
-        mock_open.assert_called_once_with(
-            "https://example/release/v0.25.0"
-        )
+        mock_open.assert_called_once_with("https://example/release/v0.25.0")
 
-    def test_latest_newer_continue_with_older_proceeds(
-        self, monkeypatch
-    ) -> None:
+    def test_latest_newer_continue_with_older_proceeds(self, monkeypatch) -> None:
         """Newer release; user clicks Continue with older version.
 
         Expected: helper returns True, install proceeds, browser is
         not opened.
         """
         _patch_target(monkeypatch, "0.17.0")
-        with patch(
-            "topos_launcher.update_check.fetch_latest_version",
-            return_value=("v0.25.0", "https://example/release/v0.25.0"),
-        ), patch(
-            "topos_launcher.ui.three_button_dialog",
-            return_value="secondary",
-        ), patch(
-            "webbrowser.open"
-        ) as mock_open:
+        with (
+            patch(
+                "topos_launcher.update_check.fetch_latest_version",
+                return_value=("v0.25.0", "https://example/release/v0.25.0"),
+            ),
+            patch(
+                "topos_launcher.ui.three_button_dialog",
+                return_value="secondary",
+            ),
+            patch("webbrowser.open") as mock_open,
+        ):
             result = launcher_main._check_launcher_target_stale()
         assert result is True
         mock_open.assert_not_called()
@@ -87,15 +85,17 @@ class TestCheckLauncherTargetStale:
         not opened.
         """
         _patch_target(monkeypatch, "0.17.0")
-        with patch(
-            "topos_launcher.update_check.fetch_latest_version",
-            return_value=("v0.25.0", "https://example/release/v0.25.0"),
-        ), patch(
-            "topos_launcher.ui.three_button_dialog",
-            return_value="cancel",
-        ), patch(
-            "webbrowser.open"
-        ) as mock_open:
+        with (
+            patch(
+                "topos_launcher.update_check.fetch_latest_version",
+                return_value=("v0.25.0", "https://example/release/v0.25.0"),
+            ),
+            patch(
+                "topos_launcher.ui.three_button_dialog",
+                return_value="cancel",
+            ),
+            patch("webbrowser.open") as mock_open,
+        ):
             result = launcher_main._check_launcher_target_stale()
         assert result is False
         mock_open.assert_not_called()
@@ -106,12 +106,15 @@ class TestCheckLauncherTargetStale:
         Expected: helper returns True, dialog is never shown.
         """
         _patch_target(monkeypatch, "0.25.0")
-        with patch(
-            "topos_launcher.update_check.fetch_latest_version",
-            return_value=("v0.25.0", "https://example/release/v0.25.0"),
-        ), patch(
-            "topos_launcher.ui.three_button_dialog",
-        ) as mock_dialog:
+        with (
+            patch(
+                "topos_launcher.update_check.fetch_latest_version",
+                return_value=("v0.25.0", "https://example/release/v0.25.0"),
+            ),
+            patch(
+                "topos_launcher.ui.three_button_dialog",
+            ) as mock_dialog,
+        ):
             result = launcher_main._check_launcher_target_stale()
         assert result is True
         mock_dialog.assert_not_called()
@@ -123,12 +126,15 @@ class TestCheckLauncherTargetStale:
         embedded TARGET), dialog is never shown.
         """
         _patch_target(monkeypatch, "0.17.0")
-        with patch(
-            "topos_launcher.update_check.fetch_latest_version",
-            return_value=None,
-        ), patch(
-            "topos_launcher.ui.three_button_dialog",
-        ) as mock_dialog:
+        with (
+            patch(
+                "topos_launcher.update_check.fetch_latest_version",
+                return_value=None,
+            ),
+            patch(
+                "topos_launcher.ui.three_button_dialog",
+            ) as mock_dialog,
+        ):
             result = launcher_main._check_launcher_target_stale()
         assert result is True
         mock_dialog.assert_not_called()

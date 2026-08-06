@@ -82,9 +82,7 @@ if _THIS_CONFTEST.parent.parent.name == "mutants":
             _dst = _MUTANT_APP / _app_entry.name
             if _dst.exists():
                 continue
-            os.symlink(
-                _app_entry, _dst, target_is_directory=_app_entry.is_dir()
-            )
+            os.symlink(_app_entry, _dst, target_is_directory=_app_entry.is_dir())
 
 # MUST run before any `from app.* import ...` statement in this file
 # or in any test module that pytest collects.
@@ -97,9 +95,7 @@ os.environ.setdefault("TEST_DATABASE_URL", "sqlite:///:memory:")
 # cleanup runs at end of session; the env var here is set early so
 # any module-import-time path resolution still hits a tmp location.
 if "TOPOS_DATA_DIR" not in os.environ:
-    os.environ["TOPOS_DATA_DIR"] = tempfile.mkdtemp(
-        prefix="topos-test-data-"
-    )
+    os.environ["TOPOS_DATA_DIR"] = tempfile.mkdtemp(prefix="topos-test-data-")
 
 # 41+ test modules open a FastAPI TestClient, each of which triggers the
 # app lifespan startup path. Starlette's TestClient recurses through its

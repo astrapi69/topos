@@ -15,7 +15,6 @@ from topos_launcher import update_check
 
 
 class TestIsNewer:
-
     def test_patch_bump(self) -> None:
         assert update_check.is_newer("0.16.0", "0.16.1") is True
 
@@ -58,15 +57,21 @@ def _mock_response(body: dict) -> MagicMock:
 
 
 class TestFetchLatestVersion:
-
     def test_returns_tag_and_url(self) -> None:
-        body = {"tag_name": "v0.17.0", "html_url": "https://github.com/astrapi69/pluginforge-app-template/releases/tag/v0.17.0"}
+        body = {
+            "tag_name": "v0.17.0",
+            "html_url": "https://github.com/astrapi69/pluginforge-app-template/releases/tag/v0.17.0",
+        }
         with patch("urllib.request.urlopen", return_value=_mock_response(body)):
             result = update_check.fetch_latest_version()
-        assert result == ("v0.17.0", "https://github.com/astrapi69/pluginforge-app-template/releases/tag/v0.17.0")
+        assert result == (
+            "v0.17.0",
+            "https://github.com/astrapi69/pluginforge-app-template/releases/tag/v0.17.0",
+        )
 
     def test_network_error_returns_none(self) -> None:
         from urllib.error import URLError
+
         with patch("urllib.request.urlopen", side_effect=URLError("no network")):
             assert update_check.fetch_latest_version() is None
 
@@ -131,11 +136,13 @@ class TestCheckForUpdateAsync:
 
     def test_broken_callback_does_not_crash(self) -> None:
         """A callback that raises must not propagate out of the thread."""
+
         def broken(tag: str, url: str) -> None:
             raise RuntimeError("subscriber bug")
 
         with patch.object(
-            update_check, "fetch_latest_version",
+            update_check,
+            "fetch_latest_version",
             return_value=("v0.17.0", "https://example.com"),
         ):
             # Should not raise
@@ -144,7 +151,6 @@ class TestCheckForUpdateAsync:
 
 
 class TestConstants:
-
     def test_releases_url_targets_correct_repo(self) -> None:
         assert "astrapi69/topos" in update_check.RELEASES_URL
         assert update_check.RELEASES_URL.endswith("/releases/latest")

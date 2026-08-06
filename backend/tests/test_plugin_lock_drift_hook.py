@@ -35,9 +35,7 @@ import pytest
 # usual ``parent.parent.parent`` shortcut resolves to ``backend/``
 # instead of the repo root when mutmut copies the suite into
 # ``mutants/tests/``.
-REPO_ROOT = next(
-    p for p in Path(__file__).resolve().parents if (p / "scripts").is_dir()
-)
+REPO_ROOT = next(p for p in Path(__file__).resolve().parents if (p / "scripts").is_dir())
 SCRIPT_PATH = REPO_ROOT / "scripts" / "check_plugin_lock_paired.py"
 
 
@@ -60,7 +58,7 @@ def isolated_git(tmp_path: Path) -> Path:
     plugin_dir.mkdir(parents=True)
     pyproject = plugin_dir / "pyproject.toml"
     lock = plugin_dir / "poetry.lock"
-    pyproject.write_text("[tool.poetry]\nname = \"x\"\n", encoding="utf-8")
+    pyproject.write_text('[tool.poetry]\nname = "x"\n', encoding="utf-8")
     lock.write_text("# lockfile placeholder\n", encoding="utf-8")
     # Initialize git, do an initial commit so subsequent edits show as
     # modifications rather than new files.
@@ -230,12 +228,8 @@ def test_multiple_pyprojects_partial_pairing_fails(
     # Add a second plugin to the fixture
     plugin2 = isolated_git / "plugins" / "topos-plugin-export-2"
     plugin2.mkdir()
-    (plugin2 / "pyproject.toml").write_text(
-        "[tool.poetry]\nname = \"x2\"\n", encoding="utf-8"
-    )
-    (plugin2 / "poetry.lock").write_text(
-        "# lock 2\n", encoding="utf-8"
-    )
+    (plugin2 / "pyproject.toml").write_text('[tool.poetry]\nname = "x2"\n', encoding="utf-8")
+    (plugin2 / "poetry.lock").write_text("# lock 2\n", encoding="utf-8")
     _stage(
         isolated_git,
         "plugins/topos-plugin-export-2/pyproject.toml",

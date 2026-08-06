@@ -47,8 +47,7 @@ except ImportError:
     from pathlib import Path as _Path
 
     _backend_pyproject = (
-        _Path(__file__).resolve().parent.parent.parent
-        / "backend" / "pyproject.toml"
+        _Path(__file__).resolve().parent.parent.parent / "backend" / "pyproject.toml"
     )
     try:
         with _backend_pyproject.open("rb") as _f:
@@ -89,6 +88,7 @@ def download_release(target_dir: Path, version: str | None = None) -> tuple[bool
         tmp_zip = Path(tmp_zip_path)
         try:
             import os
+
             os.close(tmp_fd)
             with urlopen(url, timeout=120) as resp, open(tmp_zip, "wb") as out:
                 shutil.copyfileobj(resp, out)
@@ -113,7 +113,7 @@ def download_release(target_dir: Path, version: str | None = None) -> tuple[bool
                 # Strip the top-level directory
                 rel = member.filename
                 if rel.startswith(prefix):
-                    rel = rel[len(prefix):]
+                    rel = rel[len(prefix) :]
                 if not rel:
                     continue
                 dest = target_dir / rel

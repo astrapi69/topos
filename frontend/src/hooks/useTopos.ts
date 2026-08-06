@@ -15,25 +15,31 @@
  * Mutations call ``api.<entity>.xxx`` then ``refresh()``.
  */
 
-import {useCallback, useEffect, useState} from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import {api} from "../api/client";
-import {db, refreshTable} from "../db/schema";
-import {isBackendAvailable} from "../utils/backendStatus";
-import type {ActionRow, ActionStatus, Category, Container, Item} from "../types/topos";
+import { api } from "../api/client";
+import { db, refreshTable } from "../db/schema";
+import { isBackendAvailable } from "../utils/backendStatus";
+import type {
+  ActionRow,
+  ActionStatus,
+  Category,
+  Container,
+  Item,
+} from "../types/topos";
 
 interface CachedResult<T> {
-    data: T[];
-    loading: boolean;
-    error: Error | null;
-    refresh: () => Promise<void>;
+  data: T[];
+  loading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
 }
 
 interface CachedSingle<T> {
-    data: T | undefined;
-    loading: boolean;
-    error: Error | null;
-    refresh: () => Promise<void>;
+  data: T | undefined;
+  loading: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
 }
 
 // Each refresh checks backend availability first. In Dexie-only mode
@@ -41,226 +47,230 @@ interface CachedSingle<T> {
 // instead of calling /api, so the console is not flooded with 404s.
 
 export async function refreshContainers(): Promise<Container[]> {
-    if (!(await isBackendAvailable())) return db.containers.toArray();
-    const fresh = await api.containers.list();
-    await refreshTable(db.containers, fresh);
-    return fresh;
+  if (!(await isBackendAvailable())) return db.containers.toArray();
+  const fresh = await api.containers.list();
+  await refreshTable(db.containers, fresh);
+  return fresh;
 }
 
 export async function refreshItems(): Promise<Item[]> {
-    if (!(await isBackendAvailable())) return db.items.toArray();
-    const fresh = await api.items.list();
-    await refreshTable(db.items, fresh);
-    return fresh;
+  if (!(await isBackendAvailable())) return db.items.toArray();
+  const fresh = await api.items.list();
+  await refreshTable(db.items, fresh);
+  return fresh;
 }
 
 export async function refreshCategories(): Promise<Category[]> {
-    if (!(await isBackendAvailable())) return db.categories.toArray();
-    const fresh = await api.categories.list();
-    await refreshTable(db.categories, fresh);
-    return fresh;
+  if (!(await isBackendAvailable())) return db.categories.toArray();
+  const fresh = await api.categories.list();
+  await refreshTable(db.categories, fresh);
+  return fresh;
 }
 
 export async function refreshActions(): Promise<ActionRow[]> {
-    if (!(await isBackendAvailable())) return db.actions.toArray();
-    const fresh = await api.actions.list();
-    await refreshTable(db.actions, fresh);
-    return fresh;
+  if (!(await isBackendAvailable())) return db.actions.toArray();
+  const fresh = await api.actions.list();
+  await refreshTable(db.actions, fresh);
+  return fresh;
 }
 
 /** Refresh every cached table in one shot. Called after a successful
  *  Excel import so the dashboard reflects the new state immediately. */
 export async function refreshAll(): Promise<void> {
-    await Promise.all([
-        refreshContainers(),
-        refreshItems(),
-        refreshCategories(),
-        refreshActions(),
-    ]);
+  await Promise.all([
+    refreshContainers(),
+    refreshItems(),
+    refreshCategories(),
+    refreshActions(),
+  ]);
 }
 
-function useCachedCollection<T extends {id: number}>(
-    loadCached: () => Promise<T[]>,
-    fetchFresh: () => Promise<T[]>,
+function useCachedCollection<T extends { id: number }>(
+  loadCached: () => Promise<T[]>,
+  fetchFresh: () => Promise<T[]>,
 ): CachedResult<T> {
-    const [data, setData] = useState<T[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-    const refresh = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const fresh = await fetchFresh();
-            setData(fresh);
-        } catch (e) {
-            setError(e as Error);
-        } finally {
-            setLoading(false);
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const fresh = await fetchFresh();
+      setData(fresh);
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchFresh]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const cached = await loadCached();
+        if (!cancelled && cached.length > 0) {
+          setData(cached);
         }
-    }, [fetchFresh]);
+      } catch {
+        // Cache misses are fine; the fresh fetch below populates state.
+      }
+      try {
+        const fresh = await fetchFresh();
+        if (!cancelled) {
+          setData(fresh);
+          setError(null);
+        }
+      } catch (e) {
+        if (!cancelled) setError(e as Error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadCached, fetchFresh]);
 
-    useEffect(() => {
-        let cancelled = false;
-        (async () => {
-            try {
-                const cached = await loadCached();
-                if (!cancelled && cached.length > 0) {
-                    setData(cached);
-                }
-            } catch {
-                // Cache misses are fine; the fresh fetch below populates state.
-            }
-            try {
-                const fresh = await fetchFresh();
-                if (!cancelled) {
-                    setData(fresh);
-                    setError(null);
-                }
-            } catch (e) {
-                if (!cancelled) setError(e as Error);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
-    }, [loadCached, fetchFresh]);
+  // Re-read when the cache is repopulated out of band (demo seed on
+  // first start, or a backend connecting from Settings).
+  useEffect(() => {
+    const onRefresh = () => void refresh();
+    window.addEventListener("topos:data-refresh", onRefresh);
+    return () => window.removeEventListener("topos:data-refresh", onRefresh);
+  }, [refresh]);
 
-    // Re-read when the cache is repopulated out of band (demo seed on
-    // first start, or a backend connecting from Settings).
-    useEffect(() => {
-        const onRefresh = () => void refresh();
-        window.addEventListener("topos:data-refresh", onRefresh);
-        return () => window.removeEventListener("topos:data-refresh", onRefresh);
-    }, [refresh]);
-
-    return {data, loading, error, refresh};
+  return { data, loading, error, refresh };
 }
 
 export function useContainers(): CachedResult<Container> {
-    const loadCached = useCallback(() => db.containers.toArray(), []);
-    return useCachedCollection<Container>(loadCached, refreshContainers);
+  const loadCached = useCallback(() => db.containers.toArray(), []);
+  return useCachedCollection<Container>(loadCached, refreshContainers);
 }
 
-export function useItems(filters: {containerId?: number} = {}): CachedResult<Item> {
-    const {containerId} = filters;
-    const loadCached = useCallback(
-        () =>
-            containerId !== undefined
-                ? db.items.where("containerId").equals(containerId).toArray()
-                : db.items.toArray(),
-        [containerId],
-    );
-    const fetchFresh = useCallback(async () => {
-        if (containerId !== undefined) {
-            if (!(await isBackendAvailable())) {
-                return db.items.where("containerId").equals(containerId).toArray();
-            }
-            const fresh = await api.items.list({containerId});
-            // Replace just this container's slice in the cache.
-            await db.items.where("containerId").equals(containerId).delete();
-            if (fresh.length > 0) await db.items.bulkPut(fresh);
-            return fresh;
-        }
-        return refreshItems();
-    }, [containerId]);
-    return useCachedCollection<Item>(loadCached, fetchFresh);
+export function useItems(
+  filters: { containerId?: number } = {},
+): CachedResult<Item> {
+  const { containerId } = filters;
+  const loadCached = useCallback(
+    () =>
+      containerId !== undefined
+        ? db.items.where("containerId").equals(containerId).toArray()
+        : db.items.toArray(),
+    [containerId],
+  );
+  const fetchFresh = useCallback(async () => {
+    if (containerId !== undefined) {
+      if (!(await isBackendAvailable())) {
+        return db.items.where("containerId").equals(containerId).toArray();
+      }
+      const fresh = await api.items.list({ containerId });
+      // Replace just this container's slice in the cache.
+      await db.items.where("containerId").equals(containerId).delete();
+      if (fresh.length > 0) await db.items.bulkPut(fresh);
+      return fresh;
+    }
+    return refreshItems();
+  }, [containerId]);
+  return useCachedCollection<Item>(loadCached, fetchFresh);
 }
 
 export function useCategories(): CachedResult<Category> {
-    const loadCached = useCallback(() => db.categories.toArray(), []);
-    return useCachedCollection<Category>(loadCached, refreshCategories);
+  const loadCached = useCallback(() => db.categories.toArray(), []);
+  return useCachedCollection<Category>(loadCached, refreshCategories);
 }
 
-export function useActions(filters: {status?: ActionStatus} = {}): CachedResult<ActionRow> {
-    const {status} = filters;
-    const loadCached = useCallback(
-        () =>
-            status !== undefined
-                ? db.actions.where("status").equals(status).toArray()
-                : db.actions.toArray(),
-        [status],
-    );
-    const fetchFresh = useCallback(async () => {
-        if (status !== undefined) {
-            if (!(await isBackendAvailable())) {
-                return db.actions.where("status").equals(status).toArray();
-            }
-            const fresh = await api.actions.list({status});
-            await db.actions.where("status").equals(status).delete();
-            if (fresh.length > 0) await db.actions.bulkPut(fresh);
-            return fresh;
-        }
-        return refreshActions();
-    }, [status]);
-    return useCachedCollection<ActionRow>(loadCached, fetchFresh);
+export function useActions(
+  filters: { status?: ActionStatus } = {},
+): CachedResult<ActionRow> {
+  const { status } = filters;
+  const loadCached = useCallback(
+    () =>
+      status !== undefined
+        ? db.actions.where("status").equals(status).toArray()
+        : db.actions.toArray(),
+    [status],
+  );
+  const fetchFresh = useCallback(async () => {
+    if (status !== undefined) {
+      if (!(await isBackendAvailable())) {
+        return db.actions.where("status").equals(status).toArray();
+      }
+      const fresh = await api.actions.list({ status });
+      await db.actions.where("status").equals(status).delete();
+      if (fresh.length > 0) await db.actions.bulkPut(fresh);
+      return fresh;
+    }
+    return refreshActions();
+  }, [status]);
+  return useCachedCollection<ActionRow>(loadCached, fetchFresh);
 }
 
 export function useContainer(id: number | null): CachedSingle<Container> {
-    const [data, setData] = useState<Container | undefined>(undefined);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<Container | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-    const refresh = useCallback(async () => {
-        if (id === null) {
-            setData(undefined);
-            setLoading(false);
-            return;
+  const refresh = useCallback(async () => {
+    if (id === null) {
+      setData(undefined);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      if (!(await isBackendAvailable())) {
+        setData(await db.containers.get(id));
+        return;
+      }
+      const fresh = await api.containers.get(id);
+      await db.containers.put(fresh);
+      setData(fresh);
+    } catch (e) {
+      setError(e as Error);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (id === null) {
+        setLoading(false);
+        return;
+      }
+      const cached = await db.containers.get(id);
+      if (!cancelled && cached) setData(cached);
+      try {
+        if (!(await isBackendAvailable())) {
+          // Dexie-only mode: keep the cached value, no /api call.
+          return;
         }
-        setLoading(true);
-        setError(null);
-        try {
-            if (!(await isBackendAvailable())) {
-                setData(await db.containers.get(id));
-                return;
-            }
-            const fresh = await api.containers.get(id);
-            await db.containers.put(fresh);
-            setData(fresh);
-        } catch (e) {
-            setError(e as Error);
-        } finally {
-            setLoading(false);
+        const fresh = await api.containers.get(id);
+        if (!cancelled) {
+          setData(fresh);
+          await db.containers.put(fresh);
         }
-    }, [id]);
+      } catch (e) {
+        if (!cancelled) setError(e as Error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
-    useEffect(() => {
-        let cancelled = false;
-        (async () => {
-            if (id === null) {
-                setLoading(false);
-                return;
-            }
-            const cached = await db.containers.get(id);
-            if (!cancelled && cached) setData(cached);
-            try {
-                if (!(await isBackendAvailable())) {
-                    // Dexie-only mode: keep the cached value, no /api call.
-                    return;
-                }
-                const fresh = await api.containers.get(id);
-                if (!cancelled) {
-                    setData(fresh);
-                    await db.containers.put(fresh);
-                }
-            } catch (e) {
-                if (!cancelled) setError(e as Error);
-            } finally {
-                if (!cancelled) setLoading(false);
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
-    }, [id]);
+  useEffect(() => {
+    const onRefresh = () => void refresh();
+    window.addEventListener("topos:data-refresh", onRefresh);
+    return () => window.removeEventListener("topos:data-refresh", onRefresh);
+  }, [refresh]);
 
-    useEffect(() => {
-        const onRefresh = () => void refresh();
-        window.addEventListener("topos:data-refresh", onRefresh);
-        return () => window.removeEventListener("topos:data-refresh", onRefresh);
-    }, [refresh]);
-
-    return {data, loading, error, refresh};
+  return { data, loading, error, refresh };
 }

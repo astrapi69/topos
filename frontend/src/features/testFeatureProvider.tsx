@@ -7,24 +7,27 @@
  * under test requires.
  */
 
-import type {ReactNode} from "react";
+import type { ReactNode } from "react";
 
-import {FeatureProvider} from "@astrapi69/feature-strategy-react";
+import { FeatureProvider } from "@astrapi69/feature-strategy-react";
 
-import {featureRegistry, type FeatureContext} from "./featureConfig";
+import { featureRegistry, type FeatureContext } from "./featureConfig";
 
-const DEFAULT_CONTEXT: FeatureContext = {backendAvailable: true, hasAiKey: true};
+const DEFAULT_CONTEXT: FeatureContext = {
+  backendAvailable: true,
+  hasAiKey: true,
+};
 
 export function TestFeatureProvider({
-    context = DEFAULT_CONTEXT,
-    children,
+  context = DEFAULT_CONTEXT,
+  children,
 }: {
-    context?: FeatureContext;
-    children: ReactNode;
+  context?: FeatureContext;
+  children: ReactNode;
 }) {
-    return (
-        <FeatureProvider registry={featureRegistry} context={context}>
-            {children}
-        </FeatureProvider>
-    );
+  return (
+    <FeatureProvider registry={featureRegistry} context={context}>
+      {children}
+    </FeatureProvider>
+  );
 }

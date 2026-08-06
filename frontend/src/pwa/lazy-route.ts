@@ -9,14 +9,14 @@
  * the fresh index, then gives up if it still fails (so it never loops).
  */
 
-import type {ComponentType} from "react";
+import type { ComponentType } from "react";
 
-import {lazyWithReload as kitLazyWithReload} from "@astrapi69/pwa-update-react";
+import { lazyWithReload as kitLazyWithReload } from "@astrapi69/pwa-update-react";
 
 /** React.lazy that survives a stale deploy with a single guarded reload. */
 export function lazyWithReload<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the canonical React.lazy generic
-    T extends ComponentType<any>,
->(factory: () => Promise<{default: T}>) {
-    return kitLazyWithReload(factory, {storageNamespace: "topos"});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- the canonical React.lazy generic
+  T extends ComponentType<any>,
+>(factory: () => Promise<{ default: T }>) {
+  return kitLazyWithReload(factory, { storageNamespace: "topos" });
 }
