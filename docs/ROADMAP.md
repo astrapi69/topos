@@ -25,19 +25,40 @@
       auto-templated 0o600, env-override map extendable by plugins
       via `register_plugin_secret_override`
 
+### Phase 2 - features
+
+- [x] **Category rename cascade + orphan report** (issue #11):
+      rename/move cascade (prefix rewrite over subcategories + item
+      paths), delete cascade (items nulled, not deleted),
+      `GET /api/categories/orphans` + Settings reassign/remove UI. No
+      schema migration. Non-urgent leftovers documented in #11.
+- [x] **Client-side search (MiniSearch)**: fuzzy full-text over the
+      four entities, incremental index updates, global search +
+      Dashboard search (`search/buildIndex.ts`, `GlobalSearch.tsx`,
+      `useSearch.ts`). No longer reliant on the backend ilike-substring
+      `/items/search`.
+- [x] **Data export/import** (Settings, core feature - not a plugin):
+      `.topos.json` backup. Backend path (`GET`/`POST /api/backup/*`,
+      one transaction, foreign-key remapping) + offline Dexie path,
+      auto-selected by `isBackendAvailable()`; merge/replace with a
+      typed-confirm on replace.
+- [x] **Multi-theme system**: 6 curated themes (light, dark, graphite,
+      soft-pop, high-contrast, ocean) on `data-app-theme` + theme
+      picker, token-parity test, pre-paint anti-flash.
+- [x] **AI provider settings** via `@astrapi69/ai-key-vault(-react)`:
+      passphrase-encrypted local key vault (offline PWA) + backend-gated
+      providers; photo-intake box-content recognition.
+- [x] **PWA auto-update**: `@astrapi69/pwa-update` + `version.json`
+      build manifest + `registerType: autoUpdate` (stale GitHub-Pages
+      deploys self-heal); base-path-aware same-origin API URLs.
+- [x] **About section** in Settings: version / build-hash / build-date
+      (VersionCard), MIT license, source + report-issue links, donation
+      channels (Liberapay / GitHub Sponsors / Ko-fi).
+- [x] **feature-strategy gates**: `@astrapi69/feature-strategy` for the
+      backend-required capabilities (excel-import, category-edit).
+
 ## Next (P2 - high-value features)
 
-- [x] **Category rename cascade + orphan report** (was: "real
-      relation instead of a slash-joined string"). The as-is audit
-      (issue #11) showed no tree structure is needed - the hierarchy
-      already lives in the `Category` table and every
-      `Item.category_path` consumer needs only string operations.
-      Shipped instead: rename/move cascade (prefix rewrite over
-      subcategories + item paths), delete cascade (items nulled, not
-      deleted), `GET /api/categories/orphans` + Settings UI for
-      reassign/remove. No schema migration. Remaining non-urgent
-      findings (dead Dexie `categoryPath` index, backend-vs-client
-      search-semantics divergence) stay documented in #11.
 - [ ] **QR-label-print plugin**. Generate a printable PDF with one
       QR code per container, keyed by `Container.external_id`.
       Scan from a phone -> jump to `/containers/{id}`.
@@ -56,11 +77,6 @@
 - [ ] i18n: translate the six placeholder catalogs (EL, ES, FR,
       JA, PT, TR) into their target languages
 - [ ] CSV-import plugin (sibling to Excel)
-- [ ] Backup / restore plugin (export full DB + uploads to a
-      file or remote)
-- [ ] Search: integrate MiniSearch for client-side fuzzy
-      full-text search; the current backend `/items/search` is
-      ilike-substring only
 - [ ] Voice-input plugin for hands-free item entry (mobile-first,
       basement / shelf-side use case)
 
