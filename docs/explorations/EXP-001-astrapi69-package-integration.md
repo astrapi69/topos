@@ -204,27 +204,39 @@ wiederholen: eigenes Stylesheet fuer die semantischen Klassen (analog
 
 Konsolidiert die verstreuten ad-hoc-Gates.
 
-**Neu:**
+**Umgesetzt (Schritt 2a, backend-required Gates):**
 
-1. `frontend/src/features/featureConfig.ts`: Topos-`FEATURES`-Map,
+1. `frontend/src/features/featureConfig.ts`: `FEATURES`-Map,
    `FeatureContext = { backendAvailable: boolean; hasAiKey: boolean }`,
-   Gating-Klassen. Kandidaten:
-   - `NEEDS_AI_KEY`: Foto-Intake-Analyse, AI-Provider-Features.
-   - `NEEDS_BACKEND` (statt AL's `DESKTOP_ONLY`): Excel-Import,
-     Settings-Schreibpfade, alle mutierenden `/api`-Aufrufe.
-   - `BROWSER_DIRECT_ONLY_ANTHROPIC`: CORS-Gate als Regel statt ad-hoc.
-2. `FeatureProvider` in `App.tsx` mounten (innerhalb i18n), Context aus
-   `isBackendAvailable()` + AI-Key-Status memoized.
-3. Gate-Sites migrieren: Foto-Intake-Button, AI-Panel-Modi,
-   Excel-Import-Route auf `useFeature` / `<Feature>` umstellen.
+   ein `BACKEND_REQUIRED`-Regelsatz (statt AL's `DESKTOP_ONLY`). Nur
+   tatsaechlich konsumierte IDs definiert (kein Dead-Config): `excel-import`,
+   `category-edit`.
+2. `AppFeatureProvider` in `App.tsx` gemountet (innerhalb i18n). Er besitzt
+   die geteilte `/api/health`-Probe (Re-Eval auf `topos:data-refresh`) + den
+   lokalen Vault-Status und liefert einen memoisierten Context.
+3. Gate-Sites migriert:
+   - **excel-import**: `Import.tsx` war zuvor **ungated** - offline war der
+     Button aktiv und der POST scheiterte nur mit Toast. Jetzt disabled +
+     Hinweis ohne Backend.
+   - **category-edit**: `CategoryBrowse` Rename/Delete-Gate von der lokalen
+     `backendUp`-Flag auf `useFeature(CATEGORY_EDIT)` umgestellt; State
+     entfernt.
 
-**Entfernen:** die betroffenen ad-hoc-Bedingungen an ihren
-Verwendungsorten (durch `useFeature(...)` ersetzt).
+**Tailwind:** `feature-strategy-react` rendert keine className (0 Treffer im
+dist) - kein Content-Glob/Safelist noetig.
 
-**Tailwind:** Content-Glob-Check auch hier (feature-strategy-react ist
-klein, primaer Logik; prueft ob es sichtbare Klassen rendert).
+**Commit:** `feat(frontend): add feature-strategy with Topos backend-required gates`
 
-**Commit:** `feat(frontend): add feature-strategy with Topos feature gates (ai-key, backend-required)`
+**Deferred (Schritt 2b, eigener Folgeschritt):** die AI-key- und
+CORS/browser-direct-Gates. `photo-intake` (recognize + commit) und
+`ai-browser-direct` bleiben vorerst in ihren Seiten bzw. im ai-key-vault-Kit.
+Grund: `PhotoIntake` traegt eine dicht getestete Bereitschaftslogik
+(`online`, `backendUp`, `localAiReady`), deren Migration die 36er-Testsuite
+umschreiben wuerde bei identischem Verhalten - schlechtes Risiko/Nutzen fuer
+denselben Commit. Der CORS-Gate liegt im vendored Kit (via `browserRuntime` +
+`corsBlocked`), Konvertierung hiesse dem Kit eine Entscheidung einzuspeisen
+statt ein eigenes `if` zu ersetzen. Gate-Map + Feature-ID-Vorschlaege stehen
+im Session-Bericht; Migration ist ein separater Schritt.
 
 ### Reihenfolge-Begruendung
 
@@ -240,7 +252,7 @@ durchdacht werden muss und der Nutzen (Aufraeumen) weniger dringend ist.
 Beide Bundles folgen exakt dem Muster der bereits abgeschlossenen
 ai-key-vault-Integration:
 
-| Aspekt | ai-key-vault (fertig) | pwa-update / feature-strategy (geplant) |
+| Aspekt | ai-key-vault (fertig) | pwa-update / feature-strategy (umgesetzt) |
 |---|---|---|
 | DI-Slots | `Button`/`Input`/`Link`-Slots aus `ui/classes.ts` | `Button`-Slot bei `PwaUpdateProvider` |
 | Offline-i18n | `wrapKitT(t, lang)` gebuendelte DE/EN-Map | `buildMessages(t)` + gebuendelter Fallback |
