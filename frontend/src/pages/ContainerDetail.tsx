@@ -10,6 +10,9 @@ import {ChevronDown, ChevronRight} from "lucide-react";
 
 import NavBar from "../components/NavBar";
 import FormField from "../components/FormField";
+import QrCodeModal from "../components/QrCodeModal";
+import {containerShareUrl} from "../utils/shareUrl";
+import {qrLabels} from "../utils/qrLabels";
 import {useActions, useContainer, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
@@ -38,6 +41,7 @@ export default function ContainerDetail() {
     const navigate = useNavigate();
     const containerId = params.id ? Number(params.id) : null;
     const {data: container, loading, error, refresh} = useContainer(containerId);
+    const [showQr, setShowQr] = useState(false);
     const items = useItems({containerId: containerId ?? undefined});
     const actions = useActions({});
     const {confirm} = useDialog();
@@ -210,7 +214,15 @@ export default function ContainerDetail() {
                                 : t("topos.page.container_detail.missing", "Container nicht gefunden"))}
                     </h1>
                     {container && !editing && (
-                        <div style={{display: "flex", gap: "0.5rem"}}>
+                        <div style={{display: "flex", gap: "0.5rem", flexWrap: "wrap"}}>
+                            <button
+                                type="button"
+                                className={btn}
+                                data-testid="container-detail-qr"
+                                onClick={() => setShowQr(true)}
+                            >
+                                {t("topos.page.container_detail.share_qr", "QR teilen")}
+                            </button>
                             <button type="button" className={btn} data-testid="container-detail-edit" onClick={openEdit}>
                                 {t("topos.common.edit", "Bearbeiten")}
                             </button>
@@ -455,6 +467,16 @@ export default function ContainerDetail() {
                     </div>
                 </section>
             </main>
+            {showQr && container && containerId !== null && (
+                <QrCodeModal
+                    url={containerShareUrl(containerId)}
+                    title={t("topos.page.container_detail.share_qr_title", "Container teilen")}
+                    note={container.label}
+                    labels={qrLabels(t)}
+                    fileName={`topos-container-${container.externalId}.png`}
+                    onClose={() => setShowQr(false)}
+                />
+            )}
         </>
     );
 }

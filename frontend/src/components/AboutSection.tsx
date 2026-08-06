@@ -11,9 +11,14 @@
  * data-driven so a channel can be added/removed by editing one array entry.
  */
 
+import {useState} from "react";
+
 import {VersionCard} from "@astrapi69/pwa-update-react";
 
+import QrCodeModal from "./QrCodeModal";
 import {useI18n} from "../hooks/useI18n";
+import {appShareUrl} from "../utils/shareUrl";
+import {qrLabels} from "../utils/qrLabels";
 import {card, link, muted, pill} from "../ui/classes";
 
 const REPO_URL = "https://github.com/astrapi69/topos";
@@ -59,6 +64,7 @@ function openErrorReport() {
 
 export default function AboutSection() {
     const {t} = useI18n();
+    const [showShare, setShowShare] = useState(false);
 
     return (
         <section style={{marginBottom: "1.5rem"}} data-testid="about-section">
@@ -116,6 +122,16 @@ export default function AboutSection() {
                         {t("topos.page.settings.about.report", "Problem melden")}
                     </button>
                 </li>
+                <li>
+                    <button
+                        type="button"
+                        className={link}
+                        onClick={() => setShowShare(true)}
+                        data-testid="about-share-app"
+                    >
+                        {t("topos.page.settings.about.share_app", "App teilen (QR)")}
+                    </button>
+                </li>
             </ul>
 
             <div className={`${card} mt-3 p-3`} data-testid="about-donations">
@@ -159,6 +175,16 @@ export default function AboutSection() {
                     ))}
                 </ul>
             </div>
+
+            {showShare && (
+                <QrCodeModal
+                    url={appShareUrl()}
+                    title={t("topos.page.settings.about.share_app_title", "Topos teilen")}
+                    labels={qrLabels(t)}
+                    fileName="topos-app.png"
+                    onClose={() => setShowShare(false)}
+                />
+            )}
         </section>
     );
 }

@@ -14,6 +14,13 @@ ui:
     description: Personal inventory tracker
 
 topos:
+  qr:
+    close: Close
+    copy: Copy URL
+    copied: Copied
+    download: Download
+    share: Share
+    alt: QR code
   app:
     name: Topos
     description: Personal inventory tracker
@@ -126,6 +133,12 @@ topos:
       no_results: No results
       result_count: "{count} results"
     containers:
+      labels_button: Print labels
+      labels_title: Container labels
+      labels_select_all: Select all
+      labels_print: Print
+      labels_doc_title: Topos labels
+      labels_failed: Could not generate labels
       title: Containers
       empty: No containers found.
       new_container: New container
@@ -134,6 +147,8 @@ topos:
       label_required: A label is required.
       external_id_invalid: The number must be an integer.
     container_detail:
+      share_qr: Share QR
+      share_qr_title: Share container
       no_id: No container selected.
       missing: Container not found
       items: Items
@@ -196,6 +211,8 @@ topos:
         unsupported_version: "Backup version {version} is not supported"
         empty: No data to export
       about:
+        share_app: Share app (QR)
+        share_app_title: Share Topos
         heading: About Topos
         license: License
         source: Source on GitHub
