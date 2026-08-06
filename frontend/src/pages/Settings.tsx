@@ -10,6 +10,7 @@ import {useEffect, useState} from "react";
 import NavBar from "../components/NavBar";
 import AboutSection from "../components/AboutSection";
 import AiProviderSettings from "../components/AiProviderSettings";
+import DataSection from "../components/DataSection";
 import BackendUrlSettings from "../components/BackendUrlSettings";
 import OrphanPathsSection from "../components/OrphanPathsSection";
 import ThemePicker from "../components/ThemePicker";
@@ -144,6 +145,8 @@ export default function Settings() {
                 <AiProviderSettings />
 
                 <OrphanPathsSection />
+
+                <DataSection />
 
                 <section>
                     <h2>{t("topos.page.settings.cache", "Lokaler Cache")}</h2>

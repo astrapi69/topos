@@ -180,6 +180,20 @@ topos:
       uploading: Wird hochgeladen...
       report_title: Importbericht
     settings:
+      data:
+        title: Daten
+        export: Daten exportieren
+        export_success: "Export abgeschlossen. {containers} Container, {items} Einträge."
+        import: Daten importieren
+        import_preview: "{containers} Container, {items} Einträge, {categories} Kategorien, {actions} Aktionen"
+        import_merge: Zusammenführen
+        import_replace: Ersetzen
+        import_replace_confirm: "Alle bestehenden Daten werden gelöscht. Tippe ERSETZEN zum Bestätigen."
+        replace_keyword: ERSETZEN
+        import_success: "Import abgeschlossen. {count} Einträge importiert."
+        invalid_file: Ungültige Backup-Datei
+        unsupported_version: "Backup-Version {version} wird nicht unterstützt"
+        empty: Keine Daten zum Exportieren
       about:
         heading: Über Topos
         license: Lizenz
