@@ -22,6 +22,7 @@ import type {
     Owner,
     Priority,
 } from "../types/topos";
+import type {BackendImportResult, ImportMode, ToposBackup} from "../backup/types";
 import {apiBase} from "./baseUrl";
 
 export class ApiError extends Error {
@@ -445,6 +446,17 @@ export const api = {
             method: "POST",
             rawBody: fd,
         });
+    },
+    backup: {
+        // Backend-mode path (local backend running). The offline/PWA path
+        // reads/writes Dexie directly - see src/backup/.
+        export: () => request<ToposBackup>("/backup/export"),
+        import: (backup: ToposBackup, mode: ImportMode) =>
+            request<BackendImportResult>("/backup/import", {
+                method: "POST",
+                body: backup,
+                query: {mode},
+            }),
     },
     settings: {
         getApp: () => request<AppConfig>("/settings/app"),
