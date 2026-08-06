@@ -11,6 +11,7 @@ import AppFeatureProvider from "./features/AppFeatureProvider";
 import {DialogProvider} from "./components/AppDialog";
 import DemoSeeder from "./components/DemoSeeder";
 import ErrorReportDialog from "./components/ErrorReportDialog";
+import IosInstallHint from "./components/IosInstallHint";
 import OfflineBanner from "./components/OfflineBanner";
 import {I18nProvider} from "./hooks/useI18n";
 import {useTheme} from "./hooks/useTheme";
@@ -71,6 +72,7 @@ export default function App() {
                             theme="colored"
                         />
                         <UpdateBanner icon={<RefreshCw size={16} aria-hidden />} />
+                        <IosInstallHint />
                         <ErrorReportDialog />
                     </DialogProvider>
                 </AppFeatureProvider>

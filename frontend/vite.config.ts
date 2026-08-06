@@ -120,7 +120,15 @@ export default defineConfig({
             devOptions: {
                 enabled: true,
             },
-            includeAssets: ["favicon.ico", "favicon.svg", "icons/apple-touch-icon.png"],
+            includeAssets: [
+                "favicon.ico",
+                "favicon.svg",
+                "icons/apple-touch-icon.png",
+                // Precache the static offline fallback so it is reachable at
+                // <base>offline.html even when the network and the SW nav
+                // fallback are both unavailable.
+                "offline.html",
+            ],
             manifest: {
                 name: "Topos - Inventar-Tracker",
                 short_name: "Topos",
@@ -147,7 +155,14 @@ export default defineConfig({
             },
             workbox: {
                 globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+                // Evict precache entries from superseded builds so an old
+                // deploy's chunks do not accumulate in the cache storage.
+                cleanupOutdatedCaches: true,
                 navigateFallback: `${base}index.html`,
+                // /api is the backend, not an SPA route: never answer an API
+                // request with the app shell (it would mask a real network
+                // error as a 200 HTML page).
+                navigateFallbackDenylist: [/^\/api\//],
                 runtimeCaching: [
                     {
                         // NetworkFirst so the app keeps the last API responses
