@@ -105,7 +105,13 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
     }
 
     return (
-        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 420}}>
+        <form
+            onSubmit={(e) => {
+                e.preventDefault();
+                void submit();
+            }}
+            style={{display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 420}}
+        >
             <p className={muted}>
                 {t(
                     "topos.page.settings.ai.vault_create_hint",
@@ -113,6 +119,8 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
                 )}
             </p>
             <input
+                id="ai-vault-create-pass"
+                name="new-passphrase"
                 className={input}
                 type="password"
                 autoComplete="new-password"
@@ -122,6 +130,8 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
                 data-testid="ai-vault-create-pass"
             />
             <input
+                id="ai-vault-create-confirm"
+                name="confirm-passphrase"
                 className={input}
                 type="password"
                 autoComplete="new-password"
@@ -131,15 +141,14 @@ function CreatePassphraseGate({onReady}: {onReady: () => void}) {
                 data-testid="ai-vault-create-confirm"
             />
             <button
-                type="button"
+                type="submit"
                 className={btn}
-                onClick={submit}
                 disabled={busy}
                 data-testid="ai-vault-create-button"
             >
                 {t("topos.page.settings.ai.vault_create", "Tresor anlegen")}
             </button>
-        </div>
+        </form>
     );
 }
 
@@ -183,7 +192,13 @@ function UnlockGate({onReady}: {onReady: () => void}) {
     }
 
     return (
-        <div style={{display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 420}}>
+        <form
+            onSubmit={(e) => {
+                e.preventDefault();
+                void submit();
+            }}
+            style={{display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: 420}}
+        >
             <p className={muted}>
                 {t(
                     "topos.page.settings.ai.vault_unlock_hint",
@@ -191,22 +206,20 @@ function UnlockGate({onReady}: {onReady: () => void}) {
                 )}
             </p>
             <input
+                id="ai-vault-unlock-pass"
+                name="current-passphrase"
                 className={input}
                 type="password"
                 autoComplete="current-password"
                 placeholder={t("topos.page.settings.ai.vault_pass", "Passphrase")}
                 value={pass}
                 onChange={(e) => setPass(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter") void submit();
-                }}
                 data-testid="ai-vault-unlock-pass"
             />
             <div style={{display: "flex", gap: "0.5rem"}}>
                 <button
-                    type="button"
+                    type="submit"
                     className={btn}
-                    onClick={submit}
                     disabled={busy || !pass}
                     data-testid="ai-vault-unlock-button"
                 >
@@ -221,7 +234,7 @@ function UnlockGate({onReady}: {onReady: () => void}) {
                     {t("topos.page.settings.ai.vault_forgot", "Passphrase vergessen?")}
                 </button>
             </div>
-        </div>
+        </form>
     );
 }
 
