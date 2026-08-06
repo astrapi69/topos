@@ -23,6 +23,7 @@ describe("AboutSection", () => {
         renderAbout();
         expect(screen.getByTestId("about-section")).toBeInTheDocument();
         expect(screen.getByTestId("about-version-card")).toBeInTheDocument();
+        expect(screen.getByTestId("about-share-app")).toBeInTheDocument();
         // __APP_VERSION__ is injected by Vite (package.json version).
         expect(screen.getByTestId("about-app-version").textContent).toMatch(/\d+\.\d+\.\d+/);
     });

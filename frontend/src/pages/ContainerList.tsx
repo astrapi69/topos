@@ -13,6 +13,7 @@ import {Link} from "react-router-dom";
 
 import NavBar from "../components/NavBar";
 import FormField from "../components/FormField";
+import ContainerLabelsDialog from "../components/ContainerLabelsDialog";
 import {useContainers, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {useDialog} from "../components/AppDialog";
@@ -50,6 +51,7 @@ export default function ContainerList() {
     const {t} = useI18n();
     const {confirm} = useDialog();
     const {data, loading, error, refresh} = useContainers();
+    const [showLabels, setShowLabels] = useState(false);
     const items = useItems();
     const [owner, setOwner] = useState<Owner | "all">("all");
     const [type, setType] = useState<ContainerType | "all">("all");
@@ -203,9 +205,20 @@ export default function ContainerList() {
                     <h1 data-testid="container-list-title">
                         {t("topos.page.containers.title", "Container")}
                     </h1>
-                    <button type="button" className={btnPrimary} data-testid="container-new-button" onClick={openCreate}>
-                        {t("topos.page.containers.new_container", "Neuer Container")}
-                    </button>
+                    <div style={{display: "flex", gap: "0.5rem", flexWrap: "wrap"}}>
+                        <button
+                            type="button"
+                            className={btn}
+                            data-testid="container-labels-button"
+                            onClick={() => setShowLabels(true)}
+                            disabled={data.length === 0}
+                        >
+                            {t("topos.page.containers.labels_button", "Etiketten drucken")}
+                        </button>
+                        <button type="button" className={btnPrimary} data-testid="container-new-button" onClick={openCreate}>
+                            {t("topos.page.containers.new_container", "Neuer Container")}
+                        </button>
+                    </div>
                 </header>
 
                 {showForm && (
@@ -427,6 +440,9 @@ export default function ContainerList() {
                     )}
                 </div>
             </main>
+            {showLabels && (
+                <ContainerLabelsDialog containers={data} onClose={() => setShowLabels(false)} />
+            )}
         </>
     );
 }

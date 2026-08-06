@@ -13,6 +13,13 @@ ui:
     description: Persönliche Inventarverwaltung
 
 topos:
+  qr:
+    close: Schließen
+    copy: URL kopieren
+    copied: Kopiert
+    download: Herunterladen
+    share: Teilen
+    alt: QR-Code
   app:
     name: Topos
     description: Persönliche Inventarverwaltung
@@ -125,6 +132,12 @@ topos:
       no_results: Keine Treffer
       result_count: "{count} Ergebnisse"
     containers:
+      labels_button: Etiketten drucken
+      labels_title: Container-Etiketten
+      labels_select_all: Alle auswählen
+      labels_print: Drucken
+      labels_doc_title: Topos Etiketten
+      labels_failed: Etiketten konnten nicht erstellt werden
       title: Container
       empty: Keine Container gefunden.
       new_container: Neuer Container
@@ -133,6 +146,8 @@ topos:
       label_required: Bezeichnung ist erforderlich.
       external_id_invalid: Nr. muss eine ganze Zahl sein.
     container_detail:
+      share_qr: QR teilen
+      share_qr_title: Container teilen
       no_id: Kein Container ausgewählt.
       missing: Container nicht gefunden
       items: Einträge
@@ -195,6 +210,8 @@ topos:
         unsupported_version: "Backup-Version {version} wird nicht unterstützt"
         empty: Keine Daten zum Exportieren
       about:
+        share_app: App teilen (QR)
+        share_app_title: Topos teilen
         heading: Über Topos
         license: Lizenz
         source: Quellcode auf GitHub
