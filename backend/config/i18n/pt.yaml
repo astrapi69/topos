@@ -33,6 +33,9 @@ topos:
     high-contrast:
       label: High Contrast
       desc: Yellow on black for maximum legibility (a11y).
+    ocean:
+      label: Ocean
+      desc: Sky accent on deep navy.
   nav:
     search: Search
     menu: Menu

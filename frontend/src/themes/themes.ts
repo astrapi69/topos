@@ -18,7 +18,7 @@
 
 export type ThemeFamily = "light" | "dark";
 
-export type ThemeId = "light" | "dark" | "graphite" | "soft-pop" | "high-contrast";
+export type ThemeId = "light" | "dark" | "graphite" | "soft-pop" | "high-contrast" | "ocean";
 
 export interface Theme {
     id: ThemeId;
@@ -67,6 +67,13 @@ export const THEMES: readonly Theme[] = [
         family: "dark",
         description: "Yellow on black for maximum legibility (a11y).",
         previewColors: {bg: "#000000", accent: "#ffff00", fg: "#ffffff"},
+    },
+    {
+        id: "ocean",
+        label: "Ocean",
+        family: "dark",
+        description: "Sky accent on deep navy.",
+        previewColors: {bg: "#0b1f33", accent: "#38bdf8", fg: "#e6f1fb"},
     },
 ];
 

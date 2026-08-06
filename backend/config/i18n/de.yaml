@@ -32,6 +32,9 @@ topos:
     high-contrast:
       label: Hoher Kontrast
       desc: Gelb auf Schwarz für maximale Lesbarkeit (Barrierefreiheit).
+    ocean:
+      label: Ozean
+      desc: Himmelblau-Akzent auf tiefem Marineblau.
   nav:
     search: Suchen
     menu: Menü

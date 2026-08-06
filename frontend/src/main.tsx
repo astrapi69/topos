@@ -8,6 +8,7 @@ import "./styles/global.css";
 import "./styles/themes/theme-graphite.css";
 import "./styles/themes/theme-soft-pop.css";
 import "./styles/themes/theme-high-contrast.css";
+import "./styles/themes/theme-ocean.css";
 import "./styles/ai-key-vault.css";
 import { verifyBackendVersion } from "./utils/versionCheck";
 
