@@ -15,11 +15,13 @@ import * as Collapsible from "@radix-ui/react-collapsible";
 import {useEffect, useMemo, useState} from "react";
 import {Link} from "react-router-dom";
 import {ChevronDown, ChevronRight, Pencil, Trash2} from "lucide-react";
+import {useFeature} from "@astrapi69/feature-strategy-react";
 
 import NavBar from "../components/NavBar";
 import {api} from "../api/client";
 import {db} from "../db/schema";
 import {useDialog} from "../components/AppDialog";
+import {FEATURES} from "../features/featureConfig";
 import {refreshAll, useItems} from "../hooks/useTopos";
 import {useI18n} from "../hooks/useI18n";
 import {isBackendAvailable} from "../utils/backendStatus";
@@ -34,8 +36,11 @@ export default function CategoryBrowse() {
     const items = useItems();
     const [tree, setTree] = useState<CategoryNode[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
-    const [backendUp, setBackendUp] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
+    // Rename/delete cascade server-side, so they need a reachable backend.
+    // The gate now comes from the feature layer (AppFeatureProvider owns the
+    // /api/health probe) instead of a local backendUp flag.
+    const categoryEdit = useFeature(FEATURES.CATEGORY_EDIT);
 
     useEffect(() => {
         let cancelled = false;
@@ -43,7 +48,6 @@ export default function CategoryBrowse() {
             // Offline (no-backend PWA): never call the API - it would 404.
             // Build the tree from the Dexie cache (empty cache -> empty tree).
             const available = await isBackendAvailable();
-            if (!cancelled) setBackendUp(available);
             if (!available) {
                 const cached = await db.categories.toArray();
                 if (!cancelled) setTree(buildCategoryTree(cached));
@@ -204,8 +208,8 @@ export default function CategoryBrowse() {
                                 selected={selected}
                                 setSelected={setSelected}
                                 counts={itemsByPathPrefix}
-                                onRename={backendUp ? handleRename : undefined}
-                                onDelete={backendUp ? handleDelete : undefined}
+                                onRename={categoryEdit.isActive ? handleRename : undefined}
+                                onDelete={categoryEdit.isActive ? handleDelete : undefined}
                             />
                         ))}
                         {tree.length === 0 && (

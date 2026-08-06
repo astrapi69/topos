@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {UpdateBanner} from "@astrapi69/pwa-update-react";
 
 import AppUpdateProvider from "./components/AppUpdateProvider";
+import AppFeatureProvider from "./features/AppFeatureProvider";
 import {DialogProvider} from "./components/AppDialog";
 import DemoSeeder from "./components/DemoSeeder";
 import ErrorReportDialog from "./components/ErrorReportDialog";
@@ -43,36 +44,38 @@ export default function App() {
     return (
         <I18nProvider>
             <AppUpdateProvider>
-                <DialogProvider>
-                    <OfflineBanner />
-                    <DemoSeeder />
-                    <Suspense fallback={null}>
-                        <Routes>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/containers" element={<ContainerList />} />
-                            <Route path="/containers/:id" element={<ContainerDetail />} />
-                            <Route path="/items/new" element={<ItemEditor />} />
-                            <Route path="/items/:id" element={<ItemEditor />} />
-                            <Route path="/categories" element={<CategoryBrowse />} />
-                            <Route path="/actions" element={<Actions />} />
-                            <Route path="/import" element={<Import />} />
-                            <Route path="/photo-intake" element={<PhotoIntake />} />
-                            <Route path="/settings" element={<Settings />} />
-                        </Routes>
-                    </Suspense>
-                    <ToastContainer
-                        position="bottom-right"
-                        autoClose={3000}
-                        hideProgressBar={false}
-                        newestOnTop
-                        closeOnClick
-                        pauseOnHover
-                        theme="colored"
-                    />
-                    <UpdateBanner icon={<RefreshCw size={16} aria-hidden />} />
-                    <PwaPrompts />
-                    <ErrorReportDialog />
-                </DialogProvider>
+                <AppFeatureProvider>
+                    <DialogProvider>
+                        <OfflineBanner />
+                        <DemoSeeder />
+                        <Suspense fallback={null}>
+                            <Routes>
+                                <Route path="/" element={<Dashboard />} />
+                                <Route path="/containers" element={<ContainerList />} />
+                                <Route path="/containers/:id" element={<ContainerDetail />} />
+                                <Route path="/items/new" element={<ItemEditor />} />
+                                <Route path="/items/:id" element={<ItemEditor />} />
+                                <Route path="/categories" element={<CategoryBrowse />} />
+                                <Route path="/actions" element={<Actions />} />
+                                <Route path="/import" element={<Import />} />
+                                <Route path="/photo-intake" element={<PhotoIntake />} />
+                                <Route path="/settings" element={<Settings />} />
+                            </Routes>
+                        </Suspense>
+                        <ToastContainer
+                            position="bottom-right"
+                            autoClose={3000}
+                            hideProgressBar={false}
+                            newestOnTop
+                            closeOnClick
+                            pauseOnHover
+                            theme="colored"
+                        />
+                        <UpdateBanner icon={<RefreshCw size={16} aria-hidden />} />
+                        <PwaPrompts />
+                        <ErrorReportDialog />
+                    </DialogProvider>
+                </AppFeatureProvider>
             </AppUpdateProvider>
         </I18nProvider>
     );
