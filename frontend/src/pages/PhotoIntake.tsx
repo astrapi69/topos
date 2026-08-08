@@ -47,7 +47,7 @@ import { useDialog } from "../components/AppDialog";
 import { useI18n } from "../hooks/useI18n";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { refreshAll, useCategories, useContainers } from "../hooks/useTopos";
-import { rebuildSearchIndex } from "../search/buildIndex";
+import { indexUpsertContainer, rebuildSearchIndex } from "../search/buildIndex";
 import { isBackendAvailable } from "../utils/backendStatus";
 import { ImageDecodeError, downscaleImage } from "../utils/imageResize";
 import { errorMessage, notify } from "../utils/notify";
@@ -245,8 +245,59 @@ export default function PhotoIntake() {
     });
   }
 
+  /**
+   * Create a default "Box {n}" container so a first-time user (fresh
+   * IndexedDB, zero containers) can recognize without a detour through
+   * the create form. Auto-selects the new container.
+   */
+  async function createDefaultContainer(): Promise<Container | null> {
+    const nextExternalId =
+      containers.reduce((max, row) => Math.max(max, row.externalId), 0) + 1;
+    try {
+      const created = await getStorage().containers.create({
+        externalId: nextExternalId,
+        type: "box",
+        owner: "self",
+        label: t(
+          "topos.page.photo_intake.auto_container_label",
+          "Box {n}",
+        ).replace("{n}", String(nextExternalId)),
+        description: null,
+        location: null,
+        sizeGroup: null,
+      });
+      indexUpsertContainer(created);
+      setContainerId(String(created.id));
+      void refreshContainers();
+      notify.success(t("topos.toast.container_created", "Container erstellt"));
+      return created;
+    } catch (err) {
+      notify.error(
+        errorMessage(
+          err,
+          t(
+            "topos.toast.container_save_failed",
+            "Container konnte nicht gespeichert werden",
+          ),
+        ),
+        err,
+      );
+      return null;
+    }
+  }
+
   async function handleRecognize() {
-    if (!photo || !selectedContainer || recognizing || !recognizeReady) return;
+    if (!photo || recognizing || !recognizeReady) return;
+    // Containers exist but none picked: never guess the target.
+    if (!selectedContainer && containers.length > 0) {
+      notify.warning(
+        t(
+          "topos.page.photo_intake.container_required",
+          "Bitte oben einen Container wählen.",
+        ),
+      );
+      return;
+    }
     if (!privacyAccepted) {
       const accepted = await confirm(
         t(
@@ -266,9 +317,13 @@ export default function PhotoIntake() {
       if (!accepted) return;
       setPrivacyAccepted(true);
     }
+    // Zero containers (fresh install): implicitly create "Box {n}" AFTER the
+    // privacy consent so a declined dialog leaves no side effects.
+    const target = selectedContainer ?? (await createDefaultContainer());
+    if (!target) return;
     setRecognizing(true);
     try {
-      const recognition = await requestRecognition(photo, selectedContainer);
+      const recognition = await requestRecognition(photo, target);
       setStaged((previous) => [
         ...previous,
         ...recognition.items.map(toStagedRow),
@@ -499,9 +554,7 @@ export default function PhotoIntake() {
               type="button"
               data-testid="photo-intake-recognize"
               className={btnPrimary}
-              disabled={
-                !photo || !selectedContainer || recognizing || !recognizeReady
-              }
+              disabled={!photo || recognizing || !recognizeReady}
               onClick={() => void handleRecognize()}
             >
               {recognizing
@@ -511,6 +564,19 @@ export default function PhotoIntake() {
                   )
                 : t("topos.page.photo_intake.recognize", "Erkennen")}
             </button>
+            {photo && !selectedContainer && (
+              <span data-testid="photo-intake-container-hint" className={muted}>
+                {containers.length === 0
+                  ? t(
+                      "topos.page.photo_intake.container_hint_auto",
+                      "Kein Container vorhanden - beim Erkennen wird automatisch einer angelegt.",
+                    )
+                  : t(
+                      "topos.page.photo_intake.container_required",
+                      "Bitte oben einen Container wählen.",
+                    )}
+              </span>
+            )}
             {!recognizeReady && backendUp !== null && (
               <span data-testid="photo-intake-offline-hint" className={muted}>
                 {backendUp === false && aiReason === "locked"
