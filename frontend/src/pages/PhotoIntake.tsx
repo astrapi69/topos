@@ -420,8 +420,12 @@ export default function PhotoIntake() {
           </label>
 
           <div className="flex flex-col items-start gap-2">
+            {/* Creation goes through getStorage() (dexieStorage offline), so
+                it works with or without a backend. Never gate this on the
+                backend: offline the PWA seeds no containers, and without a way
+                to create one the whole flow deadlocks (no target to select ->
+                "Erkennen" can never enable). */}
             <ContainerQuickCreate
-              disabled={!backendReady}
               onCreated={(created) => {
                 setContainerId(String(created.id));
                 void refreshContainers();
