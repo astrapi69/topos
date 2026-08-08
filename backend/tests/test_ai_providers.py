@@ -16,9 +16,9 @@ from app.ai.providers import (
 _BUILTIN_VISION_PROVIDERS = ["anthropic", "openai", "google"]
 
 
-def test_list_providers_includes_four_known_ids() -> None:
+def test_list_providers_includes_five_known_ids() -> None:
     ids = {p.id for p in list_providers()}
-    assert ids == {"anthropic", "openai", "google", "custom"}
+    assert ids == {"anthropic", "openai", "google", "perplexity", "custom"}
 
 
 def test_provider_ids_are_unique() -> None:

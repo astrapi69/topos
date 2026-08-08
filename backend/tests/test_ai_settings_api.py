@@ -73,12 +73,12 @@ def client(temp_base, monkeypatch):
 # --- GET /providers ---
 
 
-def test_get_providers_returns_four(client):
+def test_get_providers_returns_five(client):
     resp = client.get("/api/settings/ai/providers")
     assert resp.status_code == 200
     providers = resp.json()
     ids = {p["id"] for p in providers}
-    assert ids == {"anthropic", "openai", "google", "custom"}
+    assert ids == {"anthropic", "openai", "google", "perplexity", "custom"}
 
 
 def test_get_providers_default_models_are_vision(client):
@@ -103,7 +103,7 @@ def test_key_status_all_none_when_unconfigured(client):
     resp = client.get("/api/settings/ai/key-status")
     assert resp.status_code == 200
     statuses = {s["provider"]: s for s in resp.json()}
-    assert set(statuses) == {"anthropic", "openai", "google", "custom"}
+    assert set(statuses) == {"anthropic", "openai", "google", "perplexity", "custom"}
     assert all(s["source"] == "none" for s in statuses.values())
     assert all(s["configured"] is False for s in statuses.values())
 

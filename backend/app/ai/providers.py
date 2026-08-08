@@ -104,6 +104,24 @@ _GOOGLE = ProviderPreset(
     ],
 )
 
+_PERPLEXITY = ProviderPreset(
+    id="perplexity",
+    label="Perplexity",
+    base_url="https://api.perplexity.ai",
+    default_model="sonar-pro",
+    env_var="TOPOS_PERPLEXITY_API_KEY",
+    # Perplexity speaks the OpenAI-compatible chat-completions wire format, so
+    # it routes through the same client path as OpenAI. Image understanding on
+    # the sonar models is newer/weaker than the vision-first providers; offered
+    # as an option, not the recommended default for box-content recognition.
+    models=[
+        ModelOption(id="sonar-pro", label="Sonar Pro", vision=True),
+        ModelOption(id="sonar", label="Sonar", vision=True),
+        ModelOption(id="sonar-reasoning", label="Sonar Reasoning", vision=False),
+    ],
+    note="vision_depends_on_model",
+)
+
 _CUSTOM = ProviderPreset(
     id="custom",
     label="Custom (OpenAI-compatible)",
@@ -116,7 +134,7 @@ _CUSTOM = ProviderPreset(
 )
 
 
-_PROVIDER_PRESETS: list[ProviderPreset] = [_ANTHROPIC, _OPENAI, _GOOGLE, _CUSTOM]
+_PROVIDER_PRESETS: list[ProviderPreset] = [_ANTHROPIC, _OPENAI, _GOOGLE, _PERPLEXITY, _CUSTOM]
 _PROVIDERS_BY_ID: dict[str, ProviderPreset] = {p.id: p for p in _PROVIDER_PRESETS}
 
 
