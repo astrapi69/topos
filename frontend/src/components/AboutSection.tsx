@@ -13,7 +13,7 @@
 
 import { useState } from "react";
 
-import { VersionCard } from "@astrapi69/pwa-update-react";
+import { UpdateCheckControl, VersionCard } from "@astrapi69/pwa-update-react";
 
 import QrCodeModal from "./QrCodeModal";
 import { useI18n } from "../hooks/useI18n";
@@ -91,6 +91,14 @@ export default function AboutSection() {
         buildDate={typeof __BUILD_DATE__ === "string" ? __BUILD_DATE__ : ""}
         commitUrl={(hash) => `${REPO_URL}/commit/${hash}`}
       />
+
+      {/* Manual "check for updates" button. Labels come from the messages
+          wired in AppUpdateProvider (pwa.check_update / checking / ...). The
+          autoUpdate SW self-heals on a new deploy, but this lets the user
+          force a check without waiting for the SW cycle. */}
+      <div className="mt-2" data-testid="about-update-check-wrap">
+        <UpdateCheckControl testId="about-update-check" />
+      </div>
 
       <ul
         className="mt-3 flex flex-col gap-1"
