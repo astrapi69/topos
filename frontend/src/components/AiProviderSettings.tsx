@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AiSettingsPanel,
   AiSettingsProvider,
+  KeyVaultImportForm,
   KeyVaultSection,
   type ConfirmFn,
   type NotifyApi,
@@ -256,6 +257,9 @@ export default function AiProviderSettings() {
   const [vaultTick, setVaultTick] = useState(0);
   const [promptMode, setPromptMode] = useState<PromptMode | null>(null);
   const promptResolve = useRef<((ok: boolean) => void) | null>(null);
+  // Shared pending prompt so concurrent requestUnlock() callers (a multi-key
+  // import) get one dialog, not one per key.
+  const pendingUnlock = useRef<Promise<boolean> | null>(null);
 
   const backendAdapter = useMemo(() => createBackendAdapter(), []);
   // The adapter calls back into requestUnlock (via the ref) when a key save
@@ -314,13 +318,21 @@ export default function AiProviderSettings() {
   /**
    * Ensure an open vault session, prompting for a passphrase if needed. Passed
    * to the local adapter; resolves true once unlocked, false on cancel.
+   *
+   * A single import writes several keys back-to-back (one setApiKey per
+   * provider), each calling this. Dedupe to ONE prompt: concurrent callers
+   * share the pending promise, and once the first create/unlock succeeds the
+   * rest see an open session and skip the prompt entirely.
    */
-  const requestUnlock = useCallback<EnsureUnlocked>(async () => {
-    if (vault.isUnlocked()) return true;
-    setPromptMode(vault.hasVault() ? "unlock" : "create");
-    return await new Promise<boolean>((resolve) => {
+  const requestUnlock = useCallback<EnsureUnlocked>(() => {
+    if (vault.isUnlocked()) return Promise.resolve(true);
+    if (pendingUnlock.current) return pendingUnlock.current;
+    const pending = new Promise<boolean>((resolve) => {
       promptResolve.current = resolve;
     });
+    pendingUnlock.current = pending;
+    setPromptMode(vault.hasVault() ? "unlock" : "create");
+    return pending;
   }, []);
 
   useEffect(() => {
@@ -331,6 +343,7 @@ export default function AiProviderSettings() {
     if (ok) afterVaultChange();
     promptResolve.current?.(ok);
     promptResolve.current = null;
+    pendingUnlock.current = null;
     setPromptMode(null);
   }
 
@@ -450,7 +463,7 @@ export default function AiProviderSettings() {
           >
             <AiSettingsPanel />
             <CustomEndpointField />
-            {unlocked && (
+            {unlocked ? (
               <>
                 <KeyVaultSection />
                 <button
@@ -466,6 +479,27 @@ export default function AiProviderSettings() {
                   {t("topos.page.settings.ai.vault_lock", "Tresor sperren")}
                 </button>
               </>
+            ) : (
+              // No open session yet: expose the Import half of the key vault so
+              // a fresh device can bootstrap its keys from an encrypted .alk
+              // file exported elsewhere. Writing the imported keys back prompts
+              // for a device passphrase (adapter ensureUnlocked). The full
+              // KeyVaultSection (with export) appears once unlocked.
+              <div style={{ marginTop: "1rem" }} data-testid="ai-key-import">
+                <h3 className="font-semibold">
+                  {t(
+                    "topos.page.settings.ai.import_keys_heading",
+                    "API-Schluessel importieren (verschluesselte Datei)",
+                  )}
+                </h3>
+                <p className={`${muted} mt-1 text-sm`}>
+                  {t(
+                    "topos.page.settings.ai.import_keys_hint",
+                    "Schluessel von einem anderen Geraet uebernehmen: verschluesselte .alk-Datei waehlen (oder Inhalt einfuegen) und deren Passphrase eingeben.",
+                  )}
+                </p>
+                <KeyVaultImportForm onImported={afterVaultChange} />
+              </div>
             )}
           </AiSettingsProvider>
 
