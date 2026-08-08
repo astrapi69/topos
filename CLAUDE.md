@@ -29,6 +29,7 @@ out to be specific to those projects' domains.
 **Always relevant** (read on every feature/fix):
 - `architecture.md` - layered architecture, plugin structure, UI strategy, data flow
 - `coding-standards.md` - naming, function design, tests, dependencies
+- `tdd.md` - Red-Green-Refactor order, demonstrate-RED discipline (test first, prove it fails, then implement)
 
 **On demand** (read for specific tasks):
 - `code-hygiene.md` - linting, pre-commit, error handling architecture, API conventions

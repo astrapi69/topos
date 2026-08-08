@@ -1,3 +1,16 @@
+---
+# globs/alwaysApply below document INTENT only - Claude Code loads every
+# rule file regardless and strips this frontmatter. Mirrors the sibling
+# adaptive-learner tdd.md.
+description: Test-Driven Development workflow - Red-Green-Refactor, demonstrate-RED discipline, four-test-per-feature guideline, bug-fix discipline
+globs:
+  - backend/tests/**/*.py
+  - plugins/*/tests/**/*.py
+  - frontend/src/**/*.test.ts
+  - frontend/src/**/*.test.tsx
+alwaysApply: false
+---
+
 # Test-Driven Development (TDD)
 
 This is the WORKFLOW rule for writing code. It sits on top of the test
@@ -18,6 +31,18 @@ behaviour change fall under the exceptions below.
 - Write a test that describes the desired change.
 - The test MUST fail (proves the feature/fix does not exist yet).
 - No production code before the failing test.
+
+**Demonstrate the RED, do not assert it.** Actually run the test and see
+it fail with your own eyes (paste/observe the failing output) BEFORE
+touching production code. "It would fail" is not RED; a green run you
+never executed is not proof. The reason: a test that passes before the
+change is testing nothing (wrong assertion, unreached branch, mocked-away
+behaviour) and would rubber-stamp any implementation. If the new test
+passes against the unchanged code, STOP -- the test is wrong, not the
+feature. (This session's own miss: the CORS-flag fix was written before
+its test; the honest order is test -> observe RED -> fix -> observe
+GREEN, and when the fix already exists in the working tree, stash it so
+the RED is real.)
 
 ### Phase 2: GREEN (minimal implementation)
 
