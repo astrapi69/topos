@@ -3,20 +3,22 @@
 ## Layered architecture (4 layers, ALWAYS respected)
 
 ```
-1. Frontend        React 18 + TypeScript + TipTap + Vite
+1. Frontend        React 18 + TypeScript + Vite + Tailwind + Dexie
 2. Backend         FastAPI + SQLAlchemy + SQLite + Pydantic v2
 3. PluginForge     External PyPI package (pluginforge ^0.10.0), based on pluggy
 4. Plugins         Standalone packages, registered via entry points
 ```
 
-New features ALWAYS belong in a plugin, unless they touch the core (Book/Chapter CRUD, editor base functionality, backup/restore, UI shell).
+New features ALWAYS belong in a plugin, unless they touch the core
+(Container/Item/Category/Action CRUD, the frontend storage service,
+backup/restore, the UI shell).
 
 ## Two repositories
 
 | Repo | Purpose | License |
 |------|---------|---------|
 | `pluginforge` | Application-agnostic plugin framework (PyPI) | MIT |
-| `topos` | Book authoring platform, uses PluginForge | MIT (all plugins free during development) |
+| `topos` | Personal inventory tracker, uses PluginForge | MIT (all plugins free during development) |
 
 PluginForge is EXTERNAL. Changes to PluginForge are a separate repo and a separate release cycle. Topos pins `pluginforge ^0.10.0`.
 
@@ -45,7 +47,7 @@ plugins/topos-plugin-{name}/
 - SQLAlchemy models in backend/app/models/.
 - Configuration via YAML (backend/config/plugins/{name}.yaml), NOT hardcoded.
 - Extend i18n strings in backend/config/i18n/{lang}.yaml (8 languages: DE, EN, ES, FR, EL, PT, TR, JA).
-- Plugin dependencies as a class attribute: `depends_on = ["export"]`.
+- Plugin dependencies as a class attribute: `depends_on = ["excel-import"]`.
 - All plugins are free (MIT). Licensing infrastructure exists but is dormant (`LICENSING_ENABLED = False`).
 
 ### Plugin installation (ZIP)
@@ -73,8 +75,7 @@ Third-party plugins are installed as a ZIP through Settings > Plugins:
 | Library | Purpose |
 |---------|---------|
 | Radix UI | Unstyled accessible primitives (Dialog, Tabs, Dropdown, Select, Tooltip) |
-| @dnd-kit | Drag-and-drop (chapter sorting, list reordering) |
-| TipTap | WYSIWYG/Markdown editor (StarterKit + 15 extensions) |
+| @dnd-kit | Drag-and-drop / list reordering (only where a list is user-orderable) |
 | Lucide React | Icons |
 | react-toastify | Toast notifications |
 | Tailwind CSS | Utility classes (v3, Preflight disabled) - light/dark element styling |
@@ -95,55 +96,44 @@ Rejected: shadcn/ui (too opinionated for this stack), MUI (too opinionated), Ant
 
 ### Plugin UI (manifest-driven)
 
-Plugins declare UI extensions via get_frontend_manifest(). The frontend queries /api/plugins/manifests.
-
-Predefined UI slots:
-
-| Slot | Location |
-|------|----------|
-| sidebar_actions | BookEditor sidebar |
-| toolbar_buttons | Editor toolbar |
-| editor_panels | Next to the editor |
-| settings_section | Settings > Plugins |
-| export_options | ExportDialog |
-
-For complex plugin UIs: Web Components as custom elements (compiled JS bundle in the plugin ZIP).
-
-### TipTap editor
-
-- 15 official extensions + 1 community (Figure/Figcaption).
-- 24 toolbar buttons.
-- Before writing custom code, ALWAYS check whether an official TipTap extension exists.
-- See lessons-learned.md for known TipTap pitfalls.
+Plugins declare UI extensions via get_frontend_manifest(); the frontend queries
+/api/plugins/manifests. The main predefined slot is `settings_section`
+(Settings > Plugins). A plugin can also mount its own backend route + a
+dedicated page (the excel-import plugin mounts `POST /api/import/excel` behind
+the Import page). For complex plugin UIs: Web Components as custom elements
+(compiled JS bundle in the plugin ZIP).
 
 ### Component structure
 
-- Pages in frontend/src/pages/ (Dashboard, BookEditor, Settings, Help, GetStarted).
+- Pages in frontend/src/pages/ (Dashboard, ContainerList, ContainerDetail,
+  ItemEditor, CategoryBrowse, Actions, Import, PhotoIntake, Settings).
 - Shared components in frontend/src/components/.
-- API calls ONLY through frontend/src/api/client.ts, never fetch() directly in components.
+- Data access ONLY through the storage service (`getStorage()`,
+  `src/storage/`) - never `api.*` or `fetch()` directly in components. The
+  typed API client (`api/client.ts`) is an implementation detail of
+  `apiStorage`; the AI/vision + photo endpoints are the narrow exceptions that
+  still call `api.*` directly (they have no dexie-mode equivalent).
 
 ### UX patterns for forms
 
-- **Stepped modal** for creation dialogs: step 1 shows only required fields, step 2 is collapsible (Radix Collapsible, "More details") for optional fields.
-- **Reason:** modals stay compact for quick creation, optional fields don't clutter it.
-- **Example:** CreateBookModal - step 1: title, author (required only). Step 2: genre, subtitle, language, series.
-- **Collapsible:** Radix Collapsible (@radix-ui/react-collapsible) for expandable sections in modals. Collapsed when opened.
-- **Input fields with suggestions:** `<input>` + `<datalist>` for free text with dropdown suggestions (e.g. genre). No hard select when custom values should be possible.
-- **Conditional fields:** checkbox toggle for optional groups (e.g. "Part of a series" -> series name + index). Values are reset when deactivated.
-- **No dedicated page** for simple creation workflows. A modal is enough up to ~8 fields.
+- **Stepped / compact form** for creation: show the required fields first,
+  keep optional fields in a collapsible ("More details").
+- **Reason:** forms stay compact for quick creation, optional fields don't clutter it.
+- **Example:** the container create form - required: external_id, label. Optional
+  (collapsible): description, location, size_group, type, owner.
+- **Collapsible:** Radix Collapsible (@radix-ui/react-collapsible) for expandable
+  sections. Collapsed when opened.
+- **Input fields with suggestions:** `<input>` + `<datalist>` for free text with
+  dropdown suggestions (e.g. size_group). No hard select when custom values should
+  be possible.
+- **Conditional fields:** checkbox toggle for optional groups; values are reset when
+  deactivated.
 
 ### State management
 
 - Current: React state + props. No global state management.
 - If global state becomes necessary: introduce Zustand, NOT Redux.
 - Stores communicate through events or callbacks, not through direct imports.
-
-## Internal storage format
-
-- TipTap JSON is the storage format. NOT HTML, NOT Markdown.
-- Markdown is only a display/input mode in the editor.
-- Conversion (JSON -> Markdown, JSON -> HTML) is a plugin responsibility (export plugin).
-- TipTap JSON in the DB: Chapter.content field.
 
 ## Persistence
 
@@ -181,7 +171,7 @@ API client     HTTP error -> converted to ApiError
 Router         Thin, catches nothing. Global exception handler maps.
 Service        Throws ToposError subclasses (NotFoundError, ExportError, ...)
 Plugin         Throws PluginError(plugin_name, message)
-External       ExternalServiceError(service, message) for Pandoc/TTS/LanguageTool
+External       ExternalServiceError(service, message) for AI providers (Anthropic/OpenAI/Google/Perplexity vision)
 ```
 
 Services NEVER throw HTTPException, routers catch NOTHING. The global exception handler in main.py maps ToposError subclasses to HTTP status codes. See code-hygiene.md "Error handling architecture" for details.
@@ -209,11 +199,11 @@ Hidden settings that influence user behavior without a UI are forbidden. A setti
 Exceptions are allowed only for:
 - Debug and development settings (marked `# INTERNAL`)
 - Performance-tuning parameters that only power users should touch (marked `# INTERNAL` + comment)
-- Initialization values or pipeline mappings that are not a user configuration target (e.g. Pandoc format mapping in `export.yaml`)
+- Initialization values or pipeline mappings that are not a user configuration target
 
 Dead settings (fields in the YAML that the code never reads) are forbidden. When adding a new setting, ALWAYS verify that the code reads it; when removing a feature, ALWAYS remove the corresponding YAML field with it.
 
-Per-user vs per-book: settings that should vary between books do NOT belong in `config/plugins/*.yaml` but as a column on the Book model (examples: `Book.tts_engine`, `Book.audiobook_overwrite_existing`). Plugin-global YAML settings are only for values that must be the same for ALL books.
+Per-entity vs global: settings that should vary per container/item do NOT belong in `config/plugins/*.yaml` but as a column on the relevant model (Container/Item/...). Plugin-global YAML settings are only for values that must be the same for ALL entities.
 
 ## Offline/local-first
 
