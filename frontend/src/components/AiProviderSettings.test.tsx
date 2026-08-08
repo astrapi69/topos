@@ -3,6 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { refreshApiKeyStatus } from "@astrapi69/ai-key-vault-react";
+import { buildKeyVaultPayload, encryptToVault } from "@astrapi69/ai-key-vault";
 
 import AiProviderSettings, {
   VaultPassphraseForm,
@@ -105,11 +106,13 @@ describe("AiProviderSettings", () => {
       expect(screen.getByTestId("ai-settings-section")).toBeInTheDocument();
     });
     expect(await screen.findByTestId("settings-panel-ai")).toBeInTheDocument();
-    // Backend mode has no encrypted vault section and no unlock gate.
+    // Backend mode has no passphrase gate...
     expect(
       screen.queryByTestId("ai-vault-create-pass"),
     ).not.toBeInTheDocument();
-    expect(screen.queryByTestId("key-vault-section")).not.toBeInTheDocument();
+    // ...but DOES surface the key-vault section so keys can be imported from
+    // another device/app (its export half is a server-mode notice).
+    expect(await screen.findByTestId("key-vault-section")).toBeInTheDocument();
     // The custom base-URL field only shows when custom is active.
     expect(screen.queryByTestId("ai-custom-base-url")).not.toBeInTheDocument();
   });
@@ -219,6 +222,46 @@ describe("AiProviderSettings", () => {
     await waitFor(() => screen.getByTestId("ai-enable-toggle"));
     fireEvent.click(screen.getByTestId("ai-enable-toggle"));
     await waitFor(() => expect(vault.isEnabled()).toBe(true));
+  });
+
+  it("imports a sibling app's (adaptive-learner) vault: gemini key lands as google", async () => {
+    // A real adaptive-learner-format envelope carrying a "gemini" key.
+    const payload = buildKeyVaultPayload(
+      ["anthropic", "openai", "gemini"] as const,
+      { gemini: "AIza-sibling-key" },
+      { activeProvider: "gemini", modelOverride: {} },
+    );
+    const alEnvelope = await encryptToVault(payload, "sibling-pass-12", {
+      format: "adaptive-learner-keys",
+    });
+
+    mockBackendAvailable.mockResolvedValue(false);
+    renderPanel();
+    // Local mode with no vault yet exposes the import entry point.
+    await screen.findByTestId("ai-key-import");
+
+    // Paste the foreign-format envelope + its passphrase, and import.
+    fireEvent.change(screen.getByTestId("key-vault-import-text"), {
+      target: { value: alEnvelope },
+    });
+    fireEvent.change(screen.getByTestId("key-vault-import-pass"), {
+      target: { value: "sibling-pass-12" },
+    });
+    fireEvent.click(screen.getByTestId("key-vault-import-button"));
+
+    // Writing the imported key triggers the lazy device-passphrase prompt.
+    fireEvent.change(await screen.findByTestId("ai-vault-create-pass"), {
+      target: { value: "device-pass-12" },
+    });
+    fireEvent.change(screen.getByTestId("ai-vault-create-confirm"), {
+      target: { value: "device-pass-12" },
+    });
+    fireEvent.click(screen.getByTestId("ai-vault-create-button"));
+
+    // The gemini key was remapped onto google and stored in the Topos vault.
+    await waitFor(() =>
+      expect(vault.getKeys().google).toBe("AIza-sibling-key"),
+    );
   });
 
   it("closes the unlock prompt on cancel without unlocking", async () => {

@@ -59,6 +59,11 @@ type PromptMode = "create" | "unlock";
 const USER_ID = "topos"; // single-user app; the adapters ignore this
 const MIN_PASSPHRASE = 8;
 
+// Port keys from sibling apps: adaptive-learner (and the kit's builtin trio)
+// call the provider "gemini"; Topos calls it "google". The import remaps it so
+// an .alk exported from those apps lands on the right provider here.
+const IMPORT_PROVIDER_ALIASES = { gemini: "google" } as const;
+
 /**
  * Human-readable summary of an encrypted key import, for the success toast.
  * Uses the provider list the kit's import now reports back
@@ -454,6 +459,7 @@ export default function AiProviderSettings() {
           t={kitT}
           notify={notifyApi}
           confirm={confirmFn}
+          importProviderAliases={IMPORT_PROVIDER_ALIASES}
           browserRuntime={false}
           Button={ToposButton}
           Input={ToposInput}
@@ -461,6 +467,10 @@ export default function AiProviderSettings() {
         >
           <AiSettingsPanel />
           <CustomEndpointField />
+          {/* Server mode: keys are write-only, so KeyVaultSection shows the
+              import half (its export half is replaced by a notice), letting a
+              user bring keys in from another device/app here too. */}
+          <KeyVaultSection />
         </AiSettingsProvider>
       )}
 
@@ -483,6 +493,7 @@ export default function AiProviderSettings() {
 
           <AiSettingsProvider
             adapter={localAdapter}
+            importProviderAliases={IMPORT_PROVIDER_ALIASES}
             registry={TOPOS_REGISTRY}
             userId={USER_ID}
             t={kitT}
