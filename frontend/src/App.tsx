@@ -9,7 +9,6 @@ import { UpdateBanner } from "@astrapi69/pwa-update-react";
 import AppUpdateProvider from "./components/AppUpdateProvider";
 import AppFeatureProvider from "./features/AppFeatureProvider";
 import { DialogProvider } from "./components/AppDialog";
-import DemoSeeder from "./components/DemoSeeder";
 import ErrorReportDialog from "./components/ErrorReportDialog";
 import IosInstallHint from "./components/IosInstallHint";
 import OfflineBanner from "./components/OfflineBanner";
@@ -47,7 +46,6 @@ export default function App() {
         <AppFeatureProvider>
           <DialogProvider>
             <OfflineBanner />
-            <DemoSeeder />
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />

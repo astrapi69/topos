@@ -16,7 +16,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { api, type OrphanedItem } from "../api/client";
+import { type OrphanedItem } from "../api/client";
+import { getStorage } from "../storage";
 import { useDialog } from "./AppDialog";
 import { refreshAll, useCategories } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
@@ -33,8 +34,8 @@ export default function OrphanPathsSection() {
 
   useEffect(() => {
     let cancelled = false;
-    api.categories
-      .orphans()
+    getStorage()
+      .categories.orphans()
       .then((report) => {
         if (!cancelled) setOrphans(report.orphanedItems);
       })
@@ -49,7 +50,7 @@ export default function OrphanPathsSection() {
   if (orphans === null) return null;
 
   async function reload(): Promise<void> {
-    const report = await api.categories.orphans();
+    const report = await getStorage().categories.orphans();
     setOrphans(report.orphanedItems);
     await refreshAll();
   }
@@ -60,7 +61,7 @@ export default function OrphanPathsSection() {
   ): Promise<void> {
     setBusy(true);
     try {
-      await api.items.update(item.id, { categoryPath: path });
+      await getStorage().items.update(item.id, { categoryPath: path });
       notify.success(
         path
           ? t("topos.category.orphans_reassigned", "Kategorie zugeordnet.")
@@ -105,7 +106,7 @@ export default function OrphanPathsSection() {
     setBusy(true);
     try {
       for (const item of orphans) {
-        await api.items.update(item.id, { categoryPath: null });
+        await getStorage().items.update(item.id, { categoryPath: null });
       }
       notify.success(t("topos.category.orphans_removed", "Pfad entfernt."));
       await reload();

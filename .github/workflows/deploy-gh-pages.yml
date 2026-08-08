@@ -36,7 +36,7 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
-          GITHUB_PAGES=true npm run build
+          GITHUB_PAGES=true VITE_STORAGE_MODE=dexie npm run build
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

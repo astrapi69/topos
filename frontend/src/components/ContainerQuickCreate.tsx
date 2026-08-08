@@ -18,7 +18,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 
-import { api } from "../api/client";
+import { getStorage } from "../storage";
 import { useI18n } from "../hooks/useI18n";
 import { indexUpsertContainer } from "../search/buildIndex";
 import { notify, errorMessage } from "../utils/notify";
@@ -85,7 +85,7 @@ export default function ContainerQuickCreate({
     }
     setSaving(true);
     try {
-      const created = await api.containers.create({
+      const created = await getStorage().containers.create({
         externalId,
         type: form.type,
         owner: form.owner,

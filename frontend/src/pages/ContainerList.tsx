@@ -17,7 +17,7 @@ import ContainerLabelsDialog from "../components/ContainerLabelsDialog";
 import { useContainers, useItems } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
 import { useDialog } from "../components/AppDialog";
-import { api } from "../api/client";
+import { getStorage } from "../storage";
 import { notify, errorMessage } from "../utils/notify";
 import { indexRemove, indexUpsertContainer } from "../search/buildIndex";
 import {
@@ -150,7 +150,7 @@ export default function ContainerList() {
           setSaving(false);
           return;
         }
-        const created = await api.containers.create({
+        const created = await getStorage().containers.create({
           externalId,
           type: form.type,
           owner: form.owner,
@@ -164,7 +164,7 @@ export default function ContainerList() {
           t("topos.toast.container_created", "Container erstellt"),
         );
       } else {
-        const updated = await api.containers.update(editingId, {
+        const updated = await getStorage().containers.update(editingId, {
           type: form.type,
           owner: form.owner,
           label: form.label.trim(),
@@ -220,7 +220,7 @@ export default function ContainerList() {
     );
     if (!ok) return;
     try {
-      await api.containers.delete(c.id);
+      await getStorage().containers.delete(c.id);
       indexRemove("container", c.id);
       for (const it of items.data.filter((i) => i.containerId === c.id)) {
         indexRemove("item", it.id);
