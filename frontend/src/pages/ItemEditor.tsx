@@ -14,7 +14,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import NavBar from "../components/NavBar";
 import FormField from "../components/FormField";
-import { api } from "../api/client";
+import { getStorage } from "../storage";
 import { useCategories, useContainers } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
 import { notify, errorMessage } from "../utils/notify";
@@ -52,8 +52,8 @@ export default function ItemEditor() {
     if (isNew) return;
     if (itemId === null || Number.isNaN(itemId)) return;
     setLoading(true);
-    api.items
-      .get(itemId)
+    getStorage()
+      .items.get(itemId)
       .then((row: Item) => {
         setContainerId(row.containerId);
         setContent(row.content);
@@ -99,7 +99,7 @@ export default function ItemEditor() {
     setSaving(true);
     try {
       if (isNew) {
-        const created = await api.items.create({
+        const created = await getStorage().items.create({
           containerId,
           content: content.trim(),
           priority,
@@ -110,7 +110,7 @@ export default function ItemEditor() {
         notify.success(t("topos.toast.item_created", "Eintrag erstellt"));
         navigate(`/containers/${created.containerId}`);
       } else if (itemId !== null) {
-        const updated = await api.items.update(itemId, {
+        const updated = await getStorage().items.update(itemId, {
           containerId,
           content: content.trim(),
           priority,

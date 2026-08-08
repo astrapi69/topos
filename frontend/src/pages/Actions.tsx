@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 
 import NavBar from "../components/NavBar";
 import FormField from "../components/FormField";
-import { api } from "../api/client";
+import { getStorage } from "../storage";
 import { useActions, useContainers, useItems } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
 import { useDialog } from "../components/AppDialog";
@@ -83,7 +83,7 @@ export default function Actions() {
 
   async function handleComplete(id: number) {
     try {
-      const updated = await api.actions.complete(id);
+      const updated = await getStorage().actions.complete(id);
       indexUpsertAction(updated);
       await actions.refresh();
       notify.success(
@@ -105,7 +105,7 @@ export default function Actions() {
 
   async function handleReopen(id: number) {
     try {
-      const updated = await api.actions.reopen(id);
+      const updated = await getStorage().actions.reopen(id);
       indexUpsertAction(updated);
       await actions.refresh();
       notify.success(
@@ -147,7 +147,7 @@ export default function Actions() {
       return;
     }
     try {
-      const created = await api.actions.create({
+      const created = await getStorage().actions.create({
         itemId: newItemId,
         text: newText.trim(),
         dueDate: newDue.trim() || null,
@@ -184,7 +184,7 @@ export default function Actions() {
       return;
     }
     try {
-      const updated = await api.actions.update(id, {
+      const updated = await getStorage().actions.update(id, {
         text: editText.trim(),
         dueDate: editDue.trim() || null,
       });
@@ -221,7 +221,7 @@ export default function Actions() {
     );
     if (!ok) return;
     try {
-      await api.actions.delete(action.id);
+      await getStorage().actions.delete(action.id);
       indexRemove("action", action.id);
       await actions.refresh();
       notify.success(t("topos.toast.action_deleted", "Aktion gelöscht"));

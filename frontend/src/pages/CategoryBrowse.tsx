@@ -18,7 +18,7 @@ import { ChevronDown, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { useFeature } from "@astrapi69/feature-strategy-react";
 
 import NavBar from "../components/NavBar";
-import { api } from "../api/client";
+import { getStorage } from "../storage";
 import { db } from "../db/schema";
 import { useDialog } from "../components/AppDialog";
 import { FEATURES } from "../features/featureConfig";
@@ -54,7 +54,7 @@ export default function CategoryBrowse() {
         return;
       }
       try {
-        const data = await api.categories.tree();
+        const data = await getStorage().categories.tree();
         if (!cancelled) setTree(data);
       } catch (e) {
         if (!cancelled) {
@@ -78,7 +78,7 @@ export default function CategoryBrowse() {
   }, [reloadKey]);
 
   async function findCategoryId(path: string): Promise<number | null> {
-    const rows = await api.categories.list();
+    const rows = await getStorage().categories.list();
     return rows.find((row) => row.path === path)?.id ?? null;
   }
 
@@ -115,7 +115,10 @@ export default function CategoryBrowse() {
         );
         return;
       }
-      const result = await api.categories.rename(categoryId, newPath.trim());
+      const result = await getStorage().categories.rename(
+        categoryId,
+        newPath.trim(),
+      );
       notify.success(
         t(
           "topos.category.rename_success",
@@ -168,7 +171,7 @@ export default function CategoryBrowse() {
         );
         return;
       }
-      const result = await api.categories.delete(categoryId);
+      const result = await getStorage().categories.delete(categoryId);
       notify.success(
         t(
           "topos.category.delete_success",

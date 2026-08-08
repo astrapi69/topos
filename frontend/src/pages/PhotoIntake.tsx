@@ -40,6 +40,7 @@ import {
   type RecognizedItem,
   type VisionResult,
 } from "../api/client";
+import { getStorage } from "../storage";
 import type { Container } from "../types/topos";
 import { useDialog } from "../components/AppDialog";
 import { useI18n } from "../hooks/useI18n";
@@ -309,7 +310,7 @@ export default function PhotoIntake() {
     }
     setCommitting(true);
     try {
-      const bulkResult = await api.items.bulkCreate(
+      const bulkResult = await getStorage().items.bulkCreate(
         committableRows.map(toBulkPayload),
       );
       await refreshAll();
