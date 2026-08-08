@@ -314,12 +314,9 @@ export default function PhotoIntake() {
   }
 
   async function handleCommit() {
-    if (
-      committableRows.length === 0 ||
-      !selectedContainer ||
-      committing ||
-      !backendReady
-    ) {
+    // No backend gate: getStorage().items.bulkCreate writes to IndexedDB in
+    // dexie mode, so commit works offline just like recognition.
+    if (committableRows.length === 0 || !selectedContainer || committing) {
       return;
     }
     setCommitting(true);
@@ -618,24 +615,12 @@ export default function PhotoIntake() {
                 disabled={
                   committableRows.length === 0 ||
                   !selectedContainer ||
-                  committing ||
-                  !backendReady
+                  committing
                 }
                 onClick={() => void handleCommit()}
               >
                 {commitLabel}
               </button>
-              {!backendReady && backendUp !== null && (
-                <span
-                  data-testid="photo-intake-commit-offline-hint"
-                  className={muted}
-                >
-                  {t(
-                    "topos.page.photo_intake.commit_offline",
-                    "Übernehmen benötigt eine Backend-Verbindung.",
-                  )}
-                </span>
-              )}
             </div>
           )}
         </section>

@@ -416,11 +416,13 @@ describe("PhotoIntake", () => {
     expect(screen.getByTestId("photo-intake-row-0-label")).toHaveValue(
       "Ordnerdeckel",
     );
-    // Committing still needs the backend (Dexie stays a read cache).
-    expect(screen.getByTestId("photo-intake-commit")).toBeDisabled();
+    // Committing works offline too: getStorage().items.bulkCreate writes to
+    // IndexedDB in dexie mode, so there is no backend gate and no
+    // "needs a backend" hint.
+    expect(screen.getByTestId("photo-intake-commit")).not.toBeDisabled();
     expect(
-      screen.getByTestId("photo-intake-commit-offline-hint"),
-    ).toBeInTheDocument();
+      screen.queryByTestId("photo-intake-commit-offline-hint"),
+    ).not.toBeInTheDocument();
   });
 
   it("creates a container inline and auto-selects it", async () => {
