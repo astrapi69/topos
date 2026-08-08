@@ -138,6 +138,7 @@ export default function PhotoIntake() {
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const stagingRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -273,6 +274,14 @@ export default function PhotoIntake() {
         ...recognition.items.map(toStagedRow),
       ]);
       setRecognizedOnce(true);
+      // Jump straight to the staging list so the user sees the AI's items
+      // landed (on a phone the list is below the fold after the photo).
+      requestAnimationFrame(() => {
+        stagingRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
     } catch (err) {
       notify.error(
         errorMessage(
@@ -539,7 +548,7 @@ export default function PhotoIntake() {
           </div>
         </section>
 
-        <section data-testid="photo-intake-staging">
+        <section ref={stagingRef} data-testid="photo-intake-staging">
           <div className="flex flex-wrap items-center gap-2 mb-3">
             <h2 className="mr-auto mb-0">
               {t("topos.page.photo_intake.staging_title", "Aufnahmeliste")}
