@@ -51,7 +51,8 @@ import { isBackendAvailable } from "../utils/backendStatus";
 import { useDialog } from "./AppDialog";
 import { useI18n } from "../hooks/useI18n";
 import { notify, errorMessage } from "../utils/notify";
-import { btn, btnText, input, muted, danger } from "../ui/classes";
+import { SecretInput } from "./SecretInput";
+import { btn, btnText, muted, danger } from "../ui/classes";
 
 type SettingsMode = "backend" | "local";
 type PromptMode = "create" | "unlock";
@@ -213,10 +214,7 @@ export function VaultPassphraseForm({
               "Gib die Passphrase ein, um die gespeicherten API-Schluessel fuer diese Sitzung zu entsperren.",
             )}
       </p>
-      <input
-        className={input}
-        type="password"
-        autoComplete={kind === "create" ? "new-password" : "current-password"}
+      <SecretInput
         placeholder={t("topos.page.settings.ai.vault_pass", "Passphrase")}
         value={pass}
         onChange={(e) => setPass(e.target.value)}
@@ -225,10 +223,7 @@ export function VaultPassphraseForm({
         }
       />
       {kind === "create" && (
-        <input
-          className={input}
-          type="password"
-          autoComplete="new-password"
+        <SecretInput
           placeholder={t(
             "topos.page.settings.ai.vault_pass_confirm",
             "Passphrase bestaetigen",
