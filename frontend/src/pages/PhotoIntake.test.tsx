@@ -456,6 +456,14 @@ describe("PhotoIntake", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("scrolls to the recognized items so the user sees the import landed", async () => {
+    const scrollSpy = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scrollSpy;
+    renderPage();
+    await recognize();
+    await waitFor(() => expect(scrollSpy).toHaveBeenCalled());
+  });
+
   it("allows inline container creation offline (Dexie mode)", async () => {
     // Regression: the offline PWA seeds no containers, so the user MUST be
     // able to create one inline to have a photo target. Creation goes through
