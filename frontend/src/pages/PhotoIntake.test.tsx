@@ -7,6 +7,7 @@ import PhotoIntake from "./PhotoIntake";
 
 const navigateMock = vi.fn();
 const confirmMock = vi.fn(async () => true);
+const chooseMock = vi.fn(async (): Promise<string | null> => "box");
 
 vi.mock("react-router-dom", async (importOriginal) => ({
   ...(await importOriginal<typeof import("react-router-dom")>()),
@@ -18,7 +19,7 @@ vi.mock("../components/AppDialog", () => ({
     confirm: confirmMock,
     prompt: vi.fn(),
     alert: vi.fn(),
-    choose: vi.fn(),
+    choose: chooseMock,
   }),
 }));
 
@@ -223,6 +224,7 @@ async function recognize() {
 beforeEach(() => {
   vi.clearAllMocks();
   confirmMock.mockResolvedValue(true);
+  chooseMock.mockResolvedValue("box");
   (isBackendAvailable as ReturnType<typeof vi.fn>).mockResolvedValue(true);
   resolveLocalMock.mockReturnValue(null);
   // Full reset: drop refresh-mock additions AND restore the base container
@@ -481,6 +483,8 @@ describe("PhotoIntake", () => {
       screen.getByTestId("photo-intake-container-hint"),
     ).toBeInTheDocument();
     fireEvent.click(recognizeButton);
+    // The user picks the container type (Box vs Ordner) in a choose dialog.
+    await waitFor(() => expect(chooseMock).toHaveBeenCalled());
     await waitFor(() =>
       expect(api.containers.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -498,6 +502,40 @@ describe("PhotoIntake", () => {
         "43",
       ),
     );
+  });
+
+  it("creates an Ordner when the user picks the folder type", async () => {
+    containersData.splice(0);
+    chooseMock.mockResolvedValue("folder");
+    renderPage();
+    await pickPhotoOnly();
+    const recognizeButton = screen.getByTestId("photo-intake-recognize");
+    await waitFor(() => expect(recognizeButton).not.toBeDisabled());
+    fireEvent.click(recognizeButton);
+    await waitFor(() =>
+      expect(api.containers.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          externalId: 1,
+          type: "folder",
+          owner: "self",
+          label: "Ordner 1",
+        }),
+      ),
+    );
+    await waitFor(() => expect(api.ai.recognize).toHaveBeenCalled());
+  });
+
+  it("creates nothing when the type dialog is cancelled", async () => {
+    containersData.splice(0);
+    chooseMock.mockResolvedValue(null);
+    renderPage();
+    await pickPhotoOnly();
+    const recognizeButton = screen.getByTestId("photo-intake-recognize");
+    await waitFor(() => expect(recognizeButton).not.toBeDisabled());
+    fireEvent.click(recognizeButton);
+    await waitFor(() => expect(chooseMock).toHaveBeenCalled());
+    expect(api.containers.create).not.toHaveBeenCalled();
+    expect(api.ai.recognize).not.toHaveBeenCalled();
   });
 
   it("shows a hint and warns instead of recognizing when no container is selected", async () => {

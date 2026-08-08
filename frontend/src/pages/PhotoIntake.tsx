@@ -113,7 +113,7 @@ function emptyRow(): StagedRow {
 
 export default function PhotoIntake() {
   const { t } = useI18n();
-  const { confirm } = useDialog();
+  const { confirm, choose } = useDialog();
   const navigate = useNavigate();
   const online = useOnlineStatus();
   const { data: containers, refresh: refreshContainers } = useContainers();
@@ -246,21 +246,41 @@ export default function PhotoIntake() {
   }
 
   /**
-   * Create a default "Box {n}" container so a first-time user (fresh
-   * IndexedDB, zero containers) can recognize without a detour through
-   * the create form. Auto-selects the new container.
+   * Create a default container so a first-time user (fresh IndexedDB,
+   * zero containers) can recognize without a detour through the create
+   * form. The user picks the type (Box vs Ordner) in a choose dialog;
+   * cancelling creates nothing. Auto-selects the new container.
    */
   async function createDefaultContainer(): Promise<Container | null> {
+    const picked = await choose(
+      t("topos.page.photo_intake.auto_container_title", "Container anlegen"),
+      t(
+        "topos.page.photo_intake.auto_container_message",
+        "Es gibt noch keinen Container. Welchen Typ soll Topos anlegen?",
+      ),
+      [
+        {
+          value: "box",
+          label: t("topos.container.type.box", "Box"),
+          autoFocus: true,
+        },
+        { value: "folder", label: t("topos.container.type.folder", "Ordner") },
+      ],
+      t("topos.common.cancel", "Abbrechen"),
+    );
+    if (picked !== "box" && picked !== "folder") return null;
     const nextExternalId =
       containers.reduce((max, row) => Math.max(max, row.externalId), 0) + 1;
     try {
       const created = await getStorage().containers.create({
         externalId: nextExternalId,
-        type: "box",
+        type: picked,
         owner: "self",
         label: t(
-          "topos.page.photo_intake.auto_container_label",
-          "Box {n}",
+          picked === "box"
+            ? "topos.page.photo_intake.auto_container_label"
+            : "topos.page.photo_intake.auto_container_label_folder",
+          picked === "box" ? "Box {n}" : "Ordner {n}",
         ).replace("{n}", String(nextExternalId)),
         description: null,
         location: null,
