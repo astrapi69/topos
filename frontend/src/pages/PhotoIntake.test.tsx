@@ -118,7 +118,12 @@ vi.mock("../search/buildIndex", () => ({
 }));
 
 vi.mock("../utils/notify", () => ({
-  notify: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
+  notify: {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+  },
   errorMessage: (_err: unknown, fallback: string) => fallback,
 }));
 
@@ -189,16 +194,20 @@ function renderPage() {
   );
 }
 
-async function pickPhotoAndContainer() {
-  fireEvent.change(screen.getByTestId("photo-intake-container-select"), {
-    target: { value: "42" },
-  });
+async function pickPhotoOnly() {
   fireEvent.change(screen.getByTestId("photo-intake-file-input"), {
     target: { files: [new File(["x"], "box.jpg", { type: "image/jpeg" })] },
   });
   await waitFor(() =>
     expect(screen.getByTestId("photo-intake-preview")).toBeInTheDocument(),
   );
+}
+
+async function pickPhotoAndContainer() {
+  fireEvent.change(screen.getByTestId("photo-intake-container-select"), {
+    target: { value: "42" },
+  });
+  await pickPhotoOnly();
 }
 
 async function recognize() {
@@ -216,7 +225,9 @@ beforeEach(() => {
   confirmMock.mockResolvedValue(true);
   (isBackendAvailable as ReturnType<typeof vi.fn>).mockResolvedValue(true);
   resolveLocalMock.mockReturnValue(null);
-  containersData.splice(1); // drop containers added by the refresh mock
+  // Full reset: drop refresh-mock additions AND restore the base container
+  // (tests may empty the list to exercise the zero-container flow).
+  containersData.splice(0, containersData.length, BASE_CONTAINER);
   URL.createObjectURL = vi.fn(() => "blob:preview");
   URL.revokeObjectURL = vi.fn();
 });
@@ -453,6 +464,62 @@ describe("PhotoIntake", () => {
     expect(screen.getByText("12 - Neue Box")).toBeInTheDocument();
     expect(
       screen.queryByTestId("container-quick-create-form"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("implicitly creates a container and recognizes when none exists", async () => {
+    // PC repro: fresh IndexedDB has zero containers. The user should not be
+    // forced through the create form -- picking a photo and hitting Erkennen
+    // auto-creates "Box 1" and recognizes into it.
+    containersData.splice(0);
+    renderPage();
+    await pickPhotoOnly();
+    const recognizeButton = screen.getByTestId("photo-intake-recognize");
+    await waitFor(() => expect(recognizeButton).not.toBeDisabled());
+    // A hint explains what happens without a selected container.
+    expect(
+      screen.getByTestId("photo-intake-container-hint"),
+    ).toBeInTheDocument();
+    fireEvent.click(recognizeButton);
+    await waitFor(() =>
+      expect(api.containers.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          externalId: 1,
+          type: "box",
+          owner: "self",
+          label: "Box 1",
+        }),
+      ),
+    );
+    await waitFor(() => expect(api.ai.recognize).toHaveBeenCalled());
+    // The auto-created container is selected as the target.
+    await waitFor(() =>
+      expect(screen.getByTestId("photo-intake-container-select")).toHaveValue(
+        "43",
+      ),
+    );
+  });
+
+  it("shows a hint and warns instead of recognizing when no container is selected", async () => {
+    // Containers exist but none picked: never guess the target -- show the
+    // inline hint and toast a warning on click.
+    renderPage();
+    await pickPhotoOnly();
+    const recognizeButton = screen.getByTestId("photo-intake-recognize");
+    await waitFor(() => expect(recognizeButton).not.toBeDisabled());
+    expect(
+      screen.getByTestId("photo-intake-container-hint"),
+    ).toBeInTheDocument();
+    fireEvent.click(recognizeButton);
+    await waitFor(() => expect(notify.warning).toHaveBeenCalled());
+    expect(api.ai.recognize).not.toHaveBeenCalled();
+    expect(api.containers.create).not.toHaveBeenCalled();
+    // Once a container is picked, the hint disappears.
+    fireEvent.change(screen.getByTestId("photo-intake-container-select"), {
+      target: { value: "42" },
+    });
+    expect(
+      screen.queryByTestId("photo-intake-container-hint"),
     ).not.toBeInTheDocument();
   });
 
