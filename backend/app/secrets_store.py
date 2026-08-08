@@ -40,6 +40,7 @@ _ENV_SECRET_OVERRIDES: dict[str, tuple[str, ...]] = {
     "TOPOS_ANTHROPIC_API_KEY": ("ai", "keys", "anthropic"),
     "TOPOS_OPENAI_API_KEY": ("ai", "keys", "openai"),
     "TOPOS_GEMINI_API_KEY": ("ai", "keys", "google"),
+    "TOPOS_PERPLEXITY_API_KEY": ("ai", "keys", "perplexity"),
     "TOPOS_CUSTOM_API_KEY": ("ai", "keys", "custom"),
 }
 

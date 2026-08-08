@@ -30,12 +30,14 @@
 
 import {
   createProviderRegistry,
+  PERPLEXITY_PROVIDER,
   type AiProviderDescriptor,
   type ProviderRegistry,
 } from "@astrapi69/ai-key-vault";
 
 /** The provider ids Topos knows. Kept in sync with the backend chain. */
-export type ToposProviderId = "anthropic" | "openai" | "google" | "custom";
+export type ToposProviderId =
+  "anthropic" | "openai" | "google" | "perplexity" | "custom";
 
 /** Provider descriptors in UI order (drives the settings select). */
 export const TOPOS_PROVIDERS: readonly AiProviderDescriptor<ToposProviderId>[] =
@@ -79,6 +81,11 @@ export const TOPOS_PROVIDERS: readonly AiProviderDescriptor<ToposProviderId>[] =
       requiresApiKey: true,
       corsBlocked: true,
     },
+    // Perplexity: reuse the kit's ready descriptor (OpenAI-compatible,
+    // corsBlocked -> backend-only, like openai/google here). Vision on the
+    // sonar models is weaker than the vision-first providers; offered as an
+    // option, routed through the backend's OpenAI-compatible path.
+    PERPLEXITY_PROVIDER,
     {
       id: "custom",
       label: "Custom (OpenAI-compatible)",
