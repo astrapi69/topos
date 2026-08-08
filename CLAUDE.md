@@ -51,9 +51,12 @@ On a conflict between CLAUDE.md and the rules, the rules win.
 ## Architecture (short)
 
 Four layers: Frontend → Backend → PluginForge → Plugins. Details in
-`.claude/rules/architecture.md`. Backend is the source of truth;
-Dexie on the frontend is a read-through cache (no offline mutation
-queue, no CRDT). Licensing infrastructure exists but is dormant
+`.claude/rules/architecture.md`. Data access goes through a storage
+service (`frontend/src/storage/`, `getStorage()`): **api mode** =
+backend is source of truth, Dexie is a read-through cache; **dexie
+mode** (GitHub Pages PWA, `VITE_STORAGE_MODE=dexie`) = real
+offline-first CRUD in IndexedDB (no backend, no demo data). No sync
+between modes. Licensing infrastructure exists but is dormant
 (`LICENSING_ENABLED = False`).
 
 ## Commands
@@ -127,7 +130,8 @@ topos/
 ├── frontend/src/
 │   ├── api/client.ts      # typed API client (snake_case↔camelCase boundary)
 │   ├── components/        # NavBar (top bar + mobile bottom tab bar), AppDialog, FormField, ...
-│   ├── db/schema.ts       # Dexie cache
+│   ├── storage/           # getStorage() seam: apiStorage + dexieStorage (offline-first)
+│   ├── db/schema.ts       # Dexie store (dexie mode) / read-through cache (api mode)
 │   ├── hooks/useTopos.ts  # stale-while-revalidate hooks
 │   ├── pages/             # Dashboard, ContainerList, ContainerDetail, ItemEditor, CategoryBrowse, Actions, Import, Settings
 │   ├── ui/classes.ts      # shared Tailwind class strings (light+dark)

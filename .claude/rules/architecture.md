@@ -147,19 +147,31 @@ For complex plugin UIs: Web Components as custom elements (compiled JS bundle in
 
 ## Persistence
 
-- Backend: SQLAlchemy + SQLite.
-- Frontend: no local storage for book data. Everything via the API.
-- Assets: local on the filesystem, managed through /api/assets/.
-- Backup: .bgb files (ZIP), restore brings the entire state back.
-- Project import: .bgp files (write-book-template ZIP).
+- Backend (api-mode source of truth): SQLAlchemy + SQLite.
+- Frontend storage service (`frontend/src/storage/`, `getStorage()` ->
+  `IStorageService`): two impls, picked by
+  `VITE_STORAGE_MODE=dexie` (GitHub Pages) > persisted `topos.storage_mode`
+  > `api` default.
+  - **api mode** (`apiStorage`): every call is an HTTP request; Dexie is a
+    read-through cache (stale-while-revalidate) mirrored on read.
+  - **dexie mode** (`dexieStorage`): Dexie IS the store - real offline-first
+    CRUD in IndexedDB, persists across reloads, no backend, no demo data.
+    Cascade + category semantics mirror `backend/app/services/*`; ids are
+    local (max + 1 per table).
+- No sync between modes (switching does not merge stores).
+- Backup: `src/backup/` is dual-mode too (backend `/api/backup` or Dexie).
 
 ## Data flow
 
 ```
-UI (React) -> API client -> FastAPI router -> service/plugin -> SQLAlchemy -> SQLite
+api mode:    UI (React) -> getStorage() [apiStorage] -> API client -> FastAPI
+             router -> service/plugin -> SQLAlchemy -> SQLite
+dexie mode:  UI (React) -> getStorage() [dexieStorage] -> Dexie (IndexedDB)
 ```
 
-Unidirectional. No direct DB access from routers. No frontend code in the backend.
+Unidirectional. No direct DB access from routers. No frontend code in the
+backend. Pages/components call `getStorage().<entity>.<op>` - NEVER `api.<entity>`
+or `db.*` directly (the storage seam is what makes both deployments work).
 
 ## Error handling
 
@@ -205,8 +217,15 @@ Per-user vs per-book: settings that should vary between books do NOT belong in `
 
 ## Offline/local-first
 
-- SQLite as the default (no external DB required).
-- Assets local on the filesystem.
+- SQLite as the default backend DB (no external DB required).
 - Frontend deliverable as static files.
+- The GitHub Pages PWA is a real offline-first app: built with
+  `VITE_STORAGE_MODE=dexie`, so `getStorage()` resolves to `dexieStorage` and
+  all CRUD persists to IndexedDB with no backend. Do NOT reintroduce demo
+  data (the old `DemoSeeder` + "connect a backend for real data" toast were
+  removed; offline Dexie IS real storage). `seed.ts` stays only for
+  `BackendUrlSettings.clearDemoData`.
+- AI in dexie mode is browser-direct (only Anthropic; openai/google/perplexity
+  are `corsBlocked` -> backend-only). The passphrase-encrypted local key vault
+  (`@astrapi69/ai-key-vault`) stores keys in the browser.
 - License validation offline (signed keys, no license server).
-- Exception: plugins with external APIs (TTS, LanguageTool) need network access.
