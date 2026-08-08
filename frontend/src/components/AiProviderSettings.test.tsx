@@ -152,6 +152,9 @@ describe("AiProviderSettings", () => {
     ).not.toBeInTheDocument();
     // No unlock CTA either, because no vault exists yet.
     expect(screen.queryByTestId("ai-vault-unlock-cta")).not.toBeInTheDocument();
+    // The encrypted key-import entry point IS available so a fresh device can
+    // bootstrap its keys from an exported .alk file.
+    expect(screen.getByTestId("ai-key-import")).toBeInTheDocument();
   });
 
   it("offers an unlock CTA for an existing locked vault and unlocks via the prompt", async () => {
@@ -171,6 +174,9 @@ describe("AiProviderSettings", () => {
       expect(screen.getByTestId("ai-vault-lock-button")).toBeInTheDocument();
     });
     expect(screen.getByTestId("key-vault-section")).toBeInTheDocument();
+    // Once unlocked the full section (with export) replaces the standalone
+    // import entry point.
+    expect(screen.queryByTestId("ai-key-import")).not.toBeInTheDocument();
     expect(vault.isUnlocked()).toBe(true);
   });
 
