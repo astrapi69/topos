@@ -77,49 +77,57 @@ describe("NavBar global search", () => {
     );
   });
 
-  it("renders the bottom tab bar with the four primary tabs", () => {
+  it("has no bottom tab bar, only the hamburger button on mobile", () => {
+    // Regression pin: the bottom tab bar was removed (2026-08-08) in favour
+    // of a single top hamburger menu.
     render(
       <MemoryRouter>
         <NavBar />
       </MemoryRouter>,
     );
-    expect(screen.getByTestId("topos-tabbar")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-tab-dashboard")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-tab-containers")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-tab-photo-intake")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-tab-search")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-tab-more")).toBeInTheDocument();
+    expect(screen.queryByTestId("topos-tabbar")).not.toBeInTheDocument();
+    expect(screen.getByTestId("nav-hamburger")).toBeInTheDocument();
   });
 
-  it("toggles the Mehr sheet via the more tab", async () => {
+  it("toggles the mobile menu with every destination via the hamburger", async () => {
     render(
       <MemoryRouter>
         <NavBar />
       </MemoryRouter>,
     );
-    // The sheet with the secondary destinations is closed by default.
-    expect(screen.queryByTestId("nav-more-menu")).not.toBeInTheDocument();
+    // Closed by default.
+    expect(screen.queryByTestId("nav-mobile-menu")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId("nav-tab-more"));
-    expect(screen.getByTestId("nav-more-menu")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("nav-hamburger"));
+    expect(screen.getByTestId("nav-mobile-menu")).toBeInTheDocument();
+    // Every destination is reachable from the one menu.
+    expect(screen.getByTestId("nav-dashboard-mobile")).toBeInTheDocument();
+    expect(screen.getByTestId("nav-containers-mobile")).toBeInTheDocument();
+    expect(screen.getByTestId("nav-photo-intake-mobile")).toBeInTheDocument();
+    expect(screen.getByTestId("nav-categories-mobile")).toBeInTheDocument();
+    expect(screen.getByTestId("nav-actions-mobile")).toBeInTheDocument();
     expect(screen.getByTestId("nav-import-mobile")).toBeInTheDocument();
     expect(screen.getByTestId("nav-settings-mobile")).toBeInTheDocument();
+    expect(screen.getByTestId("nav-search-mobile")).toBeInTheDocument();
 
-    // Selecting a link closes the sheet again.
+    // Selecting a link closes the menu again.
     fireEvent.click(screen.getByTestId("nav-import-mobile"));
     await waitFor(() =>
-      expect(screen.queryByTestId("nav-more-menu")).not.toBeInTheDocument(),
+      expect(screen.queryByTestId("nav-mobile-menu")).not.toBeInTheDocument(),
     );
   });
 
-  it("opens the spotlight from the search tab", () => {
+  it("opens the spotlight from the mobile menu's search entry", () => {
     render(
       <MemoryRouter>
         <NavBar />
       </MemoryRouter>,
     );
-    fireEvent.click(screen.getByTestId("nav-tab-search"));
+    fireEvent.click(screen.getByTestId("nav-hamburger"));
+    fireEvent.click(screen.getByTestId("nav-search-mobile"));
     expect(screen.getByTestId("global-search-overlay")).toBeInTheDocument();
+    // Opening search closes the menu.
+    expect(screen.queryByTestId("nav-mobile-menu")).not.toBeInTheDocument();
   });
 
   it("closes the spotlight on Escape", async () => {

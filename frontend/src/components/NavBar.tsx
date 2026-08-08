@@ -1,16 +1,18 @@
 /**
  * Navigation shared by every Topos page.
  *
- * Mobile-first: the primary destinations live in a fixed bottom tab
- * bar (thumb-reachable for one-handed use - the main scenario is a
- * phone in the basement), secondary destinations sit behind a "Mehr"
- * sheet that opens above the bar. From `md` up the tab bar disappears
- * and a slim top bar carries the inline links. The desktop links stay
- * in the DOM at every width (Tailwind `hidden` only sets
- * display:none), so the existing `nav-*` test ids keep resolving.
+ * From `md` up: a slim top bar carries the destinations as inline links
+ * plus a search trigger. Below `md` (phone): the same top bar shows the
+ * brand and a single hamburger button on the right; tapping it drops
+ * down a menu with every destination and a search entry. There is no
+ * bottom tab bar (removed 2026-08-08 on user request - a phone in the
+ * basement gets one top menu, not a thumb bar). The desktop links stay
+ * in the DOM at every width (Tailwind `hidden` only sets display:none),
+ * so the `nav-*` test ids keep resolving.
  *
- * Testid namespace: top bar `nav-{route}`, tab bar `nav-tab-{route}`,
- * Mehr sheet `nav-more-menu` + `nav-{route}-mobile` per entry.
+ * Testid namespace: top bar `nav-{route}`, hamburger `nav-hamburger`,
+ * mobile dropdown `nav-mobile-menu` with `nav-{route}-mobile` per entry
+ * plus `nav-search-mobile`.
  */
 
 import { useState } from "react";
@@ -39,8 +41,8 @@ interface NavLink {
   icon: typeof House;
 }
 
-/** Primary destinations: rendered as bottom tabs on mobile. */
-const PRIMARY_LINKS: NavLink[] = [
+/** Every destination, in menu order (top-bar links + mobile dropdown). */
+const NAV_LINKS: NavLink[] = [
   {
     to: "/",
     labelKey: "topos.nav.dashboard",
@@ -62,10 +64,6 @@ const PRIMARY_LINKS: NavLink[] = [
     testId: "nav-photo-intake",
     icon: Camera,
   },
-];
-
-/** Secondary destinations: behind the "Mehr" sheet on mobile. */
-const SECONDARY_LINKS: NavLink[] = [
   {
     to: "/categories",
     labelKey: "topos.nav.categories",
@@ -96,8 +94,6 @@ const SECONDARY_LINKS: NavLink[] = [
   },
 ];
 
-const DESKTOP_LINKS: NavLink[] = [...PRIMARY_LINKS, ...SECONDARY_LINKS];
-
 function isActive(pathname: string, to: string): boolean {
   return to === "/" ? pathname === "/" : pathname.startsWith(to);
 }
@@ -105,32 +101,23 @@ function isActive(pathname: string, to: string): boolean {
 const activeCls = "no-underline font-semibold text-accent";
 const inactiveCls = "no-underline text-ink-secondary hover:text-ink";
 
-const tabBase =
-  "flex flex-col items-center justify-center gap-0.5 py-1.5 min-h-[52px] " +
-  "no-underline text-[11px] leading-tight cursor-pointer bg-transparent border-0";
-const tabActive = `${tabBase} text-accent font-semibold`;
-const tabInactive = `${tabBase} text-ink-muted`;
-
 export default function NavBar() {
   const { t } = useI18n();
   const { pathname } = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useKeyboardShortcuts([
     { keys: "mod+k", handler: () => setSearchOpen(true) },
     { keys: "/", handler: () => setSearchOpen(true) },
   ]);
 
-  const moreActive = SECONDARY_LINKS.some((link) =>
-    isActive(pathname, link.to),
-  );
-
   return (
     <>
       <nav
         data-testid="topos-navbar"
-        className="bg-surface-2 border-b border-line"
+        // relative z-40 keeps the open dropdown above the tap-away backdrop.
+        className="relative z-40 bg-surface-2 border-b border-line"
       >
         <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3">
           <strong className="mr-1 sm:mr-2 font-bold text-ink font-display">
@@ -139,7 +126,7 @@ export default function NavBar() {
 
           {/* Desktop links: horizontal from md up. */}
           <div className="hidden md:flex items-center gap-4">
-            {DESKTOP_LINKS.map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -153,7 +140,7 @@ export default function NavBar() {
             ))}
           </div>
 
-          {/* Desktop search trigger; mobile searches via the tab bar. */}
+          {/* Desktop search trigger. */}
           <button
             type="button"
             data-testid="nav-search"
@@ -168,80 +155,38 @@ export default function NavBar() {
               Ctrl K
             </kbd>
           </button>
-        </div>
-      </nav>
 
-      {/* Mobile bottom tab bar. */}
-      <nav
-        data-testid="topos-tabbar"
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-line bg-surface-2 pb-[env(safe-area-inset-bottom)]"
-      >
-        <div className="grid grid-cols-5">
-          {PRIMARY_LINKS.map((link) => {
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                data-testid={`nav-tab-${link.testId.slice("nav-".length)}`}
-                aria-current={isActive(pathname, link.to) ? "page" : undefined}
-                className={
-                  isActive(pathname, link.to) ? tabActive : tabInactive
-                }
-                onClick={() => setMoreOpen(false)}
-              >
-                <Icon size={20} aria-hidden />
-                {t(link.labelKey, link.fallback)}
-              </Link>
-            );
-          })}
+          {/* Mobile hamburger: opens the dropdown menu below the bar. */}
           <button
             type="button"
-            data-testid="nav-tab-search"
-            onClick={() => {
-              setMoreOpen(false);
-              setSearchOpen(true);
-            }}
-            className={tabInactive}
+            data-testid="nav-hamburger"
+            aria-label={t("topos.nav.menu", "Menü")}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((open) => !open)}
+            className="ml-auto md:hidden inline-flex items-center justify-center rounded border border-line bg-surface p-2 min-h-[44px] min-w-[44px] text-ink-secondary hover:text-ink cursor-pointer"
           >
-            <Search size={20} aria-hidden />
-            {t("topos.nav.search", "Suchen")}
-          </button>
-          <button
-            type="button"
-            data-testid="nav-tab-more"
-            aria-expanded={moreOpen}
-            onClick={() => setMoreOpen((open) => !open)}
-            className={moreActive ? tabActive : tabInactive}
-          >
-            <Menu size={20} aria-hidden />
-            {t("topos.nav.more", "Mehr")}
+            <Menu size={22} aria-hidden />
           </button>
         </div>
-      </nav>
 
-      {/* "Mehr" sheet: secondary destinations above the tab bar. */}
-      {moreOpen && (
-        <>
+        {/* Mobile dropdown: every destination + search, below the top bar. */}
+        {menuOpen && (
           <div
-            data-testid="nav-more-backdrop"
-            aria-hidden
-            onClick={() => setMoreOpen(false)}
-            className="md:hidden fixed inset-0 z-40 bg-black/30"
-          />
-          <div
-            data-testid="nav-more-menu"
-            className="md:hidden fixed inset-x-2 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-50 flex flex-col gap-1 rounded-lg border border-line bg-surface p-2 shadow-lg"
+            data-testid="nav-mobile-menu"
+            className="md:hidden border-t border-line bg-surface px-2 py-2 flex flex-col gap-1"
           >
-            {SECONDARY_LINKS.map((link) => {
+            {NAV_LINKS.map((link) => {
               const Icon = link.icon;
               return (
                 <Link
                   key={link.to}
                   to={link.to}
                   data-testid={`${link.testId}-mobile`}
-                  onClick={() => setMoreOpen(false)}
-                  className={`flex items-center gap-3 rounded px-3 py-3 ${
+                  aria-current={
+                    isActive(pathname, link.to) ? "page" : undefined
+                  }
+                  onClick={() => setMenuOpen(false)}
+                  className={`flex items-center gap-3 rounded px-3 py-3 min-h-[44px] ${
                     isActive(pathname, link.to) ? activeCls : inactiveCls
                   }`}
                 >
@@ -250,8 +195,30 @@ export default function NavBar() {
                 </Link>
               );
             })}
+            <button
+              type="button"
+              data-testid="nav-search-mobile"
+              onClick={() => {
+                setMenuOpen(false);
+                setSearchOpen(true);
+              }}
+              className={`flex items-center gap-3 rounded px-3 py-3 min-h-[44px] bg-transparent border-0 cursor-pointer ${inactiveCls}`}
+            >
+              <Search size={18} aria-hidden />
+              {t("topos.nav.search", "Suchen")}
+            </button>
           </div>
-        </>
+        )}
+      </nav>
+
+      {/* Tap-away backdrop for the mobile menu. */}
+      {menuOpen && (
+        <div
+          data-testid="nav-menu-backdrop"
+          aria-hidden
+          onClick={() => setMenuOpen(false)}
+          className="md:hidden fixed inset-0 z-30 bg-black/30"
+        />
       )}
 
       {searchOpen && <GlobalSearch onClose={() => setSearchOpen(false)} />}
