@@ -1889,3 +1889,70 @@ purged. Arbitrary-value utilities (`min-h-[44px]`) are generated from the
 literals in the components. Rule: keep class strings literal (or in
 `ui/classes.ts`), never build a class name by concatenating variable
 parts; if you must, safelist it.
+
+## Browser-direct AI is a per-endpoint CORS fact, measure it -- never guess
+
+Topos's AI vision recognition runs two ways: backend mode (`POST
+/api/ai/vision`, key server-side, no CORS issue) and offline PWA mode
+(browser-direct fetch to the provider's own API). Which providers work
+browser-direct is a hard CORS fact per endpoint, and the registry's
+`corsBlocked` flag encodes it.
+
+The flags were originally **guessed**: an early note assumed "only
+Anthropic ships the `anthropic-dangerous-direct-browser-access` opt-in,
+so it is the only browser-direct provider" and marked openai/google/
+perplexity/custom `corsBlocked: true`. That guess built two silent bugs:
+google and perplexity showed a false "Nur Desktop" label and had their
+Test button disabled in the offline PWA, even though their APIs allow
+the browser-direct call. The user's symptom was "warum nur Anthropic?".
+
+An empirical probe settled it. Load a page on the **real deployment
+origin** (here `https://astrapi69.github.io/topos/`, so the browser
+evaluates CORS exactly as the PWA does), then `fetch` each provider's
+**actual** endpoint with a dummy key and observe reached-vs-blocked:
+
+```js
+// Playwright: await page.goto(liveOrigin); await page.evaluate(async () => {
+//   try { const r = await fetch(url, opts); return {reached:true, status:r.status}; }
+//   catch (e) { return {reached:false, error:String(e)}; } })
+```
+
+Results (dummy keys -> a 400/401 means the request REACHED the server;
+"Failed to fetch" means CORS-BLOCKED):
+
+| Provider   | Probed call                    | Result            | browser-direct |
+|------------|--------------------------------|-------------------|----------------|
+| anthropic  | GET  /v1/models                | 401 reached       | YES            |
+| google     | POST .../v1beta/...:generateContent | 400 reached  | YES            |
+| perplexity | POST /chat/completions         | 401 reached       | YES            |
+| openai     | POST /v1/chat/completions      | Failed to fetch   | NO             |
+
+Two traps the probe exposed:
+
+1. **Test the endpoint you actually call, not a proxy for it.** OpenAI's
+   `GET /v1/models` reaches (401) -- a naive "test connection" against
+   /models would report OpenAI as browser-callable. But the real vision
+   call, `POST /v1/chat/completions`, is CORS-blocked. GET reaching does
+   NOT imply POST reaching; different endpoints have different CORS
+   policies on the same host. Probe the exact method+path production uses.
+2. **The flag is cosmetic-until-wired.** In this codebase `corsBlocked`
+   only drove the kit's status label + Test button; the recognition
+   dispatch (`recognizePhotoDirect`) never gated on it, so google/
+   perplexity recognition would have *run* -- the flag just lied in the
+   UI. When a capability flag exists, know whether it actually gates the
+   capability or only decorates it; a wrong decorative flag still erodes
+   trust ("it says Desktop only, so I didn't try it").
+
+Fix: `corsBlocked: false` for google and perplexity (override the kit's
+`PERPLEXITY_PROVIDER`, which ships it `true`), keep `openai` and `custom`
+`true`. OpenAI genuinely cannot run browser-direct -- its chat endpoint
+sends no CORS headers -- so offline it needs the backend/desktop app.
+That is OpenAI's restriction, not a Topos bug; do not paper over it by
+flipping the flag, and do not claim "all providers work offline" when one
+provably cannot. Pin the whole matrix in a test
+(`registry.test.ts::marks browser-direct providers per the empirical CORS
+matrix`) so a future edit that re-guesses fails loudly.
+
+Generalises: any "can I call X from the browser?" question is answerable
+in 30 seconds with a real-origin fetch probe. A guessed CORS flag is a
+bug with a UI. Measure, then encode, then regression-pin.

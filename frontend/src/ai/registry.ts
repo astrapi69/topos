@@ -11,13 +11,16 @@
  *    config chain, the ``/api/settings/ai/*`` endpoints and the vision
  *    client (``browserAiClient``) all key on ``google``; keeping the id
  *    avoids a translation layer at every boundary.
- *  - **``corsBlocked`` gating.** Only Anthropic ships the
- *    ``anthropic-dangerous-direct-browser-access`` opt-in, so it is the only
- *    provider callable straight from the browser in the no-backend PWA mode.
- *    OpenAI and Gemini are marked ``corsBlocked`` so the settings UI reports
- *    them ``desktop_only`` there instead of letting the user configure a
- *    provider that a browser fetch cannot reach (deliberate Topos decision,
- *    see commit e225221).
+ *  - **``corsBlocked`` gating (empirically measured, not assumed).** An
+ *    earlier version guessed that only Anthropic was browser-direct. A CORS
+ *    probe against the real APIs from the Pages origin (dummy keys, observing
+ *    reached-vs-blocked) corrected that: anthropic (dangerous-direct opt-in),
+ *    google (generativelanguage.googleapis.com), and perplexity all allow the
+ *    browser-direct vision POST. Only **OpenAI** blocks it -- GET /models
+ *    reaches, but POST /chat/completions returns "Failed to fetch" (CORS) --
+ *    so ``openai`` stays ``corsBlocked``. ``custom`` stays ``corsBlocked``
+ *    until a concrete endpoint proves otherwise. The settings UI reports the
+ *    blocked ones ``desktop_only`` (they need the backend).
  *  - **``custom`` OpenAI-compatible provider.** The backend chain supports a
  *    custom (self-hosted / OpenAI-compatible) provider. The kit's 0.1.x panel
  *    has no base-URL field, so Topos renders its own ``CustomEndpointField``
@@ -79,13 +82,16 @@ export const TOPOS_PROVIDERS: readonly AiProviderDescriptor<ToposProviderId>[] =
       ],
       baseUrl: "https://generativelanguage.googleapis.com/v1beta",
       requiresApiKey: true,
-      corsBlocked: true,
+      // Empirically browser-direct: generativelanguage.googleapis.com allows
+      // CORS for POST generateContent (probe from the Pages origin -> 400
+      // reached with a dummy key). Callable in the no-backend PWA.
+      corsBlocked: false,
     },
-    // Perplexity: reuse the kit's ready descriptor (OpenAI-compatible,
-    // corsBlocked -> backend-only, like openai/google here). Vision on the
-    // sonar models is weaker than the vision-first providers; offered as an
-    // option, routed through the backend's OpenAI-compatible path.
-    PERPLEXITY_PROVIDER,
+    // Perplexity: reuse the kit's descriptor (OpenAI-compatible) but override
+    // corsBlocked -> the kit ships it backend-only, yet api.perplexity.ai
+    // allows CORS for POST chat/completions (probe -> 401 reached). Callable
+    // browser-direct like anthropic/google.
+    { ...PERPLEXITY_PROVIDER, corsBlocked: false },
     {
       id: "custom",
       label: "Custom (OpenAI-compatible)",
