@@ -2,153 +2,6 @@
 
 These rules come from real development and solve problems that would otherwise come back over and over.
 
-## Bulk-operation limits should be per-operation cost-profile
-
-The bulk-delete feature shipped with a 200-row cap copied from the existing `bulk-export` precedent. First real use surfaced the symptom: with 209 imported articles, "Alle auswählen" tripped the cap and both Export AND Löschen disabled. Export's cap is justified (pandoc per row + asset round-trips → minutes); delete's was not (one DB UPDATE / DELETE per row → sub-second).
-
-Rule: every new bulk-operation must justify its limit against its own cost profile, not copy the neighbour's. Concretely:
-
-- **Compute-heavy operations** (pandoc, TTS synth, image processing, AI calls): cap stays. Picked from "what completes in 60-180 s server-side per batch."
-- **DB-bound operations** (soft-delete, hard-delete, status toggle, tag attach): **uncapped** by default. SQL bulk operations scale to thousands of rows trivially; an artificial cap creates the worst-of-both UX where "select all" tells the user they cannot do what they obviously want to.
-- **Network-bound external operations** (publish-to-platform, sync-to-git): cap reflects the slowest external call's timeout, not the local processing.
-
-Anti-pattern observed and rejected: "uniform cap across all bulk operations so the UX is consistent". The cost profile is what dominates the UX; pretending all operations have the same profile **is** the inconsistency.
-
-Concrete change from this incident: `MAX_BULK_DELETE` removed from `backend/app/routers/bulk_delete.py`. Pydantic field keeps `min_length=1` (empty body stays a 422) but drops `max_length`. The frontend Löschen button gates on `count < 2` only — no `overLimit` check. Bulk-export's `BULK_LIMIT_HARD = 200` stays unchanged because pandoc's cost-profile is real.
-
-## Bulk-action UX: action-bar + selection-hook decoupling stays useful
-
-The bulk-delete feature shipped fast because the existing `ArticleBulkActionBar` / `BookBulkActionBar` + `useArticleSelection` / `useBookSelection` hooks were already decoupled from any specific operation. The hook holds `Set<string>` of selected IDs plus filter-aware `selectAll(ids)` that takes an explicit list. The bar is pure-presentational, taking the count + handlers. The page wires whatever operation it wants.
-
-Adding bulk-delete meant adding two optional props (`onBulkDelete`, `onBulkDeletePermanent`) to each bar and the corresponding handlers in the page. No restructuring; no risk to the existing bulk-export flow; no changes to the selection hook.
-
-Rule for future bulk operations (bulk-edit-status, bulk-tag, bulk-export-variant, etc.):
-
-- Add optional handler props on the bar. Don't push operation-specific UI into the hook.
-- Selection state stays orthogonal to the operations that consume it.
-- Filter-aware `selectAll` callers (`filters.filteredArticles.map(a => a.id)`) are the canonical "operate on the visible-after-filter set" pattern. Don't second-guess; future bulk operations will want exactly this.
-
-What NOT to do:
-- Don't add per-operation state to the selection hook (e.g. `useArticleSelection` should never know whether the current operation is "delete" vs "export").
-- Don't fork the bar into per-operation components (`ArticleBulkDeleteBar` is wrong; one bar that takes operation handlers is right).
-- Don't centralize bulk-operation logic into a higher-order component. The page-level handlers (each with its own toast / refresh / error semantics) are the right place. Centralizing it would force every operation to fit one shape.
-
-## Medium HTML exports strip every SEO meta tag
-
-Verified across the 209-post production corpus: no `<meta name="description">`, no `og:title`, no `og:description`, no `og:image`, no `<html lang>`. Only `<title>` (which equals the article H1) and `<section data-field="subtitle">` survive.
-
-Implications for importers / scrapers consuming Medium's HTML export:
-
-- Don't bother parsing for `<meta>` or `<og:*>` tags. They're gone.
-- The only authored SEO-adjacent signal is the subtitle/kicker section. Use it as `seo_description` default; leave `seo_description` NULL for posts without one. Don't fall back to body-text slicing — table-of-contents fragments and intro labels poison that.
-- Tags are also stripped. Don't heuristic-derive them. If your app has an AI-generate-tags path, that's the canonical refinement; importer should ship with empty tags.
-- Language detection has to be statistical (langdetect or similar) — Medium's export carries no `lang` attribute on `<html>`, `<body>`, or `<article>`.
-
-This rule generalizes: any "export your data" feature from a SaaS platform tends to strip metadata that the platform considers internal (SEO, analytics tags, A/B-test flags, platform-specific IDs). When auditing an importer for "what signals does the source preserve?" check explicitly for the metadata you assume is there — production sample sweep beats reading the upstream docs.
-
-## Walker iterating repeated containers: prefer `find_all` over `find`
-
-The medium-import walker shipped with `section.find("div", class_="section-inner")` which returned only the FIRST match. Medium's standard header-image layout puts THREE `section-inner` divs per `<section class="section--body">` (title, image lane, main body). The bug silently dropped the entire main body of every Medium post that used the standard layout, for ~33% of the production import. The pre-walker tests didn't catch it because the existing fixtures had small inner[2] sections relative to the rest of the body, masking the loss in their pass-rate ratio.
-
-Rule for any future walker / scraper / HTML-shaped consumer:
-
-- Whenever a container can repeat under the same parent (CSS class match, attribute selector, etc.), use `find_all` and iterate. Use `find` only when you have a structural guarantee that there is ONE — i.e. element with a unique id, root element, etc.
-- Tests for repeated-container walks must include at least one fixture where a non-first occurrence carries the bulk of the content. The "all fixtures pass overall ratio check" smoke is not enough; the multi-occurrence-with-content-distributed-late shape is its own structural class.
-- When patching a `find` to `find_all`, immediately check the broader corpus (ideally a real production sample) for cases where the old code silently lost data. Don't trust the existing test pass-rate to confirm the patch was unnecessary.
-
-This generalizes beyond CSS-class lookups. The same shape — "we got the first match and assumed there was one" — appears in: regex `re.search` vs `re.findall`, SQLAlchemy `query.first()` vs `query.all()`, dict-from-list-of-pairs comprehensions that silently dedup keys.
-
-## User impression of scope is anchored on what they noticed, not what's broken
-
-User reported "einige" (a few) Medium articles imported with truncated content. Spotted ONE specific article. Systematic survey before patching revealed 117/209 (56%) had content loss; 9 imported with literally zero text. The user's "einige" was based on how many articles they happened to notice during normal use, not a count of the broken set.
-
-Same session: user reported "some German articles correctly detected as German". DB inspection showed 207 English + 2 German rows, both German rows with `updated_at > created_at` — the user had manually corrected those two. The walker did no language detection at all. The user's "correctly detected" was a false memory of their own manual edits.
-
-Rule:
-
-- When a user reports a bug with quantitative scope ("a few", "most", "sometimes"), treat the count as a starting hint, not authority. Run a systematic survey (DB query, corpus sample, log scrape) BEFORE scoping the fix. The actual scope can easily be 10x what the user noticed.
-- When a user reports MECHANISM ("X is detected as Y"), trust the SYMPTOM but verify the mechanism in code. Users are reliable observers of "it doesn't work as I expected"; their inferences about WHY are often shaped by hopeful priors ("surely there's some detection somewhere"). Read the code path before acting on the inference.
-- The pre-inspection report must include the survey results when the user's report was quantitative. "User said few; survey shows N=X" is a separate bullet, not a parenthetical. The discrepancy itself is information.
-
-## End-to-end behavior tests are not "kwarg passes through" tests
-
-The MEDIUM-IMPORT-FRONTEND-UI-01 session (2026-05-09) shipped a Settings UI that wrote 4 user-toggleable settings to `backend/config/plugins/medium-import.yaml`. The plugin's `activate()` read them into `self._settings`. The test suite included a smoke test confirming `_settings == {"download_images": False}` was set correctly. **It all looked working.**
-
-What was actually broken: `routes.py` called `import_zip(contents)` with no kwargs. None of the settings ever flowed from the plugin into the importer. Every import ran the hardcoded defaults — for the 209 articles already imported AND for the next year's worth of new imports if nobody had noticed.
-
-The smoke tests passed because they only verified "the dict landed in `self._settings`". They never asserted the settings produced an observable behavioral difference at import time. The wiring gap was invisible to the tests because the tests were testing the wrong layer.
-
-The fix in the `SETTINGS-WIRING-01` session establishes a hard rule: every settings flag MUST have at least one test that flips the flag to a non-default value and asserts an OBSERVABLE behavioral difference. Concretely:
-
-- `default_status="draft"` → assert `Article.status == "draft"` after import
-- `skip_existing_canonical_urls=False` → re-import the same archive and assert a DUPLICATE row appears in the DB
-- `download_images=False` → assert the downloader function is NEVER called (capture all invocations) AND body URLs stay CDN-hosted in the persisted doc
-- `image_download_timeout_seconds=7` → capture the kwargs passed to `download_images` and assert `timeout_seconds == 7.0`
-
-The pattern that the smoke-test class followed:
-
-```python
-# WRONG: this passes whether or not the setting reaches import_zip
-def test_setting_propagates():
-    plugin = make_plugin({"settings": {"default_status": "draft"}})
-    plugin.activate()
-    assert plugin._settings["default_status"] == "draft"
-```
-
-The pattern the behavior tests follow:
-
-```python
-# RIGHT: this fails if the setting doesn't reach the importer
-def test_setting_default_status_propagates_to_article(client, db):
-    body = _post_zip_with_settings(
-        client, _build_zip([fixture]), {"default_status": "draft"}
-    )
-    article = db.query(Article).filter(Article.id == body["imported"][0]["id"]).one()
-    assert article.status == "draft"
-```
-
-The behavior test reaches through every layer the production request reaches through (HTTP endpoint → plugin config injection → settings translator → import_zip kwargs → service code → DB) and asserts at the OUTPUT. Smoke tests of intermediate layers are fine to add for diagnostic granularity, but they are NOT a substitute for at-least-one end-to-end behavior test per setting.
-
-This rule generalizes beyond settings:
-
-- Feature flag (`audiobook_overwrite_existing`, etc.) → at least one test flips the flag and asserts observable change in the produced artifact.
-- New endpoint kwarg → at least one test passes a non-default value and asserts the behavior the kwarg controls.
-- Plugin config → at least one test sets the value and asserts the consumer of that value behaves differently.
-
-The 2026-05-09 retroactive fix added 6 such tests to `test_medium_import_endpoint.py`. The smoke-test pattern is not banned (it's still useful for diagnosing where in the chain a regression broke), but it cannot be the only coverage of a flag's behavior.
-
-## TipTap image node in Topos is `imageFigure`, not `image`
-
-Topos's editor ([frontend/src/components/Editor.tsx](../../frontend/src/components/Editor.tsx)) does NOT load `@tiptap/extension-image`. It loads `@pentestpad/tiptap-extension-figure`, which registers its node under `name: "imageFigure"`. `@tiptap/extension-image` IS in `package.json` but is never imported.
-
-Consequence: any TipTap doc that contains a plain `{type: "image", ...}` node fails the editor's strict ProseMirror schema. The unknown node breaks doc construction and the editor renders empty — for the WHOLE doc, not just the image.
-
-Anyone writing an HTML→TipTap converter, a TipTap-emitting importer, or generating TipTap JSON from any other source (AI, scraper, migration) MUST emit `imageFigure`, not `image`. Same attrs (`{src, alt, title}`) — the imageFigure node spec is `content: "inline*"` so omitting `content` is fine; the schema accepts both `{type, attrs}` and `{type, attrs, content: []}`.
-
-Symptom of the wrong type: title + metadata appear in the editor chrome, the editor body is empty, no console error in the browser (ProseMirror logs the schema rejection at debug level only). The article-list dashboard shows everything fine because it reads `Article.title` directly, not `content_json`. The bug is invisible until someone actually opens the editor.
-
-Why this is easy to miss:
-- TipTap's official docs and tutorials universally use `image` in code samples, so any importer modeled on those docs gets the type wrong by default.
-- The toolbar's image-upload button works regardless: `Figure.addCommands.setImage(...)` dispatches an `imageFigure`-typed node internally, masking that the schema doesn't accept the literal name `image`.
-- The editor's own markdown serializer at [Editor.tsx:1396](../../frontend/src/components/Editor.tsx#L1396) handles `type === "image"` as if it expected to see one, which is misleading; the serializer is reading nodes already in the doc, where they would only appear if some other extension produced them.
-
-If a switch to `@tiptap/extension-image` ever happens (e.g. dropping the Figure extension), be aware that both extensions register a `setImage` command. Adding both side-by-side will silently shadow one toolbar behavior.
-
-Walker shipped with this bug originally (commit `b986397`); fix landed in `cfd8b57` along with a regression-pin test in `tests/test_walker.py::test_image_node_type_is_imageFigure_not_image` that fails loudly with the actionable error message if the type ever regresses to `image`. A one-time data-fix script at `scripts/fix_medium_import_image_nodes.py` patched the 209 already-imported articles (152 had image nodes; 451 nodes total renamed).
-
-## Bulk operations earn page-route UX even when single-item siblings use modals
-
-Existing import surfaces in Topos are modals (`ImportWizardModal` opened from Dashboard + ArticleList — single book, single article, single project, single git repo). The new `/articles/import/medium` page deliberately diverges to a top-level route. The deciding factors:
-
-1. **Bulk operations have multi-minute processing time.** A single-item import is sub-second to a few seconds; a 200-post Medium archive with image downloads runs 30-60 seconds (often longer). A modal that locks the screen for that long is hostile.
-2. **Structured results need review surface, not just acknowledgement.** Single-item imports produce one outcome ("imported" or "failed"); bulk imports produce a 3-section table (imported / skipped / errored) the user genuinely reads, sometimes for several minutes.
-3. **Stable URL matters for help-doc deep links.** "Open Topos → Articles → click Importieren button → select Medium" is multi-step verbal instruction; a direct URL is one click. For features with longer learning curves (the Medium import has 4 settings worth explaining) the help-doc anchor is real value.
-4. **Pattern-adherence is not an end in itself.** Diverging knowingly for a use-case-specific reason is fine; diverging by accident is not. The decision was surfaced explicitly to the user — including the audit-finding that the original "matches existing pattern" reasoning was based on a misconception (no `/import` route existed) — and confirmed before any code shipped.
-
-When choosing route vs modal for a new import / batch surface:
-- Sub-second processing + single-result outcome → modal, match the import-wizard pattern.
-- Multi-second-to-minute processing + structured table outcome + worthwhile help-doc surface → page route, document the divergence in the commit + an archive entry.
-
 ## React 18 dev-mode double-effect-mount strands `mockImplementationOnce`
 
 React 18 in development mode (Strict Mode and/or its testing-library equivalent) deliberately mounts components twice and runs effects twice to surface non-idempotent setup. Combined with happy-dom + Vitest, the result is that a `useEffect` calling an API mock fires twice on the first render.
@@ -245,23 +98,6 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 - If a value isn't easily findable in code, that is a signal to flag the question, not to guess. Wrong defaults in user docs erode trust faster than missing docs do.
 - Example: trash auto-delete default came from `backend/config/app.yaml.example` (`trash_auto_delete_days: 90`); the configurable range came from the `trash_days_*` keys in `backend/config/i18n/*.yaml`. Both are single sources of truth that the docs cite without duplicating.
 
-## Pandoc raw-HTML pass-through is format-specific
-
-- Pandoc's HTML and EPUB writers preserve raw HTML blocks verbatim. The LaTeX (PDF) and DOCX writers SILENTLY DROP raw HTML - including `<figure>`, `<img>`, `<figcaption>`. The verbose log records `Not rendering RawBlock (Format "html") "<figure>"` per dropped element.
-- Practical consequence: any Markdown emitted by topos that contains raw HTML images will produce an EPUB with images and a PDF without them. Same input, different output, no error message. We hit this in v0.13.x: imported books exported to PDF with zero embedded images while EPUB worked, and there was no way to tell something was wrong.
-- Fix: when converting to Markdown for export, always emit native Pandoc syntax for content that must survive PDF/DOCX. For figures, that is `![caption](src "alt")` - Pandoc's `implicit_figures` extension (default in `gfm`/`markdown`) promotes a single-image paragraph back into a real `\begin{figure}` / `<figure>` block in every output format. The raw-HTML form is acceptable ONLY for HTML/EPUB-only content.
-- See [html_to_markdown.py:_close_figure](../../plugins/topos-plugin-export/topos_export/html_to_markdown.py) for the converter that emits native syntax for simple figures and falls back to raw HTML (with a warning log) for complex shapes (multiple imgs, mixed content). The warning fires the moment real-world content hits the fallback so we discover it before users do.
-- Note: manuscripta v0.8.0's `strict_images=True` does NOT catch this class of bug. Strict mode parses Pandoc stderr for unresolved-resource warnings, which only fire when the *reader* fails to resolve a path the *writer* is trying to embed. Raw HTML is dropped at the writer stage before resolution is attempted, so strict mode never sees it.
-
-## manuscripta v0.8.0 migration: source_dir + run_export + strict_images
-
-- v0.7.x had no first-class library entry point; callers imported `manuscripta.export.book.compile_book` and relied on `os.chdir(project_dir)` plus mutating `manuscripta.export.book.OUTPUT_FILE` (a module global) before the call. Both are gone in v0.8.0.
-- v0.8.0 ships `run_export(source_dir, *, output_file=..., no_type_suffix=..., strict_images=True, ...)`. Pass `source_dir` explicitly; the library never calls `os.chdir` itself, so callers must not rely on cwd. `output_file`/`no_type_suffix` are proper kwargs; do NOT mutate `OUTPUT_FILE` even though it still exists for the CLI's internal use.
-- New typed exception hierarchy under `from manuscripta import ...`: `ManuscriptaError` (base), `ManuscriptaImageError(.unresolved: list[str])`, `ManuscriptaPandocError(.returncode, .stderr, .cmd)`, `ManuscriptaLayoutError(.source_dir, .missing, .reason)`. Per ADR-0004 in upstream, `__str__()` of these is diagnostic; pin error handling on attributes, NOT on parsing the rendered text. Topos wraps them in `MissingImagesError`/`PandocError` with the original as `.cause`.
-- `strict_images=True` is the new default and the right choice for plugin-export: scaffolder writes assets into `project_dir/assets/` from the DB, so any unresolved image is a real bug worth surfacing as a 422 with the `.unresolved` list to the frontend toast.
-- Backend `poetry.lock` caches the resolved dependencies of path-installed plugins. After bumping `manuscripta` in `plugins/topos-plugin-export/pyproject.toml`, run `poetry lock` AND `poetry install` in the backend dir too - otherwise `topos-plugin-export` shows the old pin and you ImportError on `from manuscripta import ManuscriptaError`.
-- TTS adapter API (`manuscripta.audiobook.tts.create_adapter`, `VoiceInfo`, all engine names) is unchanged in v0.8.0; no audiobook plugin code touches v0.8.0's typed `TTSError` hierarchy yet (existing broad `except Exception` blocks still work). Narrowing those is a separate hygiene pass, NOT part of the v0.8.0 upgrade.
-
 ## Alembic migration + fresh test DB
 
 - For every new Alembic migration that touches `books` (or another core table) via `ALTER TABLE`: the file `backend/topos.db` MUST be deleted before the next `make test`. Otherwise you get `sqlite3.OperationalError: duplicate column name: ...`.
@@ -269,153 +105,11 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 - Permanent fix: `rm backend/topos.db` after `git pull` with a new migration, then `make test`. `init_db()` now sees no tables, runs `create_all` + `stamp head`, and subsequent test runs pass because `alembic_version` is already at the new head.
 - The clean solution would be a real in-memory test DB setup (e.g. via a `TOPOS_TEST=1` env var) that skips `init_db()` in test mode - does not exist yet.
 
-## TipTap editor
-
-### Storage format
-- TipTap stores as JSON. NOT HTML, NOT Markdown.
-- TipTap CANNOT render Markdown. Markdown must be converted to HTML before storage.
-- On import: convert Markdown files to HTML with the Python `markdown` library, then store as TipTap JSON.
-- When switching WYSIWYG -> Markdown: convert JSON to Markdown (nodeToMarkdown).
-- When switching Markdown -> WYSIWYG: convert Markdown to HTML, then to JSON.
-
-### Extensions
-- StarterKit does NOT include an image extension. @tiptap/extension-image is required separately.
-- Figure/Figcaption: use @pentestpad/tiptap-extension-figure, NO custom code.
-- Character count: use @tiptap/extension-character-count, NO custom code.
-- Currently 15 official + 1 community extension installed (see CLAUDE.md).
-- Before writing custom code, ALWAYS check whether an official TipTap extension exists.
-
-### Peer dependencies
-- Community extensions (@pentestpad/tiptap-extension-figure, tiptap-footnotes) can silently upgrade to @tiptap/core v3. Always pin with --save-exact.
-- @pentestpad/tiptap-extension-figure: pin to 1.0.12 (last v2-compatible); 1.1.0 requires @tiptap/core ^3.19.
-- tiptap-footnotes: pin to 2.0.4 (last v2-compatible); 3.0.x requires @tiptap/core ^3.0.
-- `npm ci` in CI fails on peer-dep conflicts. Do NOT use --legacy-peer-deps as a fix.
-
-### CSS
-- TipTap renders inside .ProseMirror. CSS selectors have to account for that.
-- Specificity: `.ProseMirror p.classname` instead of `.tiptap-editor classname`.
-- All styles MUST work through CSS variables (3 themes x light/dark = 6 variants).
-
-## Import (write-book-template)
-
-### Markdown-to-HTML
-- ALWAYS convert Markdown to HTML on import. TipTap cannot handle Markdown.
-- Use the Python `markdown` library (already installed).
-- Indentation: write-book-template uses 2-space indent for lists, Python's markdown needs 4-space. Double the indentation before conversion.
-
-### Chapter-type mapping
-- acknowledgments belongs in BACK-MATTER, not front-matter.
-- TOC (toc.md) is imported as its own chapter type (chapter_type: toc).
-- next-in-series.md maps to chapter_type: next_in_series.
-- part-intro and interlude are detected correctly.
-
-### Order
-- Read the section order from export-settings.yaml and use it for chapter positioning.
-- TOC must come first in front-matter.
-- Fall back to alphabetical sort if no export-settings.yaml exists.
-
-### Assets/images
-- Import assets from the assets/ folder and save them as DB assets.
-- Rewrite image paths from `assets/figures/...` to `/api/books/{id}/assets/file/{filename}`.
-- Asset serving endpoint: GET /api/books/{id}/assets/file/{filename}
-
-### Metadata
-- Parse metadata.yaml for: title, subtitle, author, language, series, series_index.
-- Extract ISBN/ASIN from metadata.yaml (isbn_ebook, isbn_paperback, isbn_hardcover, asin_ebook).
-- Import description.html, backpage-description, backpage-author-bio, custom CSS.
-- `series` can be a dict (name + index), not only a string. Handle both forms.
-- Normalize `language` (e.g. "german" -> "de").
-
-## Export
-
-### Headings
-- Content may already contain an H1. Before adding an H1, check whether one already exists.
-- `_prepend_title` has to check whether the content starts with `#` or `<h1`.
-
-### TOC
-- If a manual TOC chapter exists: pass use_manual_toc=true through to manuscripta.
-- NO double TOC (generated + manual). A checkbox in the export dialog lets the user choose.
-- Nested lists in the TOC: keep the tree structure with 2-space indentation per level.
-
-### Images in EPUB
-- Assets have to be copied from the DB into the project structure during scaffolding.
-- Rewrite API paths (/api/books/.../assets/file/...) back to relative paths (assets/figures/...).
-
-### Pandoc/manuscripta
-- manuscripta's OUTPUT_FILE is a module-level global. It has to be set directly, not via CLI.
-- Read `section_order` from the scaffolded project and filter out missing files.
-- metadata.yaml needs --- YAML delimiters for Pandoc.
-- Convert --- in Markdown (horizontal rules) to ***, otherwise they collide with YAML parsing.
-
-### Filenames
-- Book-type suffix in the filename: title-ebook.epub, title-paperback.pdf.
-- Setting `type_suffix_in_filename` (default: true).
-
 ## Docs are specification, not a wish list
 
 - If a feature is in the help, it must exist in the code. Feature audits after every large docs addition are mandatory.
 - Features that are not yet implemented but are described in the docs must be marked with `> Planned for a future version`. Do not promise what isn't there.
 - Build an audit table with the current state, run a gap analysis in A/B/C categories, then implement. No blind coding.
-
-## Help system: single source of truth
-
-- Help content lives in `docs/help/`, not in plugin code. Both the in-app Help plugin and MkDocs read the same Markdown files.
-- `docs/help/_meta.yaml` is the single source of truth for navigation. `scripts/generate_mkdocs_nav.py` converts it into the MkDocs format.
-- Markdown rendering on the frontend via `react-markdown` with `remark-gfm` + `rehype-slug` + `rehype-autolink-headings`. Never `dangerouslySetInnerHTML` for user content.
-- MkDocs dependencies live in `docs/pyproject.toml` (its own venv), not in the backend venv. `make docs-install` / `docs-build` / `docs-serve` from the root.
-- Context-sensitive help via `<HelpLink slug="export/epub"/>` - opens the HelpPanel directly on the relevant page.
-
-## Config migration (bool -> enum)
-
-- When a boolean setting is extended to an enum with more options (e.g. audiobook `merge: true|false` -> `merge: separate|merged|both`): ALWAYS introduce a `normalize_*` function that silently translates old bool values (True -> "merged", False -> "separate") and maps unknown/None values to the default.
-- Reason: user configs in YAML, backups (.bgb) and DB columns still contain old bool values. A hard schema validation would break existing installations. The default in the Pydantic schema is not checked for migration by the type system.
-- In practice: the normalization MUST happen on both the backend (generator/service layer) AND the frontend (state init from settings), so both sides share the same migration rules. Otherwise old configs show the wrong default in the UI.
-- Tests: one explicit migration test per bool value, plus pass-through for all enum values, plus default for None/unknown.
-
-## Voice dropdown: NO engine-agnostic fallback
-
-- Previously `BookMetadataEditor` and `Settings` fell back to a hardcoded `EDGE_TTS_VOICES` list when `/api/voices?engine=X&language=Y` returned an empty array. Effect: user picks Google TTS / pyttsx3 / ElevenLabs, the backend cache has no voices for those engines (only Edge is seeded via `sync_edge_tts_voices`) -> frontend dumps 16 Edge-DE voices into the dropdown even though the engine cannot play them. Bug report was "dropdown shows ALL voices instead of only the matching ones".
-- Solution: a shared helper `api.audiobook.listVoices(engine, language)` tries `/api/voices` (cache) first, then `/api/audiobook/voices` (live plugin endpoint), then returns `[]`. NO more hardcoded list. Both UI sites render a clear empty state "No voices available for {engine} in {language}" on `voices.length === 0` instead of faking something.
-- `frontend/src/data/edge-tts-voices.ts` was deleted entirely. If a user really wants to see Edge-DE voices, Edge is the only engine the backend cache seeds and the dropdown fills through the normal path.
-- Backend `voice_store.get_voices` now matches in two steps: if the `language` contains a hyphen (`"de-DE"`), it is an exact case-insensitive match. A bare code (`"de"`) is a prefix match (`de-DE`, `de-AT`, `de-CH`). Previously it always stripped the region suffix, so `"de-DE"` and `"de"` returned the same result - irrelevant for Topos's current data model (Book.language is a bare code), but the strict variant protects plugin tests and future callers.
-- Tests: `backend/tests/test_voice_store.py` (8 tests) covers every path (engine isolation, bare vs region, case insensitivity, unknown engine, unknown language, engine-leak regression). `frontend/src/api/client.test.ts` pins that the helper returns NO hardcoded Edge fallback on `[]` from both endpoints - this is the regression insurance against the original symptom.
-
-## Audiobook progress dialog: the SSE listener belongs in the context, not in the component
-
-- Previously the `EventSource` lived in the `AudioExportProgress` modal. As soon as the user minimized or a re-render happened, the listener was rebuilt and events were lost - or worse, the job was gone after `clear()` because the modal was the only place holding live state.
-- Solution: the entire SSE lifecycle (open/onmessage/close) now lives in `AudiobookJobProvider`. Phase, event log, current/total/currentTitle, downloadUrl/chapterFiles - everything is in the context. Modal and badge are pure consumers and do not talk to each other.
-- Reload recovery: jobId+bookId+bookTitle are mirrored into `localStorage` (`topos.audiobook_job`). On provider mount a `useEffect` checks whether a persisted job exists and reactivates the SSE connection. The badge reappears after F5, the modal stays minimized (no pop-up in the user's face).
-- The persisted entry is cleared on the `stream_end` event. Otherwise a reload would bring back a job that already finished.
-- Important convention: chapter numbers are pure display logic. `formatChapterPrefix(index, total)` builds "01 | Foreword" / "003 | Foreword" - the TTS engine still only gets the bare chapter title, no number, no pipe. The SSE event carries `{type, index, title, duration_seconds}` as separate fields; the frontend does the formatting. A test in `tests/test_generator.py` pins that `chapter_done` ships a `duration_seconds` field, a Vitest test in `AudioExportProgress.test.ts` pins that the frontend NEVER renders "Chapter X:".
-- BookEditor now reads `?view=metadata` from `useSearchParams`, so the badge can call `navigate("/book/{id}?view=metadata")` after completion and the tab is already open. `setShowMetadata` was wrapped into `_setShowMetadata` that keeps the query param and state in sync.
-
-## Generated audiobook files must be persisted
-
-- Before v0.10.x exported audiobook MP3s only existed in the job worker's temp dir. As soon as the user closed the progress dialog the only copy was gone - with ElevenLabs (paid) this is real data and money loss.
-- Solution: after a successful `_run_audiobook_job`, all generated files are copied to `uploads/{book_id}/audiobook/` (chapters/ + audiobook.mp3 + metadata.json). The endpoints `GET/DELETE /api/books/{id}/audiobook` plus `/merged`, `/chapters/{name}` and `/zip` expose them again for download.
-- Important: persistence runs inside `try/except` and must NEVER fail a successful job. Prefer logging; the file is still downloadable from the temp dir.
-- The persistence endpoints live in the backend core (`backend/app/routers/audiobook.py`), NOT in the audiobook plugin. This keeps downloads accessible regardless of plugin state.
-- Regeneration warns before overwriting: `POST /api/books/{id}/export/async/audiobook` responds with HTTP 409 + `{code: "audiobook_exists", existing: {engine, voice, created_at, ...}}` as soon as `audiobook_storage.has_audiobook(book_id)` is true. The frontend shows a confirm dialog with the existing metadata and calls the same endpoint again with `?confirm_overwrite=true`.
-- Plugin setting `audiobook.settings.overwrite_existing: true` skips the 409 - user request: "there is also a config for the overwrite but the warning should stay", so the frontend confirm is kept as a second safety net.
-- Backup: `GET /api/backup/export?include_audiobook=true` includes the persistent audiobook directories. Default is false because MP3 backups quickly grow to 100+MB per book.
-
-## ElevenLabs API key does NOT belong in .env
-
-- The ElevenLabs API key was previously read only from the `ELEVENLABS_API_KEY` env var. That is opaque for users: no UI, no test button, no error message when the key is missing.
-- Solution: `audiobook.yaml` now has an `elevenlabs.api_key` block, fed through `POST /api/audiobook/config/elevenlabs` (verified before save against `GET https://api.elevenlabs.io/v1/user`). `tts_engine.set_elevenlabs_api_key()` gets the key on plugin activate and on every POST.
-- The env var stays as a fallback - existing installations with `.env` do not break.
-- The key is NEVER returned in clear text in GET responses. The frontend only shows `{configured: bool}` and offers a "key stored" indicator + delete button.
-- These endpoints live in the backend core like the persistence endpoints, so key management stays accessible regardless of plugin state.
-
-## Audiobook export is async with SSE progress
-
-- The endpoint `POST /api/books/{id}/export/audiobook` must NEVER return an MP3 synchronously. Audiobook generation takes minutes; any synchronous path blocks the request thread and gives the user nothing visible.
-- Required shape: the client sends `POST /api/books/{id}/export/async/audiobook`, gets back `{job_id}`, and subscribes to `GET /api/export/jobs/{job_id}/stream` (Server-Sent Events).
-- The old sync route `GET /api/books/{id}/export/audiobook` now intentionally responds with HTTP 410 + a pointer to the async path. The regression test `test_sync_audiobook_route_returns_410` fires if anyone turns the endpoint back on.
-- Progress events emitted by the generator: `start`, `chapter_start`, `chapter_done`, `chapter_skipped`, `chapter_error`, `merge_start`, `merge_done`, `merge_error`, `done`. The route wrapper adds `ready` (with `download_url`) and `JobStore.update()` appends the synthetic `stream_end` so SSE subscribers exit cleanly.
-- Frontend uses the browser-native `EventSource` (no package required). The modal is `modal=true` and cannot be dismissed via Escape/click-outside until the job is in a terminal status - otherwise the user orphans jobs with a stray click.
-- Generator callbacks must never kill the export: `progress_callback` calls are wrapped in `try/except` and only log. A broken subscriber must NOT destroy an hour of TTS work.
-- Tests must run through `with TestClient(app) as c:`, otherwise FastAPI's lifespan does not fire and the plugin manager never mounts the audiobook/export routes (404 instead of 410). Always mock the TTS engine via `patch("topos_audiobook.generator.get_engine", ...)`.
 
 ## Async in the FastAPI lifespan
 
@@ -423,19 +117,6 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 - When a helper like `sync_edge_tts_voices` needs to run a coroutine during startup: make the function `async` and `await` it in the lifespan, do NOT build your own loop.
 - Symptoms when done wrong: `RuntimeWarning: coroutine '...' was never awaited` plus the loop conflict ERROR in the startup log.
 - Other callers of the same function (CLI targets in the Makefile, sync FastAPI endpoints) have to follow along: `asyncio.run(...)` in the CLI, `async def` + `await` in endpoints.
-
-## Config migration (bool -> enum)
-
-- When a boolean setting is extended to an enum with more options (e.g. audiobook `merge: true|false` -> `merge: separate|merged|both`): ALWAYS introduce a `normalize_*` function that silently translates old bool values (True -> "merged", False -> "separate") and maps unknown/None values to the default.
-- Reason: user configs in YAML, backups (.bgb) and DB columns still contain old bool values. A hard schema validation would break existing installations. The default in the Pydantic schema is not checked for migration by the type system.
-- In practice: the normalization MUST happen on both the backend (generator/service layer) AND the frontend (state init from settings), so both sides share the same migration rules. Otherwise old configs show the wrong default in the UI.
-- Tests: one explicit migration test per bool value, plus pass-through for all enum values, plus default for None/unknown.
-
-## HTML-to-Markdown conversion
-
-- NO regex-based converter for nested HTML structures.
-- Use an HTMLParser-based converter that tracks nesting depth.
-- Specifically for <ul>/<li>: correct 2-space indentation per level.
 
 ## Deployment
 
@@ -460,14 +141,6 @@ Detection: if local tests pass but CI fails on routes returning 404, suspect mis
 
 ### Settings UI
 - The `discoveredPlugins` API delivers `license_tier` and `has_license` per plugin. Currently all plugins are free (`license_tier = "core"`). The Licenses tab has been removed from Settings.
-
-## General patterns
-
-- Before writing a custom implementation: check whether a library/extension already solves it.
-- On CSS problems: check specificity first (.ProseMirror context).
-- On import problems: check whether the source format (Markdown) is converted to HTML correctly.
-- On export problems: check whether HTML is converted back to Markdown correctly.
-- Test roundtrips: import -> editor -> export -> epubcheck.
 
 ## Code structure
 
@@ -509,7 +182,7 @@ Dead settings (in the YAML but not read by the code) are just as bad: they are a
 
 Generic plugin settings panel on the frontend: renders booleans as a checkbox, numbers as a number input, strings as a text input, arrays as an OrderedListEditor, objects as a JSON textarea with an "Advanced" hint. Rendering a boolean as a text input (`value="true"`) is a UX bug because the user cannot tell it is a switch.
 
-Configuration values that vary between books MUST live on the Book model, NOT in the plugin YAML. Plugin YAML is plugin-global and applies to all books at once - anyone who needs per-book granularity adds a column (see the pattern on `Book.audiobook_overwrite_existing`).
+Configuration values that vary per entity (per container/item) MUST live on the relevant model as a column, NOT in the plugin YAML. Plugin YAML is plugin-global and applies to everything at once - anyone who needs per-entity granularity adds a column.
 
 ## Review architectural decisions before implementing
 
@@ -527,13 +200,6 @@ Rule: before implementing a larger architectural decision, check:
 On a conflict between a user instruction and documented planning:
 STOP and explicitly ask the user which version applies.
 Never build parallel systems that are already slated for deletion.
-
-## Content-hash sidecar files as a "was this already processed?" pattern
-
-- The audiobook generator writes a `.meta.json` sidecar next to each chapter MP3 containing `{content_hash, engine, voice, speed}`. The hash is SHA-256 of the plain text extracted from TipTap JSON. On re-export, `should_regenerate()` reads the sidecar and compares all four fields. A mismatch on any field triggers regeneration; a full match lets the generator reuse the existing file with zero TTS cost.
-- This pattern generalizes: any long-running deterministic process where re-running on unchanged input is wasteful can use sidecar fingerprint files. The sidecar stays next to the output artifact, travels with it through copy/persist operations, and is authoritative for "is this output still current?" decisions.
-- Key design decision: the sidecar includes ALL parameters that affect the output (content + engine + voice + speed), not just the content hash. Changing from Edge-TTS to ElevenLabs with the same text invalidates the MP3 even though the text is identical. Always fingerprint the full parameter set.
-- Pre-audit for the three-mode regeneration dialog assumed a new DB schema was needed for content-hash tracking. The sidecar files already provided it. Lesson: before designing new infrastructure, check whether existing persistence artifacts already carry the information you need.
 
 ## Dependency currency in active development
 
@@ -693,55 +359,6 @@ Rules for working in this codebase:
 - DEP-04 landed Vite 6 -> 7 deliberately because vite-plugin-pwa 1.2.0 did not yet ship Vite 8 compat; DEP-09 + SEC-01 paired in one session because both items resolve on the same upstream release.
 - Vitest 4 covers the matrix `vite: ^6 || ^7 || ^8`; bumping Vite alone keeps Vitest configuration untouched. The `@vitest/coverage-v8` peer-dep is exact-pinned to its own Vitest version, so when bumping Vitest itself bump both in lockstep or `npm install` will downgrade the parent.
 - The check that caught this in production was the build step, not the test step (per `lessons-learned.md` rule "Do not rely on tests alone to validate a Vite major bump; always build too"). Vitest 707/707 passed with the broken `manualChunks` config. `npm run build` was the first signal.
-
-## AI Review extension (v0.20.0)
-
-### Backup import must check soft-delete state before dedup
-
-- `backup_import._restore_book_from_dir` previously treated any pre-existing `Book.id` in the DB as "already imported" and returned False. That check predates the soft-delete / trash feature: a backup made before trashing silently could not be restored once the books had been moved to trash - the importer saw them in the DB (with `deleted_at` set) and refused to rebuild.
-- Fix: when the pre-existing row is soft-deleted, HARD-delete it along with its chapters + assets, then fall through to the fresh-insert path. Do NOT try to revive via per-attribute setattr: the backup JSON does not carry every NOT NULL column (`ai_tokens_used`, `created_at`, `updated_at`), so SQLAlchemy emits an UPDATE that sets those to NULL and the integrity constraint trips. Hard-delete + fresh-insert sidesteps the whole partial-update dance and matches the backup's snapshot semantics.
-- Generalizes: any "idempotent by id" import path added before a soft-delete feature becomes silently buggy. Always branch on `deleted_at IS NULL` when deduping.
-
-### manuscripta `run_export` moves `output/` to `backup/` on every call
-
-- `manuscripta.export.book.run_export` copies the existing `project_dir/output/` to `project_dir/backup/` at the start of every invocation and creates a fresh `output/`. A list of per-format output paths collected across a batch-export loop contains stale paths by the time the loop finishes.
-- Symptom in v0.19.x: `FileNotFoundError` at `zipfile.ZipFile.write(f, f.name)` inside `/api/books/{id}/export/batch`, referencing a file that existed moments earlier.
-- Fix: after each `run_pandoc` call, IMMEDIATELY copy the produced file into a stable staging directory (`tmp_dir/batch/`) and zip from there. Do NOT keep references to files under `project_dir/output/` across subsequent `run_export` calls.
-
-### Pandoc-wrapped metadata.yaml is a multi-doc YAML stream
-
-- The project exporter wraps `metadata.yaml` in Pandoc-style `---` / `---` document markers. PyYAML's `safe_load` expects exactly one document and raises `yaml.composer.ComposerError` on any trailing `---` (even if the second document is empty).
-- Fix: use `yaml.safe_load_all(f)` and return the first non-empty document. Handles both the bare and the Pandoc-wrapped shapes in one code path.
-- Regression: `smart_import` crashing with 500 on a ZIP that `/api/backup/export` had just produced.
-
-### CSS specificity trap: `h2 + p` loses to `p:not(:first-child)`
-
-- Specificity for `[data-app-theme="classic"] .ProseMirror h2 + p`: (0, 1, 1, 2) - 1 attr, 1 class, 2 elements.
-- For `[data-app-theme="classic"] .ProseMirror p:not(:first-child)`: (0, 1, 2, 1) - 1 attr, 1 class + 1 pseudo-class = 2 "classes", 1 element. The pseudo-class pushes the base rule ahead of the adjacent-sibling override.
-- When both rules match (a paragraph that directly follows a heading AND is not the first child), the higher-specificity `:not(:first-child)` wins and the heading override never applies.
-- Fix: append `:not(:first-child)` to each `h* + p` override. Combined (0, 1, 2, 2) beats the base (0, 1, 2, 1).
-- Generalizes: any CSS override against a `:not(:first-child)` base rule needs at least the same pseudo-class weight.
-
-### TipTap `useEditor` does NOT flush `editor.storage` reads to React
-
-- Inline reads like `{editor?.storage.characterCount?.words()}` in JSX do not update reliably on every content transaction. TipTap's built-in re-render fires on selection changes, not every content edit.
-- Two viable patterns:
-  1. **`useEditorState` selector** (TipTap-idiomatic). Wraps `useSyncExternalStore`, subscribes to the editor's transactionNumber, re-runs the selector per transaction.
-  2. **`useState` + `editor.on('update')` listener** (plain React). Manually `setWordCount(...)` on every update event.
-- Choose pattern 2 when running under React `StrictMode` + Playwright + Vite dev server. `useSyncExternalStore` under that combination produced stale renders even though storage updates fired (issue #12). The plain-listener path bypasses `useSyncExternalStore` entirely. `frontend/src/components/Editor.tsx` uses pattern 2.
-- Cleanup: always pair `editor.on('update', cb)` with `editor.off('update', cb)` in the same `useEffect` cleanup to avoid leaks across hot-reload cycles.
-
-### Prefix testid selectors match every nested testid that shares the prefix
-
-- A selector like `[data-testid^='book-card-']` cleanly matches each card root AND every nested child testid that shares the prefix (`book-card-menu-{id}`, `book-card-menu-delete-{id}`). `toHaveCount(N)` returns `2N` or more per visible card.
-- Fix: `[data-testid^='book-card-']:not([data-testid*='-menu-'])`, or give the root a distinct testid like `book-card-root-{id}`.
-- Same shape as the `[class^=""]` overmatch antipattern. Always test a prefix selector against the full rendered surface before shipping.
-
-### IndexedDB recovery draft `contentHash` is a MATCH check, not a MISMATCH
-
-- `frontend/src/db/drafts.ts#checkForRecovery` returns a draft iff `draft.contentHash === hashContent(serverContent)` AND `draft.content !== serverContent`. The contract is "this draft was written against THIS server state, local content is newer". Seeding a test draft with `contentHash: '_mismatch_'` will NOT trigger the recovery banner.
-- A misleading test comment saying "must differ from server hash" burned multiple sessions before the `checkForRecovery` source was re-read.
-- When writing tests that seed IndexedDB, compute the hash of the real server content inside the seed script rather than using a sentinel value.
 
 ## German content uses real umlauts
 
@@ -922,60 +539,6 @@ This shape bit during the v0.30.0 release: the pre-v0.30.0 dep sweep bumped fast
 - Pre-commit hook `plugin-lock-paired-with-pyproject` (shipped in commit `8f6fcea`): scoped via `files: ^plugins/topos-plugin-[^/]+/pyproject\.toml$`, fails when a staged plugin pyproject lacks a paired staged `poetry.lock`. Catches the operational mistake at commit time. Verified by 6 hook self-check tests in `backend/tests/test_plugin_lock_drift_hook.py` (commit `e31c4fd`), all green at 0.22 s.
 - Discovery channel without these gates: CI red on main, AFTER a release tag has already been cut. The retro's commitment to "discrete pre-release dep sweep commits" pays off (rollback granularity stays intact), but the better gate is to catch the drift before push, not from the GitHub Actions red badge.
 
-## AI-prompts embedded in data files beat per-call system-prompts for portability
-
-UNIVERSAL-AI-TEMPLATE-01 Session 1 (2026-05-12) shipped a
-self-explanatory `.biblio.yaml` template format where every
-fillable field carries three keys (`description`, `example`,
-`current_value`) and a top-of-file comment block carries the
-rules-for-AI text (fill `current_value` only, respond in the
-article's language, real UTF-8 characters, leave null when
-uncertain). The rules live inside the file rather than being
-passed as a system prompt at API call time.
-
-Consequence: the same artefact works across THREE workflows
-without any code branching:
-
-1. Built-in AI: Topos's existing AI-provider abstraction
-   reads the YAML at runtime, builds its own system+user
-   prompts (`backend/app/ai/article_template_prompts.py` /
-   `book_template_prompts.py`), and calls the configured
-   provider. The rules-in-file are redundant here but harmless.
-2. Custom local endpoint (LM Studio / Ollama): same Topos
-   code path; `app.ai.llm_client.LLMClient` is endpoint-
-   agnostic.
-3. External AI via YAML round-trip: the user pastes the YAML
-   into Claude.ai or ChatGPT with zero Topos context. The
-   rules-in-file are load-bearing here — they are the ONLY
-   instruction the AI sees. The AI reads them, fills
-   `current_value` per the rules, returns valid YAML, the user
-   uploads it back, the import pipeline applies it.
-
-Why this matters more broadly: a feature that depends on
-runtime-injected system prompts can only run inside the
-application's call path. A feature whose semantics travel
-WITH the data artifact can run anywhere — paid cloud APIs,
-free-tier playgrounds, local laptops, chat sessions, even
-hand-edits by a human author. The same `.biblio.yaml` exported
-from Topos can be filled in any of those contexts and
-re-imported.
-
-Generalizes to: file formats that consumers might want to
-process outside the originating app. If the file carries its
-own "what this is + how to fill it" preamble, downstream
-tools (AI assistants, scripts, manual editors) work without
-out-of-band documentation. Pure data with no embedded
-instructions forces every consumer to know the schema, which
-is a coordination cost the schema-owner pays forever in
-documentation churn.
-
-Concrete artifact constants in `app.ai.template_schema`:
-`ARTICLE_HEADER` and `BOOK_HEADER`. Each is a multi-line
-comment block written once, regenerated on every export. PyYAML
-silently drops comments on import — that's fine because the
-header is documentation regenerated downstream, not a contract
-the import path enforces.
-
 ## React `useEffect` deps + i18n test mocks: the `t` function isn't stable
 
 Symptom: a component's fetch-on-open effect kept failing in tests
@@ -1033,138 +596,6 @@ The right fix is NOT to memoise the mock's `t` per-render (that
 defeats the point of mocks). The right fix is to scope the
 effect's deps to what genuinely affects the request.
 
-## Three-workflows-share-one-format pattern (UI side)
-
-UNIVERSAL-AI-TEMPLATE-02 Session 2 (2026-05-12) shipped the
-frontend for the three-workflow feature whose backend Session 1
-landed. The validating insight from Session 1's lessons-learned
-("AI-prompts embedded in data files beat per-call system-prompts
-for portability") plays out cleanly on the UI side too:
-
-The same `AITemplatePanel` component drives all three workflows
-without branching on the workflow:
-
-- Workflow A (built-in AI): `Fill with AI` button -> internal
-  `aiFill` API call.
-- Workflow B (custom endpoint): same `Fill with AI` button, no
-  code change; the existing AI client routes through whatever
-  base_url is configured in Settings.
-- Workflow C (external roundtrip): `Export template` +
-  `Import filled template` buttons hand the user a `.biblio.yaml`
-  and accept it back. Zero new UI surface for workflow C
-  compared to A/B.
-
-The component code knows nothing about WHICH workflow the user
-is on. It just exposes three first-class buttons and the API
-client picks the right backend endpoint. Workflow B is achieved
-purely through configuration (Settings AI tab's "Custom"
-preset); workflow C is achieved purely through the file format.
-
-Generalises: when a feature has multiple "modes" that share an
-underlying data contract, ship ONE UI component and let the
-backend / config / file-format layer pick the mode. Branching
-the UI by workflow ("if workflow A then show button X else
-button Y") produces:
-
-- N × the surface area to test
-- N × the i18n strings
-- N × the chance for the UI and the backend to drift
-
-The `AITemplatePanel`'s three buttons + the unchanged
-`api.{type}.aiFill` call cover all three workflows. No
-`workflow: 'A' | 'B' | 'C'` prop anywhere in the component tree.
-
-## SSE-in-context-not-in-modal (re-validated)
-
-The AudiobookJobContext lessons-learned ("the SSE listener
-belongs in the context, not in the modal") came up cleanly again
-when designing `BulkAiFillJobContext`. The pattern works the
-same way:
-
-- Context provider holds the `EventSource` ref in `useRef`.
-- `start(jobId, kind)` opens the stream + persists
-  `{jobId, kind}` to localStorage.
-- `useEffect` on mount checks localStorage and reconnects if a
-  job is mid-flight (F5 recovery).
-- Stream-end clears persistence.
-- Dock + expanded modal are pure consumers that render based on
-  context state; minimizing the modal doesn't disturb the SSE
-  listener.
-
-The cost is one global Context per long-running job type
-(audiobook, bulk-AI-fill, future: bulk export with progress).
-The benefit is that the user can navigate freely while the job
-runs, the badge persists across route changes, and reloading
-the browser doesn't drop the connection. Both surfaces (dock
-badge + expanded modal) are trivially testable because they're
-just consumers of the context.
-
-When adding the next long-running job type to Topos, the
-pattern to follow is: context provider holds the SSE state +
-persistence, components consume it, never the other way around.
-
-## Real-world data audit BEFORE implementation prevents spec-vs-reality drift
-
-MEDIUM-COMMENTS-IMPORT-01 shipped with a three-criteria
-detection heuristic in the original spec: body_length < 500
-chars **AND** empty subtitle **AND** no structural elements.
-Pre-inspection ran that heuristic against the actual 209-file
-Medium export in the user's home directory before any code
-landed. Two findings forced a spec revision:
-
-1. **6 / 209 matched the original three-criteria heuristic.**
-   That seemed reasonable on paper.
-2. **The user's own reference comment case** ("Thanks for
-   pointing that out — you're right, the link was missing.")
-   was a **false negative**. The audit dug deeper: Medium
-   auto-fills the `data-field="subtitle"` section with the
-   second paragraph of the reply body when the author wrote
-   no explicit subtitle. So the "empty subtitle" criterion
-   never holds for those auto-filled cases, even though they
-   are unambiguously comments.
-
-Dropping the empty-subtitle criterion lifted detection from
-**6 / 209 to 8 / 209** with zero new false positives across
-the corpus. The two cases the original spec would have missed
-both carry Medium's auto-filled subtitle.
-
-The lesson generalizes:
-
-- **Specs that predict a data shape are predictions, not
-  contracts.** A heuristic that looks principled on paper can
-  silently miss the cases that matter once you point it at
-  real data.
-- **Run the audit against actual data BEFORE writing code,
-  not after.** "After" means the code is committed, possibly
-  shipped, and the regression is harder to undo than to
-  prevent. The medium-import walker session (2026-04-23) had
-  the inverse cost: a `find` vs `find_all` bug silently
-  truncated ~33% of imports for an entire release cycle, and
-  the fix needed a one-off data-fix script + a regression-pin
-  test. The MEDIUM-COMMENTS-IMPORT-01 audit caught the same
-  class of bug BEFORE landing — no data-fix script needed,
-  no production rows mis-classified.
-- **The audit input doesn't have to be production data.** In
-  the MEDIUM-COMMENTS-IMPORT-01 session, the production DB
-  was empty (the user had cleared it), so the audit ran
-  directly against the raw Medium HTML export in the user's
-  Downloads directory. Working from the source bytes instead
-  of the parsed-and-imported rows is often cleaner: the audit
-  isolates the heuristic from walker / importer drift.
-- **Surfacing the audit in the pre-inspection report** is
-  what makes the decision visible. Without the report saying
-  "6 / 209 under the spec, 8 / 209 with empty-subtitle
-  dropped, the user's own reference case is in the missing
-  2," the spec would have been confirmed unchanged. The
-  report makes the discrepancy a decision point instead of an
-  implementation surprise.
-
-Concrete rule: when a feature ships with a heuristic, a
-detection rule, a threshold, or any other prediction about
-data shape, run the prediction against real data in
-pre-inspection. Report counts + sample cases. Treat the spec
-as the starting hypothesis, not the final design.
-
 ## Operational gaps masquerade as wired infrastructure
 
 The 2026-05-12 test-infrastructure audit surfaced a concrete
@@ -1220,134 +651,6 @@ what you intended. Document the first run's outcome in the
 PR description or the related audit doc. A workflow that
 ships without a known-good first run is technical debt
 masquerading as feature delivery.
-
-## Schema "preserved" / "always set" claims must survive real-data audit before becoming spec
-
-MEDIUM-COMMENTS-IMPORT-01 shipped with prose in three
-places (model docstring, English help doc, German help doc,
-archive entry) describing the ``ArticleComment.responds_to_url``
-field as "preserved for orphans + for future re-linking"
-or "preserves the comment's own canonical URL." Both shapes
-imply the field carries data. Reality, verified after the
-fact: the v1 Medium importer sets the field to ``None``
-universally (line ``responds_to_url=None`` in
-``plugins/topos-plugin-medium-import/topos_medium_import/importer.py``),
-and the pre-inspection audit on the user's 209-file export
-already showed Medium's HTML carries no parent-reference
-data to extract.
-
-The drift was caught after the feature shipped, not before:
-
-- Sometime AFTER MEDIUM-COMMENTS-IMPORT-01 closed, a smoke
-  check surfaced 8 imported comments all with
-  ``responds_to_url`` ``None``. The user asked to correct
-  the spec.
-- The factual error in the help docs was a separate
-  mis-statement: the English wording conflated
-  ``responds_to_url`` with the comment's own
-  ``canonical_url``, which is a different field entirely.
-  The pre-inspection had distinguished them but the help
-  doc author (Claude Code, same session) merged the two
-  concepts in the user-facing prose.
-
-Two distinct anti-patterns surfaced:
-
-1. **"Future-compatible" prose presented as current
-   behaviour.** "Preserved for orphans" is true for the
-   schema (the column is nullable, the storage path
-   exists), but FALSE for the user's actual data (every
-   row has ``None``). When the gap is 100%, calling the
-   field "preserved" is misleading: the user reads the doc
-   and expects data they will never find. Either say
-   "reserved for future importers; v1 imports always
-   ``NULL``", or say nothing and let the type signature
-   carry the meaning.
-
-2. **Help-doc prose drifting from importer-comment prose.**
-   The importer comment in ``_persist_comment`` correctly
-   said "responds_to_url is left NULL too in v1 (no
-   inference); future importers that DO carry a parent
-   reference can populate it." The help docs in the same
-   commit chain disagreed. Single-pass authoring across
-   three places drifted in two of them.
-
-Concrete rules:
-
-- When a schema field's actual production value is
-  always-NULL / always-empty / always-zero for the only
-  v1 use case, the docstring must say so explicitly.
-  Pretending the field is populated leaks the schema's
-  forward-compatibility ambition into the user's
-  expectations.
-- Help-doc prose that names a field MUST be cross-checked
-  against the importer / writer code that populates it.
-  A 30-second grep for the field name in the importer
-  catches the drift; this audit caught it weeks later.
-- When a pre-inspection audit produces a "Medium doesn't
-  carry X" finding, every doc surface that mentions X in
-  the resulting code should explicitly reference the
-  audit finding. The audit is the spec.
-
-## Export semantics audit: "comprehensive export" usually means "your data only"
-
-Surfaced 2026-05-12 after a user verification on Medium's
-HTML export. The 8 imported comments in the production
-corpus are all replies the user wrote on OTHER people's
-articles (visible under ``posts/`` like any other post).
-Comments OTHER people wrote on the user's articles ("Wow,
-I am very impressed", a real-world example) are NOT in the
-export. Medium's own README.html says it plainly:
-"posts: Posts you've written" — every folder description
-follows the same "your data" framing.
-
-This is the canonical pattern across consumer platforms:
-
-- Medium: your posts, your claps, your replies-to-others,
-  your bookmarks. NOT replies-to-you.
-- Twitter / X: your tweets, your DMs you sent, your
-  likes. NOT replies-to-your-tweets unless you screenshot
-  them.
-- Reddit: your posts, your comments. NOT the comments
-  others left on YOUR submissions, unless they're in the
-  same thread you replied in.
-- Discord: your messages out. NOT messages others sent
-  IN your servers.
-
-The user's mental model — "give me everything connected
-to my account, including how others interacted with me" —
-is a reasonable expectation but rarely how data export
-features work. Platforms ship "your data" exports for
-GDPR / data-portability reasons; "everyone else's data on
-your content" is someone else's data, not yours, so it
-stays.
-
-Concrete rules for any importer surface in Topos:
-
-- **Help-doc expectations management.** When a platform's
-  export is "your data only", the help doc's "What is NOT
-  imported" section must explicitly say so. The
-  "comments-other-people-wrote" gap is exactly the kind
-  of thing users discover by smoke-test and report as a
-  Topos bug; a one-paragraph disclaimer in the help
-  doc pre-empts that.
-- **The schema can still support the missing data type
-  for forward compatibility.** Topos's
-  ``ArticleComment.imported_from String(50)`` column can
-  carry ``"manual"`` for a future user-entry workflow.
-  The column doesn't have to wait for a platform that
-  exports incoming-comments; manual entry IS the
-  workaround, and the schema is already prepared.
-- **The "no Topos bug" distinction matters.** When a
-  user reports "X is missing", the diagnosis should
-  separate "Topos failed to import X" from "the
-  source export never contained X." The second is a
-  platform limitation, not a Topos limitation; the
-  fix is documentation + maybe a follow-up manual-entry
-  workflow, NOT an importer change.
-
-Concrete filed follow-up: ``MEDIUM-COMMENT-MANUAL-ENTRY-01``
-(P5) captures the manual-entry path for the incoming-
-comment archive use case.
 
 ## Run vitest from `frontend/`, not the repo root
 
@@ -1550,65 +853,6 @@ remaining `_base_dir / "config" / "app.yaml"` writes in
 production is fine, dev quirk eventually deserves the
 broader cleanup but not at v0.31.0 release-blocker urgency.
 
-## User-facing time estimates must scale with input size or be omitted
-
-Surfaced 2026-05-14 from a manual smoke test of v0.31.0.
-
-The Medium-import upload UI shipped with the message
-"Verarbeitung auf dem Server … das kann bis zu einer Minute
-dauern." (and direct translations in all 7 other catalogs).
-The "up to one minute" claim is false for large archives — a
-500MB Medium export takes substantially longer than 60s on
-the same hardware that handles a 50MB archive in under 10s.
-User sees no progress feedback past the minute mark and
-assumes Topos has crashed.
-
-Wrong:
-
-- "X seconds" / "X minutes" / "up to N minutes" claims in
-  user-facing strings for any operation whose cost scales
-  with input size: uploads, imports, exports, bulk
-  operations, AI batch calls.
-
-Right:
-
-- Omit the time bound, OR
-- Frame the dependency: "Larger archives may take longer."
-  / "Bei großen Archiven kann das länger dauern." / etc.
-- For operations with truly bounded cost (sub-second SQL
-  bulk DELETE, single-record fetch), no time language is
-  needed.
-
-A user-facing string with a hard time bound is a promise to
-the user. Promising "≤ 1 minute" creates a "false-crash"
-impression for any input that breaks the promise. The cost
-of the bound is the trust the user loses; the value is near
-zero because they would have waited regardless.
-
-This pairs with the existing rule **Bulk-operation limits
-should be per-operation cost-profile**. Same principle —
-cost depends on input — applied to text rather than caps.
-
-Audit checkpoint: at release time, grep i18n catalogs for
-hard time bounds:
-
-```bash
-grep -rniE "minute|sekund|second|dakika|分" \
-  backend/config/i18n/*.yaml | grep -iE "dauer|takes|tardar|prendre|demor|sürebilir|かかります"
-```
-
-False-positives: config-field labels (e.g. "Timeout
-(Sekunden)") and ordinal markers (e.g. "First chapter").
-True positives: any wait-time claim a user reads while
-waiting.
-
-**Concrete artefact**: the v0.31.0 medium-import processing
-message in ``ui.medium_import.progress.processing`` was
-fixed in the same commit that filed this rule. All 8
-catalogs updated in a single sweep, including 6 that had
-local-idiom translations of the same false claim (not
-passthru-English).
-
 ## Radix DropdownMenu + happy-dom is brittle for Vitest
 
 Surfaced 2026-05-14 across the v0.32.0 F2c (ArticleEditor
@@ -1666,93 +910,6 @@ tests, consider:
 
 None of these is worth the complexity for the current use
 cases; the E2E split is the cleaner answer.
-
-## Split-button (default + chevron disclosure) for primary + alternative outputs
-
-Surfaced 2026-05-14 designing the v0.32.0 F3 Copy button.
-When a feature has two outputs where one is the obvious
-90%-case default and the other is a discrete alternative
-("Copy as Markdown" vs "Copy as plain text"), use a
-split-button: a primary action button glued to a chevron
-disclosure that exposes the alternative.
-
-Anti-patterns this avoids:
-
-- **Two equal-weight buttons** ("[Copy MD] [Copy plain]"):
-  forces the user to make a format decision in technical
-  jargon every time, even when they know they want the
-  default. Doubles the toolbar footprint.
-- **A modal "Copy options" dialog**: extra round-trip for
-  the 90%-case; users have to read + click to confirm what
-  they already wanted.
-- **Right-click context menu only**: invisible to anyone
-  who doesn't know to right-click. Discoverability dies.
-
-Implementation pattern (verified in F3):
-
-- Primary button + chevron use the same Radix
-  DropdownMenu trigger that's already in the codebase.
-- The dropdown menu has the primary action first (so a
-  user who opens the menu by mistake doesn't have to
-  re-orient) plus the alternative below it.
-- The primary button's default click bypasses the menu
-  entirely — one click, no flicker.
-- Tooltip on the chevron says "More options" / "Copy
-  options" so users know it expands the action set.
-
-Cross-platform precedent: GitHub's "Squash and merge" /
-"Create a merge commit" / "Rebase and merge" split button,
-Notion's "Copy" → "Copy link" / "Copy as Markdown" picker,
-Linear's view-switcher. The pattern is well-understood.
-
-When NOT to use a split-button:
-
-- Three or more alternatives at roughly equal weight: use
-  a full menu, not a split. Cognitive load of "pick one of
-  three" is higher than "default plus one alternative".
-- The alternatives have no clear primary: use a regular
-  dropdown.
-- The action is destructive: a split-button can fire the
-  primary by accident. Use a confirm dialog instead.
-
-## Real-corpus audit catches arithmetic drift before it ships
-
-Surfaced 2026-05-14 in the v0.32.0 F2a session. My
-pre-inspection report told the user the v2 heuristic
-produced "197 Articles / 12 Comments" on the 209-file
-corpus. The verification step — running the COMMITTED
-walker against the corpus — produced 198 / 11.
-
-The discrepancy: the audit script reported "11 comments"
-in its summary; I computed `209 - 11 = 197` in the report
-text. Off-by-one arithmetic; the audit script's data was
-correct. The same drift bled into the audit doc and the
-docstring (both said "197/12" until the verification
-caught it).
-
-Concrete rule:
-
-- **Always run a verification pass against the COMMITTED
-  code** before propagating numbers into docs, docstrings,
-  and CHANGELOG entries. A `verify_committed.py` that
-  asserts on the expected counts is the right shape — if
-  the assertion fails, the wrong numbers cannot land.
-- **Match every quantitative claim against an
-  authoritative source** (the audit script, the test
-  output, a `git ls-files | wc -l` count). Recomputing
-  from a different number that "should be" related is the
-  failure mode this rule prevents.
-- **Treat docstrings + docs as ONE artifact**. If the
-  docstring says "197/12" and the audit doc says "197/12",
-  they're not two confirmations of the same truth — they're
-  two copies of the same draft. The verification step is
-  the only independent witness.
-
-Pairs with the existing "Numeric claims verification" rule
-in `.claude/rules/ai-workflow.md`: that rule covers the
-broader case (any number in any document); this one is the
-specific tactic that catches arithmetic drift in a
-multi-doc rollout of the same finding.
 
 ## External GitHub Action major-version drift
 
@@ -1968,148 +1125,6 @@ The existing `CLAUDE.md` "Test isolation" section covers
 filesystem + DB. This rule covers the third layer: in-process
 in-memory state. All three layers need explicit handling.
 
-## Destructive row-actions must reconcile collection state
-
-When a row-action (delete, archive, move-to-trash) modifies an
-item that may be a member of a multi-select collection state, the
-post-action handler MUST reconcile the collection so its consumers
-(bulk-action bar, counters, batch-operation forms) never reference
-an orphan id that no longer corresponds to a visible row.
-
-Pattern surfaced 2026-05-14: ArticlesList + Dashboard each had a
-selection hook (``useArticleSelection`` / ``useBookSelection``)
-holding a ``Set<string>`` of selected row ids. A row-delete handler
-removed the row from the page-level list state but left the id in
-the selection Set. The BulkActionBar reads ``count > 0`` from the
-selection hook → bar stays visible → buttons claim to operate on
-"1 selected" → but the underlying row is gone. Soft-delete /
-permanent-delete handlers (both live-list AND trash-view) all
-exhibit the same bug class.
-
-### Rule
-
-Every single-item destructive handler that fires from a list view
-backed by a selection hook MUST call the hook's ``remove(id)`` (or
-equivalent idempotent delete) after the API call succeeds, BEFORE
-the success notification. The order matters: reconcile state first,
-notify second, so the user never reads "moved to trash" while the
-bar still shows them as the operand.
-
-```typescript
-async function handleDelete(item: Item) {
-  try {
-    await api.items.delete(item.id);
-    setItems((prev) => prev.filter((i) => i.id !== item.id));
-    selection.remove(item.id);  // <-- reconcile BEFORE notify
-    notify.success(...);
-  } catch (err) { ... }
-}
-```
-
-### Anti-pattern
-
-```typescript
-// WRONG — selection still contains item.id after this returns
-async function handleDelete(item: Item) {
-  await api.items.delete(item.id);
-  setItems((prev) => prev.filter((i) => i.id !== item.id));
-  // Forgot selection.remove(item.id) here → bar stays at "1 selected"
-}
-```
-
-### Hook contract
-
-Selection hooks should expose a dedicated ``remove(id)`` method
-that is idempotent (no-op when the id is absent), not just
-``toggle(id)`` with a guard at the callsite. Reasons:
-
-- ``toggle`` flips state — calling it on an unselected id ADDS the
-  id, which is the opposite of what destructive handlers want.
-- A dedicated ``remove`` makes the intent obvious at the callsite
-  and lets the hook's React state machinery short-circuit
-  (return the same Set reference on no-op) to skip a re-render.
-- The signature reads better in tests: ``selection.remove(id)``
-  asserts the operation; ``isSelected(id) && toggle(id)`` is
-  noise that obscures the contract.
-
-### Detection heuristic
-
-When auditing a list page for this bug class, grep for every
-mutator on the list state and check whether selection.remove (or
-equivalent) appears nearby:
-
-```
-grep -E 'setBooks\(|setArticles\(|setItems\(' \
-  frontend/src/pages/<page>.tsx \
-  | grep -B0 -A2 '\.filter'
-```
-
-For each match: confirm a paired ``selection.remove(`` or
-``selection.clear()`` call in the same handler. Missing pair is
-the bug.
-
-### Other affected operations
-
-Same shape applies to:
-
-- **Bulk operations on the SAME page** that internally use single-
-  item APIs in a loop (each successful delete in the loop must
-  remove that id from selection so a partial failure leaves a
-  clean post-state).
-- **Cross-tab updates** received via WebSocket / SSE / polling:
-  when the server pushes "item X was deleted", the receiver must
-  reconcile its local selection state, not just the list.
-- **Filter changes that hide rows**: this is a separate decision
-  (clear-on-filter-change vs preserve-and-warn) that both Article
-  and Dashboard already handle via ``clearSelection`` /
-  ``clearBookSelection`` callbacks bound to filter state changes.
-  Pin tests for both patterns when adding a new list page.
-
-### Topos's bar-visibility convention at count===0
-
-Both bulk-action bars (``ArticleBulkActionBar``,
-``BookBulkActionBar``) are rendered conditionally on
-``selection.count > 0`` from the surrounding page. When the count
-drops to zero, the bar UNMOUNTS — no disabled-state, no
-placeholder. This matches the widespread convention in Gmail,
-Linear, Notion, etc.
-
-This is a UI-rendering decision orthogonal to the selection-
-cleanup rule above: the cleanup happens regardless; the
-unmounting is a consequence of the count going to 0. Future
-bulk-action surfaces in Topos should follow the same shape:
-
-```typescript
-{selection.count > 0 ? (
-  <XYZBulkActionBar count={selection.count} ... />
-) : null}
-```
-
-If a future surface wants a different convention (e.g. always
-visible with disabled buttons), that's a deliberate exception and
-should ship with a doc comment explaining why; otherwise pin to
-the convention so the user experience stays consistent across the
-app's dashboards.
-
-### Audit recipe for finding all bulk-selection surfaces
-
-```
-grep -rln 'useSelection\|useArticleSelection\|useBookSelection' \
-  frontend/src/ | grep -v '\.test\.'
-```
-
-As of 2026-05-14 there are exactly two such surfaces:
-``pages/ArticleList.tsx`` and ``pages/Dashboard.tsx``. Any new
-match should immediately be audited against the rule above —
-specifically: does every single-item destructive handler in that
-page call ``selection.remove(id)`` after the API call succeeds
-and before the success toast?
-
-CommentsAdminSection has only a single-row delete and no
-bulk-selection checkboxes (the "orphans only" checkbox there is a
-FILTER, not a selection — easy to misread on first audit).
-ArticleEditor has neither.
-
 ## Every bug-fix commit ships its regression-pin test
 
 Established 2026-05-14 after the BulkActionBar selection-cleanup
@@ -2173,69 +1188,6 @@ provider, or changing the deletion order) could silently break
 the wiring while the unit tests still pass — exactly the bug
 class the original fix was meant to prevent. E2E coverage closes
 that gap.
-
-## Multi-tool collaboration tracking: re-sync before accepting new orders
-
-When an external agent (e.g. a separate planning session, the
-user's "Claude planning" workspace) loses sight of git state, the
-executor agent (Claude Code working in the repo) MUST explicitly
-re-sync before accepting new orders. Status corrections mid-
-session prevent compound stale-state from creating phantom work.
-
-### Concrete trigger (2026-05-14)
-
-A consolidated v0.32.0 UX-Polish session plan arrived after the
-v0.32.0 release tag had already shipped (commit `a432a77`)
-including Phases B–F as "pending". All five phases had actually
-shipped before the tag:
-
-- Phase B (BulkActionBar selection cleanup): `02553fb` +
-  `926decb`
-- Phase C (Heuristic v2): `95c72c8`
-- Phase D (Reciprocal reclassify endpoints): `3288ba5`
-- Phase E (UI reclassify actions): `bb4a820`
-- Phase F (Copy split-button): `3cedf78`
-
-The plan was self-consistent but acted on a stale view of repo
-state. Without a sync gate, the executor would have re-implemented
-shipped features.
-
-### Rule
-
-Before starting any non-trivial session (especially one whose
-plan was written by a different agent / a different session):
-
-1. **`git log --oneline -<N>`** where N covers the time gap
-   since the plan was written. Look for commit messages that
-   match the planned work items.
-2. **`grep -rln '<feature name>'`** for each pending item. A
-   recent match in production code (not just tests/docs)
-   suggests the work shipped.
-3. **Reconcile**: if items appear shipped, report back to the
-   planner with the commit hash + verification artifact (test
-   pass count, audit-doc reference, etc.) BEFORE starting any
-   re-implementation work.
-
-### How to surface a status correction
-
-Don't quietly skip items the planner thought were pending —
-explicit "STOP — status correction" with a table of:
-- What the plan called pending
-- Commit hash where it actually shipped
-- Verification artifact (test count, audit-doc reference)
-
-This way the planner can re-prioritize the remaining work
-deliberately rather than discover at end-of-session that 4 hours
-of work was already done.
-
-### Pairs with
-
-The existing "Numeric claims verification" and "Audit findings
-need production-vs-dev environment classification before urgency-
-tier" rules. All three share the same root cause: acting on a
-mental model that doesn't match the current state. The fix in
-all cases is "verify against the authoritative source before
-acting".
 
 ## Workbox "No route found" is benign info, not a bug indicator
 
@@ -2322,194 +1274,6 @@ classification before urgency-tier" rule. Same root cause:
 acting on surface-level evidence without verifying against the
 authoritative source (in that case, the dev vs prod Docker
 config; here, the actual network state).
-
-## Articles-vs-Books parallel-surface asymmetry
-
-**Pattern class observed 8 times across 3 release cycles.** Each
-occurrence: a feature (or fix) lands on one of the parallel
-surfaces (Articles list/editor vs Books list/editor) and the
-mirror surface lags behind, gets a different shape, or gets
-no update at all.
-
-### Concrete occurrences (2026-05 audit cycle)
-
-1. **Bulk-delete cap removal** (v0.31.0). Both Articles + Books
-   needed the 200-row cap removed simultaneously. Articles
-   adoption lagged briefly until a paired update.
-2. **Comments-Count badge** (v0.31.0). Card view shipped first;
-   List view parity in a follow-up — same Articles surface but
-   different view-modes.
-3. **BookEditor zero testids** (UX-Full-Audit G1-F1, 2026-05-15):
-   ``ArticleEditor.tsx`` has 38 testids over 1494 LOC;
-   ``BookEditor.tsx`` has 0 over 700 LOC.
-4. **ArticleFilterBar inline duplication** (UX-Full-Audit G2-F1):
-   Articles uses a 200-LOC inline ``ArticleFilterBar`` (in
-   ArticleList.tsx) with 6 filter slots; Books uses the shared
-   ``DashboardFilterBar`` component with 1 filter slot.
-5. **View-mode testid namespace split** (UX-Full-Audit G2-F2):
-   ``book-card-{id}`` (grid) vs ``book-list-row-{id}`` (list).
-   E2E specs silently skip when wrong view-mode persisted.
-6. **BookDashboard list-view missing selection checkboxes**
-   (v0.33.0 manual smoke, fixed in commit ``711aef0``).
-   ``BookListView`` was rebuilt later than ``ArticleRow`` and
-   shipped without ArticleRow's selection-checkbox feature.
-   ``BulkActionBar`` appeared on Articles list-view but never on
-   Books list-view; bulk-delete on BD list-view was impossible
-   for two release cycles before user-smoke surfaced the gap.
-7. **Comments-Admin bulk-delete** (Bug 4a, filed 2026-05-16,
-   pending implementation). The Comments-Admin section in
-   Settings has single-row delete but no bulk-selection +
-   bulk-delete affordance, while the parallel AD / BD
-   list-views both ship the
-   ``BulkActionBar`` + ``useSelection``-hook pattern. Confirms
-   Comments-Admin as a third parallel surface to AD / BD for
-   bulk-action capabilities; the fix re-introduces parity
-   instead of treating Comments-Admin as a separate concern.
-8. **Comments trash-lifecycle** (Bug 10, fixed 2026-05-16,
-   commits ``f09f0c2..acdee4a``). Articles + Books shipped the
-   full trash lifecycle (soft-delete + list-trashed + restore +
-   permanent-delete-from-trash + empty-trash) from day one;
-   Comments shipped only the soft-delete half in v0.32.0 with
-   the rest filed as ``v2`` in the
-   ``MEDIUM-COMMENTS-IMPORT-01`` commit 7 docstring. The
-   deferred half was never picked up. Production smoke
-   surfaced **61 soft-deleted comments stuck in invisible
-   purgatory** — the user pressed "Move to Trash", got
-   "moved to trash" feedback, and then found no trash to
-   look in. Closed by Bug 10: new
-   ``/api/comments/trash/list``, ``/api/comments/trash/{id}/restore``,
-   ``/api/comments/trash/empty``, ``/api/comments/trash/{id}``,
-   ``/api/comments/trash/bulk-restore`` endpoints + a
-   ``viewMode`` toggle on CommentsAdminSection + the trash-view
-   bulk-action bar. See the "Half-wired trash lifecycle" rule
-   below for the generalized pattern.
-
-> **Footnote on Bug 3 (Trash-View-Mode-Settings):** an earlier
-> mid-session report tagged Bug 3 as occurrence #7 of this
-> pattern class. Reclassified out of this tally: Bug 3 was
-> symmetric across AD and BD (both surfaces had the same
-> missing per-tab default), not asymmetric between them. It
-> belongs to a Settings-Granularity-Pattern (Class B,
-> currently single-instance, not yet formalized as its own
-> lessons-learned class per the "single instance is incident,
-> not pattern" discipline). Tally above reflects the
-> corrected classification.
-
-### Rule
-
-**Every parallel-surface feature (Articles ↔ Books) gets an
-explicit parity verification step in its development workflow.**
-Before merging a PR that touches one of the parallel surfaces:
-
-1. **List the parallel features the change affects** (e.g.
-   "this is a delete-confirm dialog change → applies to both
-   Articles and Books").
-2. **Verify the mirror surface received the equivalent
-   treatment** (or explicitly document why it's intentionally
-   asymmetric).
-3. **Add cross-surface E2E coverage** if the bug class is
-   user-visible (yesterday's BulkActionBar fix in ``02553fb``
-   shipped Vitest hook tests for both surfaces — the right
-   shape).
-
-### Periodic hygiene
-
-**Articles-vs-Books-Parity audit** as quarterly hygiene OR after
-any feature wave that touches list/editor surfaces. Audit recipe:
-
-```bash
-# Find inline implementations on one side that have a shared
-# counterpart on the other.
-grep -rln 'useArticleSelection\|useArticleFilters' frontend/src/
-grep -rln 'useBookSelection\|useBookFilters' frontend/src/
-
-# Find testid-namespace inconsistencies via column counts.
-for f in $(grep -rln 'data-testid' frontend/src/pages/*.tsx); do
-  echo "$f: $(grep -c 'data-testid' $f)"
-done
-```
-
-The 2026-05-15 audit's Articles-vs-Books parity matrix
-(``docs/audits/ux-full-audit-2026-05-14.md``) is the template:
-13 features compared, 3 confirmed asymmetries documented + 2
-historical resolutions noted.
-
-## Half-wired trash lifecycle: soft-delete shipped without the restore-surface is purgatory, not a feature
-
-When a feature ships the "move to trash" half of a soft-delete
-lifecycle (the DELETE endpoint that flips ``deleted_at``) but
-NOT the "see + restore + permanent-delete-from-trash" half (the
-``/trash/list`` + ``/trash/{id}/restore`` + ``/trash/{id}`` +
-``/trash/empty`` endpoints), the user experiences silent data
-purgatory: their data still exists in the DB but they can't
-find it, restore it, or finally delete it. The feature was
-**half-shipped**; the partial implementation actively destroys
-trust because the word "trash" implies "I can go look at it".
-
-### Concrete occurrence
-
-The MEDIUM-COMMENTS-IMPORT-01 v1 admin surface (2026-05)
-shipped soft-delete on ``DELETE /api/comments/{id}`` and bulk-
-soft-delete on ``POST /api/comments/bulk-delete`` (``permanent
-= false``). The original commit's docstring even called it
-out: *"Hard-delete and re-linkage endpoints are out of scope
-for v1; v2 ships them when MEDIUM-COMMENTS-UI-01 builds the
-admin view."* The "v2" work was filed in prose, NOT in a
-load-bearing backlog item; nobody picked it up. Production
-smoke at the v0.33.0 release surfaced **61 user-trashed
-comments stuck in invisible purgatory** — the user had to
-ask "where did my comments go?" before the gap was visible.
-Closed by Bug 10 in this same session.
-
-### Rule
-
-When a feature ships any half of a lifecycle (soft-delete
-without restore-surface, "save draft" without "see drafts",
-"schedule" without "see scheduled", "archive" without "see
-archive", etc.), the deferred half MUST be filed as a
-**load-bearing backlog item** with an explicit blocker
-relationship to the shipping half:
-
-1. Open a P-tier backlog entry (NOT just a docstring TODO)
-   with ID + scope + trigger.
-2. Cross-reference in the docstring of the shipping half —
-   so anyone reading the code sees the backlog reference,
-   not just the prose "v2 will do it".
-3. Set the trigger to be **observable from real use** (user
-   reports the gap, monitor alert, follow-up audit), not a
-   silent "we'll get to it".
-
-### Detection grep
-
-Audit existing partial implementations:
-
-```bash
-grep -rnE 'out of scope|v2 ships|deferred to v2|filed for v2|TODO.*v2' \
-  backend/app/ frontend/src/ plugins/ \
-  --include='*.py' --include='*.tsx' --include='*.ts'
-```
-
-Each hit is a candidate for the half-wired pattern. Cross-
-check whether the deferred half is in the backlog with a
-real ID; if not, file one now.
-
-### Anti-pattern
-
-The original ``v1 ships half, v2 ships the other half``
-docstring is fine **IF** v2 has an open backlog item with an
-ID that anyone scanning the backlog can find. The failure
-mode is the docstring-only deferral that never makes it into
-``docs/backlog.md``, ``docs/ROADMAP.md``, or any other
-tracked list. Out of sight, out of mind, in production for a
-release cycle, user reports "data loss".
-
-### Pairs with
-
-- "Articles-vs-Books parallel-surface asymmetry" — the Bug 10
-  case appears under BOTH patterns. The asymmetry rule fires
-  on "Articles + Books have it, Comments doesn't"; this rule
-  fires on "Comments shipped half the contract". Same fix,
-  two different audit lenses.
 
 ## Test-isolation discipline: never run integration smoke-tests outside pytest
 
@@ -2605,150 +1369,6 @@ it. Rewrite as a pytest file.
   family. The harness is wired, but only triggered on the
   pytest path; a script outside that path is operationally
   unprotected even though the protection exists.
-
-## Inline-component duplication is the upstream cause of parallel-surface asymmetry
-
-**Pattern class observed 2 times so far (2026-05-15 audit).**
-Inline component definitions inside large monolithic page files
-amplify the Articles-vs-Books asymmetry pattern above. They have
-a cause-effect relationship:
-
-```
-[Monolithic component file]
-        ↓ blocks
-[Component extraction discipline]
-        ↓ absence creates
-[Duplication across parallel surfaces]
-        ↓ amplifies
-[Articles-vs-Books asymmetry when updates touch one surface only]
-```
-
-### Concrete occurrences
-
-1. **Settings.tsx 2338 LOC** with inline ``function
-   PluginSettings(...)`` + inline ``function AuthorSettings(...)``
-   (UX-Full-Audit G3-F1 + G3-F2 + G3-F8). The inline structure
-   makes per-tab testid additions land as cross-2000-line PRs;
-   neither inline component has testids.
-2. **ArticleList.tsx 1541 LOC** with inline ``function
-   ArticleFilterBar(...)`` ~200 LOC (UX-Full-Audit G2-F1). The
-   inline structure made it easy to grow Articles-specific filters
-   (6 slots) without considering Books parity (1 slot in the
-   shared ``DashboardFilterBar``).
-
-### Rule
-
-**Extract inline component functions to their own files when they
-exceed 50 LOC OR span a logical sub-feature** (a panel, a tab
-content, a filter bar, etc.). The extraction enables:
-
-1. **Per-component testid additions** as small, scoped PRs.
-2. **Cross-surface reuse** (the extracted Articles-side component
-   becomes a candidate for the Books side to import or model).
-3. **Independent test files** (Vitest unit tests per component vs
-   monolithic page tests).
-
-### The compounding insight
-
-**Fixing the monolithic-component-extraction-gap addresses the
-root cause of multiple Articles-vs-Books asymmetries
-simultaneously.** Extraction work has compounding parity value,
-not just code-cleanup value. Backlog items
-``PLUGIN-SETTINGS-TESTID-COVERAGE-01`` (Settings extraction +
-testids + E2E) and ``ARTICLEFILTERBAR-EXTRACT-01`` (ArticleList
-extraction) are the targeted fixes for the two observed
-instances.
-
-## Intentional asymmetry between Articles and Books must be documented
-
-The "Articles-vs-Books parallel-surface asymmetry" rule above is
-about ACCIDENTAL drift: one surface gets a feature, the mirror
-surface doesn't, nobody noticed. The corollary is that some
-asymmetries are DELIBERATE — Articles and Books have genuinely
-different conceptual shapes, and forcing parity would degrade
-the product. When the asymmetry is intentional, document it
-explicitly so a future audit doesn't flag it as a regression
-and the next contributor doesn't "fix" it by accident.
-
-### The trigger pattern
-
-When you ship a feature on one surface and an audit asks "why
-not the other side too?", there are three possible answers:
-
-1. **Accidental drift** — the other side just didn't get it
-   yet. Fix per the parallel-surface-asymmetry rule above.
-2. **Intentional asymmetry, undocumented** — the other side
-   genuinely shouldn't have it for conceptual reasons. The next
-   audit will surface the same question, get the same verbal
-   "oh right, that's intentional" answer, and the loop repeats.
-3. **Intentional asymmetry, documented** — the why lives in the
-   commit message + a lessons-learned entry, so the next audit
-   sees the documentation and closes the question immediately.
-
-The middle case is the one this rule prevents. The cost of
-documentation is small; the cost of re-running the same audit
-every quarter is large.
-
-### Rule
-
-When a feature ships on Articles XOR Books and the asymmetry
-is intentional:
-
-1. **Commit message must call it out.** A sentence like
-   "Books-only by design — Articles use Topic (single enum)
-   + Tags (free-text), Books use Categories (free-text JSON
-   list) + BISAC; the two domains have different metadata
-   shapes" is enough.
-2. **Add a one-line note to this section.** Lists the feature,
-   which surface has it, and the one-sentence "why" — so future
-   audits can grep this section before raising the asymmetry.
-
-### Documented intentional asymmetries
-
-- **Categories + BISAC (Bug 9, shipped 2026-05-16, commits
-  ``032a1c7..148be6b``)**: Books-only. Articles use
-  ``Article.topic`` (single, settings-managed enum, drives
-  the per-platform publishing workflow) and ``Article.tags``
-  (free-text). Books use ``Book.categories`` (free-text JSON
-  list, KDP-aligned) and ``Book.bisac_codes`` (BISAC 9-char
-  codes ``^[A-Z]{3}[0-9]{6}$``, validated for format only —
-  see ``BISAC-DATABASE-LOOKUP-01`` for the deferred bundled-
-  catalog path). The two domains have fundamentally different
-  metadata shapes: an article ships to N platforms each with
-  its own tagging norms; a book targets retail catalogues
-  (KDP / Apple Books / Kobo) with industry-standard subject
-  hierarchies. Forcing the same field set on both would help
-  neither. **Canonical concrete example for this rule**: a
-  future audit that grep's the accidental-asymmetry tally and
-  asks "why aren't categories on Articles too?" should find
-  this entry as the answer and close the question without a
-  re-investigation. The KDP plugin's metadata checker
-  (``plugin-kdp/topos_kdp/metadata_checker.py``) is the
-  only place that validates BISAC codes at write-time —
-  the backend schema validator (``app.schemas.BISAC_CODE_RE``)
-  is the canonical regex and the plugin duplicates it
-  intentionally for loose coupling.
-
-- **Authors-Database (Bug 8)**: Books-only at the
-  wizard-integration layer in v0.33.0+. The new Authors-DB +
-  Settings tab IS global (no Article / Book scoping), but the
-  Phase 2 wizard-datalist integration only lands on the
-  Article-to-Book conversion wizard. ArticleEditor + BookEditor
-  free-text author inputs stay plain text per D8 — the wizard
-  is the high-leverage surface (multi-article selection
-  surfaces multiple authors at once); single-record editors
-  ship the datalist later. Future session promotes the pattern
-  to both editors.
-
-### Anti-pattern
-
-Removing or weakening a feature on one surface just to "match"
-the other surface, when the surfaces have genuinely different
-needs. Symmetry-for-symmetry's-sake is wrong; symmetry-in-
-service-of-the-user is right. The asymmetry tally above tracks
-the bugs of the second kind (accidental missing parity); this
-section catalogues the cases where asymmetry IS the right
-answer.
 
 ## Periodic theme-token completeness audit as pre-release hygiene
 
@@ -2875,112 +1495,6 @@ The "Audit findings need production-vs-dev environment
 classification before urgency-tier" rule. Same family: separating
 "this looks scary" from "this is actually broken" requires
 verifying against authoritative sources before urgency-triage.
-
-## Testid namespace pinning prevents silent E2E skips
-
-Surfaced 2026-05-15 as the positive discipline derived from the
-G2-F2 silent-skip incident (recorded inside
-"Articles-vs-Books parallel-surface asymmetry"). The G2-F2 entry
-documents what went wrong: ``book-card-{id}`` in the grid view
-vs ``book-list-row-{id}`` in the list view; an E2E spec written
-for one view-mode resolves all its testids cleanly when the
-fixture happens to persist the same view-mode, and silently
-finds nothing — passing on a no-op — when a different view-mode
-persists. The bug was invisible for two release cycles.
-
-This rule is the positive discipline that prevents the
-recurrence: namespace your testids deliberately and exercise
-every one positively in the E2E spec.
-
-### Rule
-
-For any non-trivial UI component that an E2E spec will drive
-(wizards, multi-step forms, dialogs with multiple slots, bulk-
-action bars, settings tabs):
-
-1. **Choose a single namespace string at component creation
-   time.** A 2-3 dot-prefix or hyphen-prefix that uniquely
-   identifies the component family is enough:
-   ``convert-to-book-wizard-{step}-{slot}``,
-   ``article-bulk-{action}``,
-   ``settings-tab-{tab-id}-{slot}``. Document the schema in
-   the component's header docstring or a short JSDoc block
-   above the first testid use site.
-
-2. **Every interactive surface gets a testid in that
-   namespace.** No exceptions for "the button is obvious".
-   Buttons, inputs, selects, toggles, dropzones, drag
-   handles, list rows — each addressable element has an
-   id under the component's namespace.
-
-3. **List every testid in the component's header comment
-   or in a sibling ``*.testids.md`` file.** The list is the
-   contract: it tells the E2E author what's pinned and tells
-   future maintainers what they must keep stable when they
-   refactor.
-
-4. **The E2E spec exercises every testid in the namespace at
-   least once positively.** "Positively" means
-   ``await expect(page.getByTestId(...)).toBeVisible()`` —
-   not a negative assertion like ``not.toBeNull()`` and not
-   a fragile partial-match. The spec walks the happy path
-   from first user surface to last, asserting each pinned
-   testid resolves to exactly one visible element.
-
-5. **When the namespace evolves, the spec's positive
-   coverage walk is the safety net.** Renaming a testid or
-   forgetting to apply the namespace to a new surface
-   triggers a spec failure on the very next CI run — not
-   a silent skip on the next view-mode flip.
-
-### Concrete artefacts
-
-- **First feature shipped under this discipline**: Phase 2 of
-  the article-to-book conversion (commit ``9261acd`` for the
-  component, commit ``7440564`` for the E2E spec). Component
-  header docstring carries the namespace schema; E2E happy
-  path positively asserts every step's slot resolves; 11
-  Vitest specs cross-check the same testid names from a
-  component-rendering angle.
-
-- **Negative incident the discipline prevents**: G2-F2
-  view-mode testid namespace split, documented in
-  "Articles-vs-Books parallel-surface asymmetry"
-  occurrence list.
-
-### Anti-patterns
-
-- **No namespace at all** — ad-hoc testids like ``submit-btn``,
-  ``confirm``, ``ok``. Two sibling components collide; specs
-  resolve to the wrong element. Cure: prefix.
-- **Namespace drifts across view-modes / branches** — same
-  visual concept, different testid in card vs list view, in
-  draft vs published state, in mobile vs desktop layout. Cure:
-  one testid per conceptual element regardless of which branch
-  renders it. The E2E spec's positive walk would have caught
-  the drift on the very next run.
-- **Specs that only assert negatively** —
-  ``await page.getByTestId(...).not.toBeNull()`` passes when
-  the element doesn't exist at all. Cure: use ``toBeVisible``
-  (or ``toHaveCount(1)`` when uniqueness matters).
-- **Partial-prefix selectors that overmatch** —
-  ``[data-testid^="book-card-"]`` matches both the root
-  ``book-card-{id}`` AND every nested ``book-card-menu-{id}``.
-  Documented earlier in "Prefix testid selectors match every
-  nested testid that shares the prefix". The positive-coverage
-  discipline complements that fix.
-
-### Pairs with
-
-- "Articles-vs-Books parallel-surface asymmetry" — the G2-F2
-  occurrence list captures the negative side; this rule is
-  the positive prevention.
-- "Prefix testid selectors match every nested testid that
-  shares the prefix" — same testid-discipline family,
-  different failure mode.
-- The two rules together cover the "namespace your testids +
-  exercise them positively + don't overmatch with prefix
-  selectors" trifecta.
 
 ## Menu-Dialog Lifecycle: do not `preventDefault` inside `onSelect`
 
@@ -3272,3 +1786,106 @@ the key is missing. Two consequences when swapping in a packaged UI:
   packaged UI in a catalog-fetched i18n system, budget the kit's own key
   namespace as a separate translation task and be explicit that
   local/offline mode always shows the kit's shipped fallbacks.
+
+---
+
+# Topos-specific lessons (this project's own history)
+
+The lessons above are the generalizable ones (backend/Alembic, test
+isolation, version pins, CI, Vite/TS, i18n, Radix/happy-dom, the
+storage-agnostic AI-key-vault kit). The cluster below is Topos's own,
+learned building the inventory tracker + its GitHub Pages PWA.
+
+## Base path: apiBase + PWA config MUST respect import.meta.env.BASE_URL
+
+The GitHub Pages PWA is served under `/topos/`, not `/`. Anything that
+builds a URL from a hardcoded `/api` or `/` breaks there. `apiBase()`
+must be `${import.meta.env.BASE_URL}api` (so it targets `/topos/api`);
+the health probe, the vite-plugin-pwa `scope`/`start_url`, and the
+service-worker `navigateFallback` all take the base too. A stale-deploy
+class of bug ("changes don't land on GH Pages") was actually the SW
+serving old precached assets - switched `registerType` to `autoUpdate`
+so a new deploy self-heals. Rule: every URL in the frontend flows
+through a base-aware helper; never a bare `/api` or `/`.
+
+## GitHub-Pages deploy can fail on transient GitHub infra - verify the LIVE bundle
+
+The `deploy-gh-pages.yml` run failed twice with "Failed to resolve
+action download info. Error: Service Unavailable" at Set-up-job - a
+GitHub Actions outage, not a code bug. The build never ran, so the fix
+never went live and the user still saw the old app. Re-dispatch when
+infra recovers. ALWAYS confirm a deploy actually shipped by fetching the
+live bundle and grepping the Settings/index chunk for a marker you just
+added (`curl .../assets/Settings-*.js | grep <new-testid>`), rather than
+trusting a green run or assuming the push deployed.
+
+## Reproduce a reported UI bug in a real browser before concluding "by design"
+
+The "AI providers not visible on GH Pages" report was dismissed three
+times as "works as designed (passphrase gate first)" from reading code.
+It was a real UX wall. Only a real-browser reproduction found it. Recipe:
+`GITHUB_PAGES=true VITE_STORAGE_MODE=dexie npm run build` then
+`vite preview`, drive `http://localhost:PORT/topos/<route>` with a
+Playwright script that lives IN `e2e/` (so `@astrapi69/... `/`@playwright/test`
+resolve; a /tmp script fails ERR_MODULE_NOT_FOUND). A repeated report
+falsifies the prior "by design" - re-open, do not re-defend. See
+[[reproduce-ui-bugs-in-browser]].
+
+## AI in the browser: corsBlocked providers are backend-only
+
+Only Anthropic ships the `anthropic-dangerous-direct-browser-access`
+opt-in, so it is the only provider callable straight from the browser in
+dexie mode. OpenAI / Google / Perplexity are `corsBlocked: true` in
+`src/ai/registry.ts` (and the kit's `PERPLEXITY_PROVIDER`) - they need a
+backend proxy. Do NOT offer a browser-direct call a CORS policy will
+reject; mark such providers desktop/backend-only in the UI. Perplexity
+is OpenAI-compatible, so its backend vision call reuses the openai path
+(`vision.py` else-branch, `recognize_openai(provider="perplexity")`) -
+no new client.
+
+## Lazy passphrase: show the provider list, ask the passphrase on first key save
+
+Gating the whole AI provider panel behind "create a passphrase first"
+reads as "no providers here" and generated repeated bug reports. In
+local mode the panel is ALWAYS visible; the passphrase is requested
+lazily, only when the first key is saved (the adapter's `ensureUnlocked`
+seam). At-rest encryption still holds (keys never stored plaintext), but
+the in-memory unlock session clears on reload, so any AI-gated feature
+(PhotoIntake) must (a) treat "vault locked" as a distinct, actionable
+state and (b) tell the user to unlock in Settings - not a generic "needs
+AI settings" hint. See [[ai-features-follow-adaptive-learner-pattern]].
+
+## Passphrase fields: SecretInput, never `<input type="password">`
+
+A password input triggers the browser/OS password manager (autofill
+popup, "save password?") and hides the value with no reveal - wrong for a
+vault passphrase the user wants to see and that no password manager
+should capture. `components/SecretInput.tsx` renders `type="text"` +
+`-webkit-text-security` mask + `data-1p-ignore`/`data-lpignore`/
+`autocomplete="off"` + a show/hide toggle. (The kit's own `SecretInput`
+needs the AiSettings context; this standalone twin works in the
+passphrase modal that renders outside the provider.) happy-dom drops the
+vendor `-webkit-text-security`, so test the reveal via the toggle's
+`aria-label`, not the style attribute.
+
+## Cross-test async can write module-level state after the next beforeEach
+
+A create-form validation test asserted `vault.hasVault() === false`, but
+a prior test's still-pending vault write (the in-memory `localVaultStore`
+is module-level) landed after that test's `beforeEach` cleared
+localStorage, flipping the global. `beforeEach` was clean (envlen 0); the
+write came mid-test. Fix: assert the LOCAL proof (`onReady` not called -
+it fires only after a successful `createVault`), not a pollutable global.
+Generalises the "module-level caches survive test boundaries" rule to
+async writes, not just `lru_cache`.
+
+## Tailwind purge: template-literal + arbitrary classes need help
+
+Tailwind's content-glob only sees class strings that appear literally in
+the `.tsx`. Classes composed in a template literal (`` `${base} ...` ``)
+or shared via `ui/classes.ts` string constants are found only because the
+literal fragments are present; a class assembled dynamically at runtime is
+purged. Arbitrary-value utilities (`min-h-[44px]`) are generated from the
+literals in the components. Rule: keep class strings literal (or in
+`ui/classes.ts`), never build a class name by concatenating variable
+parts; if you must, safelist it.
