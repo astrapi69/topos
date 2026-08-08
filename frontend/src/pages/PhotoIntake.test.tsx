@@ -368,6 +368,11 @@ describe("PhotoIntake", () => {
     await pickPhotoAndContainer();
     expect(screen.getByTestId("photo-intake-recognize")).toBeDisabled();
     expect(api.settings.getApp).not.toHaveBeenCalled();
+    // The hint is actionable: it links to Settings (KI-Assistent) so the
+    // user can enable/unlock/configure AI instead of guessing.
+    expect(
+      screen.getByTestId("photo-intake-ai-settings-link"),
+    ).toBeInTheDocument();
   });
 
   it("recognizes browser-direct without a backend when local AI is configured", async () => {
