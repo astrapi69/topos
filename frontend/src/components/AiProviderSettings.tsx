@@ -29,7 +29,10 @@ import {
   type ConfirmFn,
   type NotifyApi,
 } from "@astrapi69/ai-key-vault-react";
-import { emitSettingsRefresh } from "@astrapi69/ai-key-vault";
+import {
+  emitSettingsRefresh,
+  type KeyVaultImportResult,
+} from "@astrapi69/ai-key-vault";
 import { VaultDecryptError } from "@astrapi69/passphrase-vault";
 
 import { api } from "../api/client";
@@ -55,6 +58,30 @@ type PromptMode = "create" | "unlock";
 
 const USER_ID = "topos"; // single-user app; the adapters ignore this
 const MIN_PASSPHRASE = 8;
+
+/**
+ * Human-readable summary of an encrypted key import, for the success toast.
+ * Uses the provider list the kit's import now reports back
+ * (``KeyVaultImportForm.onImported(result)``).
+ */
+export function importedKeysSummary(
+  result: KeyVaultImportResult,
+  t: (key: string, fallback: string) => string,
+): string {
+  const count = result.providers.length;
+  if (count === 0) {
+    return t(
+      "topos.page.settings.ai.import_none",
+      "Keine Schluessel in der Datei.",
+    );
+  }
+  return t(
+    "topos.page.settings.ai.import_done",
+    "{n} Schluessel importiert: {list}",
+  )
+    .replace("{n}", String(count))
+    .replace("{list}", result.providers.join(", "));
+}
 
 const notifyApi: NotifyApi = {
   success: (message) => void notify.success(message),
@@ -315,6 +342,12 @@ export default function AiProviderSettings() {
     emitSettingsRefresh();
   }
 
+  /** Bootstrap import finished: report which providers landed, then refresh. */
+  function handleKeysImported(result: KeyVaultImportResult) {
+    notify.success(importedKeysSummary(result, t));
+    afterVaultChange();
+  }
+
   /**
    * Ensure an open vault session, prompting for a passphrase if needed. Passed
    * to the local adapter; resolves true once unlocked, false on cancel.
@@ -498,7 +531,7 @@ export default function AiProviderSettings() {
                     "Schluessel von einem anderen Geraet uebernehmen: verschluesselte .alk-Datei waehlen (oder Inhalt einfuegen) und deren Passphrase eingeben.",
                   )}
                 </p>
-                <KeyVaultImportForm onImported={afterVaultChange} />
+                <KeyVaultImportForm onImported={handleKeysImported} />
               </div>
             )}
           </AiSettingsProvider>

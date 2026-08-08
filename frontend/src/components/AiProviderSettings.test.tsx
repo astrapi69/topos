@@ -4,7 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { refreshApiKeyStatus } from "@astrapi69/ai-key-vault-react";
 
-import AiProviderSettings, { VaultPassphraseForm } from "./AiProviderSettings";
+import AiProviderSettings, {
+  VaultPassphraseForm,
+  importedKeysSummary,
+} from "./AiProviderSettings";
 import { notify } from "../utils/notify";
 import { createBackendAdapter } from "../ai/backendAdapter";
 import { TOPOS_REGISTRY } from "../ai/registry";
@@ -230,6 +233,22 @@ describe("AiProviderSettings", () => {
       expect(screen.queryByTestId("ai-vault-prompt")).not.toBeInTheDocument(),
     );
     expect(vault.isUnlocked()).toBe(false);
+  });
+});
+
+describe("importedKeysSummary", () => {
+  const t = (_key: string, fallback: string) => fallback;
+
+  it("counts and lists the imported providers", () => {
+    expect(importedKeysSummary({ providers: ["anthropic", "openai"] }, t)).toBe(
+      "2 Schluessel importiert: anthropic, openai",
+    );
+  });
+
+  it("handles an empty import", () => {
+    expect(importedKeysSummary({ providers: [] }, t)).toBe(
+      "Keine Schluessel in der Datei.",
+    );
   });
 });
 
