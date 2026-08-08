@@ -6,9 +6,13 @@
  * ContainerList edit form.
  *
  * Used on pages where the user picks a target container and the
- * container may not exist yet (photo intake). Creation needs a
- * backend (Dexie is a read-through cache), so callers pass
- * ``disabled`` while no backend answers.
+ * container may not exist yet (photo intake). Creation goes through
+ * ``getStorage().containers.create``, so it works in BOTH modes: api
+ * mode (backend is the source of truth) and dexie mode (offline PWA,
+ * real IndexedDB write). Do NOT gate this on a backend -- offline the
+ * PWA seeds no containers, so inline creation is the only way to get a
+ * target. The optional ``disabled`` prop stays for callers that need it
+ * for other reasons, but photo intake leaves it unset.
  *
  * Testid namespace: `container-quick-create-*` with the slots
  * `toggle`, `form`, `external-id`, `type`, `owner`, `label`,

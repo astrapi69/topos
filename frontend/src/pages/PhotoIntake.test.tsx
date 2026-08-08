@@ -454,13 +454,22 @@ describe("PhotoIntake", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("disables the inline container creation without a backend", async () => {
+  it("allows inline container creation offline (Dexie mode)", async () => {
+    // Regression: the offline PWA seeds no containers, so the user MUST be
+    // able to create one inline to have a photo target. Creation goes through
+    // getStorage() (dexieStorage offline), so it must NOT be gated on a
+    // backend -- otherwise the flow deadlocks: no container to select, and no
+    // way to create one, so "Erkennen" can never enable.
     (isBackendAvailable as ReturnType<typeof vi.fn>).mockResolvedValue(false);
     renderPage();
+    // Let the backend probe resolve (offline), then the toggle must stay usable.
     await waitFor(() =>
       expect(
-        screen.getByTestId("container-quick-create-toggle"),
-      ).toBeDisabled(),
+        screen.getByTestId("photo-intake-offline-hint"),
+      ).toBeInTheDocument(),
     );
+    expect(
+      screen.getByTestId("container-quick-create-toggle"),
+    ).not.toBeDisabled();
   });
 });
