@@ -34,6 +34,7 @@ import {
   resolveActiveProvider,
   TOPOS_REGISTRY,
 } from "../ai";
+import { hasVault, isEnabled, isUnlocked } from "../ai/localVaultStore";
 import {
   api,
   type BulkItemCreate,
@@ -56,6 +57,7 @@ import {
   btnText,
   card,
   input,
+  link,
   muted,
   text,
 } from "../ui/classes";
@@ -119,6 +121,12 @@ export default function PhotoIntake() {
 
   const [backendUp, setBackendUp] = useState<boolean | null>(null);
   const [localAiReady, setLocalAiReady] = useState(false);
+  // Why local AI is not usable (offline), so the hint can be actionable
+  // instead of a generic "configure it somewhere": vault locked vs AI
+  // disabled vs no usable key.
+  const [aiReason, setAiReason] = useState<
+    "locked" | "disabled" | "nokey" | null
+  >(null);
   const [providerLabel, setProviderLabel] = useState("AI");
   const [containerId, setContainerId] = useState("");
   const [photo, setPhoto] = useState<CapturedPhoto | null>(null);
@@ -140,7 +148,13 @@ export default function PhotoIntake() {
         // No backend: the browser-local key vault drives recognition.
         // A key is only usable once the vault is unlocked this session.
         const active = getMeta().activeProvider;
-        setLocalAiReady(resolveActiveProvider() !== null);
+        const ready = resolveActiveProvider() !== null;
+        setLocalAiReady(ready);
+        // Pin down WHY it is not ready so the hint can point at the fix.
+        if (ready) setAiReason(null);
+        else if (!isEnabled()) setAiReason("disabled");
+        else if (hasVault() && !isUnlocked()) setAiReason("locked");
+        else setAiReason("nokey");
         const descriptor = TOPOS_REGISTRY.find(active);
         setProviderLabel(descriptor?.label ?? active);
         return;
@@ -489,10 +503,36 @@ export default function PhotoIntake() {
             </button>
             {!recognizeReady && backendUp !== null && (
               <span data-testid="photo-intake-offline-hint" className={muted}>
-                {t(
-                  "topos.page.photo_intake.offline",
-                  "Foto-Erkennung benötigt eine Backend-Verbindung oder gespeicherte KI-Einstellungen (Einstellungen: KI-Assistent).",
-                )}
+                {backendUp === false && aiReason === "locked"
+                  ? t(
+                      "topos.page.photo_intake.offline_locked",
+                      "KI-Tresor gesperrt - in den Einstellungen entsperren, dann hierher zurück.",
+                    )
+                  : backendUp === false && aiReason === "disabled"
+                    ? t(
+                        "topos.page.photo_intake.offline_disabled",
+                        "KI ist ausgeschaltet - in den Einstellungen aktivieren.",
+                      )
+                    : backendUp === false
+                      ? t(
+                          "topos.page.photo_intake.offline_nokey",
+                          "Kein nutzbarer KI-Schlüssel - in den Einstellungen konfigurieren (offline nur Anthropic browser-direkt).",
+                        )
+                      : t(
+                          "topos.page.photo_intake.offline",
+                          "Foto-Erkennung benötigt eine Backend-Verbindung oder gespeicherte KI-Einstellungen (Einstellungen: KI-Assistent).",
+                        )}{" "}
+                <button
+                  type="button"
+                  className={link}
+                  onClick={() => navigate("/settings")}
+                  data-testid="photo-intake-ai-settings-link"
+                >
+                  {t(
+                    "topos.page.photo_intake.open_ai_settings",
+                    "Einstellungen öffnen",
+                  )}
+                </button>
               </span>
             )}
           </div>
