@@ -239,6 +239,7 @@ export default function DataSection() {
           accept=".topos.json,.json,application/json"
           hidden
           onChange={onFilePicked}
+          aria-label={t("topos.page.settings.data.import", "Daten importieren")}
           data-testid="data-import-input"
         />
       </div>

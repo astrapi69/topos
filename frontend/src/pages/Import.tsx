@@ -126,6 +126,10 @@ export default function Import() {
               type="file"
               accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              aria-label={t(
+                "topos.page.import.pick_file",
+                "Excel-Datei auswählen",
+              )}
               data-testid="import-file-input"
               style={{ marginTop: "0.5rem" }}
             />

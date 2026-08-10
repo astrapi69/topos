@@ -112,6 +112,10 @@ export default function Dashboard() {
               "topos.page.dashboard.search_placeholder",
               "Container, Einträge, Aktionen durchsuchen...",
             )}
+            aria-label={t(
+              "topos.page.dashboard.search_placeholder",
+              "Container, Einträge, Aktionen durchsuchen...",
+            )}
             data-testid="dashboard-search-input"
           />
 

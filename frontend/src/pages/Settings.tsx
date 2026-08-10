@@ -102,6 +102,7 @@ export default function Settings() {
             className={input}
             value={lang}
             onChange={(e) => setLang(e.target.value)}
+            aria-label={t("topos.page.settings.language", "Sprache")}
             data-testid="settings-language-select"
           >
             {LANGUAGES.map((l) => (
