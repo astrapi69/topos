@@ -14,6 +14,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 import { verifyBackendVersion } from "./versionCheck";
+import { _resetBackendProbe } from "./backendStatus";
 
 const APP = __APP_VERSION__;
 
@@ -21,12 +22,20 @@ describe("verifyBackendVersion", () => {
   let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
+    // The check runs behind the shared backend probe; reset it so each
+    // test decides for itself whether a backend answers.
+    _resetBackendProbe();
+    localStorage.clear();
+    vi.unstubAllEnvs();
     warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   afterEach(() => {
     warnSpy.mockRestore();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    localStorage.clear();
   });
 
   it("does not warn when versions match", async () => {
@@ -99,5 +108,35 @@ describe("verifyBackendVersion", () => {
 
     await verifyBackendVersion();
     expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it("probes through apiBase, not a bare /api path", async () => {
+    // Regression: a hardcoded "/api/health" ignores the deployment base
+    // path, so the GitHub Pages build hit astrapi69.github.io/api/health
+    // (404) instead of the app's own /topos/api/health.
+    localStorage.setItem("topos.backend_url", "https://backend.example");
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ version: APP }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await verifyBackendVersion();
+
+    const probed = fetchMock.mock.calls.map((call) => String(call[0]));
+    expect(probed).toContain("https://backend.example/api/health");
+    expect(probed).not.toContain("/api/health");
+  });
+
+  it("does not touch the network when no backend can answer", async () => {
+    // Static PWA build: nothing to cross-check against, and the request
+    // would only 404 on every load.
+    vi.stubEnv("VITE_STORAGE_MODE", "dexie");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await verifyBackendVersion();
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

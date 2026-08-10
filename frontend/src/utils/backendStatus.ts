@@ -11,14 +11,32 @@
  * lifetime, so every caller shares a single /api/health request.
  */
 
-import { apiBase } from "../api/baseUrl";
+import { apiBase, getBackendUrl } from "../api/baseUrl";
 
 const PROBE_TIMEOUT_MS = 3000;
 
 let probe: Promise<boolean> | null = null;
 
+/**
+ * True when this build cannot have a backend: the GitHub Pages bundle
+ * ships ``VITE_STORAGE_MODE=dexie`` and is served from static hosting,
+ * so /api/* is guaranteed to 404. Probing there only spams the console
+ * on every load. A backend URL configured in Settings overrides this -
+ * the user explicitly pointed the app at a reachable backend.
+ *
+ * Read from the build flag directly (not via ``storage/index``) to keep
+ * this module free of the storage -> api-client import chain.
+ */
+function backendImpossible(): boolean {
+  return import.meta.env.VITE_STORAGE_MODE === "dexie" && getBackendUrl() === "";
+}
+
 export function isBackendAvailable(): Promise<boolean> {
   if (probe === null) {
+    if (backendImpossible()) {
+      probe = Promise.resolve(false);
+      return probe;
+    }
     probe = (async () => {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);

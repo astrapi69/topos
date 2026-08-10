@@ -1,3 +1,6 @@
+import { apiBase } from "../api/baseUrl";
+import { isBackendAvailable } from "./backendStatus";
+
 /**
  * Cross-check the build-time __APP_VERSION__ against the backend
  * /api/health response at app start.
@@ -10,10 +13,16 @@
  *
  * Fails open on any fetch / parse / network error. Offline boot or a
  * backend that hasn't finished starting is not a divergence signal.
+ *
+ * Skipped entirely when no backend can answer (the static PWA build):
+ * a version cross-check has nothing to compare against there, and the
+ * request would only 404. The URL goes through ``apiBase()`` so a
+ * subpath deployment hits ``/topos/api/health``, not the host root.
  */
 export async function verifyBackendVersion(): Promise<void> {
+  if (!(await isBackendAvailable())) return;
   try {
-    const res = await fetch("/api/health");
+    const res = await fetch(`${apiBase()}/health`);
     if (!res.ok) return;
     const body = (await res.json()) as { version?: unknown };
     const backendVersion =

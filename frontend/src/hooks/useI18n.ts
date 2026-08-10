@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { api } from "../api/client";
+import { isBackendAvailable } from "../utils/backendStatus";
 import React from "react";
 
 type I18nStrings = Record<string, unknown>;
@@ -27,18 +28,24 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [strings, setStrings] = useState<I18nStrings>(cachedStrings);
   const [lang, setLangState] = useState(cachedLang || "de");
 
-  // Load language preference from app settings on mount
+  // Load language preference from app settings on mount.
+  // Both catalog requests are gated on the backend probe: the static PWA
+  // build has no backend, so an ungated fetch 404s on every load and
+  // t() falls back to its inline strings anyway.
   useEffect(() => {
     if (cachedLang) return; // already loaded
-    api.settings
-      .getApp()
-      .then((config) => {
-        const appLang =
-          ((config.app as Record<string, unknown>)
-            ?.default_language as string) || "de";
-        setLangState(appLang);
-      })
-      .catch(() => {});
+    void isBackendAvailable().then((available) => {
+      if (!available) return;
+      api.settings
+        .getApp()
+        .then((config) => {
+          const appLang =
+            ((config.app as Record<string, unknown>)
+              ?.default_language as string) || "de";
+          setLangState(appLang);
+        })
+        .catch(() => {});
+    });
   }, []);
 
   // Fetch strings when language changes
@@ -47,16 +54,19 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       setStrings(cachedStrings);
       return;
     }
-    api.i18n
-      .get(lang)
-      .then((data) => {
-        cachedLang = lang;
-        cachedStrings = data;
-        setStrings(data);
-      })
-      .catch(() => {
-        /* Silent bootstrap fallback: t() reverts to fallback strings. */
-      });
+    void isBackendAvailable().then((available) => {
+      if (!available) return;
+      api.i18n
+        .get(lang)
+        .then((data) => {
+          cachedLang = lang;
+          cachedStrings = data;
+          setStrings(data);
+        })
+        .catch(() => {
+          /* Silent bootstrap fallback: t() reverts to fallback strings. */
+        });
+    });
   }, [lang]);
 
   const setLang = useCallback((newLang: string) => {
