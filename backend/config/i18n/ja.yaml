@@ -210,6 +210,9 @@ topos:
         title: Data
         export: Export data
         export_success: "Export complete. {containers} containers, {items} items."
+        export_excel: Export Excel
+        excel_export_success: "Excel export complete. {containers} containers, {items} items."
+        excel_export_failed: Excel export failed
         import: Import data
         import_preview: "{containers} containers, {items} items, {categories} categories, {actions} actions"
         import_merge: Merge

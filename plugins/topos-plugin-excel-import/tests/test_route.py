@@ -60,3 +60,18 @@ def test_post_import_excel_rejects_empty_upload():
         files = {"file": ("empty.xlsx", b"", "application/octet-stream")}
         r = client.post("/api/import/excel", files=files)
     assert r.status_code == 400
+
+
+def test_get_export_excel_returns_workbook():
+    with TestClient(app) as client:
+        r = client.get("/api/export/excel")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith(
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    assert "topos-export.xlsx" in r.headers["content-disposition"]
+    wb = openpyxl.load_workbook(BytesIO(r.content), read_only=True)
+    try:
+        assert wb.sheetnames == ["Meine Ordner", "Ordner Eltern", "Boxen"]
+    finally:
+        wb.close()

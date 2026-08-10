@@ -1,4 +1,4 @@
-"""FastAPI route for the Excel-import plugin."""
+"""FastAPI routes for Excel import and export."""
 
 from __future__ import annotations
 
@@ -7,10 +7,13 @@ from app.exceptions import ValidationError
 from fastapi import APIRouter, Depends, File, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from starlette.responses import Response
 
+from .exporter import export_workbook
 from .importer import import_workbook
 
-router = APIRouter(prefix="/import", tags=["import"])
+router = APIRouter(tags=["import"])
+EXCEL_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 class ImportReportResponse(BaseModel):
@@ -30,7 +33,7 @@ class ImportReportResponse(BaseModel):
     warnings: list[str]
 
 
-@router.post("/excel", response_model=ImportReportResponse)
+@router.post("/import/excel", response_model=ImportReportResponse)
 async def import_excel(
     file: UploadFile = File(...),
     prune_missing: bool = False,
@@ -55,4 +58,15 @@ async def import_excel(
         actions_created=report.actions_created,
         categories_created=report.categories_created,
         warnings=report.warnings,
+    )
+
+
+@router.get("/export/excel")
+def export_excel(db: Session = Depends(get_db)) -> Response:
+    """Export all Topos data as an import-compatible ``.xlsx`` workbook."""
+    payload = export_workbook(db)
+    return Response(
+        content=payload,
+        media_type=EXCEL_MIME,
+        headers={"Content-Disposition": 'attachment; filename="topos-export.xlsx"'},
     )

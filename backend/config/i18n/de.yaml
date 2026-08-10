@@ -209,6 +209,9 @@ topos:
         title: Daten
         export: Daten exportieren
         export_success: "Export abgeschlossen. {containers} Container, {items} Einträge."
+        export_excel: Excel exportieren
+        excel_export_success: "Excel-Export abgeschlossen. {containers} Container, {items} Einträge."
+        excel_export_failed: Excel-Export fehlgeschlagen
         import: Daten importieren
         import_preview: "{containers} Container, {items} Einträge, {categories} Kategorien, {actions} Aktionen"
         import_merge: Zusammenführen
