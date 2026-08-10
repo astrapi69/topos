@@ -1,8 +1,18 @@
 name: Deploy to GitHub Pages
 
+# Deploys from main, not develop. The build stamps version.json with the
+# built commit's short SHA (see vite.config.ts resolveBuildHash), so
+# deploying develop meant the live hash was always the commit BEFORE the
+# merge commit that main ends up carrying - the app looked one commit
+# stale next to GitHub's branch view even though the tree was identical.
+# Deploying main makes the live hash the newest commit, and merging is
+# the single deploy trigger instead of push-then-merge deploying twice.
+#
+# To preview a develop branch on Pages before merging, run this workflow
+# manually (workflow_dispatch) from that branch.
 on:
   push:
-    branches: [develop]
+    branches: [main]
   workflow_dispatch:
 
 # Read the repo, mint the Pages deployment token.
@@ -11,7 +21,7 @@ permissions:
   pages: write
   id-token: write
 
-# Only the newest develop deploy matters; cancel superseded runs.
+# Only the newest deploy matters; cancel superseded runs.
 concurrency:
   group: pages
   cancel-in-progress: true
