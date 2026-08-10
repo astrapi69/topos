@@ -9,11 +9,12 @@
 
 import { useRef, useState } from "react";
 
-import { Download, Upload } from "lucide-react";
+import { Download, FileSpreadsheet, Upload } from "lucide-react";
 
 import {
   BackupValidationError,
   downloadBackup,
+  downloadExcelBackup,
   exportToposData,
   importToposData,
   readBackupFile,
@@ -72,6 +73,47 @@ export default function DataSection() {
         errorMessage(
           err,
           t("topos.page.settings.data.invalid_file", "Ungültige Backup-Datei"),
+        ),
+        err,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleExcelExport() {
+    setBusy(true);
+    try {
+      const backup = await exportToposData();
+      const total =
+        backup.stats.containers +
+        backup.stats.items +
+        backup.stats.categories +
+        backup.stats.actions;
+      if (total === 0) {
+        notify.warning(
+          t("topos.page.settings.data.empty", "Keine Daten zum Exportieren"),
+        );
+        return;
+      }
+      await downloadExcelBackup(backup);
+      notify.success(
+        fill(
+          t(
+            "topos.page.settings.data.excel_export_success",
+            "Excel-Export abgeschlossen. {containers} Container, {items} Einträge.",
+          ),
+          { containers: backup.stats.containers, items: backup.stats.items },
+        ),
+      );
+    } catch (err) {
+      notify.error(
+        errorMessage(
+          err,
+          t(
+            "topos.page.settings.data.excel_export_failed",
+            "Excel-Export fehlgeschlagen",
+          ),
         ),
         err,
       );
@@ -170,6 +212,16 @@ export default function DataSection() {
         >
           <Download size={16} aria-hidden />
           {t("topos.page.settings.data.export", "Daten exportieren")}
+        </button>
+        <button
+          type="button"
+          className={btn}
+          onClick={handleExcelExport}
+          disabled={busy}
+          data-testid="data-export-excel"
+        >
+          <FileSpreadsheet size={16} aria-hidden />
+          {t("topos.page.settings.data.export_excel", "Excel exportieren")}
         </button>
         <button
           type="button"

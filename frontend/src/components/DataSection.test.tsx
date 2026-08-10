@@ -6,6 +6,7 @@ import DataSection from "./DataSection";
 const mocks = vi.hoisted(() => ({
   exportToposData: vi.fn(),
   downloadBackup: vi.fn(),
+  downloadExcelBackup: vi.fn(),
   importToposData: vi.fn(),
   readBackupFile: vi.fn(),
   promptMock: vi.fn(),
@@ -17,6 +18,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("../backup", () => ({
   exportToposData: mocks.exportToposData,
   downloadBackup: mocks.downloadBackup,
+  downloadExcelBackup: mocks.downloadExcelBackup,
   importToposData: mocks.importToposData,
   readBackupFile: mocks.readBackupFile,
   BackupValidationError: class extends Error {
@@ -61,6 +63,7 @@ describe("DataSection", () => {
   it("renders export and import buttons", () => {
     render(<DataSection />);
     expect(screen.getByTestId("data-export")).toBeInTheDocument();
+    expect(screen.getByTestId("data-export-excel")).toBeInTheDocument();
     expect(screen.getByTestId("data-import")).toBeInTheDocument();
   });
 
@@ -70,6 +73,16 @@ describe("DataSection", () => {
     fireEvent.click(screen.getByTestId("data-export"));
     await waitFor(() =>
       expect(mocks.downloadBackup).toHaveBeenCalledWith(BACKUP),
+    );
+    expect(mocks.success).toHaveBeenCalled();
+  });
+
+  it("exports Excel from the same backup snapshot", async () => {
+    mocks.exportToposData.mockResolvedValue(BACKUP);
+    render(<DataSection />);
+    fireEvent.click(screen.getByTestId("data-export-excel"));
+    await waitFor(() =>
+      expect(mocks.downloadExcelBackup).toHaveBeenCalledWith(BACKUP),
     );
     expect(mocks.success).toHaveBeenCalled();
   });
