@@ -309,9 +309,29 @@ body {
     overflow: hidden;
 }
 
+/* App scroll container (html/body stay viewport-locked above).
+   Flex column + centered children: pages with a max-width column render
+   centered on wide screens. Two guards against the known flex traps:
+   - `#root > *` keeps full-width children (NavBar) from shrink-wrapping
+     under `align-items: center`.
+   - NO `justify-content: center` here: combined with `overflow-y: auto`
+     it makes the top of tall pages unreachable (content overflows both
+     ways, scroll cannot reach the start). */
 #root {
     height: 100%;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#root > * {
+    width: 100%;
+}
+
+/* Center every page's content column (pages set max-w-* on <main>). */
+#root main {
+    margin-inline: auto;
 }
 
 html {
