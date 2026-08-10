@@ -21,7 +21,7 @@ import { useI18n } from "../hooks/useI18n";
 import { useDialog } from "../components/AppDialog";
 import { isBackendAvailable } from "../utils/backendStatus";
 import { notify, errorMessage } from "../utils/notify";
-import { btn, input, muted } from "../ui/classes";
+import { btn, input, muted, pageMainNarrow } from "../ui/classes";
 
 const LANGUAGES = ["de", "en", "es", "fr", "el", "pt", "tr", "ja"];
 
@@ -91,7 +91,7 @@ export default function Settings() {
   return (
     <>
       <NavBar />
-      <main className="p-4 sm:p-6 max-w-3xl">
+      <main className={pageMainNarrow}>
         <h1 data-testid="settings-title">
           {t("topos.page.settings.title", "Einstellungen")}
         </h1>

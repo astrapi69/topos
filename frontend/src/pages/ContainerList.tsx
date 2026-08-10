@@ -29,6 +29,7 @@ import {
   muted,
   danger,
   link,
+  pageMain,
 } from "../ui/classes";
 import type { Container, ContainerType, Owner } from "../types/topos";
 
@@ -244,7 +245,7 @@ export default function ContainerList() {
   return (
     <>
       <NavBar />
-      <main className="p-4 sm:p-6">
+      <main className={pageMain}>
         <header
           style={{
             display: "flex",

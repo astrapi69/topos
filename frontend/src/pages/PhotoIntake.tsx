@@ -60,6 +60,7 @@ import {
   link,
   muted,
   text,
+  pageMainNarrow,
 } from "../ui/classes";
 
 /** Sentinel option value for "create the AI-suggested category". */
@@ -461,7 +462,7 @@ export default function PhotoIntake() {
   return (
     <>
       <NavBar />
-      <main className={`p-4 sm:p-6 max-w-3xl ${text}`}>
+      <main className={`${pageMainNarrow} ${text}`}>
         <h1 data-testid="photo-intake-title">
           {t("topos.page.photo_intake.title", "Foto-Erfassung")}
         </h1>

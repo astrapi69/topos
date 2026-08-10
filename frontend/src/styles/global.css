@@ -319,7 +319,12 @@ body {
    - `#root > *` keeps full-width children (NavBar) from shrink-wrapping
      under `align-items: center`.
    - NO `justify-content: center`: combined with `overflow-y: auto` it
-     makes the top of tall pages unreachable. */
+     makes the top of tall pages unreachable.
+   Centring the content column itself is NOT done here: each page's
+   <main> carries `mx-auto` + a max-width via `pageMain` /
+   `pageMainNarrow` (ui/classes). A `#root main { margin-inline: auto }`
+   rule would work too but its id specificity cannot be overridden by a
+   utility class, so a future full-bleed page could not opt out. */
 #root {
     height: 100%;
     width: 100%;
@@ -331,11 +336,6 @@ body {
 
 #root > * {
     width: 100%;
-}
-
-/* Center every page's content column (pages set max-w-* on <main>). */
-#root main {
-    margin-inline: auto;
 }
 
 html {

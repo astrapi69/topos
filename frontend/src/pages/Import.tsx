@@ -18,7 +18,7 @@ import { useI18n } from "../hooks/useI18n";
 import { useDialog } from "../components/AppDialog";
 import { notify, errorMessage } from "../utils/notify";
 import { rebuildSearchIndex } from "../search/buildIndex";
-import { btnPrimary, muted } from "../ui/classes";
+import { btnPrimary, muted, pageMainNarrow } from "../ui/classes";
 import type { ImportReport } from "../types/topos";
 
 export default function Import() {
@@ -83,7 +83,7 @@ export default function Import() {
   return (
     <>
       <NavBar />
-      <main className="p-4 sm:p-6 max-w-3xl">
+      <main className={pageMainNarrow}>
         <h1 data-testid="import-title">
           {t("topos.page.import.title", "Excel-Import")}
         </h1>
