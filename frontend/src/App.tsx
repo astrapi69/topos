@@ -11,7 +11,6 @@ import AppFeatureProvider from "./features/AppFeatureProvider";
 import { DialogProvider } from "./components/AppDialog";
 import ErrorReportDialog from "./components/ErrorReportDialog";
 import IosInstallHint from "./components/IosInstallHint";
-import OfflineBanner from "./components/OfflineBanner";
 import { I18nProvider } from "./hooks/useI18n";
 import { useTheme } from "./hooks/useTheme";
 import { lazyWithReload } from "./pwa/lazy-route";
@@ -45,7 +44,6 @@ export default function App() {
       <AppUpdateProvider>
         <AppFeatureProvider>
           <DialogProvider>
-            <OfflineBanner />
             <Suspense fallback={null}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />

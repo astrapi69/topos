@@ -53,8 +53,6 @@ topos:
     settings: Einstellungen
     photo_intake: "Foto-Erfassung"
     more: Mehr
-  offline:
-    banner: Offline-Modus - Daten werden nur lokal gespeichert.
   demo:
     seeded: Demo-Daten geladen. Verbinde ein Backend für echte Daten.
   common:
