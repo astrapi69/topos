@@ -19,7 +19,7 @@ import { useCategories, useContainers } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
 import { notify, errorMessage } from "../utils/notify";
 import { indexUpsertItem } from "../search/buildIndex";
-import { btn, btnPrimary, input } from "../ui/classes";
+import { btn, btnPrimary, input, pageMainNarrow } from "../ui/classes";
 import type { Item, Priority } from "../types/topos";
 
 const PRIORITIES: Priority[] = ["none", "low", "medium", "high", "very_high"];
@@ -140,7 +140,7 @@ export default function ItemEditor() {
   return (
     <>
       <NavBar />
-      <main className="p-4 sm:p-6 max-w-3xl">
+      <main className={pageMainNarrow}>
         <h1 data-testid="item-editor-title">
           {isNew
             ? t("topos.page.item_editor.new_title", "Neuer Eintrag")

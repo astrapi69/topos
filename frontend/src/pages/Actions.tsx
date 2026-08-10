@@ -30,6 +30,7 @@ import {
   muted,
   link,
   pill,
+  pageMain,
 } from "../ui/classes";
 import type { ActionRow, ActionStatus } from "../types/topos";
 
@@ -242,7 +243,7 @@ export default function Actions() {
   return (
     <>
       <NavBar />
-      <main className="p-4 sm:p-6">
+      <main className={pageMain}>
         <header
           style={{
             display: "flex",

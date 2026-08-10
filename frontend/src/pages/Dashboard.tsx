@@ -20,7 +20,7 @@ import { useI18n } from "../hooks/useI18n";
 import { rebuildSearchIndex } from "../search/buildIndex";
 import SearchResults from "../search/SearchResults";
 import { useSearch, type SearchResult } from "../search/useSearch";
-import { input, muted } from "../ui/classes";
+import { input, muted, pageMain } from "../ui/classes";
 
 export default function Dashboard() {
   const { t } = useI18n();
@@ -60,7 +60,7 @@ export default function Dashboard() {
   return (
     <>
       <NavBar />
-      <main className="p-4 sm:p-6">
+      <main className={pageMain}>
         <h1 data-testid="dashboard-title">
           {t("topos.page.dashboard.title", "Übersicht")}
         </h1>

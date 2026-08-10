@@ -66,3 +66,12 @@ export const rowBorder = "border-line";
 
 // Selected/active row background (e.g. CategoryBrowse selection).
 export const selected = "bg-accent-light";
+
+// Page <main> wrappers. `mx-auto` + a max-width is what centers the
+// content column on wide screens; without a max-width there is nothing
+// to centre and the page spans edge to edge. `w-full` keeps the column
+// full width below the breakpoint.
+//   pageMain       - lists, dashboards, detail pages (wide grids/tables)
+//   pageMainNarrow - forms and settings (comfortable reading measure)
+export const pageMain = "p-4 sm:p-6 w-full max-w-5xl mx-auto";
+export const pageMainNarrow = "p-4 sm:p-6 w-full max-w-3xl mx-auto";

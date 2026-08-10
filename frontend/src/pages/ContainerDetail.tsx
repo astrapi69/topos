@@ -30,6 +30,7 @@ import {
   muted,
   danger,
   link,
+  pageMain,
 } from "../ui/classes";
 import type { ActionRow, ContainerType, Owner } from "../types/topos";
 
@@ -98,7 +99,7 @@ export default function ContainerDetail() {
     return (
       <>
         <NavBar />
-        <main className="p-4 sm:p-6">
+        <main className={pageMain}>
           <p>
             {t(
               "topos.page.container_detail.no_id",
@@ -257,7 +258,7 @@ export default function ContainerDetail() {
   return (
     <>
       <NavBar />
-      <main className="p-4 sm:p-6">
+      <main className={pageMain}>
         <Link
           to="/containers"
           className={link}

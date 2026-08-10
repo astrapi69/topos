@@ -27,7 +27,13 @@ import { useI18n } from "../hooks/useI18n";
 import { isBackendAvailable } from "../utils/backendStatus";
 import { buildCategoryTree } from "../utils/categoryTree";
 import { notify, errorMessage } from "../utils/notify";
-import { text, muted, link, selected as selectedCls } from "../ui/classes";
+import {
+  pageMain,
+  text,
+  muted,
+  link,
+  selected as selectedCls,
+} from "../ui/classes";
 import type { CategoryNode, Item } from "../types/topos";
 
 export default function CategoryBrowse() {
@@ -218,7 +224,7 @@ export default function CategoryBrowse() {
   return (
     <>
       <NavBar />
-      <main className="p-4 sm:p-6">
+      <main className={pageMain}>
         <h1 data-testid="category-browse-title">
           {t("topos.page.categories.title", "Kategorien")}
         </h1>
