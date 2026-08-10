@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import {execSync} from "node:child_process";
-import {copyFileSync, existsSync, writeFileSync} from "node:fs";
+import {copyFileSync, existsSync, mkdirSync, writeFileSync} from "node:fs";
 import {resolve} from "node:path";
 
 import {defineConfig, type Plugin} from "vite";
@@ -8,6 +8,7 @@ import react from "@vitejs/plugin-react";
 import {VitePWA} from "vite-plugin-pwa";
 
 import pkg from "./package.json" with {type: "json"};
+import {STATIC_ROUTES} from "./src/appRoutes";
 
 // Build hash for @astrapi69/pwa-update's version manifest. The short git
 // SHA of the built commit; "unknown" outside a git checkout (e.g. a
@@ -64,17 +65,30 @@ function versionManifest(): Plugin {
 }
 
 // GitHub Pages has no SPA rewrite: a deep link like /topos/containers/5
-// would 404. Serving a copy of index.html as 404.html makes GH Pages
-// return the app shell for any unknown path, and React Router then
-// resolves the route client-side.
+// would 404. Two layers handle that:
+//
+//  1. Every static route gets its own `dist/<route>/index.html`, so
+//     Pages serves a real HTTP 200 for /topos/settings and friends.
+//     Without it the deep link falls through to 404.html: the app still
+//     loads, but with a 404 status - which Lighthouse reports as an
+//     unreliable load plus a failing SEO audit, and which logs a console
+//     error on every visit.
+//  2. 404.html keeps covering everything that cannot be enumerated at
+//     build time (parameterised routes like /containers/5).
 function spa404Fallback(): Plugin {
     return {
         name: "spa-404-fallback",
         apply: "build",
         closeBundle() {
-            const index = resolve(process.cwd(), "dist", "index.html");
-            if (existsSync(index)) {
-                copyFileSync(index, resolve(process.cwd(), "dist", "404.html"));
+            const dist = resolve(process.cwd(), "dist");
+            const index = resolve(dist, "index.html");
+            if (!existsSync(index)) return;
+            copyFileSync(index, resolve(dist, "404.html"));
+            for (const route of STATIC_ROUTES) {
+                if (route === "/") continue; // already dist/index.html
+                const dir = resolve(dist, route.replace(/^\//, ""));
+                mkdirSync(dir, {recursive: true});
+                copyFileSync(index, resolve(dir, "index.html"));
             }
         },
     };

@@ -194,6 +194,7 @@ topos:
       filter_all: Alle
     import:
       title: Excel-Import
+      pick_file: "Excel-Datei auswählen"
       description: >-
         Lade eine Ordner-Ordnung.xlsx (oder kompatible Datei) hoch.
         Der Importer ist idempotent.

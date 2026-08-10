@@ -519,6 +519,10 @@ export default function PhotoIntake() {
             <input
               ref={cameraInputRef}
               data-testid="photo-intake-camera-input"
+              aria-label={t(
+                "topos.page.photo_intake.take_photo",
+                "Foto aufnehmen",
+              )}
               type="file"
               accept="image/*"
               capture="environment"
@@ -528,6 +532,10 @@ export default function PhotoIntake() {
             <input
               ref={fileInputRef}
               data-testid="photo-intake-file-input"
+              aria-label={t(
+                "topos.page.photo_intake.upload_file",
+                "Datei hochladen",
+              )}
               type="file"
               accept="image/*"
               className="hidden"

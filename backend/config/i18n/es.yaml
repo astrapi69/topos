@@ -195,6 +195,7 @@ topos:
       filter_all: All
     import:
       title: Excel import
+      pick_file: "Choose Excel file"
       description: >-
         Upload an Ordner-Ordnung.xlsx (or compatible workbook). The
         importer is idempotent.
