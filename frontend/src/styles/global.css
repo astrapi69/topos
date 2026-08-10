@@ -311,14 +311,18 @@ body {
 
 /* App scroll container (html/body stay viewport-locked above).
    Flex column + centered children: pages with a max-width column render
-   centered on wide screens. Two guards against the known flex traps:
+   centered on wide screens. Three constraints, all load-bearing:
+   - `height: 100%` + `overflow-y: auto` are REQUIRED, not optional:
+     html/body carry `overflow: hidden`, so #root is the only scroll
+     container. Dropping them makes every long page unscrollable
+     (incident ef7ce5c, see lessons-learned).
    - `#root > *` keeps full-width children (NavBar) from shrink-wrapping
      under `align-items: center`.
-   - NO `justify-content: center` here: combined with `overflow-y: auto`
-     it makes the top of tall pages unreachable (content overflows both
-     ways, scroll cannot reach the start). */
+   - NO `justify-content: center`: combined with `overflow-y: auto` it
+     makes the top of tall pages unreachable. */
 #root {
     height: 100%;
+    width: 100%;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
