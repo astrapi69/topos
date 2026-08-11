@@ -184,6 +184,10 @@ def _upsert_items(
         if existing is None:
             new_item = Item(
                 container_id=container.id,
+                # Keep the number the sheet carries so a label already
+                # written on paper still matches; item_service assigns
+                # one lazily when the workbook has none.
+                external_id=parsed_item.external_id,
                 content=parsed_item.content,
                 priority=Priority(parsed_item.priority),
                 category_path=parsed_item.category_path,

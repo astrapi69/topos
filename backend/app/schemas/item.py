@@ -28,6 +28,8 @@ class ItemRead(BaseModel):
 
     id: int
     container_id: int
+    # Per-container user-facing number ("42-3"); assigned by the service.
+    external_id: int | None
     content: str
     priority: Priority
     category_path: str | None

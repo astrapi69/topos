@@ -26,6 +26,7 @@ OWNER_SHEET_HEADER = [
     "Kategorie-Pfad",
     "Eigentuemer",
     "Groessengruppe",
+    "Eintrag-Nr.",
 ]
 BOX_SHEET_HEADER = [
     "Nr.",
@@ -39,6 +40,7 @@ BOX_SHEET_HEADER = [
     "Kategorie-Pfad",
     "Prioritaet",
     "Eigentuemer",
+    "Eintrag-Nr.",
 ]
 CATEGORY_SHEET_HEADER = ["Pfad", "Anzeigename", "Elternpfad", "Ebene"]
 SHEET_KATEGORIEN = "Kategorien"
@@ -139,6 +141,9 @@ def _write_owner_sheet(
                     _encoded_actions(item),
                     item.notes,
                     item.category_path,
+                    None,
+                    None,
+                    item.external_id,
                 ]
             )
 
@@ -186,6 +191,8 @@ def _write_box_sheet(
                     item.notes,
                     item.category_path,
                     _priority_label(item.priority),
+                    None,
+                    item.external_id,
                 ]
             )
 

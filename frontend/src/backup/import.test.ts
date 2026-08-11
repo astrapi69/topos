@@ -32,6 +32,7 @@ const CONTAINER: Container = {
 const ITEM: Item = {
   id: 1,
   containerId: 1,
+  externalId: 1,
   content: "Invoice",
   priority: "none",
   categoryPath: null,

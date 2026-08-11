@@ -67,6 +67,7 @@ const BACKUP: ToposBackup = {
       {
         id: 7,
         containerId: 1,
+        externalId: 1,
         content: "Versicherung & Vertrag",
         priority: "high",
         categoryPath: "finance/insurance",
@@ -77,6 +78,7 @@ const BACKUP: ToposBackup = {
       {
         id: 8,
         containerId: 2,
+        externalId: 1,
         content: "Elternvertrag",
         priority: "none",
         categoryPath: null,
@@ -87,6 +89,7 @@ const BACKUP: ToposBackup = {
       {
         id: 9,
         containerId: 3,
+        externalId: 1,
         content: "Kabeltrommel",
         priority: "none",
         categoryPath: null,

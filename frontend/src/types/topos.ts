@@ -26,6 +26,13 @@ export interface Container {
 export interface Item {
   id: number;
   containerId: number;
+  /**
+   * User-facing number, counted per container: item 3 in folder 42 is
+   * shown as "42-3". Assigned automatically (highest + 1), re-assigned
+   * when the item moves. Null only for rows written before the field
+   * existed; both storage backends backfill those on read.
+   */
+  externalId: number | null;
   content: string;
   priority: Priority;
   categoryPath: string | null;

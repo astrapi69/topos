@@ -70,6 +70,7 @@ class ParsedItem:
     """
 
     content: str
+    external_id: int | None
     priority: str
     notes: str | None
     category_path: str | None
@@ -245,6 +246,7 @@ def _build_item(
     action_cell: str | None,
     result: ParseResult,
     slug_path_cell: str | None = None,
+    external_id: int | None = None,
 ) -> ParsedItem:
     priority, warning = priority_from_german(priority_cell)
     if warning:
@@ -265,6 +267,7 @@ def _build_item(
 
     return ParsedItem(
         content=content,
+        external_id=external_id,
         priority=priority,
         notes=notes_cell,
         category_path=category_path,
@@ -301,6 +304,7 @@ def _parse_owner_sheet(
         slug_path = _cell_str(row, 8)
         owner_cell = _owner_from_cell(_cell_str(row, 9))
         size_group_cell = _cell_str(row, 10)
+        item_number = _cell_int(row, 11)
 
         if external_id is not None:
             current = ParsedContainer(
@@ -337,6 +341,7 @@ def _parse_owner_sheet(
                     action_cell=col6,
                     result=result,
                     slug_path_cell=slug_path,
+                    external_id=item_number,
                 )
             )
             continue
@@ -364,6 +369,7 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
         slug_path = _cell_str(row, 8)
         priority_cell = _cell_str(row, 9)
         owner_cell = _owner_from_cell(_cell_str(row, 10))
+        item_number = _cell_int(row, 11)
 
         if col0_str is not None and col0_int is None:
             match = _RANGE_HEADER_RE.match(col0_str)
@@ -407,6 +413,7 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
                     action_cell=action_cell,
                     result=result,
                     slug_path_cell=slug_path,
+                    external_id=item_number,
                 )
             )
 

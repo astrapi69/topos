@@ -66,6 +66,7 @@ interface ParsedAction {
 
 interface ParsedItem {
   content: string;
+  externalId: number | null;
   priority: Priority;
   categoryPath: string | null;
   categorySegments: CategorySegment[];
@@ -213,6 +214,7 @@ function buildItem(
   actionCell: string | null,
   notesCell: string | null,
   slugPathCell: string | null,
+  externalId: number | null,
   warnings: string[],
 ): ParsedItem {
   const { priority, warning } = priorityFromGerman(priorityCell);
@@ -237,6 +239,7 @@ function buildItem(
 
   return {
     content,
+    externalId,
     priority,
     categoryPath,
     categorySegments,
@@ -272,6 +275,7 @@ function parseOwnerSheet(
     const slugPath = cellStr(row, 8);
     const ownerCell = cellStr(row, 9);
     const sizeGroupCell = cellStr(row, 10);
+    const itemNumber = cellInt(row, 11);
 
     if (externalId !== null) {
       current = {
@@ -301,7 +305,16 @@ function parseOwnerSheet(
 
     if (col2 !== null) {
       current.items.push(
-        buildItem(col2, col3, col4, col6, notes, slugPath, result.warnings),
+        buildItem(
+          col2,
+          col3,
+          col4,
+          col6,
+          notes,
+          slugPath,
+          itemNumber,
+          result.warnings,
+        ),
       );
       continue;
     }
@@ -325,6 +338,7 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
     const slugPath = cellStr(row, 8);
     const priorityCell = cellStr(row, 9);
     const ownerCell = cellStr(row, 10);
+    const itemNumber = cellInt(row, 11);
 
     if (col0Str !== null && col0Int === null) {
       const match = RANGE_HEADER_RE.exec(col0Str);
@@ -373,6 +387,7 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
           actionCell,
           notes,
           slugPath,
+          itemNumber,
           result.warnings,
         ),
       );
@@ -592,6 +607,11 @@ export async function importWorkbook(
         priority: parsedItem.priority,
         categoryPath: parsedItem.categoryPath,
         notes: parsedItem.notes,
+        // Keep the number the sheet carries; without one the storage
+        // service assigns the next free one for the container.
+        ...(parsedItem.externalId !== null
+          ? { externalId: parsedItem.externalId }
+          : {}),
       };
       let item = itemsByContent.get(parsedItem.content);
       if (item === undefined) {

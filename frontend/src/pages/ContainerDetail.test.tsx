@@ -33,6 +33,7 @@ vi.mock("../api/client", () => ({
         {
           id: 7,
           containerId: 1,
+          externalId: 3,
           content: "Sparkassen-Vertrag",
           priority: "none",
           categoryPath: null,
@@ -76,6 +77,14 @@ function renderDetail() {
 
 describe("ContainerDetail", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("labels each item with its container-scoped number", async () => {
+    // Items carry a per-container number so an entry can be referenced
+    // the way it is found physically: third entry in folder 1001.
+    renderDetail();
+    const label = await screen.findByTestId("item-number-7");
+    expect(label).toHaveTextContent("1001-3");
+  });
 
   it("loads and renders the container metadata", async () => {
     renderDetail();

@@ -171,6 +171,7 @@ def test_synthetic_parse_result_imports_without_openpyxl(db):
                 items=[
                     ParsedItem(
                         content="synthetic item",
+                        external_id=None,
                         priority="low",
                         notes=None,
                         category_path="finance",

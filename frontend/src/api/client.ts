@@ -200,6 +200,12 @@ export interface ContainerUpdate {
 export interface ItemCreate {
   containerId: number;
   content: string;
+  /**
+   * Per-container number. Normally omitted - the storage service picks
+   * the next free one. Supplied by the Excel import so an entry keeps
+   * the number it already carries in the workbook (and on the sticker).
+   */
+  externalId?: number | null;
   priority?: Priority;
   categoryPath?: string | null;
   notes?: string | null;

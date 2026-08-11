@@ -62,6 +62,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9101,
     containerId: 9001,
+    externalId: 1,
     content: "Kontoauszüge Sparkasse 2024",
     priority: "medium",
     categoryPath: "finance/bank",
@@ -72,6 +73,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9102,
     containerId: 9001,
+    externalId: 1,
     content: "Depotübersicht Wertpapiere",
     priority: "low",
     categoryPath: "finance/bank",
@@ -82,6 +84,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9103,
     containerId: 9001,
+    externalId: 1,
     content: "Steuerunterlagen 2023",
     priority: "high",
     categoryPath: "finance",
@@ -92,6 +95,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9104,
     containerId: 9002,
+    externalId: 1,
     content: "Hausratversicherung Police",
     priority: "medium",
     categoryPath: "finance/insurance",
@@ -102,6 +106,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9105,
     containerId: 9002,
+    externalId: 1,
     content: "Kfz-Versicherung",
     priority: "medium",
     categoryPath: "finance/insurance",
@@ -112,6 +117,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9106,
     containerId: 9002,
+    externalId: 1,
     content: "Haftpflichtversicherung",
     priority: "low",
     categoryPath: "finance/insurance",
@@ -122,6 +128,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9107,
     containerId: 9003,
+    externalId: 1,
     content: "Alte Verträge 2024",
     priority: "none",
     categoryPath: "archive/2024",
@@ -132,6 +139,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9108,
     containerId: 9003,
+    externalId: 1,
     content: "Garantiebelege Elektronik",
     priority: "low",
     categoryPath: "archive",
@@ -142,6 +150,7 @@ const DEMO_ITEMS: Item[] = [
   {
     id: 9109,
     containerId: 9003,
+    externalId: 1,
     content: "Reisedokumente 2024",
     priority: "none",
     categoryPath: "archive/2024",
