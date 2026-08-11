@@ -30,6 +30,12 @@ class Item(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     container_id: Mapped[int] = mapped_column(ForeignKey("containers.id"), index=True)
+    # User-facing number, counted per container: item 3 in folder 42 is
+    # "42-3". Assigned by the service (highest + 1), never edited by the
+    # user, re-assigned when the item moves to another container.
+    # Nullable so rows written before the column existed still load; the
+    # service backfills them on the next read.
+    external_id: Mapped[int | None] = mapped_column(default=None, index=True)
     content: Mapped[str] = mapped_column(String(1000))
     priority: Mapped[Priority] = mapped_column(SAEnum(Priority), default=Priority.NONE, index=True)
     category_path: Mapped[str | None] = mapped_column(String(500), default=None, index=True)

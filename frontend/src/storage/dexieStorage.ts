@@ -87,6 +87,45 @@ async function deleteContainer(id: number): Promise<void> {
 
 // --- items ---
 
+/**
+ * Next free per-container item number ("highest + 1").
+ *
+ * Deliberately not "count + 1": deleting an item must not hand its
+ * number to a later one, or two entries in the same folder would end up
+ * carrying the same label on paper. Mirrors the backend service.
+ */
+async function nextItemExternalId(containerId: number): Promise<number> {
+  const siblings = await db.items
+    .where("containerId")
+    .equals(containerId)
+    .toArray();
+  const highest = siblings.reduce(
+    (max, row) => Math.max(max, row.externalId ?? 0),
+    0,
+  );
+  return highest + 1;
+}
+
+/**
+ * Number any row that has none yet, in creation order. Rows written by
+ * a build from before the field existed carry null; numbering them on
+ * read means no item stays unnumbered without a migration step.
+ */
+async function backfillItemExternalIds(items: Item[]): Promise<Item[]> {
+  const missing = items.filter((row) => row.externalId == null);
+  if (missing.length === 0) return items;
+  const next = new Map<number, number>();
+  for (const item of [...missing].sort((a, b) => a.id - b.id)) {
+    let number = next.get(item.containerId);
+    if (number === undefined)
+      number = await nextItemExternalId(item.containerId);
+    item.externalId = number;
+    next.set(item.containerId, number + 1);
+    await db.items.put(item);
+  }
+  return items;
+}
+
 async function createItem(payload: ItemCreate): Promise<Item> {
   return db.transaction("rw", db.items, async () => {
     const id = await nextId(db.items);
@@ -94,6 +133,10 @@ async function createItem(payload: ItemCreate): Promise<Item> {
     const item: Item = {
       id,
       containerId: payload.containerId,
+      // An import supplies the number the entry already had; anything
+      // else gets the next free one in the container.
+      externalId:
+        payload.externalId ?? (await nextItemExternalId(payload.containerId)),
       content: payload.content,
       priority: payload.priority ?? "none",
       categoryPath: payload.categoryPath ?? null,
@@ -104,6 +147,23 @@ async function createItem(payload: ItemCreate): Promise<Item> {
     await db.items.put(item);
     return item;
   });
+}
+
+/**
+ * Update an item; moving it to another container re-numbers it there.
+ * The number is per container, so carrying the old one across would
+ * duplicate a label that already exists in the target.
+ */
+async function updateItem(id: number, payload: ItemUpdate): Promise<Item> {
+  const existing = (await db.items.get(id)) ?? notFound("Item", id);
+  const patch = { ...payload } as Partial<Item>;
+  if (
+    payload.containerId !== undefined &&
+    payload.containerId !== existing.containerId
+  ) {
+    patch.externalId = await nextItemExternalId(payload.containerId);
+  }
+  return updateRow<Item>(db.items, id, patch, "Item");
 }
 
 async function deleteItem(id: number): Promise<void> {
@@ -119,9 +179,25 @@ async function bulkCreateItems(
   return db.transaction("rw", db.items, async () => {
     let id = await nextId(db.items);
     const ts = nowIso();
+    // Number within the batch without a query per row: the first row for
+    // a container reads the current highest, the rest count on.
+    const nextNumbers = new Map<number, number>();
+    for (const row of rows) {
+      if (!nextNumbers.has(row.containerId)) {
+        nextNumbers.set(
+          row.containerId,
+          await nextItemExternalId(row.containerId),
+        );
+      }
+    }
     const created: Item[] = rows.map((row) => ({
       id: id++,
       containerId: row.containerId,
+      externalId: (() => {
+        const number = nextNumbers.get(row.containerId) as number;
+        nextNumbers.set(row.containerId, number + 1);
+        return number;
+      })(),
       content: row.content,
       priority: row.priority ?? "none",
       categoryPath: row.categoryPath ?? null,
@@ -330,13 +406,17 @@ export const dexieStorage: IStorageService = {
   },
   items: {
     list: async (filters = {}) =>
-      filters.containerId !== undefined
-        ? db.items.where("containerId").equals(filters.containerId).toArray()
-        : db.items.toArray(),
+      backfillItemExternalIds(
+        filters.containerId !== undefined
+          ? await db.items
+              .where("containerId")
+              .equals(filters.containerId)
+              .toArray()
+          : await db.items.toArray(),
+      ),
     get: async (id) => (await db.items.get(id)) ?? notFound("Item", id),
     create: createItem,
-    update: (id, payload) =>
-      updateRow<Item>(db.items, id, payload as Partial<Item>, "Item"),
+    update: updateItem,
     delete: deleteItem,
     bulkCreate: bulkCreateItems,
   },

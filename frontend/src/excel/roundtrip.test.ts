@@ -181,6 +181,7 @@ const SOURCE: ToposBackup = {
       {
         id: 101,
         containerId: 1,
+        externalId: 1,
         content: "Mit Notiz",
         priority: "high",
         categoryPath: "finance/insurance",
@@ -191,6 +192,7 @@ const SOURCE: ToposBackup = {
       {
         id: 102,
         containerId: 1,
+        externalId: 2,
         content: "Sonderslug",
         priority: "low",
         categoryPath: "custom-slug",
@@ -201,6 +203,7 @@ const SOURCE: ToposBackup = {
       {
         id: 103,
         containerId: 2,
+        externalId: 1,
         content: "Geteilt-Eintrag",
         priority: "medium",
         categoryPath: null,
@@ -211,6 +214,7 @@ const SOURCE: ToposBackup = {
       {
         id: 104,
         containerId: 3,
+        externalId: 1,
         content: "Eltern-Eintrag",
         priority: "very_high",
         categoryPath: null,
@@ -221,6 +225,7 @@ const SOURCE: ToposBackup = {
       {
         id: 105,
         containerId: 4,
+        externalId: 4,
         content: "Box-Eintrag",
         priority: "high",
         categoryPath: null,
@@ -443,6 +448,11 @@ describe("Excel round-trip fidelity", () => {
     expect(item("Sonderslug")?.categoryPath).toBe("custom-slug");
     // "Boxen" carries priority.
     expect(item("Box-Eintrag")?.priority).toBe("high");
+    // The per-container item number survives, so a printed "42-3" label
+    // still matches after a round-trip.
+    expect(item("Mit Notiz")?.externalId).toBe(1);
+    expect(item("Sonderslug")?.externalId).toBe(2);
+    expect(item("Box-Eintrag")?.externalId).toBe(4);
     // Every action survives with its status, on every sheet.
     expect(
       store.actions.map((action) => `${action.text}:${action.status}`).sort(),

@@ -25,6 +25,7 @@ const items: Item[] = [
   {
     id: 7,
     containerId: 1,
+    externalId: 1,
     content: "Kontoauszug Sparda",
     priority: "none",
     categoryPath: "finance/bank",

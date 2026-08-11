@@ -31,6 +31,7 @@ const BACKUP: ToposBackup = {
       {
         id: 7,
         containerId: 1,
+        externalId: 1,
         content: "Versicherung & Vertrag",
         priority: "high",
         categoryPath: "finance/insurance",

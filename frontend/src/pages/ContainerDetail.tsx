@@ -503,7 +503,20 @@ export default function ContainerDetail() {
                   className="grid grid-cols-1 md:grid-cols-[1fr_7rem_1fr_auto] gap-1 md:gap-2 md:items-start border md:border-0 md:border-b border-line rounded md:rounded-none p-3 md:px-2 md:py-2 mb-2 md:mb-0"
                 >
                   <div>
-                    <div>{item.content}</div>
+                    <div className="flex items-baseline gap-2">
+                      {/* Per-container number ("1001-3"): the label an
+                          entry carries physically, so it can be found
+                          again in the folder or written on a sticker. */}
+                      {item.externalId != null && (
+                        <span
+                          className={`${muted} font-mono text-sm shrink-0`}
+                          data-testid={`item-number-${item.id}`}
+                        >
+                          {container?.externalId}-{item.externalId}
+                        </span>
+                      )}
+                      <span>{item.content}</span>
+                    </div>
                     <button
                       type="button"
                       className={`${badge} mt-1`}

@@ -113,6 +113,7 @@ function ownerRows(
       "Kategorie-Pfad",
       "Eigentuemer",
       "Groessengruppe",
+      "Eintrag-Nr.",
     ],
   ];
   for (const container of containers) {
@@ -146,6 +147,9 @@ function ownerRows(
         encodedActions(actionsByItem, item.id),
         item.notes,
         item.categoryPath,
+        null,
+        null,
+        item.externalId,
       ]);
     }
   }
@@ -178,6 +182,7 @@ function boxRows(
       "Kategorie-Pfad",
       "Prioritaet",
       "Eigentuemer",
+      "Eintrag-Nr.",
     ],
   ];
   let currentSizeGroup: string | null = null;
@@ -217,6 +222,8 @@ function boxRows(
         item.notes,
         item.categoryPath,
         PRIORITY_LABELS[item.priority] ?? "keine",
+        null,
+        item.externalId,
       ]);
     }
   }
