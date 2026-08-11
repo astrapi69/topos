@@ -449,6 +449,32 @@ h3 {
     background: var(--accent-hover);
 }
 
+/* Native file-picker button of the AI key-import form.
+   @astrapi69/ai-key-vault-react (0.3.2+) renders the input with a bare
+   `akv-file-input` class and ships no appearance of its own - the same
+   slot philosophy as its Button/Input/Link props. Without this rule the
+   browser's default chrome shows through, which is unreadable on the
+   dark themes (see lessons-learned: never rely on bare button colour).
+   Mirrors .btn-secondary so it matches the surrounding controls. */
+.akv-file-input::file-selector-button {
+    margin-right: 12px;
+    padding: 6px 12px;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.akv-file-input::file-selector-button:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-strong);
+}
+
 .btn-secondary {
     background: var(--bg-secondary);
     color: var(--text-primary);
