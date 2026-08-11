@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -41,6 +41,12 @@ vi.mock("../utils/backendStatus", () => ({
   isBackendAvailable: () => Promise.resolve(true),
 }));
 
+/** Open the application-key tab; it appears only once the backend answers. */
+async function openSecurityTab() {
+  const tab = await screen.findByTestId("settings-tab-security");
+  fireEvent.click(tab);
+}
+
 function renderSettings() {
   // AppUpdateProvider supplies the PwaUpdateProvider context the About
   // section's VersionCard reads.
@@ -66,22 +72,63 @@ describe("Settings", () => {
     });
   });
 
-  it("renders language, theme, and reset controls", () => {
+  it("opens on the general tab with language and theme", () => {
     renderSettings();
     expect(screen.getByTestId("settings-title")).toBeInTheDocument();
+    expect(screen.getByTestId("settings-tabs")).toBeInTheDocument();
     expect(screen.getByTestId("settings-language-select")).toBeInTheDocument();
     expect(screen.getByTestId("theme-picker")).toBeInTheDocument();
-    expect(screen.getByTestId("settings-reset-cache")).toBeInTheDocument();
+    // Only the active panel renders - the rest is one click away.
+    expect(screen.queryByTestId("about-section")).not.toBeInTheDocument();
+  });
+
+  it("switches panels when a sidebar tab is picked", () => {
+    renderSettings();
+    fireEvent.click(screen.getByTestId("settings-tab-about"));
     expect(screen.getByTestId("about-section")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("settings-language-select"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the cache reset on the maintenance tab", () => {
+    renderSettings();
+    fireEvent.click(screen.getByTestId("settings-tab-maintenance"));
+    expect(screen.getByTestId("settings-reset-cache")).toBeInTheDocument();
+  });
+
+  it("restores the tab from the URL", () => {
+    render(
+      <MemoryRouter initialEntries={["/settings?tab=data"]}>
+        <AppUpdateProvider>
+          <DialogProvider>
+            <Settings />
+          </DialogProvider>
+        </AppUpdateProvider>
+      </MemoryRouter>,
+    );
+    expect(screen.getByTestId("data-export")).toBeInTheDocument();
+  });
+
+  it("falls back to the first tab for an unknown ?tab=", () => {
+    render(
+      <MemoryRouter initialEntries={["/settings?tab=nonsense"]}>
+        <AppUpdateProvider>
+          <DialogProvider>
+            <Settings />
+          </DialogProvider>
+        </AppUpdateProvider>
+      </MemoryRouter>,
+    );
+    expect(screen.getByTestId("settings-language-select")).toBeInTheDocument();
   });
 
   it("renders the secret-source label when the endpoint resolves", async () => {
     renderSettings();
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("settings-secret-source-label"),
-      ).toBeInTheDocument();
-    });
+    await openSecurityTab();
+    expect(
+      screen.getByTestId("settings-secret-source-label"),
+    ).toBeInTheDocument();
   });
 
   it("shows the external-management hint when source is secrets_yaml", async () => {
@@ -92,11 +139,7 @@ describe("Settings", () => {
       secretsYamlPath: "/home/user/.config/topos/secrets.yaml",
     });
     renderSettings();
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("settings-secret-source-hint"),
-      ).toBeInTheDocument();
-    });
+    await openSecurityTab();
     expect(
       screen.getByTestId("settings-secret-source-hint").textContent,
     ).toContain("/home/user/.config/topos/secrets.yaml");
@@ -110,18 +153,21 @@ describe("Settings", () => {
       secretsYamlPath: "/home/user/.config/topos/secrets.yaml",
     });
     renderSettings();
-    await waitFor(() => {
-      expect(
-        screen.getByTestId("settings-secret-source-hint").textContent,
-      ).toContain("$TOPOS_SECRET_KEY");
-    });
+    await openSecurityTab();
+    expect(
+      screen.getByTestId("settings-secret-source-hint").textContent,
+    ).toContain("$TOPOS_SECRET_KEY");
   });
 
   it("hides the secret-source card when the endpoint rejects", async () => {
     mockGetSecretSource.mockRejectedValue(new Error("offline"));
     renderSettings();
-    // Wait for the rejection to settle, then assert the card never appeared.
+    // Wait for the rejection to settle: without a key there is no tab to
+    // open at all (absent, not greyed out).
     await new Promise((r) => setTimeout(r, 30));
+    expect(
+      screen.queryByTestId("settings-tab-security"),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByTestId("settings-secret-source-label"),
     ).not.toBeInTheDocument();

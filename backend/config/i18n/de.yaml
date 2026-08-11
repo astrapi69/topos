@@ -206,6 +206,17 @@ topos:
       uploading: Wird hochgeladen...
       report_title: Importbericht
     settings:
+      nav_aria: "Einstellungs-Navigation"
+      group_app: "App"
+      group_data: "Daten"
+      group_system: "System"
+      tab_general: "Allgemein"
+      tab_ai: "KI-Assistent"
+      tab_backend: "Backend"
+      tab_data: "Import & Export"
+      tab_maintenance: "Wartung"
+      tab_security: "Anwendungsschlüssel"
+      tab_about: "Über Topos"
       data:
         title: Daten
         export: Daten exportieren
