@@ -1,9 +1,19 @@
 from __future__ import annotations
 
+from datetime import datetime
 from io import BytesIO
 
 import openpyxl
-from app.models import Action, Category, Container, ContainerType, Item, Owner, Priority
+from app.models import (
+    Action,
+    ActionStatus,
+    Category,
+    Container,
+    ContainerType,
+    Item,
+    Owner,
+    Priority,
+)
 
 from topos_excel_import.exporter import export_workbook
 from topos_excel_import.parser import parse_workbook
@@ -58,7 +68,7 @@ def test_export_workbook_writes_import_compatible_sheets(db):
     assert parsed.containers[0].items[0].content == "Police"
     assert parsed.containers[0].items[0].priority == "high"
     assert parsed.containers[0].items[0].category_path == "finance/insurance"
-    assert parsed.containers[0].items[0].action_texts == ["Prüfen"]
+    assert [a.text for a in parsed.containers[0].items[0].actions] == ["Prüfen"]
 
 
 def test_export_workbook_can_be_opened_by_openpyxl(db):
@@ -76,8 +86,119 @@ def test_export_workbook_can_be_opened_by_openpyxl(db):
     payload = export_workbook(db)
     wb = openpyxl.load_workbook(BytesIO(payload), read_only=True)
     try:
-        assert wb.sheetnames == ["Meine Ordner", "Ordner Eltern", "Boxen"]
+        assert wb.sheetnames == ["Meine Ordner", "Ordner Eltern", "Boxen", "Kategorien"]
         assert wb["Boxen"]["A2"].value == "100 bis 199"
         assert wb["Boxen"]["A3"].value == 100
     finally:
         wb.close()
+
+
+def test_export_import_roundtrip_is_lossless(db):
+    """Export -> parse -> import must preserve every field the model has.
+
+    The sheet layout was extended (owner, notes, category slug, box
+    priority, action status/dates, a Kategorien sheet) precisely so this
+    holds; the frontend importer applies the same contract.
+    """
+    from topos_excel_import.importer import import_parsed_result
+
+    db.add_all(
+        [
+            Category(
+                path="custom-slug",
+                parent_path=None,
+                name="custom-slug",
+                display_name="Sonderfall",
+                level=0,
+            ),
+            Category(
+                path="unused",
+                parent_path=None,
+                name="unused",
+                display_name="Ungenutzt",
+                level=0,
+            ),
+        ]
+    )
+    shared = Container(
+        external_id=20,
+        type=ContainerType.FOLDER,
+        owner=Owner.SHARED,
+        label="Geteilt",
+        location="Keller",
+    )
+    parents = Container(
+        external_id=30,
+        type=ContainerType.FOLDER,
+        owner=Owner.PARENTS,
+        label="Eltern",
+        location="Dachboden",
+    )
+    box = Container(
+        external_id=40,
+        type=ContainerType.BOX,
+        owner=Owner.SELF,
+        label="Kiste",
+        size_group="40 bis 49",
+    )
+    db.add_all([shared, parents, box])
+    db.flush()
+    with_notes = Item(
+        container_id=shared.id,
+        content="Mit Notiz",
+        priority=Priority.HIGH,
+        category_path="custom-slug",
+        notes="wichtige Notiz",
+    )
+    box_item = Item(container_id=box.id, content="Box-Eintrag", priority=Priority.HIGH)
+    parents_item = Item(
+        container_id=parents.id,
+        content="Eltern-Eintrag",
+        priority=Priority.VERY_HIGH,
+    )
+    db.add_all([with_notes, box_item, parents_item])
+    db.flush()
+    db.add_all(
+        [
+            Action(item_id=with_notes.id, text="Offen"),
+            Action(
+                item_id=with_notes.id,
+                text="Erledigt",
+                status=ActionStatus.DONE,
+                completed_at=datetime(2026, 1, 1),
+            ),
+            Action(item_id=parents_item.id, text="Eltern-Aktion"),
+        ]
+    )
+    db.commit()
+
+    first = export_workbook(db)
+
+    # Wipe and re-import into an empty DB.
+    for model in (Action, Item, Container, Category):
+        db.query(model).delete()
+    db.commit()
+    import_parsed_result(db, parse_workbook(BytesIO(first)))
+
+    containers = {row.external_id: row for row in db.query(Container).all()}
+    assert containers[20].owner == Owner.SHARED
+    assert containers[30].location == "Dachboden"
+    assert containers[40].size_group == "40 bis 49"
+
+    items = {row.content: row for row in db.query(Item).all()}
+    assert items["Mit Notiz"].notes == "wichtige Notiz"
+    assert items["Mit Notiz"].category_path == "custom-slug"
+    assert items["Box-Eintrag"].priority == Priority.HIGH
+    assert items["Eltern-Eintrag"].priority == Priority.VERY_HIGH
+
+    actions = {row.text: row for row in db.query(Action).all()}
+    assert set(actions) == {"Offen", "Erledigt", "Eltern-Aktion"}
+    assert actions["Erledigt"].status == ActionStatus.DONE
+    assert actions["Erledigt"].completed_at == datetime(2026, 1, 1)
+
+    # Categories survive, including one no item references.
+    paths = {row.path for row in db.query(Category).all()}
+    assert {"custom-slug", "unused"} <= paths
+
+    # And the workbook is a fixed point.
+    assert parse_workbook(BytesIO(export_workbook(db))).containers is not None

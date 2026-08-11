@@ -5,7 +5,12 @@ from __future__ import annotations
 from app.models import Action, ActionStatus, Category, Container, Item
 
 from topos_excel_import.importer import import_parsed_result, import_workbook
-from topos_excel_import.parser import ParsedContainer, ParsedItem, ParseResult
+from topos_excel_import.parser import (
+    ParsedAction,
+    ParsedContainer,
+    ParsedItem,
+    ParseResult,
+)
 
 _HEADER = [
     "Ordner-Nr",
@@ -170,7 +175,7 @@ def test_synthetic_parse_result_imports_without_openpyxl(db):
                         notes=None,
                         category_path="finance",
                         category_segments=[("finance", "Finanzen")],
-                        action_texts=["one", "two"],
+                        actions=[ParsedAction(text="one"), ParsedAction(text="two")],
                     )
                 ],
             )

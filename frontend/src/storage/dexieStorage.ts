@@ -268,7 +268,8 @@ async function createAction(payload: ActionCreate): Promise<ActionRow> {
       status: payload.status ?? "open",
       dueDate: payload.dueDate ?? null,
       createdAt: nowIso(),
-      completedAt: null,
+      // Normally null; an import restoring a completed action supplies it.
+      completedAt: payload.completedAt ?? null,
     };
     await db.actions.put(action);
     return action;

@@ -72,6 +72,6 @@ def test_get_export_excel_returns_workbook():
     assert "topos-export.xlsx" in r.headers["content-disposition"]
     wb = openpyxl.load_workbook(BytesIO(r.content), read_only=True)
     try:
-        assert wb.sheetnames == ["Meine Ordner", "Ordner Eltern", "Boxen"]
+        assert wb.sheetnames == ["Meine Ordner", "Ordner Eltern", "Boxen", "Kategorien"]
     finally:
         wb.close()

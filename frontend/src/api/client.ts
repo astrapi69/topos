@@ -259,6 +259,13 @@ export interface ActionCreate {
   text: string;
   status?: ActionStatus;
   dueDate?: string | null;
+  /**
+   * Completion timestamp, set when restoring an already-completed action
+   * (Excel import). Dexie mode stores it verbatim; the backend derives
+   * completion itself, so api mode ignores it - api-mode imports go
+   * through the backend importer anyway.
+   */
+  completedAt?: string | null;
 }
 
 export interface ActionUpdate {
