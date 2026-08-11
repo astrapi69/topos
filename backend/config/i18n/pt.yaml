@@ -1,518 +1,509 @@
-# Topos i18n catalog (EN). Phase 6 of the bootstrap populates the
-# full UI string set referenced by the frontend pages.
-
 ui:
   api_key:
-    open_settings: Open Settings
-    required: API key required.
-    required_long: Configure a provider key in Settings to enable this action.
-    required_with_feature: API key required {feature}.
-  hide_secret: Hide value
-  show_secret: Show value
+    open_settings: Abrir Definições
+    required: É necessária uma chave de API.
+    required_long: Configura uma chave de fornecedor nas Definições para ativar esta ação.
+    required_with_feature: É necessária uma chave de API {feature}.
+  hide_secret: Ocultar valor
+  show_secret: Mostrar valor
   app:
     name: Topos
-    description: Personal inventory tracker
-
+    description: Inventário pessoal
 topos:
   qr:
-    close: Close
-    copy: Copy URL
-    copied: Copied
-    download: Download
-    share: Share
-    alt: QR code
+    close: Fechar
+    copy: Copiar URL
+    copied: Copiado
+    download: Transferir
+    share: Partilhar
+    alt: Código QR
   app:
     name: Topos
-    description: Personal inventory tracker
+    description: Inventário pessoal
   theme:
     light:
-      label: Light
-      desc: Cool slate with a Blue-800 anchor. The default.
+      label: Claro
+      desc: Ardósia fria com acento Azul 800. A predefinição.
     dark:
-      label: Dark
-      desc: Slate dark with a Blue-400 anchor.
+      label: Escuro
+      desc: Ardósia escura com acento Azul 400.
     graphite:
-      label: Graphite
-      desc: Neutral grey, low-chroma light theme.
+      label: Grafite
+      desc: Cinzento neutro, tema claro pouco saturado.
     soft-pop:
       label: Soft Pop
-      desc: Indigo accent on pure black.
+      desc: Acento índigo sobre preto puro.
     high-contrast:
-      label: High Contrast
-      desc: Yellow on black for maximum legibility (a11y).
+      label: Alto contraste
+      desc: Amarelo sobre preto para máxima legibilidade (acessibilidade).
     ocean:
-      label: Ocean
-      desc: Sky accent on deep navy.
+      label: Oceano
+      desc: Acento celeste sobre azul-marinho profundo.
   nav:
-    search: Search
+    search: Pesquisar
     menu: Menu
-    dashboard: Dashboard
-    containers: Containers
-    categories: Categories
-    actions: Actions
-    import: Import
-    settings: Settings
-    photo_intake: "Photo intake"
-    more: More
+    dashboard: Painel
+    containers: Contentores
+    categories: Categorias
+    actions: Ações
+    import: Importar
+    settings: Definições
+    photo_intake: Captura por foto
+    more: Mais
   demo:
-    seeded: Demo data loaded. Connect a backend for real data.
+    seeded: Dados de demonstração carregados. Liga um servidor para dados reais.
   common:
-    actions: Actions
-    back: Back
-    cancel: Cancel
-    delete: Delete
-    edit: Edit
-    loading: Loading...
-    save: Save
-    saving: Saving...
+    actions: Ações
+    back: Voltar
+    cancel: Cancelar
+    delete: Eliminar
+    edit: Editar
+    loading: A carregar...
+    save: Guardar
+    saving: A guardar...
   filter:
-    all: All
-    owner: Owner
-    type: Type
-    search: Search
-    search_placeholder: Label or location
+    all: Tudo
+    owner: Proprietário
+    type: Tipo
+    search: Pesquisar
+    search_placeholder: Etiqueta ou localização
   category:
-    rename: "Rename"
-    rename_message: "New path (english-kebab-case, '/' separates levels). Items and subcategories move along."
-    rename_success: "Category renamed. {count} items updated."
-    delete_confirm: "{count} items will lose their category. Continue?"
-    delete_success: "Category deleted. {count} items uncategorized."
-    orphans_title: "Orphaned category paths"
-    orphans_description: "These items point at categories that no longer exist."
-    orphans_empty: "No orphaned paths."
-    orphans_reassign: "Reassign"
-    orphans_reassigned: "Category assigned."
-    orphans_remove: "Remove path"
-    orphans_removed: "Path removed."
-    orphans_remove_all: "Remove all paths"
-    orphans_remove_all_confirm: "{count} items will lose their orphaned category path."
+    rename: Mudar o nome
+    rename_message: Novo caminho (english-kebab-case, «/» separa níveis). As entradas e subcategorias acompanham.
+    rename_success: Nome da categoria alterado. {count} entradas atualizadas.
+    delete_confirm: '{count} entradas vão perder a categoria. Continuar?'
+    delete_success: Categoria eliminada. {count} entradas sem categoria.
+    orphans_title: Caminhos de categoria órfãos
+    orphans_description: Estas entradas apontam para categorias que já não existem.
+    orphans_empty: Não há caminhos órfãos.
+    orphans_reassign: Reatribuir
+    orphans_reassigned: Categoria atribuída.
+    orphans_remove: Remover caminho
+    orphans_removed: Caminho removido.
+    orphans_remove_all: Remover todos os caminhos
+    orphans_remove_all_confirm: '{count} entradas vão perder o caminho de categoria órfão.'
   container:
-    label: Label
-    location: Location
-    external_id: No.
-    type_label: Type
-    owner: Owner
-    description: Description
-    size_group: Size group
+    label: Etiqueta
+    location: Localização
+    external_id: N.º
+    type_label: Tipo
+    owner: Proprietário
+    description: Descrição
+    size_group: Grupo de tamanho
     type:
-      folder: Folder
-      box: Box
+      folder: Pasta
+      box: Caixa
   owner:
-    self: Mine
-    parents: Parents
-    shared: Shared
+    self: Meu
+    parents: Pais
+    shared: Partilhado
   priority:
-    none: None
-    low: Low
-    medium: Medium
-    high: High
-    very_high: Very high
+    none: Nenhuma
+    low: Baixa
+    medium: Média
+    high: Alta
+    very_high: Muito alta
   action:
-    due: due
+    due: vence
     status:
-      open: Open
-      done: Done
-      archived: Archived
+      open: Aberta
+      done: Concluída
+      archived: Arquivado
   item:
-    number: "No. in container"
-    number_hint: "Unique within this container only. Leave empty for the next free number."
-    container: Container
-    content: Content
-    priority: Priority
-    category: Category
-    notes: Notes
+    number: N.º no contentor
+    number_hint: Único apenas dentro deste contentor. Deixa vazio para o próximo número livre.
+    container: Contentor
+    content: Conteúdo
+    priority: Prioridade
+    category: Categoria
+    notes: Notas
   page:
     dashboard:
-      title: Overview
-      items: Items
-      categories: Categories
-      open_actions: Open actions
-      search: Search
-      search_placeholder: Search containers, items, actions...
-      searching: Searching...
-      no_results: No results
-      result_count: "{count} results"
+      title: Visão geral
+      items: Entradas
+      categories: Categorias
+      open_actions: Ações abertas
+      search: Pesquisar
+      search_placeholder: Pesquisar contentores, entradas, ações...
+      searching: A pesquisar...
+      no_results: Sem resultados
+      result_count: '{count} resultados'
     containers:
-      labels_button: Print labels
-      labels_title: Container labels
-      labels_select_all: Select all
-      labels_print: Print
-      labels_doc_title: Topos labels
-      labels_failed: Could not generate labels
-      title: Containers
-      empty: No containers found.
-      new_container: New container
-      create_title: New container
-      edit_title: Edit container
-      label_required: A label is required.
-      external_id_invalid: The number must be an integer.
+      labels_button: Imprimir etiquetas
+      labels_title: Etiquetas de contentor
+      labels_select_all: Selecionar tudo
+      labels_print: Imprimir
+      labels_doc_title: Etiquetas do Topos
+      labels_failed: Não foi possível gerar as etiquetas
+      title: Contentores
+      empty: Nenhum contentor encontrado.
+      new_container: Novo contentor
+      create_title: Novo contentor
+      edit_title: Editar contentor
+      label_required: É necessária uma etiqueta.
+      external_id_invalid: O número tem de ser um inteiro.
     container_detail:
-      photos_title: Photos
-      photos_camera: Camera
-      photos_add: Add photos
-      photos_empty: No photos yet.
-      photos_open: Open photo
-      photos_added: "{count} photo(s) added"
-      photos_add_failed: Could not add photo
-      photos_delete_title: Delete photo?
-      photos_delete_message: This photo will be permanently deleted.
-      photos_delete_failed: Could not delete photo
-      share_qr: Share QR
-      share_qr_title: Share container
-      no_id: No container selected.
-      missing: Container not found
-      items: Items
-      new_item: New item
-      empty: No items in this container.
-      item_actions: Actions
+      photos_title: Fotos
+      photos_camera: Câmara
+      photos_add: Adicionar fotos
+      photos_empty: Ainda não há fotos.
+      photos_open: Abrir foto
+      photos_added: '{count} foto(s) adicionada(s)'
+      photos_add_failed: Não foi possível adicionar a foto
+      photos_delete_title: Eliminar a foto?
+      photos_delete_message: Esta foto será eliminada permanentemente.
+      photos_delete_failed: Não foi possível eliminar a foto
+      share_qr: Partilhar QR
+      share_qr_title: Partilhar contentor
+      no_id: Nenhum contentor selecionado.
+      missing: Contentor não encontrado
+      items: Entradas
+      new_item: Nova entrada
+      empty: Não há entradas neste contentor.
+      item_actions: Ações
     item_editor:
-      new_title: New item
-      edit_title: Edit item
-      container_required: Container is required.
-      content_required: Content is required.
+      new_title: Nova entrada
+      edit_title: Editar entrada
+      container_required: É necessário um contentor.
+      content_required: O conteúdo é obrigatório.
     categories:
-      title: Categories
-      expand: Expand
-      collapse: Collapse
-      uncategorized: Uncategorized
-      no_items: No items.
-      empty: No categories yet.
+      title: Categorias
+      expand: Expandir
+      collapse: Recolher
+      uncategorized: Sem categoria
+      no_items: Sem entradas.
+      empty: Ainda não há categorias.
     actions:
-      title: Actions
-      empty: No actions.
-      no_container: Without container
-      missing_item: Item not loaded
-      mark_done: Done
-      reopen: Reopen
-      new_action: New action
-      create_title: New action
-      item: Item
-      text: Text
-      due_date: Due date
-      item_required: An item is required.
-      text_required: Text is required.
-      filter_open: Open
-      filter_done: Done
-      filter_archived: Archived
-      filter_all: All
+      title: Ações
+      empty: Sem ações.
+      no_container: Sem contentor
+      missing_item: Entrada não carregada
+      mark_done: Concluída
+      reopen: Reabrir
+      new_action: Nova ação
+      create_title: Nova ação
+      item: Entrada
+      text: Texto
+      due_date: Data limite
+      item_required: É necessária uma entrada.
+      text_required: O texto é obrigatório.
+      filter_open: Aberta
+      filter_done: Concluída
+      filter_archived: Arquivado
+      filter_all: Tudo
     import:
-      title: Excel import
-      pick_file: "Choose Excel file"
-      description: >-
-        Upload an Ordner-Ordnung.xlsx (or compatible workbook). The
-        importer is idempotent.
-      drop_hint: Drop file here or pick one
-      prune_missing: Remove items missing from the source
-      upload: Upload
-      uploading: Uploading...
-      report_title: Import report
+      title: Importação de Excel
+      pick_file: Escolher ficheiro Excel
+      description: Carrega um Ordner-Ordnung.xlsx (ou livro compatível). A importação é idempotente.
+      drop_hint: Arrasta o ficheiro para aqui ou escolhe um
+      prune_missing: Remover as entradas em falta na origem
+      upload: Carregar
+      uploading: A carregar...
+      report_title: Relatório de importação
     settings:
-      nav_aria: "Settings navigation"
-      group_app: "App"
-      group_data: "Data"
-      group_system: "System"
-      tab_general: "General"
-      tab_ai: "AI assistant"
-      tab_backend: "Backend"
-      tab_data: "Import & export"
-      tab_maintenance: "Maintenance"
-      tab_security: "Application key"
-      tab_about: "About Topos"
+      nav_aria: Navegação das definições
+      group_app: Aplicação
+      group_data: Dados
+      group_system: Sistema
+      tab_general: Geral
+      tab_ai: Assistente de IA
+      tab_backend: Servidor
+      tab_data: Importar e exportar
+      tab_maintenance: Manutenção
+      tab_security: Chave da aplicação
+      tab_about: Sobre o Topos
       data:
-        title: Data
-        export: Export data
-        export_success: "Export complete. {containers} containers, {items} items."
-        export_excel: Export Excel
-        excel_export_success: "Excel export complete. {containers} containers, {items} items."
-        excel_export_failed: Excel export failed
-        import: Import data
-        import_preview: "{containers} containers, {items} items, {categories} categories, {actions} actions"
-        import_merge: Merge
-        import_replace: Replace
-        import_replace_confirm: "All existing data will be deleted. Type REPLACE to confirm."
+        title: Dados
+        export: Exportar dados
+        export_success: Exportação concluída. {containers} contentores, {items} entradas.
+        export_excel: Exportar para Excel
+        excel_export_success: Exportação para Excel concluída. {containers} contentores, {items} entradas.
+        excel_export_failed: A exportação para Excel falhou
+        import: Importar dados
+        import_preview: '{containers} contentores, {items} entradas, {categories} categorias, {actions} ações'
+        import_merge: Combinar
+        import_replace: Substituir
+        import_replace_confirm: Todos os dados existentes serão eliminados. Escreve REPLACE para confirmar.
         replace_keyword: REPLACE
-        import_success: "Import complete. {count} entries imported."
-        invalid_file: Invalid backup file
-        unsupported_version: "Backup version {version} is not supported"
-        empty: No data to export
+        import_success: Importação concluída. {count} entradas importadas.
+        invalid_file: Ficheiro de cópia inválido
+        unsupported_version: A versão de cópia {version} não é suportada
+        empty: Não há dados para exportar
       about:
-        share_app: Share app (QR)
-        share_app_title: Share Topos
-        heading: About Topos
-        license: License
-        source: Source on GitHub
-        report: Report a problem
-        donate_heading: Support development
-        donate_intro: Topos is free and open source. If it helps you, consider chipping in.
-        donate_preferred: preferred
-        donate_liberapay: Recurring donations, no platform fee.
-        donate_github: Via your existing GitHub account.
-        donate_kofi: One-time tips, no login needed.
-      title: Settings
-      language: Language
-      theme: Appearance
-      theme_current: Theme
-      cache: Local cache
-      cache_description: >-
-        Clear the IndexedDB cache and refetch from the server.
-      reset: Reset cache
-      resetting: Resetting...
-      reset_ok: Cache reset.
-      secret_key: Application secret key
-      secret_key_source_env: "Key from: environment"
-      secret_key_source_secrets_yaml: "Key from: secrets.yaml"
-      secret_key_source_app_yaml: "Key from: app.yaml (default)"
-      secret_key_source_auto_generated: "Key from: auto-generated"
-      secret_key_external_hint: >-
-        This key is configured in {path}. Edit the file to change it.
-      backend_title: Backend connection
-      backend_description: By default the app uses a backend on the same host. If your backend runs elsewhere, enter its address here.
-      backend_url_label: Backend URL
-      backend_test: Test connection
-      backend_testing: Testing...
-      backend_connected: Connected. Loading data from the backend.
-      backend_unreachable: Backend not reachable.
-      backend_current: "Currently connected: {url}"
-      backend_same_origin: "Currently: same host (/api)"
+        share_app: Partilhar a aplicação (QR)
+        share_app_title: Partilhar o Topos
+        heading: Sobre o Topos
+        license: Licença
+        source: Código-fonte no GitHub
+        report: Comunicar um problema
+        donate_heading: Apoiar o desenvolvimento
+        donate_intro: O Topos é livre e de código aberto. Se te for útil, considera contribuir.
+        donate_preferred: preferido
+        donate_liberapay: Donativos recorrentes, sem comissão de plataforma.
+        donate_github: Através da tua conta GitHub existente.
+        donate_kofi: Contribuições pontuais, sem necessidade de registo.
+      title: Definições
+      language: Idioma
+      theme: Aparência
+      theme_current: Tema
+      cache: Cache local
+      cache_description: Limpa a cache IndexedDB e volta a obter os dados do servidor.
+      reset: Repor cache
+      resetting: A repor...
+      reset_ok: Cache reposta.
+      secret_key: Chave secreta da aplicação
+      secret_key_source_env: 'Chave de: variável de ambiente'
+      secret_key_source_secrets_yaml: 'Chave de: secrets.yaml'
+      secret_key_source_app_yaml: 'Chave de: app.yaml (predefinição)'
+      secret_key_source_auto_generated: 'Chave de: gerada automaticamente'
+      secret_key_external_hint: Esta chave é configurada em {path}. Edita o ficheiro para a alterar.
+      backend_title: Ligação ao servidor
+      backend_description: Por predefinição a aplicação usa um servidor no mesmo anfitrião. Se o teu servidor estiver noutro sítio, indica aqui o endereço.
+      backend_url_label: URL do servidor
+      backend_test: Testar ligação
+      backend_testing: A testar...
+      backend_connected: Ligado. A carregar dados do servidor.
+      backend_unreachable: Servidor inacessível.
+      backend_current: 'Ligado atualmente: {url}'
+      backend_same_origin: 'Atualmente: mesmo anfitrião (/api)'
       ai:
-        provider_requires_backend: This provider requires a backend connection
-        connect_backend_hint: Connect a backend in Settings to use all providers.
-        local_mode: "No backend connected: settings and API keys are stored in this browser only, and AI requests go directly to the provider."
-        title: AI Assistant
-        description: "Provider, API key and model for recognising box contents from a photo."
-        enable: Enable AI features
-        provider: Provider
-        model: Model
-        base_url: Base URL
-        api_key: API key
-        key_placeholder: Enter API key
-        key_set: Stored
-        configured: Key stored
-        vision_badge: Vision
-        custom_vision_hint: "Vision support depends on the selected model."
-        custom_base_url_hint: "Endpoint URL of the OpenAI-compatible server (e.g. LM Studio, Ollama)."
-        save: Save
-        saving: Saving...
-        saved: AI settings saved
-        save_failed: Could not save settings
-        test: Test connection
-        testing: Testing...
-        test_ok: Connection successful
-        test_failed: Connection failed
-        test_err_auth_error: Invalid API key
-        test_err_missing_key: No API key provided
-        test_err_missing_base_url: No base URL provided
-        test_err_provider_error: Provider error
-        test_err_network_error: Network error
-        test_err_unknown_provider: Unknown provider
-        vault_create_hint: "Choose a passphrase to store the API keys encrypted in this browser. Without the passphrase the keys cannot be recovered."
-        vault_pass: "Passphrase"
-        vault_pass_confirm: "Confirm passphrase"
-        vault_create: "Create vault"
-        vault_created: "Key vault created."
-        vault_create_failed: "Could not create the vault."
-        vault_pass_too_short: "Passphrase too short (at least 8 characters)."
-        vault_pass_mismatch: "Passphrases do not match."
-        vault_unlock_hint: "Enter the passphrase to unlock the stored API keys for this session."
-        vault_unlock: "Unlock"
-        vault_wrong_pass: "Wrong passphrase."
-        vault_unlock_failed: "Unlock failed."
-        vault_forgot: "Forgot passphrase?"
-        vault_forget_title: "Reset vault?"
-        vault_forget_message: "Without the passphrase the stored keys cannot be recovered. The vault will be emptied and you can set a new passphrase."
-        vault_lock: "Lock vault"
-        confirm_title: "Confirm"
-        enable_hint: "Enable the AI features above so image recognition uses the stored keys."
+        provider_requires_backend: Este fornecedor requer uma ligação ao servidor
+        connect_backend_hint: Liga um servidor nas Definições para usar todos os fornecedores.
+        local_mode: 'Sem servidor ligado: as definições e as chaves de API são guardadas apenas neste navegador, e os pedidos de IA vão diretamente para o fornecedor.'
+        title: Assistente de IA
+        description: Fornecedor, chave de API e modelo para reconhecer o conteúdo de uma caixa a partir de uma foto.
+        enable: Ativar as funcionalidades de IA
+        provider: Fornecedor
+        model: Modelo
+        base_url: URL base
+        api_key: Chave de API
+        key_placeholder: Introduz a chave de API
+        key_set: Guardada
+        configured: Chave guardada
+        vision_badge: Visão
+        custom_vision_hint: O suporte de visão depende do modelo selecionado.
+        custom_base_url_hint: URL do endpoint do servidor compatível com OpenAI (p. ex. LM Studio, Ollama).
+        save: Guardar
+        saving: A guardar...
+        saved: Definições de IA guardadas
+        save_failed: Não foi possível guardar as definições
+        test: Testar ligação
+        testing: A testar...
+        test_ok: Ligação estabelecida
+        test_failed: A ligação falhou
+        test_err_auth_error: Chave de API inválida
+        test_err_missing_key: Nenhuma chave de API indicada
+        test_err_missing_base_url: Nenhuma URL base indicada
+        test_err_provider_error: Erro do fornecedor
+        test_err_network_error: Erro de rede
+        test_err_unknown_provider: Fornecedor desconhecido
+        vault_create_hint: Escolhe uma frase-passe para guardar as chaves de API cifradas neste navegador. Sem ela as chaves não podem ser recuperadas.
+        vault_pass: Frase-passe
+        vault_pass_confirm: Confirmar frase-passe
+        vault_create: Criar cofre
+        vault_created: Cofre de chaves criado.
+        vault_create_failed: Não foi possível criar o cofre.
+        vault_pass_too_short: Frase-passe demasiado curta (pelo menos 8 caracteres).
+        vault_pass_mismatch: As frases-passe não coincidem.
+        vault_unlock_hint: Introduz a frase-passe para desbloquear as chaves de API guardadas nesta sessão.
+        vault_unlock: Desbloquear
+        vault_wrong_pass: Frase-passe incorreta.
+        vault_unlock_failed: O desbloqueio falhou.
+        vault_forgot: Esqueceste-te da frase-passe?
+        vault_forget_title: Repor o cofre?
+        vault_forget_message: Sem a frase-passe as chaves guardadas não podem ser recuperadas. O cofre será esvaziado e poderás definir uma nova frase-passe.
+        vault_lock: Bloquear cofre
+        confirm_title: Confirmar
+        enable_hint: Ativa acima as funcionalidades de IA para que o reconhecimento de imagens use as chaves guardadas.
     photo_intake:
-      title: "Photo intake"
-      description: "Take a photo of a container's contents. The AI suggests entries for you to review and accept."
-      select_container: "Which container?"
-      select_container_placeholder: "Choose a container..."
-      container_required: "Please select a container above."
-      container_hint_auto: "No container yet - one is created automatically when you recognize."
-      auto_container_label: "Box {n}"
-      auto_container_title: "Create container"
-      auto_container_message: "There is no container yet. Which type should Topos create?"
-      auto_container_label_folder: "Folder {n}"
-      take_photo: "Take photo"
-      upload_file: "Upload file"
-      photo_ready: "Photo ready: {name}"
-      recognize: "Recognize"
-      recognizing: "Recognizing contents..."
-      no_items: "No items recognized"
-      staging_title: "Staging list"
-      accept_all: "Select all"
-      reject_all: "Deselect all"
-      add_manual: "Add manually"
-      remove_row: "Remove"
-      label: "Label"
-      category: "Category"
-      no_category: "No category"
-      new_category: "New: {hint}"
-      item_description: "Description"
-      commit: "Add {count} items"
-      committed: "{count} items added"
-      commit_partial: "{failed} of {total} rows failed"
-      offline: "Photo recognition needs a backend connection or AI settings saved in this browser (Settings: AI assistant)."
-      privacy_title: "Send the photo to the AI provider?"
-      privacy_notice: "The photo is sent to {provider} for analysis."
-      decode_failed: "Could not read the image (unsupported format, e.g. HEIC)."
-      confidence_high: "High"
-      confidence_medium: "Medium"
-      confidence_low: "Low"
+      title: Captura por foto
+      description: Fotografa o conteúdo de um contentor. A IA propõe entradas para reveres e aceitares.
+      select_container: Que contentor?
+      select_container_placeholder: Escolhe um contentor...
+      container_required: Seleciona um contentor acima.
+      container_hint_auto: 'Ainda não há contentor: é criado um automaticamente ao reconhecer.'
+      auto_container_label: Caixa {n}
+      auto_container_title: Criar contentor
+      auto_container_message: Ainda não existe nenhum contentor. Que tipo deve o Topos criar?
+      auto_container_label_folder: Pasta {n}
+      take_photo: Tirar foto
+      upload_file: Carregar ficheiro
+      photo_ready: 'Foto pronta: {name}'
+      recognize: Reconhecer
+      recognizing: A reconhecer o conteúdo...
+      no_items: Nenhuma entrada reconhecida
+      staging_title: Lista de preparação
+      accept_all: Selecionar tudo
+      reject_all: Desmarcar tudo
+      add_manual: Adicionar manualmente
+      remove_row: Remover
+      label: Etiqueta
+      category: Categoria
+      no_category: Sem categoria
+      new_category: 'Novo: {hint}'
+      item_description: Descrição
+      commit: Adicionar {count} entradas
+      committed: '{count} entradas adicionadas'
+      commit_partial: '{failed} de {total} linhas falharam'
+      offline: 'O reconhecimento de fotos precisa de uma ligação ao servidor ou de definições de IA guardadas neste navegador (Definições: assistente de IA).'
+      privacy_title: Enviar a foto para o fornecedor de IA?
+      privacy_notice: A foto é enviada para {provider} para análise.
+      decode_failed: Não foi possível ler a imagem (formato não suportado, p. ex. HEIC).
+      confidence_high: Alta
+      confidence_medium: Média
+      confidence_low: Baixa
   import:
     report:
-      containers_created: Containers created
-      containers_updated: Containers updated
-      items_created: Items created
-      items_updated: Items updated
-      items_pruned: Items removed
-      actions_created: Actions created
-      categories_created: Categories created
-      warnings: Warnings
+      containers_created: Contentores criados
+      containers_updated: Contentores atualizados
+      items_created: Entradas criadas
+      items_updated: Entradas atualizadas
+      items_pruned: Entradas removidas
+      actions_created: Ações criadas
+      categories_created: Categorias criadas
+      warnings: Avisos
   toast:
-    item_created: Item created
-    item_updated: Item updated
-    item_deleted: Item deleted
-    item_load_failed: Could not load the item
-    item_save_failed: Could not save the item
-    item_delete_failed: Could not delete the item
-    action_done: Action marked as done
-    action_done_failed: Could not complete the action
-    categories_load_failed: Could not load categories
-    category_rename_failed: "Category could not be renamed"
-    category_delete_failed: "Category could not be deleted"
-    import_done: Import complete
-    import_failed: Import failed
-    cache_cleared: Local cache cleared
-    cache_clear_failed: Could not clear the cache
-    action_reopened: Action reopened
-    action_reopen_failed: Could not reopen the action
-    action_created: Action created
-    action_create_failed: Could not create the action
-    action_updated: Action updated
-    action_update_failed: Could not update the action
-    action_deleted: Action deleted
-    action_delete_failed: Could not delete the action
-    container_created: Container created
-    container_updated: Container updated
-    container_deleted: Container deleted
-    container_save_failed: Could not save the container
-    container_delete_failed: Could not delete the container
-    photo_recognize_failed: "Recognition failed"
-    photo_commit_failed: "Commit failed"
+    item_created: Entrada criada
+    item_updated: Entrada atualizada
+    item_deleted: Entrada eliminada
+    item_load_failed: Não foi possível carregar a entrada
+    item_save_failed: Não foi possível guardar a entrada
+    item_delete_failed: Não foi possível eliminar a entrada
+    action_done: Ação marcada como concluída
+    action_done_failed: Não foi possível concluir a ação
+    categories_load_failed: Não foi possível carregar as categorias
+    category_rename_failed: Não foi possível mudar o nome da categoria
+    category_delete_failed: Não foi possível eliminar a categoria
+    import_done: Importação concluída
+    import_failed: A importação falhou
+    cache_cleared: Cache local limpa
+    cache_clear_failed: Não foi possível limpar a cache
+    action_reopened: Ação reaberta
+    action_reopen_failed: Não foi possível reabrir a ação
+    action_created: Ação criada
+    action_create_failed: Não foi possível criar a ação
+    action_updated: Ação atualizada
+    action_update_failed: Não foi possível atualizar a ação
+    action_deleted: Ação eliminada
+    action_delete_failed: Não foi possível eliminar a ação
+    container_created: Contentor criado
+    container_updated: Contentor atualizado
+    container_deleted: Contentor eliminado
+    container_save_failed: Não foi possível guardar o contentor
+    container_delete_failed: Não foi possível eliminar o contentor
+    photo_recognize_failed: O reconhecimento falhou
+    photo_commit_failed: Falha ao guardar
   confirm:
-    delete_item_title: Delete item?
-    delete_item_message: The item "{content}" will be permanently deleted.
-    reset_cache_title: Reset cache?
-    reset_cache_message: The local cache will be cleared and data reloaded from the server.
-    prune_title: Delete missing items?
-    prune_message: Items that are no longer in the Excel file will be permanently deleted from the database.
-    delete_action_title: Delete action?
-    delete_action_message: The action "{text}" will be permanently deleted.
-    delete_container_title: Delete container?
-    delete_container_message: The container "{label}" will be permanently deleted.
-    delete_container_items_warning: "Warning: {count} contained items will also be deleted."
-
+    delete_item_title: Eliminar a entrada?
+    delete_item_message: A entrada «{content}» será eliminada permanentemente.
+    reset_cache_title: Repor a cache?
+    reset_cache_message: A cache local será limpa e os dados recarregados do servidor.
+    prune_title: Eliminar as entradas em falta?
+    prune_message: As entradas que já não constam do ficheiro Excel serão eliminadas permanentemente da base de dados.
+    delete_action_title: Eliminar a ação?
+    delete_action_message: A ação «{text}» será eliminada permanentemente.
+    delete_container_title: Eliminar o contentor?
+    delete_container_message: O contentor «{label}» será eliminado permanentemente.
+    delete_container_items_warning: 'Atenção: {count} entradas contidas também serão eliminadas.'
 pwa:
-  update_available: New version available
-  update_action: Update
-  install_app: Install app
+  update_available: Nova versão disponível
+  update_action: Atualizar
+  install_app: Instalar a aplicação
   ios:
-    title: Install as an app
-    steps: 'Tap the Share icon, then "Add to Home Screen" - it opens without the Safari bar.'
-    dismiss: Dismiss
-    aria_label: Install on your iPhone
+    title: Instalar como aplicação
+    steps: 'Toca no ícone Partilhar e depois em «Adicionar ao ecrã principal»: abre sem a barra do Safari.'
+    dismiss: Dispensar
+    aria_label: Instalar no teu iPhone
 common:
-  error: Something went wrong.
-  loading: Loading…
-  remove: Remove
+  error: Algo correu mal.
+  loading: A carregar…
+  remove: Remover
 settings:
-  active_provider_missing_key: This is your active provider but no API key is stored. AI replies will be skipped until a key is saved.
+  active_provider_missing_key: Este é o teu fornecedor ativo mas não há nenhuma chave de API guardada. As respostas de IA serão ignoradas até guardares uma.
   api_key:
-    format_invalid: Invalid format.
-    rollback_restore: Restore last working key
-    test: Test
-    test_error: Test failed. The provider rejected the request.
-    test_invalid: Key invalid or expired.
-    test_network: Connection failed. Check your internet connection.
-    test_no_key: No key to test.
-    test_rate_limit: Rate limit hit. Try later.
-    test_success: Key works!
-    testing: Testing…
-  api_key_confirm_delete: Really remove this API key?
-  api_key_delete: Remove key
-  api_key_external_hint_env: This key is configured via an environment variable and cannot be edited here.
-  api_key_external_hint_file: Stored in a secrets file. Saving here overwrites it.
-  api_key_label: API key
-  api_key_missing: Not set
-  api_key_placeholder: Paste here…
-  api_key_placeholder_replace: Paste a new key to replace the stored one…
-  api_key_saved: Key stored
-  api_key_set: Save key
-  api_key_source_env: 'Key from: environment'
-  api_key_source_file: 'Key from: secrets file'
-  api_key_source_none: No key configured
-  api_key_source_settings: 'Key from: Settings'
+    format_invalid: Formato inválido.
+    rollback_restore: Restaurar a última chave funcional
+    test: Testar
+    test_error: O teste falhou. O fornecedor rejeitou o pedido.
+    test_invalid: Chave inválida ou expirada.
+    test_network: A ligação falhou. Verifica a tua ligação à internet.
+    test_no_key: Não há nenhuma chave para testar.
+    test_rate_limit: Limite de pedidos atingido. Tenta mais tarde.
+    test_success: A chave funciona!
+    testing: A testar…
+  api_key_confirm_delete: Remover mesmo esta chave de API?
+  api_key_delete: Remover chave
+  api_key_external_hint_env: Esta chave é configurada através de uma variável de ambiente e não pode ser editada aqui.
+  api_key_external_hint_file: Guardada num ficheiro de segredos. Guardar aqui substitui-a.
+  api_key_label: Chave de API
+  api_key_missing: Não definido
+  api_key_placeholder: Cola aqui…
+  api_key_placeholder_replace: Cola uma chave nova para substituir a guardada…
+  api_key_saved: Chave guardada
+  api_key_set: Guardar chave
+  api_key_source_env: 'Chave de: variável de ambiente'
+  api_key_source_file: 'Chave de: ficheiro de segredos'
+  api_key_source_none: Nenhuma chave configurada
+  api_key_source_settings: 'Chave de: Definições'
   key_export_link:
-    button: Go to key export
-    heading: AI keys - encrypted export
-    hint: Export or import your AI keys as a single encrypted file.
+    button: Ir para a exportação de chaves
+    heading: Chaves de IA - exportação cifrada
+    hint: Exporta ou importa as tuas chaves de IA num único ficheiro cifrado.
   key_vault:
-    api_export_disabled: In server mode keys cannot be exported - they are managed encrypted on the server. Importing a key file still works.
-    busy: Working…
-    confirm_label: Confirm passphrase
-    error_decrypt: Passphrase incorrect or file corrupted.
-    error_export: Could not create the export.
-    error_import: Could not import the key file.
-    error_mismatch: The passphrases do not match.
-    export_button: Export encrypted file
-    export_heading: Export
-    import_button: Import key file
-    import_file_label: Encrypted key file
-    import_heading: Import
-    import_hint: Choose the encrypted key file, or paste its contents below. Either way works.
-    import_text_invalid: This does not look like a valid key file. Check that you pasted the whole contents.
-    import_text_label: …or paste the key file contents
+    api_export_disabled: 'No modo servidor as chaves não podem ser exportadas: são geridas cifradas no servidor. Importar um ficheiro de chaves continua a funcionar.'
+    busy: A processar…
+    confirm_label: Confirmar frase-passe
+    error_decrypt: Frase-passe incorreta ou ficheiro danificado.
+    error_export: Não foi possível criar a exportação.
+    error_import: Não foi possível importar o ficheiro de chaves.
+    error_mismatch: As frases-passe não coincidem.
+    export_button: Exportar ficheiro cifrado
+    export_heading: Exportar
+    import_button: Importar ficheiro de chaves
+    import_file_label: Ficheiro de chaves cifrado
+    import_heading: Importar
+    import_hint: Escolhe o ficheiro de chaves cifrado ou cola o conteúdo abaixo. Ambos funcionam.
+    import_text_invalid: Isto não parece um ficheiro de chaves válido. Verifica se colaste todo o conteúdo.
+    import_text_label: …ou cola o conteúdo do ficheiro de chaves
     import_text_placeholder: '{ "format": "…", … }'
-    intro: Move your AI keys to another device in one encrypted file, separate from the normal backup (which never contains keys).
-    min_length: At least {n} characters.
-    no_keys: There are no AI keys to export yet.
-    passphrase_hint: Choose a strong passphrase. It cannot be recovered - without it the file cannot be opened.
-    passphrase_label: Passphrase
-    success_export: Encrypted key file downloaded.
-    success_import: Keys imported. AI features are ready again.
-    title: AI keys - encrypted export
-  model_override_clear: Use default
-  model_override_default: Default model
-  model_override_label: Model
-  model_override_save: Save model
-  model_override_set: Override active
-  model_overrides_hint: Leave blank to use the default model for each provider. A non-empty value replaces the default at chat time.
-  provider_active: Active
-  provider_label: Active provider
+    intro: Leva as tuas chaves de IA para outro dispositivo num único ficheiro cifrado, separado da cópia de segurança normal (que nunca contém chaves).
+    min_length: Pelo menos {n} caracteres.
+    no_keys: Ainda não há chaves de IA para exportar.
+    passphrase_hint: 'Escolhe uma frase-passe forte. Não pode ser recuperada: sem ela o ficheiro não pode ser aberto.'
+    passphrase_label: Frase-passe
+    success_export: Ficheiro de chaves cifrado transferido.
+    success_import: Chaves importadas. As funcionalidades de IA estão prontas novamente.
+    title: Chaves de IA - exportação cifrada
+  model_override_clear: Usar a predefinição
+  model_override_default: Modelo predefinido
+  model_override_label: Modelo
+  model_override_save: Guardar modelo
+  model_override_set: Personalização ativa
+  model_overrides_hint: Deixa vazio para usar o modelo predefinido de cada fornecedor. Um valor preenchido substitui a predefinição durante a conversa.
+  provider_active: Ativo
+  provider_label: Fornecedor ativo
   providers:
-    add: Add key
-    edit: Edit
-    hint: Keys you have saved stay stored. Only a masked preview is shown - never the full key.
-    import_keys: Import
-    set_active: Use as active provider
-    status_active: Active
-    status_desktop_only: Desktop only
-    status_empty: Empty
-    status_external: External
-    test: Test
-    test_backend_only: Only testable with the backend
-    test_connection_ok: Connection ok
-    test_key_invalid: Key invalid
-    test_network_error: Network error
-    testing: Testing…
-    title: Configured AI providers
-  saved: Saved.
-  section_api_keys: API keys
-  section_model_overrides: Model overrides
-  section_provider: AI provider
+    add: Adicionar chave
+    edit: Editar
+    hint: As chaves guardadas permanecem armazenadas. Só é mostrada uma pré-visualização mascarada, nunca a chave completa.
+    import_keys: Importar
+    set_active: Usar como fornecedor ativo
+    status_active: Ativo
+    status_desktop_only: Apenas computador
+    status_empty: Vazio
+    status_external: Externo
+    test: Testar
+    test_backend_only: Só testável com o servidor
+    test_connection_ok: Ligação ok
+    test_key_invalid: Chave inválida
+    test_network_error: Erro de rede
+    testing: A testar…
+    title: Fornecedores de IA configurados
+  saved: Guardado.
+  section_api_keys: Chaves de API
+  section_model_overrides: Modelos personalizados
+  section_provider: Fornecedor de IA
 toast:
-  api_key_deleted: API key removed.
-  api_key_restored: Last working key restored.
-  api_key_saved: API key saved.
+  api_key_deleted: Chave de API removida.
+  api_key_restored: Última chave funcional restaurada.
+  api_key_saved: Chave de API guardada.
