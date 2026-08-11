@@ -1,518 +1,509 @@
-# Topos i18n catalog (EN). Phase 6 of the bootstrap populates the
-# full UI string set referenced by the frontend pages.
-
 ui:
   api_key:
-    open_settings: Open Settings
-    required: API key required.
-    required_long: Configure a provider key in Settings to enable this action.
-    required_with_feature: API key required {feature}.
-  hide_secret: Hide value
-  show_secret: Show value
+    open_settings: Ayarları aç
+    required: API anahtarı gerekli.
+    required_long: Bu işlemi etkinleştirmek için Ayarlar'da bir sağlayıcı anahtarı tanımlayın.
+    required_with_feature: '{feature} için API anahtarı gerekli.'
+  hide_secret: Değeri gizle
+  show_secret: Değeri göster
   app:
     name: Topos
-    description: Personal inventory tracker
-
+    description: Kişisel envanter takibi
 topos:
   qr:
-    close: Close
-    copy: Copy URL
-    copied: Copied
-    download: Download
-    share: Share
-    alt: QR code
+    close: Kapat
+    copy: Adresi kopyala
+    copied: Kopyalandı
+    download: İndir
+    share: Paylaş
+    alt: QR kodu
   app:
     name: Topos
-    description: Personal inventory tracker
+    description: Kişisel envanter takibi
   theme:
     light:
-      label: Light
-      desc: Cool slate with a Blue-800 anchor. The default.
+      label: Açık
+      desc: Mavi 800 vurgulu soğuk arduvaz. Varsayılan.
     dark:
-      label: Dark
-      desc: Slate dark with a Blue-400 anchor.
+      label: Koyu
+      desc: Mavi 400 vurgulu koyu arduvaz.
     graphite:
-      label: Graphite
-      desc: Neutral grey, low-chroma light theme.
+      label: Grafit
+      desc: Nötr gri, düşük doygunluklu açık tema.
     soft-pop:
       label: Soft Pop
-      desc: Indigo accent on pure black.
+      desc: Saf siyah üzerinde çivit vurgusu.
     high-contrast:
-      label: High Contrast
-      desc: Yellow on black for maximum legibility (a11y).
+      label: Yüksek karşıtlık
+      desc: En yüksek okunabilirlik için siyah üzerine sarı (erişilebilirlik).
     ocean:
-      label: Ocean
-      desc: Sky accent on deep navy.
+      label: Okyanus
+      desc: Koyu lacivert üzerinde gök mavisi vurgu.
   nav:
-    search: Search
-    menu: Menu
-    dashboard: Dashboard
-    containers: Containers
-    categories: Categories
-    actions: Actions
-    import: Import
-    settings: Settings
-    photo_intake: "Photo intake"
-    more: More
+    search: Ara
+    menu: Menü
+    dashboard: Panel
+    containers: Kaplar
+    categories: Kategoriler
+    actions: Görevler
+    import: İçe aktar
+    settings: Ayarlar
+    photo_intake: Fotoğrafla kayıt
+    more: Daha fazla
   demo:
-    seeded: Demo data loaded. Connect a backend for real data.
+    seeded: Örnek veriler yüklendi. Gerçek veriler için bir sunucu bağlayın.
   common:
-    actions: Actions
-    back: Back
-    cancel: Cancel
-    delete: Delete
-    edit: Edit
-    loading: Loading...
-    save: Save
-    saving: Saving...
+    actions: Görevler
+    back: Geri
+    cancel: İptal
+    delete: Sil
+    edit: Düzenle
+    loading: Yükleniyor...
+    save: Kaydet
+    saving: Kaydediliyor...
   filter:
-    all: All
-    owner: Owner
-    type: Type
-    search: Search
-    search_placeholder: Label or location
+    all: Tümü
+    owner: Sahip
+    type: Tür
+    search: Ara
+    search_placeholder: Etiket veya konum
   category:
-    rename: "Rename"
-    rename_message: "New path (english-kebab-case, '/' separates levels). Items and subcategories move along."
-    rename_success: "Category renamed. {count} items updated."
-    delete_confirm: "{count} items will lose their category. Continue?"
-    delete_success: "Category deleted. {count} items uncategorized."
-    orphans_title: "Orphaned category paths"
-    orphans_description: "These items point at categories that no longer exist."
-    orphans_empty: "No orphaned paths."
-    orphans_reassign: "Reassign"
-    orphans_reassigned: "Category assigned."
-    orphans_remove: "Remove path"
-    orphans_removed: "Path removed."
-    orphans_remove_all: "Remove all paths"
-    orphans_remove_all_confirm: "{count} items will lose their orphaned category path."
+    rename: Yeniden adlandır
+    rename_message: Yeni yol (english-kebab-case, düzeyleri '/' ayırır). Kayıtlar ve alt kategoriler birlikte taşınır.
+    rename_success: Kategori yeniden adlandırıldı. {count} kayıt güncellendi.
+    delete_confirm: '{count} kayıt kategorisini kaybedecek. Devam edilsin mi?'
+    delete_success: Kategori silindi. {count} kayıt kategorisiz kaldı.
+    orphans_title: Sahipsiz kategori yolları
+    orphans_description: Bu kayıtlar artık var olmayan kategorileri gösteriyor.
+    orphans_empty: Sahipsiz yol yok.
+    orphans_reassign: Yeniden ata
+    orphans_reassigned: Kategori atandı.
+    orphans_remove: Yolu kaldır
+    orphans_removed: Yol kaldırıldı.
+    orphans_remove_all: Tüm yolları kaldır
+    orphans_remove_all_confirm: '{count} kayıt sahipsiz kategori yolunu kaybedecek.'
   container:
-    label: Label
-    location: Location
+    label: Etiket
+    location: Konum
     external_id: No.
-    type_label: Type
-    owner: Owner
-    description: Description
-    size_group: Size group
+    type_label: Tür
+    owner: Sahip
+    description: Açıklama
+    size_group: Boyut grubu
     type:
-      folder: Folder
-      box: Box
+      folder: Klasör
+      box: Kutu
   owner:
-    self: Mine
-    parents: Parents
-    shared: Shared
+    self: Benim
+    parents: Ebeveynler
+    shared: Paylaşılan
   priority:
-    none: None
-    low: Low
-    medium: Medium
-    high: High
-    very_high: Very high
+    none: Yok
+    low: Düşük
+    medium: Orta
+    high: Yüksek
+    very_high: Çok yüksek
   action:
-    due: due
+    due: son tarih
     status:
-      open: Open
-      done: Done
-      archived: Archived
+      open: Açık
+      done: Tamamlandı
+      archived: Arşivlendi
   item:
-    number: "No. in container"
-    number_hint: "Unique within this container only. Leave empty for the next free number."
-    container: Container
-    content: Content
-    priority: Priority
-    category: Category
-    notes: Notes
+    number: Kap içindeki no.
+    number_hint: Yalnızca bu kap içinde benzersiz. Sıradaki boş numara için boş bırakın.
+    container: Kap
+    content: İçerik
+    priority: Öncelik
+    category: Kategori
+    notes: Notlar
   page:
     dashboard:
-      title: Overview
-      items: Items
-      categories: Categories
-      open_actions: Open actions
-      search: Search
-      search_placeholder: Search containers, items, actions...
-      searching: Searching...
-      no_results: No results
-      result_count: "{count} results"
+      title: Genel bakış
+      items: Kayıtlar
+      categories: Kategoriler
+      open_actions: Açık görevler
+      search: Ara
+      search_placeholder: Kap, kayıt, görev ara...
+      searching: Aranıyor...
+      no_results: Sonuç yok
+      result_count: '{count} sonuç'
     containers:
-      labels_button: Print labels
-      labels_title: Container labels
-      labels_select_all: Select all
-      labels_print: Print
-      labels_doc_title: Topos labels
-      labels_failed: Could not generate labels
-      title: Containers
-      empty: No containers found.
-      new_container: New container
-      create_title: New container
-      edit_title: Edit container
-      label_required: A label is required.
-      external_id_invalid: The number must be an integer.
+      labels_button: Etiketleri yazdır
+      labels_title: Kap etiketleri
+      labels_select_all: Tümünü seç
+      labels_print: Yazdır
+      labels_doc_title: Topos etiketleri
+      labels_failed: Etiketler oluşturulamadı
+      title: Kaplar
+      empty: Kap bulunamadı.
+      new_container: Yeni kap
+      create_title: Yeni kap
+      edit_title: Kabı düzenle
+      label_required: Bir etiket gerekli.
+      external_id_invalid: Numara tam sayı olmalı.
     container_detail:
-      photos_title: Photos
-      photos_camera: Camera
-      photos_add: Add photos
-      photos_empty: No photos yet.
-      photos_open: Open photo
-      photos_added: "{count} photo(s) added"
-      photos_add_failed: Could not add photo
-      photos_delete_title: Delete photo?
-      photos_delete_message: This photo will be permanently deleted.
-      photos_delete_failed: Could not delete photo
-      share_qr: Share QR
-      share_qr_title: Share container
-      no_id: No container selected.
-      missing: Container not found
-      items: Items
-      new_item: New item
-      empty: No items in this container.
-      item_actions: Actions
+      photos_title: Fotoğraflar
+      photos_camera: Kamera
+      photos_add: Fotoğraf ekle
+      photos_empty: Henüz fotoğraf yok.
+      photos_open: Fotoğrafı aç
+      photos_added: '{count} fotoğraf eklendi'
+      photos_add_failed: Fotoğraf eklenemedi
+      photos_delete_title: Fotoğraf silinsin mi?
+      photos_delete_message: Bu fotoğraf kalıcı olarak silinecek.
+      photos_delete_failed: Fotoğraf silinemedi
+      share_qr: QR paylaş
+      share_qr_title: Kabı paylaş
+      no_id: Kap seçilmedi.
+      missing: Kap bulunamadı
+      items: Kayıtlar
+      new_item: Yeni kayıt
+      empty: Bu kapta kayıt yok.
+      item_actions: Görevler
     item_editor:
-      new_title: New item
-      edit_title: Edit item
-      container_required: Container is required.
-      content_required: Content is required.
+      new_title: Yeni kayıt
+      edit_title: Kaydı düzenle
+      container_required: Bir kap gerekli.
+      content_required: İçerik gerekli.
     categories:
-      title: Categories
-      expand: Expand
-      collapse: Collapse
-      uncategorized: Uncategorized
-      no_items: No items.
-      empty: No categories yet.
+      title: Kategoriler
+      expand: Genişlet
+      collapse: Daralt
+      uncategorized: Kategorisiz
+      no_items: Kayıt yok.
+      empty: Henüz kategori yok.
     actions:
-      title: Actions
-      empty: No actions.
-      no_container: Without container
-      missing_item: Item not loaded
-      mark_done: Done
-      reopen: Reopen
-      new_action: New action
-      create_title: New action
-      item: Item
-      text: Text
-      due_date: Due date
-      item_required: An item is required.
-      text_required: Text is required.
-      filter_open: Open
-      filter_done: Done
-      filter_archived: Archived
-      filter_all: All
+      title: Görevler
+      empty: Görev yok.
+      no_container: Kapsız
+      missing_item: Kayıt yüklenmedi
+      mark_done: Tamamlandı
+      reopen: Yeniden aç
+      new_action: Yeni görev
+      create_title: Yeni görev
+      item: Kayıt
+      text: Metin
+      due_date: Son tarih
+      item_required: Bir kayıt gerekli.
+      text_required: Metin gerekli.
+      filter_open: Açık
+      filter_done: Tamamlandı
+      filter_archived: Arşivlendi
+      filter_all: Tümü
     import:
-      title: Excel import
-      pick_file: "Choose Excel file"
-      description: >-
-        Upload an Ordner-Ordnung.xlsx (or compatible workbook). The
-        importer is idempotent.
-      drop_hint: Drop file here or pick one
-      prune_missing: Remove items missing from the source
-      upload: Upload
-      uploading: Uploading...
-      report_title: Import report
+      title: Excel içe aktarma
+      pick_file: Excel dosyası seç
+      description: Bir Ordner-Ordnung.xlsx (veya uyumlu çalışma kitabı) yükleyin. İçe aktarma yinelenebilirdir.
+      drop_hint: Dosyayı buraya bırakın veya seçin
+      prune_missing: Kaynakta bulunmayan kayıtları kaldır
+      upload: Yükle
+      uploading: Yükleniyor...
+      report_title: İçe aktarma raporu
     settings:
-      nav_aria: "Settings navigation"
-      group_app: "App"
-      group_data: "Data"
-      group_system: "System"
-      tab_general: "General"
-      tab_ai: "AI assistant"
-      tab_backend: "Backend"
-      tab_data: "Import & export"
-      tab_maintenance: "Maintenance"
-      tab_security: "Application key"
-      tab_about: "About Topos"
+      nav_aria: Ayarlar gezinmesi
+      group_app: Uygulama
+      group_data: Veriler
+      group_system: Sistem
+      tab_general: Genel
+      tab_ai: Yapay zekâ asistanı
+      tab_backend: Sunucu
+      tab_data: İçe ve dışa aktarma
+      tab_maintenance: Bakım
+      tab_security: Uygulama anahtarı
+      tab_about: Topos hakkında
       data:
-        title: Data
-        export: Export data
-        export_success: "Export complete. {containers} containers, {items} items."
-        export_excel: Export Excel
-        excel_export_success: "Excel export complete. {containers} containers, {items} items."
-        excel_export_failed: Excel export failed
-        import: Import data
-        import_preview: "{containers} containers, {items} items, {categories} categories, {actions} actions"
-        import_merge: Merge
-        import_replace: Replace
-        import_replace_confirm: "All existing data will be deleted. Type REPLACE to confirm."
+        title: Veriler
+        export: Verileri dışa aktar
+        export_success: Dışa aktarma tamamlandı. {containers} kap, {items} kayıt.
+        export_excel: Excel'e aktar
+        excel_export_success: Excel dışa aktarımı tamamlandı. {containers} kap, {items} kayıt.
+        excel_export_failed: Excel dışa aktarımı başarısız
+        import: Verileri içe aktar
+        import_preview: '{containers} kap, {items} kayıt, {categories} kategori, {actions} görev'
+        import_merge: Birleştir
+        import_replace: Değiştir
+        import_replace_confirm: Mevcut tüm veriler silinecek. Onaylamak için REPLACE yazın.
         replace_keyword: REPLACE
-        import_success: "Import complete. {count} entries imported."
-        invalid_file: Invalid backup file
-        unsupported_version: "Backup version {version} is not supported"
-        empty: No data to export
+        import_success: İçe aktarma tamamlandı. {count} kayıt alındı.
+        invalid_file: Geçersiz yedek dosyası
+        unsupported_version: '{version} yedek sürümü desteklenmiyor'
+        empty: Dışa aktarılacak veri yok
       about:
-        share_app: Share app (QR)
-        share_app_title: Share Topos
-        heading: About Topos
-        license: License
-        source: Source on GitHub
-        report: Report a problem
-        donate_heading: Support development
-        donate_intro: Topos is free and open source. If it helps you, consider chipping in.
-        donate_preferred: preferred
-        donate_liberapay: Recurring donations, no platform fee.
-        donate_github: Via your existing GitHub account.
-        donate_kofi: One-time tips, no login needed.
-      title: Settings
-      language: Language
-      theme: Appearance
-      theme_current: Theme
-      cache: Local cache
-      cache_description: >-
-        Clear the IndexedDB cache and refetch from the server.
-      reset: Reset cache
-      resetting: Resetting...
-      reset_ok: Cache reset.
-      secret_key: Application secret key
-      secret_key_source_env: "Key from: environment"
-      secret_key_source_secrets_yaml: "Key from: secrets.yaml"
-      secret_key_source_app_yaml: "Key from: app.yaml (default)"
-      secret_key_source_auto_generated: "Key from: auto-generated"
-      secret_key_external_hint: >-
-        This key is configured in {path}. Edit the file to change it.
-      backend_title: Backend connection
-      backend_description: By default the app uses a backend on the same host. If your backend runs elsewhere, enter its address here.
-      backend_url_label: Backend URL
-      backend_test: Test connection
-      backend_testing: Testing...
-      backend_connected: Connected. Loading data from the backend.
-      backend_unreachable: Backend not reachable.
-      backend_current: "Currently connected: {url}"
-      backend_same_origin: "Currently: same host (/api)"
+        share_app: Uygulamayı paylaş (QR)
+        share_app_title: Topos'u paylaş
+        heading: Topos hakkında
+        license: Lisans
+        source: GitHub'daki kaynak kodu
+        report: Sorun bildir
+        donate_heading: Geliştirmeyi destekle
+        donate_intro: Topos ücretsiz ve açık kaynaklıdır. İşinize yarıyorsa katkıda bulunmayı düşünün.
+        donate_preferred: tercih edilen
+        donate_liberapay: Düzenli bağış, platform ücreti yok.
+        donate_github: Mevcut GitHub hesabınız üzerinden.
+        donate_kofi: Tek seferlik bağış, giriş gerekmez.
+      title: Ayarlar
+      language: Dil
+      theme: Görünüm
+      theme_current: Tema
+      cache: Yerel önbellek
+      cache_description: IndexedDB önbelleğini temizler ve verileri sunucudan yeniden alır.
+      reset: Önbelleği sıfırla
+      resetting: Sıfırlanıyor...
+      reset_ok: Önbellek sıfırlandı.
+      secret_key: Uygulama gizli anahtarı
+      secret_key_source_env: 'Anahtar kaynağı: ortam değişkeni'
+      secret_key_source_secrets_yaml: 'Anahtar kaynağı: secrets.yaml'
+      secret_key_source_app_yaml: 'Anahtar kaynağı: app.yaml (varsayılan)'
+      secret_key_source_auto_generated: 'Anahtar kaynağı: otomatik oluşturuldu'
+      secret_key_external_hint: Bu anahtar {path} içinde tanımlı. Değiştirmek için dosyayı düzenleyin.
+      backend_title: Sunucu bağlantısı
+      backend_description: Uygulama varsayılan olarak aynı sunucudaki arka ucu kullanır. Arka ucunuz başka yerdeyse adresini buraya girin.
+      backend_url_label: Sunucu adresi
+      backend_test: Bağlantıyı test et
+      backend_testing: Test ediliyor...
+      backend_connected: Bağlandı. Veriler sunucudan yükleniyor.
+      backend_unreachable: Sunucuya ulaşılamıyor.
+      backend_current: 'Şu anda bağlı: {url}'
+      backend_same_origin: 'Şu anda: aynı sunucu (/api)'
       ai:
-        provider_requires_backend: This provider requires a backend connection
-        connect_backend_hint: Connect a backend in Settings to use all providers.
-        local_mode: "No backend connected: settings and API keys are stored in this browser only, and AI requests go directly to the provider."
-        title: AI Assistant
-        description: "Provider, API key and model for recognising box contents from a photo."
-        enable: Enable AI features
-        provider: Provider
+        provider_requires_backend: Bu sağlayıcı bir sunucu bağlantısı gerektirir
+        connect_backend_hint: Tüm sağlayıcıları kullanmak için Ayarlar'dan bir sunucu bağlayın.
+        local_mode: 'Sunucu bağlı değil: ayarlar ve API anahtarları yalnızca bu tarayıcıda saklanır, yapay zekâ istekleri doğrudan sağlayıcıya gider.'
+        title: Yapay zekâ asistanı
+        description: Bir fotoğraftan kutu içeriğini tanımak için sağlayıcı, API anahtarı ve model.
+        enable: Yapay zekâ özelliklerini etkinleştir
+        provider: Sağlayıcı
         model: Model
-        base_url: Base URL
-        api_key: API key
-        key_placeholder: Enter API key
-        key_set: Stored
-        configured: Key stored
-        vision_badge: Vision
-        custom_vision_hint: "Vision support depends on the selected model."
-        custom_base_url_hint: "Endpoint URL of the OpenAI-compatible server (e.g. LM Studio, Ollama)."
-        save: Save
-        saving: Saving...
-        saved: AI settings saved
-        save_failed: Could not save settings
-        test: Test connection
-        testing: Testing...
-        test_ok: Connection successful
-        test_failed: Connection failed
-        test_err_auth_error: Invalid API key
-        test_err_missing_key: No API key provided
-        test_err_missing_base_url: No base URL provided
-        test_err_provider_error: Provider error
-        test_err_network_error: Network error
-        test_err_unknown_provider: Unknown provider
-        vault_create_hint: "Choose a passphrase to store the API keys encrypted in this browser. Without the passphrase the keys cannot be recovered."
-        vault_pass: "Passphrase"
-        vault_pass_confirm: "Confirm passphrase"
-        vault_create: "Create vault"
-        vault_created: "Key vault created."
-        vault_create_failed: "Could not create the vault."
-        vault_pass_too_short: "Passphrase too short (at least 8 characters)."
-        vault_pass_mismatch: "Passphrases do not match."
-        vault_unlock_hint: "Enter the passphrase to unlock the stored API keys for this session."
-        vault_unlock: "Unlock"
-        vault_wrong_pass: "Wrong passphrase."
-        vault_unlock_failed: "Unlock failed."
-        vault_forgot: "Forgot passphrase?"
-        vault_forget_title: "Reset vault?"
-        vault_forget_message: "Without the passphrase the stored keys cannot be recovered. The vault will be emptied and you can set a new passphrase."
-        vault_lock: "Lock vault"
-        confirm_title: "Confirm"
-        enable_hint: "Enable the AI features above so image recognition uses the stored keys."
+        base_url: Temel adres
+        api_key: API anahtarı
+        key_placeholder: API anahtarını girin
+        key_set: Kayıtlı
+        configured: Anahtar kaydedildi
+        vision_badge: Görüntü
+        custom_vision_hint: Görüntü desteği seçilen modele bağlıdır.
+        custom_base_url_hint: OpenAI uyumlu sunucunun uç nokta adresi (örn. LM Studio, Ollama).
+        save: Kaydet
+        saving: Kaydediliyor...
+        saved: Yapay zekâ ayarları kaydedildi
+        save_failed: Ayarlar kaydedilemedi
+        test: Bağlantıyı test et
+        testing: Test ediliyor...
+        test_ok: Bağlantı başarılı
+        test_failed: Bağlantı başarısız
+        test_err_auth_error: Geçersiz API anahtarı
+        test_err_missing_key: API anahtarı verilmedi
+        test_err_missing_base_url: Temel adres verilmedi
+        test_err_provider_error: Sağlayıcı hatası
+        test_err_network_error: Ağ hatası
+        test_err_unknown_provider: Bilinmeyen sağlayıcı
+        vault_create_hint: API anahtarlarını bu tarayıcıda şifreli saklamak için bir parola belirleyin. Parola olmadan anahtarlar kurtarılamaz.
+        vault_pass: Parola
+        vault_pass_confirm: Parolayı doğrula
+        vault_create: Kasa oluştur
+        vault_created: Anahtar kasası oluşturuldu.
+        vault_create_failed: Kasa oluşturulamadı.
+        vault_pass_too_short: Parola çok kısa (en az 8 karakter).
+        vault_pass_mismatch: Parolalar eşleşmiyor.
+        vault_unlock_hint: Kayıtlı API anahtarlarını bu oturum için açmak üzere parolayı girin.
+        vault_unlock: Kilidi aç
+        vault_wrong_pass: Yanlış parola.
+        vault_unlock_failed: Kilit açılamadı.
+        vault_forgot: Parolanızı mı unuttunuz?
+        vault_forget_title: Kasa sıfırlansın mı?
+        vault_forget_message: Parola olmadan kayıtlı anahtarlar kurtarılamaz. Kasa boşaltılacak ve yeni bir parola belirleyebileceksiniz.
+        vault_lock: Kasayı kilitle
+        confirm_title: Onayla
+        enable_hint: Görsel tanımanın kayıtlı anahtarları kullanması için yukarıdaki yapay zekâ özelliklerini etkinleştirin.
     photo_intake:
-      title: "Photo intake"
-      description: "Take a photo of a container's contents. The AI suggests entries for you to review and accept."
-      select_container: "Which container?"
-      select_container_placeholder: "Choose a container..."
-      container_required: "Please select a container above."
-      container_hint_auto: "No container yet - one is created automatically when you recognize."
-      auto_container_label: "Box {n}"
-      auto_container_title: "Create container"
-      auto_container_message: "There is no container yet. Which type should Topos create?"
-      auto_container_label_folder: "Folder {n}"
-      take_photo: "Take photo"
-      upload_file: "Upload file"
-      photo_ready: "Photo ready: {name}"
-      recognize: "Recognize"
-      recognizing: "Recognizing contents..."
-      no_items: "No items recognized"
-      staging_title: "Staging list"
-      accept_all: "Select all"
-      reject_all: "Deselect all"
-      add_manual: "Add manually"
-      remove_row: "Remove"
-      label: "Label"
-      category: "Category"
-      no_category: "No category"
-      new_category: "New: {hint}"
-      item_description: "Description"
-      commit: "Add {count} items"
-      committed: "{count} items added"
-      commit_partial: "{failed} of {total} rows failed"
-      offline: "Photo recognition needs a backend connection or AI settings saved in this browser (Settings: AI assistant)."
-      privacy_title: "Send the photo to the AI provider?"
-      privacy_notice: "The photo is sent to {provider} for analysis."
-      decode_failed: "Could not read the image (unsupported format, e.g. HEIC)."
-      confidence_high: "High"
-      confidence_medium: "Medium"
-      confidence_low: "Low"
+      title: Fotoğrafla kayıt
+      description: Bir kabın içeriğini fotoğraflayın. Yapay zekâ, gözden geçirip onaylayacağınız kayıtlar önerir.
+      select_container: Hangi kap?
+      select_container_placeholder: Bir kap seçin...
+      container_required: Lütfen yukarıdan bir kap seçin.
+      container_hint_auto: Henüz kap yok; tanıma sırasında otomatik olarak bir tane oluşturulur.
+      auto_container_label: Kutu {n}
+      auto_container_title: Kap oluştur
+      auto_container_message: Henüz bir kap yok. Topos hangi türü oluştursun?
+      auto_container_label_folder: Klasör {n}
+      take_photo: Fotoğraf çek
+      upload_file: Dosya yükle
+      photo_ready: 'Fotoğraf hazır: {name}'
+      recognize: Tanı
+      recognizing: İçerik tanınıyor...
+      no_items: Hiçbir kayıt tanınmadı
+      staging_title: Hazırlık listesi
+      accept_all: Tümünü seç
+      reject_all: Tüm seçimi kaldır
+      add_manual: Elle ekle
+      remove_row: Kaldır
+      label: Etiket
+      category: Kategori
+      no_category: Kategorisiz
+      new_category: 'Yeni: {hint}'
+      item_description: Açıklama
+      commit: '{count} kayıt ekle'
+      committed: '{count} kayıt eklendi'
+      commit_partial: '{total} satırdan {failed} tanesi başarısız oldu'
+      offline: 'Fotoğraf tanıma için bir sunucu bağlantısı ya da bu tarayıcıda kayıtlı yapay zekâ ayarları gerekir (Ayarlar: yapay zekâ asistanı).'
+      privacy_title: Fotoğraf yapay zekâ sağlayıcısına gönderilsin mi?
+      privacy_notice: Fotoğraf çözümleme için {provider} sağlayıcısına gönderilir.
+      decode_failed: Görsel okunamadı (desteklenmeyen biçim, örn. HEIC).
+      confidence_high: Yüksek
+      confidence_medium: Orta
+      confidence_low: Düşük
   import:
     report:
-      containers_created: Containers created
-      containers_updated: Containers updated
-      items_created: Items created
-      items_updated: Items updated
-      items_pruned: Items removed
-      actions_created: Actions created
-      categories_created: Categories created
-      warnings: Warnings
+      containers_created: Oluşturulan kaplar
+      containers_updated: Güncellenen kaplar
+      items_created: Oluşturulan kayıtlar
+      items_updated: Güncellenen kayıtlar
+      items_pruned: Kaldırılan kayıtlar
+      actions_created: Oluşturulan görevler
+      categories_created: Oluşturulan kategoriler
+      warnings: Uyarılar
   toast:
-    item_created: Item created
-    item_updated: Item updated
-    item_deleted: Item deleted
-    item_load_failed: Could not load the item
-    item_save_failed: Could not save the item
-    item_delete_failed: Could not delete the item
-    action_done: Action marked as done
-    action_done_failed: Could not complete the action
-    categories_load_failed: Could not load categories
-    category_rename_failed: "Category could not be renamed"
-    category_delete_failed: "Category could not be deleted"
-    import_done: Import complete
-    import_failed: Import failed
-    cache_cleared: Local cache cleared
-    cache_clear_failed: Could not clear the cache
-    action_reopened: Action reopened
-    action_reopen_failed: Could not reopen the action
-    action_created: Action created
-    action_create_failed: Could not create the action
-    action_updated: Action updated
-    action_update_failed: Could not update the action
-    action_deleted: Action deleted
-    action_delete_failed: Could not delete the action
-    container_created: Container created
-    container_updated: Container updated
-    container_deleted: Container deleted
-    container_save_failed: Could not save the container
-    container_delete_failed: Could not delete the container
-    photo_recognize_failed: "Recognition failed"
-    photo_commit_failed: "Commit failed"
+    item_created: Kayıt oluşturuldu
+    item_updated: Kayıt güncellendi
+    item_deleted: Kayıt silindi
+    item_load_failed: Kayıt yüklenemedi
+    item_save_failed: Kayıt kaydedilemedi
+    item_delete_failed: Kayıt silinemedi
+    action_done: Görev tamamlandı olarak işaretlendi
+    action_done_failed: Görev tamamlanamadı
+    categories_load_failed: Kategoriler yüklenemedi
+    category_rename_failed: Kategori yeniden adlandırılamadı
+    category_delete_failed: Kategori silinemedi
+    import_done: İçe aktarma tamamlandı
+    import_failed: İçe aktarma başarısız
+    cache_cleared: Yerel önbellek temizlendi
+    cache_clear_failed: Önbellek temizlenemedi
+    action_reopened: Görev yeniden açıldı
+    action_reopen_failed: Görev yeniden açılamadı
+    action_created: Görev oluşturuldu
+    action_create_failed: Görev oluşturulamadı
+    action_updated: Görev güncellendi
+    action_update_failed: Görev güncellenemedi
+    action_deleted: Görev silindi
+    action_delete_failed: Görev silinemedi
+    container_created: Kap oluşturuldu
+    container_updated: Kap güncellendi
+    container_deleted: Kap silindi
+    container_save_failed: Kap kaydedilemedi
+    container_delete_failed: Kap silinemedi
+    photo_recognize_failed: Tanıma başarısız
+    photo_commit_failed: Kaydetme başarısız
   confirm:
-    delete_item_title: Delete item?
-    delete_item_message: The item "{content}" will be permanently deleted.
-    reset_cache_title: Reset cache?
-    reset_cache_message: The local cache will be cleared and data reloaded from the server.
-    prune_title: Delete missing items?
-    prune_message: Items that are no longer in the Excel file will be permanently deleted from the database.
-    delete_action_title: Delete action?
-    delete_action_message: The action "{text}" will be permanently deleted.
-    delete_container_title: Delete container?
-    delete_container_message: The container "{label}" will be permanently deleted.
-    delete_container_items_warning: "Warning: {count} contained items will also be deleted."
-
+    delete_item_title: Kayıt silinsin mi?
+    delete_item_message: «{content}» kaydı kalıcı olarak silinecek.
+    reset_cache_title: Önbellek sıfırlansın mı?
+    reset_cache_message: Yerel önbellek temizlenecek ve veriler sunucudan yeniden yüklenecek.
+    prune_title: Eksik kayıtlar silinsin mi?
+    prune_message: Excel dosyasında artık bulunmayan kayıtlar veritabanından kalıcı olarak silinecek.
+    delete_action_title: Görev silinsin mi?
+    delete_action_message: «{text}» görevi kalıcı olarak silinecek.
+    delete_container_title: Kap silinsin mi?
+    delete_container_message: «{label}» kabı kalıcı olarak silinecek.
+    delete_container_items_warning: 'Dikkat: içindeki {count} kayıt da silinecek.'
 pwa:
-  update_available: New version available
-  update_action: Update
-  install_app: Install app
+  update_available: Yeni sürüm mevcut
+  update_action: Güncelle
+  install_app: Uygulamayı kur
   ios:
-    title: Install as an app
-    steps: 'Tap the Share icon, then "Add to Home Screen" - it opens without the Safari bar.'
-    dismiss: Dismiss
-    aria_label: Install on your iPhone
+    title: Uygulama olarak kur
+    steps: Paylaş simgesine, ardından «Ana Ekrana Ekle» seçeneğine dokunun; Safari çubuğu olmadan açılır.
+    dismiss: Kapat
+    aria_label: iPhone'unuza kurun
 common:
-  error: Something went wrong.
-  loading: Loading…
-  remove: Remove
+  error: Bir şeyler ters gitti.
+  loading: Yükleniyor…
+  remove: Kaldır
 settings:
-  active_provider_missing_key: This is your active provider but no API key is stored. AI replies will be skipped until a key is saved.
+  active_provider_missing_key: Bu etkin sağlayıcınız ancak kayıtlı bir API anahtarı yok. Bir anahtar kaydedilene kadar yapay zekâ yanıtları atlanacak.
   api_key:
-    format_invalid: Invalid format.
-    rollback_restore: Restore last working key
-    test: Test
-    test_error: Test failed. The provider rejected the request.
-    test_invalid: Key invalid or expired.
-    test_network: Connection failed. Check your internet connection.
-    test_no_key: No key to test.
-    test_rate_limit: Rate limit hit. Try later.
-    test_success: Key works!
-    testing: Testing…
-  api_key_confirm_delete: Really remove this API key?
-  api_key_delete: Remove key
-  api_key_external_hint_env: This key is configured via an environment variable and cannot be edited here.
-  api_key_external_hint_file: Stored in a secrets file. Saving here overwrites it.
-  api_key_label: API key
-  api_key_missing: Not set
-  api_key_placeholder: Paste here…
-  api_key_placeholder_replace: Paste a new key to replace the stored one…
-  api_key_saved: Key stored
-  api_key_set: Save key
-  api_key_source_env: 'Key from: environment'
-  api_key_source_file: 'Key from: secrets file'
-  api_key_source_none: No key configured
-  api_key_source_settings: 'Key from: Settings'
+    format_invalid: Geçersiz biçim.
+    rollback_restore: Çalışan son anahtarı geri yükle
+    test: Test et
+    test_error: Test başarısız. Sağlayıcı isteği reddetti.
+    test_invalid: Anahtar geçersiz veya süresi dolmuş.
+    test_network: Bağlantı başarısız. İnternet bağlantınızı kontrol edin.
+    test_no_key: Test edilecek anahtar yok.
+    test_rate_limit: İstek sınırına ulaşıldı. Daha sonra deneyin.
+    test_success: Anahtar çalışıyor!
+    testing: Test ediliyor…
+  api_key_confirm_delete: Bu API anahtarı gerçekten kaldırılsın mı?
+  api_key_delete: Anahtarı kaldır
+  api_key_external_hint_env: Bu anahtar bir ortam değişkeniyle tanımlanmış ve burada düzenlenemez.
+  api_key_external_hint_file: Bir gizli anahtar dosyasında saklanıyor. Buradan kaydetmek üzerine yazar.
+  api_key_label: API anahtarı
+  api_key_missing: Ayarlanmadı
+  api_key_placeholder: Buraya yapıştırın…
+  api_key_placeholder_replace: Kayıtlı anahtarın yerine yeni bir anahtar yapıştırın…
+  api_key_saved: Anahtar kaydedildi
+  api_key_set: Anahtarı kaydet
+  api_key_source_env: 'Anahtar kaynağı: ortam değişkeni'
+  api_key_source_file: 'Anahtar kaynağı: gizli anahtar dosyası'
+  api_key_source_none: Anahtar tanımlı değil
+  api_key_source_settings: 'Anahtar kaynağı: Ayarlar'
   key_export_link:
-    button: Go to key export
-    heading: AI keys - encrypted export
-    hint: Export or import your AI keys as a single encrypted file.
+    button: Anahtar dışa aktarmaya git
+    heading: Yapay zekâ anahtarları - şifreli dışa aktarma
+    hint: Yapay zekâ anahtarlarınızı tek bir şifreli dosya olarak dışa veya içe aktarın.
   key_vault:
-    api_export_disabled: In server mode keys cannot be exported - they are managed encrypted on the server. Importing a key file still works.
-    busy: Working…
-    confirm_label: Confirm passphrase
-    error_decrypt: Passphrase incorrect or file corrupted.
-    error_export: Could not create the export.
-    error_import: Could not import the key file.
-    error_mismatch: The passphrases do not match.
-    export_button: Export encrypted file
-    export_heading: Export
-    import_button: Import key file
-    import_file_label: Encrypted key file
-    import_heading: Import
-    import_hint: Choose the encrypted key file, or paste its contents below. Either way works.
-    import_text_invalid: This does not look like a valid key file. Check that you pasted the whole contents.
-    import_text_label: …or paste the key file contents
+    api_export_disabled: Sunucu kipinde anahtarlar dışa aktarılamaz; sunucuda şifreli olarak yönetilir. Anahtar dosyası içe aktarma yine çalışır.
+    busy: Çalışıyor…
+    confirm_label: Parolayı doğrula
+    error_decrypt: Parola yanlış veya dosya bozuk.
+    error_export: Dışa aktarma oluşturulamadı.
+    error_import: Anahtar dosyası içe aktarılamadı.
+    error_mismatch: Parolalar eşleşmiyor.
+    export_button: Şifreli dosyayı dışa aktar
+    export_heading: Dışa aktar
+    import_button: Anahtar dosyasını içe aktar
+    import_file_label: Şifreli anahtar dosyası
+    import_heading: İçe aktar
+    import_hint: Şifreli anahtar dosyasını seçin veya içeriğini aşağıya yapıştırın. İkisi de olur.
+    import_text_invalid: Bu geçerli bir anahtar dosyasına benzemiyor. İçeriğin tamamını yapıştırdığınızdan emin olun.
+    import_text_label: …veya anahtar dosyasının içeriğini yapıştırın
     import_text_placeholder: '{ "format": "…", … }'
-    intro: Move your AI keys to another device in one encrypted file, separate from the normal backup (which never contains keys).
-    min_length: At least {n} characters.
-    no_keys: There are no AI keys to export yet.
-    passphrase_hint: Choose a strong passphrase. It cannot be recovered - without it the file cannot be opened.
-    passphrase_label: Passphrase
-    success_export: Encrypted key file downloaded.
-    success_import: Keys imported. AI features are ready again.
-    title: AI keys - encrypted export
-  model_override_clear: Use default
-  model_override_default: Default model
+    intro: Yapay zekâ anahtarlarınızı tek bir şifreli dosyayla başka bir cihaza taşıyın; bu, anahtar içermeyen normal yedekten ayrıdır.
+    min_length: En az {n} karakter.
+    no_keys: Henüz dışa aktarılacak yapay zekâ anahtarı yok.
+    passphrase_hint: Güçlü bir parola seçin. Kurtarılamaz; parolasız dosya açılamaz.
+    passphrase_label: Parola
+    success_export: Şifreli anahtar dosyası indirildi.
+    success_import: Anahtarlar içe aktarıldı. Yapay zekâ özellikleri yeniden hazır.
+    title: Yapay zekâ anahtarları - şifreli dışa aktarma
+  model_override_clear: Varsayılanı kullan
+  model_override_default: Varsayılan model
   model_override_label: Model
-  model_override_save: Save model
-  model_override_set: Override active
-  model_overrides_hint: Leave blank to use the default model for each provider. A non-empty value replaces the default at chat time.
-  provider_active: Active
-  provider_label: Active provider
+  model_override_save: Modeli kaydet
+  model_override_set: Geçersiz kılma etkin
+  model_overrides_hint: Her sağlayıcının varsayılan modelini kullanmak için boş bırakın. Doldurulursa sohbette varsayılanın yerine geçer.
+  provider_active: Etkin
+  provider_label: Etkin sağlayıcı
   providers:
-    add: Add key
-    edit: Edit
-    hint: Keys you have saved stay stored. Only a masked preview is shown - never the full key.
-    import_keys: Import
-    set_active: Use as active provider
-    status_active: Active
-    status_desktop_only: Desktop only
-    status_empty: Empty
-    status_external: External
-    test: Test
-    test_backend_only: Only testable with the backend
-    test_connection_ok: Connection ok
-    test_key_invalid: Key invalid
-    test_network_error: Network error
-    testing: Testing…
-    title: Configured AI providers
-  saved: Saved.
-  section_api_keys: API keys
-  section_model_overrides: Model overrides
-  section_provider: AI provider
+    add: Anahtar ekle
+    edit: Düzenle
+    hint: Kaydettiğiniz anahtarlar saklı kalır. Yalnızca maskelenmiş bir önizleme gösterilir, tam anahtar asla.
+    import_keys: İçe aktar
+    set_active: Etkin sağlayıcı olarak kullan
+    status_active: Etkin
+    status_desktop_only: Yalnızca masaüstü
+    status_empty: Boş
+    status_external: Harici
+    test: Test et
+    test_backend_only: Yalnızca sunucuyla test edilebilir
+    test_connection_ok: Bağlantı tamam
+    test_key_invalid: Anahtar geçersiz
+    test_network_error: Ağ hatası
+    testing: Test ediliyor…
+    title: Tanımlı yapay zekâ sağlayıcıları
+  saved: Kaydedildi.
+  section_api_keys: API anahtarları
+  section_model_overrides: Model geçersiz kılmaları
+  section_provider: Yapay zekâ sağlayıcısı
 toast:
-  api_key_deleted: API key removed.
-  api_key_restored: Last working key restored.
-  api_key_saved: API key saved.
+  api_key_deleted: API anahtarı kaldırıldı.
+  api_key_restored: Çalışan son anahtar geri yüklendi.
+  api_key_saved: API anahtarı kaydedildi.

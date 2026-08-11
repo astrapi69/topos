@@ -1,518 +1,509 @@
-# Topos i18n catalog (EN). Phase 6 of the bootstrap populates the
-# full UI string set referenced by the frontend pages.
-
 ui:
   api_key:
-    open_settings: Open Settings
-    required: API key required.
-    required_long: Configure a provider key in Settings to enable this action.
-    required_with_feature: API key required {feature}.
-  hide_secret: Hide value
-  show_secret: Show value
+    open_settings: Άνοιγμα ρυθμίσεων
+    required: Απαιτείται κλειδί API.
+    required_long: Ρυθμίστε ένα κλειδί παρόχου στις Ρυθμίσεις για να ενεργοποιηθεί αυτή η ενέργεια.
+    required_with_feature: Απαιτείται κλειδί API {feature}.
+  hide_secret: Απόκρυψη τιμής
+  show_secret: Εμφάνιση τιμής
   app:
     name: Topos
-    description: Personal inventory tracker
-
+    description: Προσωπική καταγραφή αντικειμένων
 topos:
   qr:
-    close: Close
-    copy: Copy URL
-    copied: Copied
-    download: Download
-    share: Share
-    alt: QR code
+    close: Κλείσιμο
+    copy: Αντιγραφή διεύθυνσης
+    copied: Αντιγράφηκε
+    download: Λήψη
+    share: Κοινή χρήση
+    alt: Κωδικός QR
   app:
     name: Topos
-    description: Personal inventory tracker
+    description: Προσωπική καταγραφή αντικειμένων
   theme:
     light:
-      label: Light
-      desc: Cool slate with a Blue-800 anchor. The default.
+      label: Φωτεινό
+      desc: Ψυχρό γκρι με τόνο Μπλε 800. Η προεπιλογή.
     dark:
-      label: Dark
-      desc: Slate dark with a Blue-400 anchor.
+      label: Σκοτεινό
+      desc: Σκούρο γκρι με τόνο Μπλε 400.
     graphite:
-      label: Graphite
-      desc: Neutral grey, low-chroma light theme.
+      label: Γραφίτης
+      desc: Ουδέτερο γκρι, φωτεινό θέμα χαμηλού κορεσμού.
     soft-pop:
       label: Soft Pop
-      desc: Indigo accent on pure black.
+      desc: Τόνος ινδικού σε καθαρό μαύρο.
     high-contrast:
-      label: High Contrast
-      desc: Yellow on black for maximum legibility (a11y).
+      label: Υψηλή αντίθεση
+      desc: Κίτρινο σε μαύρο για μέγιστη αναγνωσιμότητα (προσβασιμότητα).
     ocean:
-      label: Ocean
-      desc: Sky accent on deep navy.
+      label: Ωκεανός
+      desc: Γαλάζιος τόνος σε βαθύ μπλε.
   nav:
-    search: Search
-    menu: Menu
-    dashboard: Dashboard
-    containers: Containers
-    categories: Categories
-    actions: Actions
-    import: Import
-    settings: Settings
-    photo_intake: "Photo intake"
-    more: More
+    search: Αναζήτηση
+    menu: Μενού
+    dashboard: Πίνακας
+    containers: Δοχεία
+    categories: Κατηγορίες
+    actions: Ενέργειες
+    import: Εισαγωγή
+    settings: Ρυθμίσεις
+    photo_intake: Καταγραφή με φωτογραφία
+    more: Περισσότερα
   demo:
-    seeded: Demo data loaded. Connect a backend for real data.
+    seeded: Φορτώθηκαν δοκιμαστικά δεδομένα. Συνδέστε διακομιστή για πραγματικά δεδομένα.
   common:
-    actions: Actions
-    back: Back
-    cancel: Cancel
-    delete: Delete
-    edit: Edit
-    loading: Loading...
-    save: Save
-    saving: Saving...
+    actions: Ενέργειες
+    back: Πίσω
+    cancel: Άκυρο
+    delete: Διαγραφή
+    edit: Επεξεργασία
+    loading: Φόρτωση...
+    save: Αποθήκευση
+    saving: Αποθήκευση...
   filter:
-    all: All
-    owner: Owner
-    type: Type
-    search: Search
-    search_placeholder: Label or location
+    all: Όλα
+    owner: Κάτοχος
+    type: Τύπος
+    search: Αναζήτηση
+    search_placeholder: Ετικέτα ή θέση
   category:
-    rename: "Rename"
-    rename_message: "New path (english-kebab-case, '/' separates levels). Items and subcategories move along."
-    rename_success: "Category renamed. {count} items updated."
-    delete_confirm: "{count} items will lose their category. Continue?"
-    delete_success: "Category deleted. {count} items uncategorized."
-    orphans_title: "Orphaned category paths"
-    orphans_description: "These items point at categories that no longer exist."
-    orphans_empty: "No orphaned paths."
-    orphans_reassign: "Reassign"
-    orphans_reassigned: "Category assigned."
-    orphans_remove: "Remove path"
-    orphans_removed: "Path removed."
-    orphans_remove_all: "Remove all paths"
-    orphans_remove_all_confirm: "{count} items will lose their orphaned category path."
+    rename: Μετονομασία
+    rename_message: Νέα διαδρομή (english-kebab-case, το «/» χωρίζει επίπεδα). Οι καταχωρίσεις και οι υποκατηγορίες μετακινούνται μαζί.
+    rename_success: Η κατηγορία μετονομάστηκε. {count} καταχωρίσεις ενημερώθηκαν.
+    delete_confirm: '{count} καταχωρίσεις θα χάσουν την κατηγορία τους. Συνέχεια;'
+    delete_success: Η κατηγορία διαγράφηκε. {count} καταχωρίσεις χωρίς κατηγορία.
+    orphans_title: Ορφανές διαδρομές κατηγοριών
+    orphans_description: Αυτές οι καταχωρίσεις παραπέμπουν σε κατηγορίες που δεν υπάρχουν πλέον.
+    orphans_empty: Δεν υπάρχουν ορφανές διαδρομές.
+    orphans_reassign: Επανάθεση
+    orphans_reassigned: Η κατηγορία ανατέθηκε.
+    orphans_remove: Αφαίρεση διαδρομής
+    orphans_removed: Η διαδρομή αφαιρέθηκε.
+    orphans_remove_all: Αφαίρεση όλων των διαδρομών
+    orphans_remove_all_confirm: '{count} καταχωρίσεις θα χάσουν την ορφανή διαδρομή κατηγορίας τους.'
   container:
-    label: Label
-    location: Location
-    external_id: No.
-    type_label: Type
-    owner: Owner
-    description: Description
-    size_group: Size group
+    label: Ετικέτα
+    location: Θέση
+    external_id: Αρ.
+    type_label: Τύπος
+    owner: Κάτοχος
+    description: Περιγραφή
+    size_group: Ομάδα μεγέθους
     type:
-      folder: Folder
-      box: Box
+      folder: Ντοσιέ
+      box: Κουτί
   owner:
-    self: Mine
-    parents: Parents
-    shared: Shared
+    self: Δικά μου
+    parents: Γονείς
+    shared: Κοινόχρηστο
   priority:
-    none: None
-    low: Low
-    medium: Medium
-    high: High
-    very_high: Very high
+    none: Καμία
+    low: Χαμηλή
+    medium: Μεσαία
+    high: Υψηλή
+    very_high: Πολύ υψηλή
   action:
-    due: due
+    due: λήγει
     status:
-      open: Open
-      done: Done
-      archived: Archived
+      open: Ανοιχτή
+      done: Ολοκληρωμένη
+      archived: Αρχειοθετημένο
   item:
-    number: "No. in container"
-    number_hint: "Unique within this container only. Leave empty for the next free number."
-    container: Container
-    content: Content
-    priority: Priority
-    category: Category
-    notes: Notes
+    number: Αρ. στο δοχείο
+    number_hint: Μοναδικό μόνο μέσα σε αυτό το δοχείο. Αφήστε το κενό για τον επόμενο ελεύθερο αριθμό.
+    container: Δοχείο
+    content: Περιεχόμενο
+    priority: Προτεραιότητα
+    category: Κατηγορία
+    notes: Σημειώσεις
   page:
     dashboard:
-      title: Overview
-      items: Items
-      categories: Categories
-      open_actions: Open actions
-      search: Search
-      search_placeholder: Search containers, items, actions...
-      searching: Searching...
-      no_results: No results
-      result_count: "{count} results"
+      title: Επισκόπηση
+      items: Καταχωρίσεις
+      categories: Κατηγορίες
+      open_actions: Ανοιχτές ενέργειες
+      search: Αναζήτηση
+      search_placeholder: Αναζήτηση σε δοχεία, καταχωρίσεις, ενέργειες...
+      searching: Αναζήτηση...
+      no_results: Κανένα αποτέλεσμα
+      result_count: '{count} αποτελέσματα'
     containers:
-      labels_button: Print labels
-      labels_title: Container labels
-      labels_select_all: Select all
-      labels_print: Print
-      labels_doc_title: Topos labels
-      labels_failed: Could not generate labels
-      title: Containers
-      empty: No containers found.
-      new_container: New container
-      create_title: New container
-      edit_title: Edit container
-      label_required: A label is required.
-      external_id_invalid: The number must be an integer.
+      labels_button: Εκτύπωση ετικετών
+      labels_title: Ετικέτες δοχείων
+      labels_select_all: Επιλογή όλων
+      labels_print: Εκτύπωση
+      labels_doc_title: Ετικέτες Topos
+      labels_failed: Δεν ήταν δυνατή η δημιουργία ετικετών
+      title: Δοχεία
+      empty: Δεν βρέθηκαν δοχεία.
+      new_container: Νέο δοχείο
+      create_title: Νέο δοχείο
+      edit_title: Επεξεργασία δοχείου
+      label_required: Απαιτείται ετικέτα.
+      external_id_invalid: Ο αριθμός πρέπει να είναι ακέραιος.
     container_detail:
-      photos_title: Photos
-      photos_camera: Camera
-      photos_add: Add photos
-      photos_empty: No photos yet.
-      photos_open: Open photo
-      photos_added: "{count} photo(s) added"
-      photos_add_failed: Could not add photo
-      photos_delete_title: Delete photo?
-      photos_delete_message: This photo will be permanently deleted.
-      photos_delete_failed: Could not delete photo
-      share_qr: Share QR
-      share_qr_title: Share container
-      no_id: No container selected.
-      missing: Container not found
-      items: Items
-      new_item: New item
-      empty: No items in this container.
-      item_actions: Actions
+      photos_title: Φωτογραφίες
+      photos_camera: Κάμερα
+      photos_add: Προσθήκη φωτογραφιών
+      photos_empty: Δεν υπάρχουν ακόμη φωτογραφίες.
+      photos_open: Άνοιγμα φωτογραφίας
+      photos_added: '{count} φωτογραφίες προστέθηκαν'
+      photos_add_failed: Δεν ήταν δυνατή η προσθήκη της φωτογραφίας
+      photos_delete_title: Διαγραφή φωτογραφίας;
+      photos_delete_message: Αυτή η φωτογραφία θα διαγραφεί οριστικά.
+      photos_delete_failed: Δεν ήταν δυνατή η διαγραφή της φωτογραφίας
+      share_qr: Κοινή χρήση QR
+      share_qr_title: Κοινή χρήση δοχείου
+      no_id: Δεν επιλέχθηκε δοχείο.
+      missing: Το δοχείο δεν βρέθηκε
+      items: Καταχωρίσεις
+      new_item: Νέα καταχώριση
+      empty: Δεν υπάρχουν καταχωρίσεις σε αυτό το δοχείο.
+      item_actions: Ενέργειες
     item_editor:
-      new_title: New item
-      edit_title: Edit item
-      container_required: Container is required.
-      content_required: Content is required.
+      new_title: Νέα καταχώριση
+      edit_title: Επεξεργασία καταχώρισης
+      container_required: Απαιτείται δοχείο.
+      content_required: Το περιεχόμενο είναι υποχρεωτικό.
     categories:
-      title: Categories
-      expand: Expand
-      collapse: Collapse
-      uncategorized: Uncategorized
-      no_items: No items.
-      empty: No categories yet.
+      title: Κατηγορίες
+      expand: Ανάπτυξη
+      collapse: Σύμπτυξη
+      uncategorized: Χωρίς κατηγορία
+      no_items: Καμία καταχώριση.
+      empty: Δεν υπάρχουν ακόμη κατηγορίες.
     actions:
-      title: Actions
-      empty: No actions.
-      no_container: Without container
-      missing_item: Item not loaded
-      mark_done: Done
-      reopen: Reopen
-      new_action: New action
-      create_title: New action
-      item: Item
-      text: Text
-      due_date: Due date
-      item_required: An item is required.
-      text_required: Text is required.
-      filter_open: Open
-      filter_done: Done
-      filter_archived: Archived
-      filter_all: All
+      title: Ενέργειες
+      empty: Καμία ενέργεια.
+      no_container: Χωρίς δοχείο
+      missing_item: Η καταχώριση δεν φορτώθηκε
+      mark_done: Ολοκληρωμένη
+      reopen: Άνοιγμα ξανά
+      new_action: Νέα ενέργεια
+      create_title: Νέα ενέργεια
+      item: Καταχώριση
+      text: Κείμενο
+      due_date: Προθεσμία
+      item_required: Απαιτείται καταχώριση.
+      text_required: Το κείμενο είναι υποχρεωτικό.
+      filter_open: Ανοιχτή
+      filter_done: Ολοκληρωμένη
+      filter_archived: Αρχειοθετημένο
+      filter_all: Όλα
     import:
-      title: Excel import
-      pick_file: "Choose Excel file"
-      description: >-
-        Upload an Ordner-Ordnung.xlsx (or compatible workbook). The
-        importer is idempotent.
-      drop_hint: Drop file here or pick one
-      prune_missing: Remove items missing from the source
-      upload: Upload
-      uploading: Uploading...
-      report_title: Import report
+      title: Εισαγωγή από Excel
+      pick_file: Επιλογή αρχείου Excel
+      description: Μεταφορτώστε ένα Ordner-Ordnung.xlsx (ή συμβατό βιβλίο εργασίας). Η εισαγωγή είναι επαναλήψιμη χωρίς παρενέργειες.
+      drop_hint: Αφήστε το αρχείο εδώ ή επιλέξτε ένα
+      prune_missing: Αφαίρεση καταχωρίσεων που λείπουν από την πηγή
+      upload: Μεταφόρτωση
+      uploading: Μεταφόρτωση...
+      report_title: Αναφορά εισαγωγής
     settings:
-      nav_aria: "Settings navigation"
-      group_app: "App"
-      group_data: "Data"
-      group_system: "System"
-      tab_general: "General"
-      tab_ai: "AI assistant"
-      tab_backend: "Backend"
-      tab_data: "Import & export"
-      tab_maintenance: "Maintenance"
-      tab_security: "Application key"
-      tab_about: "About Topos"
+      nav_aria: Πλοήγηση ρυθμίσεων
+      group_app: Εφαρμογή
+      group_data: Δεδομένα
+      group_system: Σύστημα
+      tab_general: Γενικά
+      tab_ai: Βοηθός AI
+      tab_backend: Διακομιστής
+      tab_data: Εισαγωγή και εξαγωγή
+      tab_maintenance: Συντήρηση
+      tab_security: Κλειδί εφαρμογής
+      tab_about: Σχετικά με το Topos
       data:
-        title: Data
-        export: Export data
-        export_success: "Export complete. {containers} containers, {items} items."
-        export_excel: Export Excel
-        excel_export_success: "Excel export complete. {containers} containers, {items} items."
-        excel_export_failed: Excel export failed
-        import: Import data
-        import_preview: "{containers} containers, {items} items, {categories} categories, {actions} actions"
-        import_merge: Merge
-        import_replace: Replace
-        import_replace_confirm: "All existing data will be deleted. Type REPLACE to confirm."
+        title: Δεδομένα
+        export: Εξαγωγή δεδομένων
+        export_success: Η εξαγωγή ολοκληρώθηκε. {containers} δοχεία, {items} καταχωρίσεις.
+        export_excel: Εξαγωγή σε Excel
+        excel_export_success: Η εξαγωγή σε Excel ολοκληρώθηκε. {containers} δοχεία, {items} καταχωρίσεις.
+        excel_export_failed: Η εξαγωγή σε Excel απέτυχε
+        import: Εισαγωγή δεδομένων
+        import_preview: '{containers} δοχεία, {items} καταχωρίσεις, {categories} κατηγορίες, {actions} ενέργειες'
+        import_merge: Συγχώνευση
+        import_replace: Αντικατάσταση
+        import_replace_confirm: Όλα τα υπάρχοντα δεδομένα θα διαγραφούν. Πληκτρολογήστε REPLACE για επιβεβαίωση.
         replace_keyword: REPLACE
-        import_success: "Import complete. {count} entries imported."
-        invalid_file: Invalid backup file
-        unsupported_version: "Backup version {version} is not supported"
-        empty: No data to export
+        import_success: Η εισαγωγή ολοκληρώθηκε. {count} καταχωρίσεις εισήχθησαν.
+        invalid_file: Μη έγκυρο αρχείο αντιγράφου
+        unsupported_version: Η έκδοση αντιγράφου {version} δεν υποστηρίζεται
+        empty: Δεν υπάρχουν δεδομένα για εξαγωγή
       about:
-        share_app: Share app (QR)
-        share_app_title: Share Topos
-        heading: About Topos
-        license: License
-        source: Source on GitHub
-        report: Report a problem
-        donate_heading: Support development
-        donate_intro: Topos is free and open source. If it helps you, consider chipping in.
-        donate_preferred: preferred
-        donate_liberapay: Recurring donations, no platform fee.
-        donate_github: Via your existing GitHub account.
-        donate_kofi: One-time tips, no login needed.
-      title: Settings
-      language: Language
-      theme: Appearance
-      theme_current: Theme
-      cache: Local cache
-      cache_description: >-
-        Clear the IndexedDB cache and refetch from the server.
-      reset: Reset cache
-      resetting: Resetting...
-      reset_ok: Cache reset.
-      secret_key: Application secret key
-      secret_key_source_env: "Key from: environment"
-      secret_key_source_secrets_yaml: "Key from: secrets.yaml"
-      secret_key_source_app_yaml: "Key from: app.yaml (default)"
-      secret_key_source_auto_generated: "Key from: auto-generated"
-      secret_key_external_hint: >-
-        This key is configured in {path}. Edit the file to change it.
-      backend_title: Backend connection
-      backend_description: By default the app uses a backend on the same host. If your backend runs elsewhere, enter its address here.
-      backend_url_label: Backend URL
-      backend_test: Test connection
-      backend_testing: Testing...
-      backend_connected: Connected. Loading data from the backend.
-      backend_unreachable: Backend not reachable.
-      backend_current: "Currently connected: {url}"
-      backend_same_origin: "Currently: same host (/api)"
+        share_app: Κοινή χρήση εφαρμογής (QR)
+        share_app_title: Κοινή χρήση του Topos
+        heading: Σχετικά με το Topos
+        license: Άδεια
+        source: Πηγαίος κώδικας στο GitHub
+        report: Αναφορά προβλήματος
+        donate_heading: Στηρίξτε την ανάπτυξη
+        donate_intro: Το Topos είναι ελεύθερο και ανοιχτού κώδικα. Αν σας βοηθά, σκεφτείτε να συνεισφέρετε.
+        donate_preferred: προτιμώμενο
+        donate_liberapay: Επαναλαμβανόμενες δωρεές, χωρίς προμήθεια πλατφόρμας.
+        donate_github: Μέσω του υπάρχοντος λογαριασμού σας στο GitHub.
+        donate_kofi: Εφάπαξ ενισχύσεις, χωρίς σύνδεση.
+      title: Ρυθμίσεις
+      language: Γλώσσα
+      theme: Εμφάνιση
+      theme_current: Θέμα
+      cache: Τοπική προσωρινή μνήμη
+      cache_description: Καθαρίζει την προσωρινή μνήμη IndexedDB και φορτώνει ξανά τα δεδομένα από τον διακομιστή.
+      reset: Μηδενισμός προσωρινής μνήμης
+      resetting: Μηδενισμός...
+      reset_ok: Η προσωρινή μνήμη μηδενίστηκε.
+      secret_key: Μυστικό κλειδί εφαρμογής
+      secret_key_source_env: 'Κλειδί από: μεταβλητή περιβάλλοντος'
+      secret_key_source_secrets_yaml: 'Κλειδί από: secrets.yaml'
+      secret_key_source_app_yaml: 'Κλειδί από: app.yaml (προεπιλογή)'
+      secret_key_source_auto_generated: 'Κλειδί από: αυτόματη δημιουργία'
+      secret_key_external_hint: Αυτό το κλειδί ρυθμίζεται στο {path}. Επεξεργαστείτε το αρχείο για να το αλλάξετε.
+      backend_title: Σύνδεση με τον διακομιστή
+      backend_description: Από προεπιλογή η εφαρμογή χρησιμοποιεί διακομιστή στον ίδιο υπολογιστή. Αν ο δικός σας βρίσκεται αλλού, δώστε εδώ τη διεύθυνσή του.
+      backend_url_label: Διεύθυνση διακομιστή
+      backend_test: Δοκιμή σύνδεσης
+      backend_testing: Δοκιμή...
+      backend_connected: Συνδέθηκε. Φόρτωση δεδομένων από τον διακομιστή.
+      backend_unreachable: Ο διακομιστής δεν είναι προσβάσιμος.
+      backend_current: 'Συνδεδεμένο αυτή τη στιγμή: {url}'
+      backend_same_origin: 'Αυτή τη στιγμή: ίδιος υπολογιστής (/api)'
       ai:
-        provider_requires_backend: This provider requires a backend connection
-        connect_backend_hint: Connect a backend in Settings to use all providers.
-        local_mode: "No backend connected: settings and API keys are stored in this browser only, and AI requests go directly to the provider."
-        title: AI Assistant
-        description: "Provider, API key and model for recognising box contents from a photo."
-        enable: Enable AI features
-        provider: Provider
-        model: Model
-        base_url: Base URL
-        api_key: API key
-        key_placeholder: Enter API key
-        key_set: Stored
-        configured: Key stored
-        vision_badge: Vision
-        custom_vision_hint: "Vision support depends on the selected model."
-        custom_base_url_hint: "Endpoint URL of the OpenAI-compatible server (e.g. LM Studio, Ollama)."
-        save: Save
-        saving: Saving...
-        saved: AI settings saved
-        save_failed: Could not save settings
-        test: Test connection
-        testing: Testing...
-        test_ok: Connection successful
-        test_failed: Connection failed
-        test_err_auth_error: Invalid API key
-        test_err_missing_key: No API key provided
-        test_err_missing_base_url: No base URL provided
-        test_err_provider_error: Provider error
-        test_err_network_error: Network error
-        test_err_unknown_provider: Unknown provider
-        vault_create_hint: "Choose a passphrase to store the API keys encrypted in this browser. Without the passphrase the keys cannot be recovered."
-        vault_pass: "Passphrase"
-        vault_pass_confirm: "Confirm passphrase"
-        vault_create: "Create vault"
-        vault_created: "Key vault created."
-        vault_create_failed: "Could not create the vault."
-        vault_pass_too_short: "Passphrase too short (at least 8 characters)."
-        vault_pass_mismatch: "Passphrases do not match."
-        vault_unlock_hint: "Enter the passphrase to unlock the stored API keys for this session."
-        vault_unlock: "Unlock"
-        vault_wrong_pass: "Wrong passphrase."
-        vault_unlock_failed: "Unlock failed."
-        vault_forgot: "Forgot passphrase?"
-        vault_forget_title: "Reset vault?"
-        vault_forget_message: "Without the passphrase the stored keys cannot be recovered. The vault will be emptied and you can set a new passphrase."
-        vault_lock: "Lock vault"
-        confirm_title: "Confirm"
-        enable_hint: "Enable the AI features above so image recognition uses the stored keys."
+        provider_requires_backend: Αυτός ο πάροχος απαιτεί σύνδεση με διακομιστή
+        connect_backend_hint: Συνδέστε διακομιστή στις Ρυθμίσεις για να χρησιμοποιήσετε όλους τους παρόχους.
+        local_mode: 'Δεν έχει συνδεθεί διακομιστής: οι ρυθμίσεις και τα κλειδιά API αποθηκεύονται μόνο σε αυτό το πρόγραμμα περιήγησης και τα αιτήματα AI πηγαίνουν απευθείας στον πάροχο.'
+        title: Βοηθός AI
+        description: Πάροχος, κλειδί API και μοντέλο για την αναγνώριση του περιεχομένου ενός κουτιού από φωτογραφία.
+        enable: Ενεργοποίηση λειτουργιών AI
+        provider: Πάροχος
+        model: Μοντέλο
+        base_url: Βασική διεύθυνση
+        api_key: Κλειδί API
+        key_placeholder: Εισαγωγή κλειδιού API
+        key_set: Αποθηκευμένο
+        configured: Το κλειδί αποθηκεύτηκε
+        vision_badge: Όραση
+        custom_vision_hint: Η υποστήριξη όρασης εξαρτάται από το επιλεγμένο μοντέλο.
+        custom_base_url_hint: Διεύθυνση του συμβατού με OpenAI διακομιστή (π.χ. LM Studio, Ollama).
+        save: Αποθήκευση
+        saving: Αποθήκευση...
+        saved: Οι ρυθμίσεις AI αποθηκεύτηκαν
+        save_failed: Δεν ήταν δυνατή η αποθήκευση των ρυθμίσεων
+        test: Δοκιμή σύνδεσης
+        testing: Δοκιμή...
+        test_ok: Επιτυχής σύνδεση
+        test_failed: Η σύνδεση απέτυχε
+        test_err_auth_error: Μη έγκυρο κλειδί API
+        test_err_missing_key: Δεν δόθηκε κλειδί API
+        test_err_missing_base_url: Δεν δόθηκε βασική διεύθυνση
+        test_err_provider_error: Σφάλμα παρόχου
+        test_err_network_error: Σφάλμα δικτύου
+        test_err_unknown_provider: Άγνωστος πάροχος
+        vault_create_hint: Επιλέξτε συνθηματικό για να αποθηκευτούν τα κλειδιά API κρυπτογραφημένα σε αυτό το πρόγραμμα περιήγησης. Χωρίς αυτό, τα κλειδιά δεν ανακτώνται.
+        vault_pass: Συνθηματικό
+        vault_pass_confirm: Επιβεβαίωση συνθηματικού
+        vault_create: Δημιουργία θυρίδας
+        vault_created: Η θυρίδα κλειδιών δημιουργήθηκε.
+        vault_create_failed: Δεν ήταν δυνατή η δημιουργία της θυρίδας.
+        vault_pass_too_short: Πολύ σύντομο συνθηματικό (τουλάχιστον 8 χαρακτήρες).
+        vault_pass_mismatch: Τα συνθηματικά δεν ταιριάζουν.
+        vault_unlock_hint: Δώστε το συνθηματικό για να ξεκλειδώσετε τα αποθηκευμένα κλειδιά API για αυτή τη συνεδρία.
+        vault_unlock: Ξεκλείδωμα
+        vault_wrong_pass: Λανθασμένο συνθηματικό.
+        vault_unlock_failed: Το ξεκλείδωμα απέτυχε.
+        vault_forgot: Ξεχάσατε το συνθηματικό;
+        vault_forget_title: Μηδενισμός θυρίδας;
+        vault_forget_message: Χωρίς το συνθηματικό τα αποθηκευμένα κλειδιά δεν ανακτώνται. Η θυρίδα θα αδειάσει και θα μπορείτε να ορίσετε νέο συνθηματικό.
+        vault_lock: Κλείδωμα θυρίδας
+        confirm_title: Επιβεβαίωση
+        enable_hint: Ενεργοποιήστε παραπάνω τις λειτουργίες AI ώστε η αναγνώριση εικόνων να χρησιμοποιεί τα αποθηκευμένα κλειδιά.
     photo_intake:
-      title: "Photo intake"
-      description: "Take a photo of a container's contents. The AI suggests entries for you to review and accept."
-      select_container: "Which container?"
-      select_container_placeholder: "Choose a container..."
-      container_required: "Please select a container above."
-      container_hint_auto: "No container yet - one is created automatically when you recognize."
-      auto_container_label: "Box {n}"
-      auto_container_title: "Create container"
-      auto_container_message: "There is no container yet. Which type should Topos create?"
-      auto_container_label_folder: "Folder {n}"
-      take_photo: "Take photo"
-      upload_file: "Upload file"
-      photo_ready: "Photo ready: {name}"
-      recognize: "Recognize"
-      recognizing: "Recognizing contents..."
-      no_items: "No items recognized"
-      staging_title: "Staging list"
-      accept_all: "Select all"
-      reject_all: "Deselect all"
-      add_manual: "Add manually"
-      remove_row: "Remove"
-      label: "Label"
-      category: "Category"
-      no_category: "No category"
-      new_category: "New: {hint}"
-      item_description: "Description"
-      commit: "Add {count} items"
-      committed: "{count} items added"
-      commit_partial: "{failed} of {total} rows failed"
-      offline: "Photo recognition needs a backend connection or AI settings saved in this browser (Settings: AI assistant)."
-      privacy_title: "Send the photo to the AI provider?"
-      privacy_notice: "The photo is sent to {provider} for analysis."
-      decode_failed: "Could not read the image (unsupported format, e.g. HEIC)."
-      confidence_high: "High"
-      confidence_medium: "Medium"
-      confidence_low: "Low"
+      title: Καταγραφή με φωτογραφία
+      description: Φωτογραφίστε το περιεχόμενο ενός δοχείου. Η AI προτείνει καταχωρίσεις για να ελέγξετε και να αποδεχτείτε.
+      select_container: Ποιο δοχείο;
+      select_container_placeholder: Επιλέξτε δοχείο...
+      container_required: Επιλέξτε ένα δοχείο παραπάνω.
+      container_hint_auto: 'Δεν υπάρχει ακόμη δοχείο: δημιουργείται αυτόματα κατά την αναγνώριση.'
+      auto_container_label: Κουτί {n}
+      auto_container_title: Δημιουργία δοχείου
+      auto_container_message: Δεν υπάρχει ακόμη δοχείο. Ποιον τύπο να δημιουργήσει το Topos;
+      auto_container_label_folder: Ντοσιέ {n}
+      take_photo: Λήψη φωτογραφίας
+      upload_file: Μεταφόρτωση αρχείου
+      photo_ready: 'Η φωτογραφία είναι έτοιμη: {name}'
+      recognize: Αναγνώριση
+      recognizing: Αναγνώριση περιεχομένου...
+      no_items: Δεν αναγνωρίστηκε καμία καταχώριση
+      staging_title: Λίστα προετοιμασίας
+      accept_all: Επιλογή όλων
+      reject_all: Αποεπιλογή όλων
+      add_manual: Χειροκίνητη προσθήκη
+      remove_row: Αφαίρεση
+      label: Ετικέτα
+      category: Κατηγορία
+      no_category: Χωρίς κατηγορία
+      new_category: 'Νέο: {hint}'
+      item_description: Περιγραφή
+      commit: Προσθήκη {count} καταχωρίσεων
+      committed: '{count} καταχωρίσεις προστέθηκαν'
+      commit_partial: '{failed} από {total} γραμμές απέτυχαν'
+      offline: 'Η αναγνώριση φωτογραφιών χρειάζεται σύνδεση με διακομιστή ή ρυθμίσεις AI αποθηκευμένες σε αυτό το πρόγραμμα περιήγησης (Ρυθμίσεις: βοηθός AI).'
+      privacy_title: Αποστολή της φωτογραφίας στον πάροχο AI;
+      privacy_notice: Η φωτογραφία αποστέλλεται στον {provider} για ανάλυση.
+      decode_failed: Δεν ήταν δυνατή η ανάγνωση της εικόνας (μη υποστηριζόμενη μορφή, π.χ. HEIC).
+      confidence_high: Υψηλή
+      confidence_medium: Μεσαία
+      confidence_low: Χαμηλή
   import:
     report:
-      containers_created: Containers created
-      containers_updated: Containers updated
-      items_created: Items created
-      items_updated: Items updated
-      items_pruned: Items removed
-      actions_created: Actions created
-      categories_created: Categories created
-      warnings: Warnings
+      containers_created: Δοχεία που δημιουργήθηκαν
+      containers_updated: Δοχεία που ενημερώθηκαν
+      items_created: Καταχωρίσεις που δημιουργήθηκαν
+      items_updated: Καταχωρίσεις που ενημερώθηκαν
+      items_pruned: Καταχωρίσεις που αφαιρέθηκαν
+      actions_created: Ενέργειες που δημιουργήθηκαν
+      categories_created: Κατηγορίες που δημιουργήθηκαν
+      warnings: Προειδοποιήσεις
   toast:
-    item_created: Item created
-    item_updated: Item updated
-    item_deleted: Item deleted
-    item_load_failed: Could not load the item
-    item_save_failed: Could not save the item
-    item_delete_failed: Could not delete the item
-    action_done: Action marked as done
-    action_done_failed: Could not complete the action
-    categories_load_failed: Could not load categories
-    category_rename_failed: "Category could not be renamed"
-    category_delete_failed: "Category could not be deleted"
-    import_done: Import complete
-    import_failed: Import failed
-    cache_cleared: Local cache cleared
-    cache_clear_failed: Could not clear the cache
-    action_reopened: Action reopened
-    action_reopen_failed: Could not reopen the action
-    action_created: Action created
-    action_create_failed: Could not create the action
-    action_updated: Action updated
-    action_update_failed: Could not update the action
-    action_deleted: Action deleted
-    action_delete_failed: Could not delete the action
-    container_created: Container created
-    container_updated: Container updated
-    container_deleted: Container deleted
-    container_save_failed: Could not save the container
-    container_delete_failed: Could not delete the container
-    photo_recognize_failed: "Recognition failed"
-    photo_commit_failed: "Commit failed"
+    item_created: Η καταχώριση δημιουργήθηκε
+    item_updated: Η καταχώριση ενημερώθηκε
+    item_deleted: Η καταχώριση διαγράφηκε
+    item_load_failed: Δεν ήταν δυνατή η φόρτωση της καταχώρισης
+    item_save_failed: Δεν ήταν δυνατή η αποθήκευση της καταχώρισης
+    item_delete_failed: Δεν ήταν δυνατή η διαγραφή της καταχώρισης
+    action_done: Η ενέργεια σημειώθηκε ως ολοκληρωμένη
+    action_done_failed: Δεν ήταν δυνατή η ολοκλήρωση της ενέργειας
+    categories_load_failed: Δεν ήταν δυνατή η φόρτωση των κατηγοριών
+    category_rename_failed: Η κατηγορία δεν μετονομάστηκε
+    category_delete_failed: Η κατηγορία δεν διαγράφηκε
+    import_done: Η εισαγωγή ολοκληρώθηκε
+    import_failed: Η εισαγωγή απέτυχε
+    cache_cleared: Η τοπική προσωρινή μνήμη καθαρίστηκε
+    cache_clear_failed: Δεν ήταν δυνατός ο καθαρισμός της προσωρινής μνήμης
+    action_reopened: Η ενέργεια άνοιξε ξανά
+    action_reopen_failed: Δεν ήταν δυνατό το άνοιγμα της ενέργειας ξανά
+    action_created: Η ενέργεια δημιουργήθηκε
+    action_create_failed: Δεν ήταν δυνατή η δημιουργία της ενέργειας
+    action_updated: Η ενέργεια ενημερώθηκε
+    action_update_failed: Δεν ήταν δυνατή η ενημέρωση της ενέργειας
+    action_deleted: Η ενέργεια διαγράφηκε
+    action_delete_failed: Δεν ήταν δυνατή η διαγραφή της ενέργειας
+    container_created: Το δοχείο δημιουργήθηκε
+    container_updated: Το δοχείο ενημερώθηκε
+    container_deleted: Το δοχείο διαγράφηκε
+    container_save_failed: Δεν ήταν δυνατή η αποθήκευση του δοχείου
+    container_delete_failed: Δεν ήταν δυνατή η διαγραφή του δοχείου
+    photo_recognize_failed: Η αναγνώριση απέτυχε
+    photo_commit_failed: Η καταχώριση απέτυχε
   confirm:
-    delete_item_title: Delete item?
-    delete_item_message: The item "{content}" will be permanently deleted.
-    reset_cache_title: Reset cache?
-    reset_cache_message: The local cache will be cleared and data reloaded from the server.
-    prune_title: Delete missing items?
-    prune_message: Items that are no longer in the Excel file will be permanently deleted from the database.
-    delete_action_title: Delete action?
-    delete_action_message: The action "{text}" will be permanently deleted.
-    delete_container_title: Delete container?
-    delete_container_message: The container "{label}" will be permanently deleted.
-    delete_container_items_warning: "Warning: {count} contained items will also be deleted."
-
+    delete_item_title: Διαγραφή καταχώρισης;
+    delete_item_message: Η καταχώριση «{content}» θα διαγραφεί οριστικά.
+    reset_cache_title: Μηδενισμός προσωρινής μνήμης;
+    reset_cache_message: Η τοπική προσωρινή μνήμη θα καθαριστεί και τα δεδομένα θα φορτωθούν ξανά από τον διακομιστή.
+    prune_title: Διαγραφή των καταχωρίσεων που λείπουν;
+    prune_message: Οι καταχωρίσεις που δεν υπάρχουν πλέον στο αρχείο Excel θα διαγραφούν οριστικά από τη βάση δεδομένων.
+    delete_action_title: Διαγραφή ενέργειας;
+    delete_action_message: Η ενέργεια «{text}» θα διαγραφεί οριστικά.
+    delete_container_title: Διαγραφή δοχείου;
+    delete_container_message: Το δοχείο «{label}» θα διαγραφεί οριστικά.
+    delete_container_items_warning: 'Προσοχή: θα διαγραφούν επίσης {count} καταχωρίσεις που περιέχονται.'
 pwa:
-  update_available: New version available
-  update_action: Update
-  install_app: Install app
+  update_available: Διαθέσιμη νέα έκδοση
+  update_action: Ενημέρωση
+  install_app: Εγκατάσταση εφαρμογής
   ios:
-    title: Install as an app
-    steps: 'Tap the Share icon, then "Add to Home Screen" - it opens without the Safari bar.'
-    dismiss: Dismiss
-    aria_label: Install on your iPhone
+    title: Εγκατάσταση ως εφαρμογή
+    steps: 'Πατήστε το εικονίδιο Κοινή χρήση και μετά «Προσθήκη στην οθόνη Αφετηρίας»: ανοίγει χωρίς τη μπάρα του Safari.'
+    dismiss: Απόρριψη
+    aria_label: Εγκατάσταση στο iPhone σας
 common:
-  error: Something went wrong.
-  loading: Loading…
-  remove: Remove
+  error: Κάτι πήγε στραβά.
+  loading: Φόρτωση…
+  remove: Αφαίρεση
 settings:
-  active_provider_missing_key: This is your active provider but no API key is stored. AI replies will be skipped until a key is saved.
+  active_provider_missing_key: Αυτός είναι ο ενεργός σας πάροχος αλλά δεν έχει αποθηκευτεί κλειδί API. Οι απαντήσεις AI θα παραλείπονται μέχρι να αποθηκευτεί κλειδί.
   api_key:
-    format_invalid: Invalid format.
-    rollback_restore: Restore last working key
-    test: Test
-    test_error: Test failed. The provider rejected the request.
-    test_invalid: Key invalid or expired.
-    test_network: Connection failed. Check your internet connection.
-    test_no_key: No key to test.
-    test_rate_limit: Rate limit hit. Try later.
-    test_success: Key works!
-    testing: Testing…
-  api_key_confirm_delete: Really remove this API key?
-  api_key_delete: Remove key
-  api_key_external_hint_env: This key is configured via an environment variable and cannot be edited here.
-  api_key_external_hint_file: Stored in a secrets file. Saving here overwrites it.
-  api_key_label: API key
-  api_key_missing: Not set
-  api_key_placeholder: Paste here…
-  api_key_placeholder_replace: Paste a new key to replace the stored one…
-  api_key_saved: Key stored
-  api_key_set: Save key
-  api_key_source_env: 'Key from: environment'
-  api_key_source_file: 'Key from: secrets file'
-  api_key_source_none: No key configured
-  api_key_source_settings: 'Key from: Settings'
+    format_invalid: Μη έγκυρη μορφή.
+    rollback_restore: Επαναφορά του τελευταίου κλειδιού που λειτουργούσε
+    test: Δοκιμή
+    test_error: Η δοκιμή απέτυχε. Ο πάροχος απέρριψε το αίτημα.
+    test_invalid: Το κλειδί δεν είναι έγκυρο ή έχει λήξει.
+    test_network: Η σύνδεση απέτυχε. Ελέγξτε τη σύνδεσή σας στο διαδίκτυο.
+    test_no_key: Δεν υπάρχει κλειδί για δοκιμή.
+    test_rate_limit: Συμπληρώθηκε το όριο αιτημάτων. Δοκιμάστε αργότερα.
+    test_success: Το κλειδί λειτουργεί!
+    testing: Δοκιμή…
+  api_key_confirm_delete: Να αφαιρεθεί όντως αυτό το κλειδί API;
+  api_key_delete: Αφαίρεση κλειδιού
+  api_key_external_hint_env: Αυτό το κλειδί ρυθμίζεται μέσω μεταβλητής περιβάλλοντος και δεν μπορεί να αλλάξει εδώ.
+  api_key_external_hint_file: Αποθηκευμένο σε αρχείο μυστικών. Η αποθήκευση εδώ το αντικαθιστά.
+  api_key_label: Κλειδί API
+  api_key_missing: Δεν έχει οριστεί
+  api_key_placeholder: Επικολλήστε εδώ…
+  api_key_placeholder_replace: Επικολλήστε νέο κλειδί για να αντικαταστήσετε το αποθηκευμένο…
+  api_key_saved: Το κλειδί αποθηκεύτηκε
+  api_key_set: Αποθήκευση κλειδιού
+  api_key_source_env: 'Κλειδί από: μεταβλητή περιβάλλοντος'
+  api_key_source_file: 'Κλειδί από: αρχείο μυστικών'
+  api_key_source_none: Δεν έχει ρυθμιστεί κλειδί
+  api_key_source_settings: 'Κλειδί από: Ρυθμίσεις'
   key_export_link:
-    button: Go to key export
-    heading: AI keys - encrypted export
-    hint: Export or import your AI keys as a single encrypted file.
+    button: Μετάβαση στην εξαγωγή κλειδιών
+    heading: Κλειδιά AI - κρυπτογραφημένη εξαγωγή
+    hint: Εξάγετε ή εισάγετε τα κλειδιά AI σας ως ένα κρυπτογραφημένο αρχείο.
   key_vault:
-    api_export_disabled: In server mode keys cannot be exported - they are managed encrypted on the server. Importing a key file still works.
-    busy: Working…
-    confirm_label: Confirm passphrase
-    error_decrypt: Passphrase incorrect or file corrupted.
-    error_export: Could not create the export.
-    error_import: Could not import the key file.
-    error_mismatch: The passphrases do not match.
-    export_button: Export encrypted file
-    export_heading: Export
-    import_button: Import key file
-    import_file_label: Encrypted key file
-    import_heading: Import
-    import_hint: Choose the encrypted key file, or paste its contents below. Either way works.
-    import_text_invalid: This does not look like a valid key file. Check that you pasted the whole contents.
-    import_text_label: …or paste the key file contents
+    api_export_disabled: 'Σε λειτουργία διακομιστή τα κλειδιά δεν εξάγονται: διαχειρίζονται κρυπτογραφημένα στον διακομιστή. Η εισαγωγή αρχείου κλειδιών εξακολουθεί να λειτουργεί.'
+    busy: Επεξεργασία…
+    confirm_label: Επιβεβαίωση συνθηματικού
+    error_decrypt: Λανθασμένο συνθηματικό ή κατεστραμμένο αρχείο.
+    error_export: Δεν ήταν δυνατή η δημιουργία της εξαγωγής.
+    error_import: Δεν ήταν δυνατή η εισαγωγή του αρχείου κλειδιών.
+    error_mismatch: Τα συνθηματικά δεν ταιριάζουν.
+    export_button: Εξαγωγή κρυπτογραφημένου αρχείου
+    export_heading: Εξαγωγή
+    import_button: Εισαγωγή αρχείου κλειδιών
+    import_file_label: Κρυπτογραφημένο αρχείο κλειδιών
+    import_heading: Εισαγωγή
+    import_hint: Επιλέξτε το κρυπτογραφημένο αρχείο κλειδιών ή επικολλήστε το περιεχόμενό του παρακάτω. Και τα δύο λειτουργούν.
+    import_text_invalid: Αυτό δεν μοιάζει με έγκυρο αρχείο κλειδιών. Βεβαιωθείτε ότι επικολλήσατε όλο το περιεχόμενο.
+    import_text_label: …ή επικολλήστε το περιεχόμενο του αρχείου κλειδιών
     import_text_placeholder: '{ "format": "…", … }'
-    intro: Move your AI keys to another device in one encrypted file, separate from the normal backup (which never contains keys).
-    min_length: At least {n} characters.
-    no_keys: There are no AI keys to export yet.
-    passphrase_hint: Choose a strong passphrase. It cannot be recovered - without it the file cannot be opened.
-    passphrase_label: Passphrase
-    success_export: Encrypted key file downloaded.
-    success_import: Keys imported. AI features are ready again.
-    title: AI keys - encrypted export
-  model_override_clear: Use default
-  model_override_default: Default model
-  model_override_label: Model
-  model_override_save: Save model
-  model_override_set: Override active
-  model_overrides_hint: Leave blank to use the default model for each provider. A non-empty value replaces the default at chat time.
-  provider_active: Active
-  provider_label: Active provider
+    intro: Μεταφέρετε τα κλειδιά AI σε άλλη συσκευή με ένα κρυπτογραφημένο αρχείο, ξεχωριστό από το κανονικό αντίγραφο ασφαλείας (που ποτέ δεν περιέχει κλειδιά).
+    min_length: Τουλάχιστον {n} χαρακτήρες.
+    no_keys: Δεν υπάρχουν ακόμη κλειδιά AI για εξαγωγή.
+    passphrase_hint: 'Επιλέξτε ισχυρό συνθηματικό. Δεν ανακτάται: χωρίς αυτό το αρχείο δεν ανοίγει.'
+    passphrase_label: Συνθηματικό
+    success_export: Το κρυπτογραφημένο αρχείο κλειδιών λήφθηκε.
+    success_import: Τα κλειδιά εισήχθησαν. Οι λειτουργίες AI είναι ξανά έτοιμες.
+    title: Κλειδιά AI - κρυπτογραφημένη εξαγωγή
+  model_override_clear: Χρήση προεπιλογής
+  model_override_default: Προεπιλεγμένο μοντέλο
+  model_override_label: Μοντέλο
+  model_override_save: Αποθήκευση μοντέλου
+  model_override_set: Ενεργή προσαρμογή
+  model_overrides_hint: Αφήστε το κενό για να χρησιμοποιείται το προεπιλεγμένο μοντέλο κάθε παρόχου. Μια τιμή αντικαθιστά την προεπιλογή κατά τη συνομιλία.
+  provider_active: Ενεργό
+  provider_label: Ενεργός πάροχος
   providers:
-    add: Add key
-    edit: Edit
-    hint: Keys you have saved stay stored. Only a masked preview is shown - never the full key.
-    import_keys: Import
-    set_active: Use as active provider
-    status_active: Active
-    status_desktop_only: Desktop only
-    status_empty: Empty
-    status_external: External
-    test: Test
-    test_backend_only: Only testable with the backend
-    test_connection_ok: Connection ok
-    test_key_invalid: Key invalid
-    test_network_error: Network error
-    testing: Testing…
-    title: Configured AI providers
-  saved: Saved.
-  section_api_keys: API keys
-  section_model_overrides: Model overrides
-  section_provider: AI provider
+    add: Προσθήκη κλειδιού
+    edit: Επεξεργασία
+    hint: Τα κλειδιά που αποθηκεύσατε παραμένουν. Εμφανίζεται μόνο μια συγκαλυμμένη προεπισκόπηση, ποτέ ολόκληρο το κλειδί.
+    import_keys: Εισαγωγή
+    set_active: Χρήση ως ενεργός πάροχος
+    status_active: Ενεργό
+    status_desktop_only: Μόνο για υπολογιστή
+    status_empty: Κενό
+    status_external: Εξωτερικό
+    test: Δοκιμή
+    test_backend_only: Δοκιμάζεται μόνο με τον διακομιστή
+    test_connection_ok: Η σύνδεση είναι εντάξει
+    test_key_invalid: Μη έγκυρο κλειδί
+    test_network_error: Σφάλμα δικτύου
+    testing: Δοκιμή…
+    title: Ρυθμισμένοι πάροχοι AI
+  saved: Αποθηκεύτηκε.
+  section_api_keys: Κλειδιά API
+  section_model_overrides: Προσαρμοσμένα μοντέλα
+  section_provider: Πάροχος AI
 toast:
-  api_key_deleted: API key removed.
-  api_key_restored: Last working key restored.
-  api_key_saved: API key saved.
+  api_key_deleted: Το κλειδί API αφαιρέθηκε.
+  api_key_restored: Το τελευταίο κλειδί που λειτουργούσε αποκαταστάθηκε.
+  api_key_saved: Το κλειδί API αποθηκεύτηκε.
