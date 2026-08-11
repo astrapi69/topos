@@ -114,6 +114,8 @@ topos:
       done: Done
       archived: Archived
   item:
+    number: "No. in container"
+    number_hint: "Unique within this container only. Leave empty for the next free number."
     container: Container
     content: Content
     priority: Priority

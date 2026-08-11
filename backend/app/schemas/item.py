@@ -17,6 +17,9 @@ class ItemCreate(BaseModel):
 
 class ItemUpdate(BaseModel):
     container_id: int | None = None
+    # Per-container number; editable so the user can match a label that
+    # already exists on paper. Unique within its container only.
+    external_id: int | None = None
     content: str | None = None
     priority: Priority | None = None
     category_path: str | None = None

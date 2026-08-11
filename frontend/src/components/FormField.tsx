@@ -12,6 +12,8 @@
 
 import type { ReactNode } from "react";
 
+import { muted } from "../ui/classes";
+
 interface FormFieldProps {
   label: string;
   children: ReactNode;
@@ -19,6 +21,8 @@ interface FormFieldProps {
   testId?: string;
   /** Extra classes on the wrapper (e.g. margins). */
   className?: string;
+  /** Optional explanation shown under the control, muted and small. */
+  hint?: string;
 }
 
 export default function FormField({
@@ -26,6 +30,7 @@ export default function FormField({
   children,
   testId,
   className = "",
+  hint,
 }: FormFieldProps) {
   return (
     <label
@@ -34,6 +39,14 @@ export default function FormField({
     >
       <span>{label}</span>
       {children}
+      {hint && (
+        <span
+          className={`${muted} text-xs`}
+          data-testid={testId && `${testId}-hint`}
+        >
+          {hint}
+        </span>
+      )}
     </label>
   );
 }

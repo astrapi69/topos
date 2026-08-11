@@ -12,6 +12,7 @@ vi.mock("../api/client", () => ({
       get: vi.fn().mockResolvedValue({
         id: 1,
         containerId: 1,
+        externalId: 3,
         content: "Bank statement",
         priority: "high",
         categoryPath: "finance/bank",
@@ -46,6 +47,22 @@ describe("ItemEditor", () => {
       "item-editor-content-input",
     ) as HTMLInputElement;
     await waitFor(() => expect(input.value).toBe("Bank statement"));
+  });
+
+  it("prefills the editable item number", async () => {
+    // The number is a label the user may correct; it is unique only
+    // within its container, so the form edits it directly.
+    render(
+      <MemoryRouter initialEntries={["/items/1"]}>
+        <Routes>
+          <Route path="/items/:id" element={<ItemEditor />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    const numberInput = (await screen.findByTestId(
+      "item-editor-number-input",
+    )) as HTMLInputElement;
+    await waitFor(() => expect(numberInput.value).toBe("3"));
   });
 
   it("renders the new-item form when route is /items/new", async () => {

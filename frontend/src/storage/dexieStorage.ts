@@ -154,14 +154,53 @@ async function createItem(payload: ItemCreate): Promise<Item> {
  * The number is per container, so carrying the old one across would
  * duplicate a label that already exists in the target.
  */
+/**
+ * Reject a number already used inside the same container.
+ *
+ * Only the (container, number) pair has to be unique - 42-1 and 100-1
+ * are different labels - so the check never looks beyond the container.
+ * `itemId` excludes the row being edited, otherwise saving a form
+ * without touching the number would clash with itself. Mirrors
+ * `_assert_number_free` in the backend service.
+ */
+async function assertItemNumberFree(
+  containerId: number,
+  externalId: number,
+  itemId: number,
+): Promise<void> {
+  const siblings = await db.items
+    .where("containerId")
+    .equals(containerId)
+    .toArray();
+  const clash = siblings.find(
+    (row) => row.id !== itemId && row.externalId === externalId,
+  );
+  if (!clash) return;
+  const container = await db.containers.get(containerId);
+  const label = container
+    ? `${container.externalId}-${externalId}`
+    : `${externalId}`;
+  throw new Error(
+    `Nummer ${label} ist in diesem Container bereits vergeben ` +
+      `(Eintrag "${clash.content}")`,
+  );
+}
+
 async function updateItem(id: number, payload: ItemUpdate): Promise<Item> {
   const existing = (await db.items.get(id)) ?? notFound("Item", id);
   const patch = { ...payload } as Partial<Item>;
-  if (
+  const moving =
     payload.containerId !== undefined &&
-    payload.containerId !== existing.containerId
-  ) {
-    patch.externalId = await nextItemExternalId(payload.containerId);
+    payload.containerId !== existing.containerId;
+  const targetContainer = moving
+    ? (payload.containerId as number)
+    : existing.containerId;
+
+  if (payload.externalId != null) {
+    // Validated against the container the item ends up in.
+    await assertItemNumberFree(targetContainer, payload.externalId, id);
+  } else if (moving) {
+    patch.externalId = await nextItemExternalId(targetContainer);
   }
   return updateRow<Item>(db.items, id, patch, "Item");
 }

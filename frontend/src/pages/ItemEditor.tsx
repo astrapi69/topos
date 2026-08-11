@@ -42,6 +42,8 @@ export default function ItemEditor() {
     initialContainerId,
   );
   const [content, setContent] = useState("");
+  // Per-container number, editable: unique only within its container.
+  const [itemNumber, setItemNumber] = useState("");
   const [priority, setPriority] = useState<Priority>("none");
   const [categoryPath, setCategoryPath] = useState("");
   const [notes, setNotes] = useState("");
@@ -57,6 +59,7 @@ export default function ItemEditor() {
       .then((row: Item) => {
         setContainerId(row.containerId);
         setContent(row.content);
+        setItemNumber(row.externalId != null ? String(row.externalId) : "");
         setPriority(row.priority);
         setCategoryPath(row.categoryPath ?? "");
         setNotes(row.notes ?? "");
@@ -101,6 +104,7 @@ export default function ItemEditor() {
       if (isNew) {
         const created = await getStorage().items.create({
           containerId,
+          ...(itemNumber.trim() ? { externalId: Number(itemNumber) } : {}),
           content: content.trim(),
           priority,
           categoryPath: categoryPath.trim() || null,
@@ -112,6 +116,7 @@ export default function ItemEditor() {
       } else if (itemId !== null) {
         const updated = await getStorage().items.update(itemId, {
           containerId,
+          ...(itemNumber.trim() ? { externalId: Number(itemNumber) } : {}),
           content: content.trim(),
           priority,
           categoryPath: categoryPath.trim() || null,
@@ -176,6 +181,25 @@ export default function ItemEditor() {
                 </option>
               ))}
             </select>
+          </FormField>
+
+          <FormField
+            className="mb-3"
+            label={t("topos.item.number", "Nr. im Container")}
+            hint={t(
+              "topos.item.number_hint",
+              "Nur innerhalb dieses Containers eindeutig. Leer lassen für die nächste freie Nummer.",
+            )}
+            testId="item-editor-number"
+          >
+            <input
+              type="number"
+              min="1"
+              className={input}
+              value={itemNumber}
+              onChange={(e) => setItemNumber(e.target.value)}
+              data-testid="item-editor-number-input"
+            />
           </FormField>
 
           <FormField

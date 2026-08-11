@@ -7,7 +7,7 @@ import logging
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from app.exceptions import NotFoundError, ValidationError
+from app.exceptions import ConflictError, NotFoundError, ValidationError
 from app.models import Category, Container, Item
 from app.schemas.item import BulkItemCreate, BulkItemError, ItemCreate, ItemUpdate
 from app.services.categories import ensure_category_chain
@@ -26,6 +26,30 @@ def next_external_id(db: Session, container_id: int) -> int:
         db.query(func.max(Item.external_id)).filter(Item.container_id == container_id).scalar()
     )
     return (highest or 0) + 1
+
+
+def _assert_number_free(
+    db: Session, container_id: int, external_id: int, *, item_id: int | None = None
+) -> None:
+    """Reject a number already used inside the same container.
+
+    Only the ``(container_id, external_id)`` pair has to be unique - 42-1
+    and 100-1 are different labels - so the check never looks beyond the
+    container. ``item_id`` excludes the row being edited, otherwise
+    saving a form without touching the number would clash with itself.
+    """
+    query = db.query(Item).filter(
+        Item.container_id == container_id, Item.external_id == external_id
+    )
+    if item_id is not None:
+        query = query.filter(Item.id != item_id)
+    clash = query.first()
+    if clash is not None:
+        container = db.get(Container, container_id)
+        label = f"{container.external_id}-{external_id}" if container else str(external_id)
+        raise ConflictError(
+            f'Nummer {label} ist in diesem Container bereits vergeben (Eintrag "{clash.content}")'
+        )
 
 
 def backfill_external_ids(db: Session, items: list[Item]) -> None:
@@ -173,9 +197,21 @@ def update_item(db: Session, item_id: int, payload: ItemUpdate) -> Item:
             raise NotFoundError(f"Container {data['container_id']} not found")
         if data["container_id"] != item.container_id:
             moved_to = data["container_id"]
+
+    # An explicit number is validated against the container the item ends
+    # up in - the target when moving, the current one otherwise.
+    requested_number = data.get("external_id")
+    if requested_number is not None:
+        _assert_number_free(
+            db,
+            moved_to if moved_to is not None else item.container_id,
+            requested_number,
+            item_id=item.id,
+        )
+
     for key, value in data.items():
         setattr(item, key, value)
-    if moved_to is not None:
+    if moved_to is not None and requested_number is None:
         # The number is per container, so it means nothing in the target:
         # take the next free one there instead of carrying a duplicate in.
         item.external_id = next_external_id(db, moved_to)
