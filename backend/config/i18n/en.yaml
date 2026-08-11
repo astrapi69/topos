@@ -207,6 +207,17 @@ topos:
       uploading: Uploading...
       report_title: Import report
     settings:
+      nav_aria: "Settings navigation"
+      group_app: "App"
+      group_data: "Data"
+      group_system: "System"
+      tab_general: "General"
+      tab_ai: "AI assistant"
+      tab_backend: "Backend"
+      tab_data: "Import & export"
+      tab_maintenance: "Maintenance"
+      tab_security: "Application key"
+      tab_about: "About Topos"
       data:
         title: Data
         export: Export data
