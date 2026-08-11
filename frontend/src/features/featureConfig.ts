@@ -49,7 +49,13 @@ export interface FeatureContext {
  * constant; feature ids are never spelled as string literals.
  */
 export const FEATURES = {
-  /** Excel workbook import (POST /api/import/excel) - needs the backend. */
+  /**
+   * Excel workbook import via the backend plugin (POST /api/import/excel).
+   * Active means "a backend can do the parse+upsert"; when inactive the
+   * Import page falls back to the browser parser (src/excel/importWorkbook)
+   * writing through the storage service, so the feature is NOT gone
+   * offline - only the path differs.
+   */
   EXCEL_IMPORT: "excel-import",
   /** Category rename/delete (cascading writes) - needs the backend. */
   CATEGORY_EDIT: "category-edit",
