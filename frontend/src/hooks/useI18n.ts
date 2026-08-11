@@ -20,20 +20,50 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-// Module-level cache to avoid refetching on remount
+// Module-level cache to avoid reloading on remount
 let cachedLang = "";
 let cachedStrings: I18nStrings = {};
 
+const LANG_KEY = "topos.lang";
+
+/**
+ * The catalogs, bundled at build time from backend/config/i18n/*.yaml
+ * (see scripts/generate_i18n_catalogs.py). Without them the static PWA
+ * has no strings at all: every label falls back to its inline German
+ * default and switching the language changes nothing. Loaded lazily, so
+ * a session only ever downloads the language it actually shows.
+ */
+const BUNDLED_CATALOGS = import.meta.glob<{ default: I18nStrings }>(
+  "../i18n/catalogs/*.json",
+);
+
+async function loadBundledCatalog(lang: string): Promise<I18nStrings | null> {
+  const loader = BUNDLED_CATALOGS[`../i18n/catalogs/${lang}.json`];
+  if (!loader) return null;
+  try {
+    return (await loader()).default;
+  } catch {
+    return null;
+  }
+}
+
+/** The language the user picked last, if any. */
+function readStoredLang(): string | null {
+  try {
+    return localStorage.getItem(LANG_KEY);
+  } catch {
+    return null; // private mode
+  }
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [strings, setStrings] = useState<I18nStrings>(cachedStrings);
-  const [lang, setLangState] = useState(cachedLang || "de");
+  const [lang, setLangState] = useState(cachedLang || readStoredLang() || "de");
 
-  // Load language preference from app settings on mount.
-  // Both catalog requests are gated on the backend probe: the static PWA
-  // build has no backend, so an ungated fetch 404s on every load and
-  // t() falls back to its inline strings anyway.
+  // The user's own choice wins over the backend default; only ask the
+  // backend when nothing was picked yet (and only when one answers).
   useEffect(() => {
-    if (cachedLang) return; // already loaded
+    if (cachedLang || readStoredLang()) return;
     void isBackendAvailable().then((available) => {
       if (!available) return;
       api.settings
@@ -48,28 +78,45 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  // Fetch strings when language changes
+  // Load the catalog whenever the language changes. The bundled copy is
+  // the baseline (works offline); a reachable backend may then override
+  // it, which is what keeps plugin-provided strings available.
   useEffect(() => {
+    let cancelled = false;
     if (lang === cachedLang && Object.keys(cachedStrings).length > 0) {
       setStrings(cachedStrings);
       return;
     }
-    void isBackendAvailable().then((available) => {
-      if (!available) return;
-      api.i18n
-        .get(lang)
-        .then((data) => {
-          cachedLang = lang;
-          cachedStrings = data;
-          setStrings(data);
-        })
-        .catch(() => {
-          /* Silent bootstrap fallback: t() reverts to fallback strings. */
-        });
-    });
+    void (async () => {
+      const bundled = await loadBundledCatalog(lang);
+      if (cancelled) return;
+      if (bundled) {
+        cachedLang = lang;
+        cachedStrings = bundled;
+        setStrings(bundled);
+      }
+      if (!(await isBackendAvailable())) return;
+      try {
+        const fromBackend = await api.i18n.get(lang);
+        if (cancelled || !fromBackend) return;
+        cachedLang = lang;
+        cachedStrings = fromBackend;
+        setStrings(fromBackend);
+      } catch {
+        /* Keep the bundled catalog. */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [lang]);
 
   const setLang = useCallback((newLang: string) => {
+    try {
+      localStorage.setItem(LANG_KEY, newLang);
+    } catch {
+      /* private mode: the choice just does not survive a reload */
+    }
     setLangState(newLang);
   }, []);
 
