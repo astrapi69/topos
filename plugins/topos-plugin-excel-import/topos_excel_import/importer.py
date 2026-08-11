@@ -23,10 +23,19 @@ from io import BytesIO
 from pathlib import Path
 from typing import IO
 
-from app.models import Action, Category, Container, ContainerType, Item, Owner, Priority
+from app.models import (
+    Action,
+    ActionStatus,
+    Category,
+    Container,
+    ContainerType,
+    Item,
+    Owner,
+    Priority,
+)
 from sqlalchemy.orm import Session
 
-from .parser import ParsedContainer, ParseResult, parse_workbook
+from .parser import ParsedAction, ParsedContainer, ParseResult, parse_workbook
 
 
 @dataclass
@@ -98,19 +107,30 @@ def _ensure_categories(
 def _upsert_actions(
     db: Session,
     item: Item,
-    action_texts: list[str],
+    actions: list[ParsedAction],
     report: ImportReport,
 ) -> None:
-    """Insert any action text that does not already exist on the item.
-    Existing actions are left alone (status/due_date/completed_at
-    preserved)."""
-    if not action_texts:
+    """Insert any action that does not already exist on the item.
+
+    Existing actions are left alone (status / due_date / completed_at
+    preserved), so a completed action never reopens on re-import. New
+    ones restore the state encoded in the cell.
+    """
+    if not actions:
         return
     existing = {action.text for action in item.actions}
-    for text in action_texts:
-        if text in existing:
+    for parsed in actions:
+        if parsed.text in existing:
             continue
-        db.add(Action(item_id=item.id, text=text))
+        db.add(
+            Action(
+                item_id=item.id,
+                text=parsed.text,
+                status=ActionStatus(parsed.status),
+                due_date=parsed.due_date,
+                completed_at=parsed.completed_at,
+            )
+        )
         report.actions_created += 1
     db.flush()
 
@@ -173,13 +193,13 @@ def _upsert_items(
             db.flush()
             container.items.append(new_item)
             report.items_created += 1
-            _upsert_actions(db, new_item, parsed_item.action_texts, report)
+            _upsert_actions(db, new_item, parsed_item.actions, report)
         else:
             existing.priority = Priority(parsed_item.priority)
             existing.category_path = parsed_item.category_path
             existing.notes = parsed_item.notes
             report.items_updated += 1
-            _upsert_actions(db, existing, parsed_item.action_texts, report)
+            _upsert_actions(db, existing, parsed_item.actions, report)
         seen_contents.add(parsed_item.content)
 
     if prune_missing:
@@ -203,6 +223,27 @@ def import_parsed_result(
     """
     report = ImportReport(warnings=list(parsed.warnings))
     category_cache: dict[str, Category] = {}
+
+    # The "Kategorien" sheet is the authority for the taxonomy: it keeps
+    # display names and categories no item references. Create parents
+    # before children so item rows only ever find existing paths.
+    for parsed_category in sorted(parsed.categories, key=lambda row: (row.level, row.path)):
+        existing_category = (
+            db.query(Category).filter(Category.path == parsed_category.path).one_or_none()
+        )
+        if existing_category is None:
+            existing_category = Category(
+                path=parsed_category.path,
+                parent_path=parsed_category.parent_path,
+                name=parsed_category.path.rsplit("/", 1)[-1],
+                display_name=parsed_category.display_name,
+                level=parsed_category.level,
+            )
+            db.add(existing_category)
+            db.flush()
+            report.categories_created += 1
+        category_cache[parsed_category.path] = existing_category
+
     for parsed_container in parsed.containers:
         container = _upsert_container(db, parsed_container, report)
         db.flush()

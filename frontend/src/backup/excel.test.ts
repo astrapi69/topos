@@ -85,10 +85,13 @@ describe("buildExcelBackup", () => {
     );
 
     const workbook = await readWorkbook(blob);
+    // "Kategorien" carries the taxonomy verbatim so slugs, display names
+    // and unreferenced categories survive a round-trip.
     expect(workbook.worksheets.map((sheet) => sheet.name)).toEqual([
       "Meine Ordner",
       "Ordner Eltern",
       "Boxen",
+      "Kategorien",
     ]);
   });
 

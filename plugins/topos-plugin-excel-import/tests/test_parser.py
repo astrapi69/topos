@@ -69,11 +69,14 @@ def test_meine_ordner_container_with_items_and_actions(write_workbook):
     assert bank.priority == "high"
     assert bank.category_path == "finance/bank"
     assert bank.category_segments == [("finance", "Finanzen"), ("bank", "Bank")]
-    assert bank.action_texts == ["request statement"]
+    assert [a.text for a in bank.actions] == ["request statement"]
 
     assert tax.content == "Tax forms"
     assert tax.priority == "medium"
-    assert tax.action_texts == ["review and possibly cancel", "check meter reading"]
+    assert [a.text for a in tax.actions] == [
+        "review and possibly cancel",
+        "check meter reading",
+    ]
     assert parsed.warnings == []
 
 

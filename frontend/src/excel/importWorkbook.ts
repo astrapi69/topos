@@ -4,8 +4,10 @@
  *
  * The backend plugin (`topos-plugin-excel-import`) does the same job
  * server-side; this is the no-backend path so the GitHub Pages PWA can
- * import too. Both read the same three-sheet contract and apply the same
- * match keys, so a workbook lands identically in either mode:
+ * import too. Both read the same four-sheet contract and apply the same
+ * match keys, so a workbook lands identically in either mode - verified
+ * in both directions (a file written by one side imports losslessly on
+ * the other):
  *
  *   Container  matched by externalId
  *   Item       matched by (containerId, content)
@@ -16,6 +18,11 @@
  * `pruneMissing` deletes items of a matched container that the sheet no
  * longer lists. Off by default, mirroring the backend flag.
  *
+ * Columns beyond the original layout (notes, category slug, owner, size
+ * group, box priority, encoded action state) and the "Kategorien" sheet
+ * are all OPTIONAL: a workbook from an older version, or one written by
+ * hand, still imports with the previous semantics.
+ *
  * exceljs is loaded via dynamic import so it stays in the lazy chunk it
  * already occupies for the export side.
  */
@@ -23,11 +30,18 @@
 import { priorityFromGerman, slugifyCategoryPath } from "./mappings";
 import type { CategorySegment } from "./mappings";
 import type { IStorageService } from "../storage/types";
-import type { Category, ContainerType, Owner, Priority } from "../types/topos";
+import type {
+  ActionStatus,
+  Category,
+  ContainerType,
+  Owner,
+  Priority,
+} from "../types/topos";
 
 const SHEET_MEINE_ORDNER = "Meine Ordner";
 const SHEET_ORDNER_ELTERN = "Ordner Eltern";
 const SHEET_BOXEN = "Boxen";
+const SHEET_KATEGORIEN = "Kategorien";
 
 const RANGE_HEADER_RE = /^\s*(\d+)\s+bis\s+(\d+)\s*$/i;
 const NEGATIVE_ACTION_VALUES = new Set(["", "keine", "nein", "no", "none"]);
@@ -43,12 +57,28 @@ export interface ImportReport {
   warnings: string[];
 }
 
+interface ParsedAction {
+  text: string;
+  status: ActionStatus;
+  completedAt: string | null;
+  dueDate: string | null;
+}
+
 interface ParsedItem {
   content: string;
   priority: Priority;
   categoryPath: string | null;
   categorySegments: CategorySegment[];
-  actionTexts: string[];
+  notes: string | null;
+  actions: ParsedAction[];
+}
+
+/** One row of the optional "Kategorien" sheet. */
+interface ParsedCategory {
+  path: string;
+  displayName: string;
+  parentPath: string | null;
+  level: number;
 }
 
 interface ParsedContainer {
@@ -64,6 +94,7 @@ interface ParsedContainer {
 
 interface ParseResult {
   containers: ParsedContainer[];
+  categories: ParsedCategory[];
   warnings: string[];
 }
 
@@ -99,13 +130,80 @@ function cellInt(row: Row, index: number): number | null {
   return parsed;
 }
 
-function splitActions(raw: string | null): string[] {
+/**
+ * Decode one action token written by the exporter's `encodeAction`.
+ *
+ * The bracket suffix is only read as flags when its content parses as
+ * known tokens, so "Regal [oben]" stays a plain open action instead of
+ * losing its brackets.
+ */
+function decodeAction(token: string): ParsedAction {
+  const match = /^(.*?)\s*\[([^\]]*)\]$/.exec(token);
+  if (match === null) {
+    return { text: token, status: "open", completedAt: null, dueDate: null };
+  }
+  const [, text, flagBlob] = match;
+  const flags = flagBlob.split("|").map((flag) => flag.trim());
+  let status: ActionStatus | null = null;
+  let completedAt: string | null = null;
+  let dueDate: string | null = null;
+  for (const flag of flags) {
+    const done = /^erledigt(?:@(.+))?$/.exec(flag);
+    const archived = /^archiviert(?:@(.+))?$/.exec(flag);
+    const due = /^faellig:(.+)$/.exec(flag);
+    if (done) {
+      status = "done";
+      completedAt = done[1] ?? null;
+    } else if (archived) {
+      status = "archived";
+      completedAt = archived[1] ?? null;
+    } else if (due) {
+      dueDate = due[1];
+    } else {
+      // Unknown bracket content: not ours, keep the token verbatim.
+      return { text: token, status: "open", completedAt: null, dueDate: null };
+    }
+  }
+  return { text, status: status ?? "open", completedAt, dueDate };
+}
+
+/** Read the owner column; null when absent so the sheet decides. */
+function parseOwner(raw: string | null): Owner | null {
+  if (raw === null) return null;
+  const value = raw.trim().toLowerCase();
+  return value === "self" || value === "parents" || value === "shared"
+    ? (value as Owner)
+    : null;
+}
+
+function splitActions(raw: string | null): ParsedAction[] {
   if (raw === null) return [];
   if (NEGATIVE_ACTION_VALUES.has(raw.trim().toLowerCase())) return [];
   return raw
     .split(";")
     .map((piece) => piece.trim())
+    .filter(Boolean)
+    .map(decodeAction);
+}
+
+/**
+ * Pair an explicit slug path with the German display path so each level
+ * keeps its display name. Falls back to the slug when the display path
+ * has fewer segments (hand-edited file).
+ */
+function segmentsFromSlugPath(
+  slugPath: string,
+  displayCell: string | null,
+): CategorySegment[] {
+  const displays = (displayCell ?? "")
+    .split("/")
+    .map((part) => part.trim())
     .filter(Boolean);
+  return slugPath
+    .split("/")
+    .map((slug) => slug.trim())
+    .filter(Boolean)
+    .map((slug, index) => ({ slug, display: displays[index] ?? slug }));
 }
 
 function buildItem(
@@ -113,18 +211,37 @@ function buildItem(
   priorityCell: string | null,
   categoryCell: string | null,
   actionCell: string | null,
+  notesCell: string | null,
+  slugPathCell: string | null,
   warnings: string[],
 ): ParsedItem {
   const { priority, warning } = priorityFromGerman(priorityCell);
   if (warning) warnings.push(warning);
-  const slugged = slugifyCategoryPath(categoryCell);
-  if (slugged) warnings.push(...slugged.warnings);
+
+  // The slug column is authoritative when present: it preserves a slug
+  // that the German display name would not reproduce. Without it (legacy
+  // workbook, hand-written file) the display path is slugified as before.
+  let categoryPath: string | null = null;
+  let categorySegments: CategorySegment[] = [];
+  if (slugPathCell) {
+    categoryPath = slugPathCell;
+    categorySegments = segmentsFromSlugPath(slugPathCell, categoryCell);
+  } else {
+    const slugged = slugifyCategoryPath(categoryCell);
+    if (slugged) {
+      warnings.push(...slugged.warnings);
+      categoryPath = slugged.path;
+      categorySegments = slugged.segments;
+    }
+  }
+
   return {
     content,
     priority,
-    categoryPath: slugged?.path ?? null,
-    categorySegments: slugged?.segments ?? [],
-    actionTexts: splitActions(actionCell),
+    categoryPath,
+    categorySegments,
+    notes: notesCell,
+    actions: splitActions(actionCell),
   };
 }
 
@@ -147,17 +264,25 @@ function parseOwnerSheet(
     const col2 = cellStr(row, 2);
     const col3 = cellStr(row, 3);
     const col4 = cellStr(row, 4);
-    const col5 = options.hasLocation ? cellStr(row, 5) : null;
-    const col6 = options.hasActions ? cellStr(row, 6) : null;
+    // Columns 5-6 exist on both folder sheets since the layout grew; a
+    // legacy "Ordner Eltern" simply leaves them empty.
+    const col5 = cellStr(row, 5);
+    const col6 = cellStr(row, 6);
+    const notes = cellStr(row, 7);
+    const slugPath = cellStr(row, 8);
+    const ownerCell = cellStr(row, 9);
+    const sizeGroupCell = cellStr(row, 10);
 
     if (externalId !== null) {
       current = {
         externalId,
         type: options.containerType,
-        owner: options.owner,
+        // The owner column wins when present; otherwise the sheet decides
+        // (which is why "shared" needed a column - it shares a sheet).
+        owner: parseOwner(ownerCell) ?? options.owner,
         label: col1 ?? `Container ${externalId}`,
         location: col5,
-        sizeGroup: null,
+        sizeGroup: sizeGroupCell,
         descriptionLines: [],
         items: [],
       };
@@ -175,7 +300,9 @@ function parseOwnerSheet(
     }
 
     if (col2 !== null) {
-      current.items.push(buildItem(col2, col3, col4, col6, result.warnings));
+      current.items.push(
+        buildItem(col2, col3, col4, col6, notes, slugPath, result.warnings),
+      );
       continue;
     }
 
@@ -193,6 +320,11 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
     const col1 = cellStr(row, 1);
     const col4 = cellStr(row, 4);
     const col5 = cellStr(row, 5);
+    const actionCell = cellStr(row, 6);
+    const notes = cellStr(row, 7);
+    const slugPath = cellStr(row, 8);
+    const priorityCell = cellStr(row, 9);
+    const ownerCell = cellStr(row, 10);
 
     if (col0Str !== null && col0Int === null) {
       const match = RANGE_HEADER_RE.exec(col0Str);
@@ -212,7 +344,7 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
       current = {
         externalId: col0Int,
         type: "box",
-        owner: "self",
+        owner: parseOwner(ownerCell) ?? "self",
         label: col1 ?? `Box ${col0Int}`,
         location: null,
         sizeGroup: currentSizeGroup,
@@ -233,7 +365,17 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
     }
 
     if (col4 !== null) {
-      current.items.push(buildItem(col4, null, col5, null, result.warnings));
+      current.items.push(
+        buildItem(
+          col4,
+          priorityCell,
+          col5,
+          actionCell,
+          notes,
+          slugPath,
+          result.warnings,
+        ),
+      );
     }
   }
 }
@@ -257,13 +399,30 @@ function sheetRows(worksheet: {
   return rows;
 }
 
+/** Optional "Kategorien" sheet: the taxonomy verbatim. */
+function parseCategorySheet(rows: Row[]): ParsedCategory[] {
+  const parsed: ParsedCategory[] = [];
+  for (const row of rows) {
+    const path = cellStr(row, 0);
+    if (path === null) continue;
+    const level = cellInt(row, 3);
+    parsed.push({
+      path,
+      displayName: cellStr(row, 1) ?? path.split("/").pop() ?? path,
+      parentPath: cellStr(row, 2),
+      level: level ?? path.split("/").length - 1,
+    });
+  }
+  return parsed;
+}
+
 async function parseWorkbook(source: ArrayBuffer): Promise<ParseResult> {
   const excelJsModule = await import("exceljs");
   const ExcelJS = excelJsModule.default ?? excelJsModule;
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(source);
 
-  const result: ParseResult = { containers: [], warnings: [] };
+  const result: ParseResult = { containers: [], categories: [], warnings: [] };
   const mine = workbook.getWorksheet(SHEET_MEINE_ORDNER);
   if (mine) {
     parseOwnerSheet(
@@ -298,6 +457,11 @@ async function parseWorkbook(source: ArrayBuffer): Promise<ParseResult> {
 
   const boxes = workbook.getWorksheet(SHEET_BOXEN);
   if (boxes) parseBoxSheet(sheetRows(boxes), result);
+
+  const categorySheet = workbook.getWorksheet(SHEET_KATEGORIEN);
+  if (categorySheet) {
+    result.categories = parseCategorySheet(sheetRows(categorySheet));
+  }
 
   return result;
 }
@@ -367,6 +531,25 @@ export async function importWorkbook(
     ]),
   );
 
+  // The "Kategorien" sheet is the authority for the taxonomy: it carries
+  // display names and keeps categories that no item references. Create
+  // them first (parents before children) so item rows only ever find
+  // existing paths.
+  for (const parsedCategory of [...parsed.categories].sort(
+    (a, b) => a.level - b.level || a.path.localeCompare(b.path),
+  )) {
+    if (knownCategories.has(parsedCategory.path)) continue;
+    const created = await storage.categories.create({
+      path: parsedCategory.path,
+      parentPath: parsedCategory.parentPath,
+      name: parsedCategory.path.split("/").pop() ?? parsedCategory.path,
+      displayName: parsedCategory.displayName,
+      level: parsedCategory.level,
+    });
+    knownCategories.set(parsedCategory.path, created);
+    report.categoriesCreated += 1;
+  }
+
   for (const parsedContainer of parsed.containers) {
     const payload = {
       externalId: parsedContainer.externalId,
@@ -408,6 +591,7 @@ export async function importWorkbook(
         content: parsedItem.content,
         priority: parsedItem.priority,
         categoryPath: parsedItem.categoryPath,
+        notes: parsedItem.notes,
       };
       let item = itemsByContent.get(parsedItem.content);
       if (item === undefined) {
@@ -422,18 +606,25 @@ export async function importWorkbook(
       }
       seen.add(parsedItem.content);
 
-      if (parsedItem.actionTexts.length > 0) {
-        // Existing actions keep their status: only genuinely new texts
-        // are inserted (a completed action must not reopen on re-import).
+      if (parsedItem.actions.length > 0) {
+        // Existing actions keep their status: only genuinely new texts are
+        // inserted (a completed action must not reopen on re-import). The
+        // status/dates travel in the cell, so a fresh import restores them.
         const existingActions = await storage.actions.list();
         const taken = new Set(
           existingActions
             .filter((action) => action.itemId === item.id)
             .map((action) => action.text),
         );
-        for (const text of parsedItem.actionTexts) {
-          if (taken.has(text)) continue;
-          await storage.actions.create({ itemId: item.id, text });
+        for (const action of parsedItem.actions) {
+          if (taken.has(action.text)) continue;
+          await storage.actions.create({
+            itemId: item.id,
+            text: action.text,
+            status: action.status,
+            dueDate: action.dueDate,
+            completedAt: action.completedAt,
+          });
           report.actionsCreated += 1;
         }
       }

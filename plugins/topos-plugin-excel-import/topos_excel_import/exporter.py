@@ -10,6 +10,10 @@ from sqlalchemy.orm import Session, selectinload
 
 from .parser import SHEET_BOXEN, SHEET_MEINE_ORDNER, SHEET_ORDNER_ELTERN
 
+# Columns 0-6 (folder sheets) and 0-5 (box sheet) are the original
+# layout; everything after was appended so an export -> import cycle
+# loses nothing. Appending rather than reordering keeps workbooks written
+# by older versions readable - every added column is optional on import.
 OWNER_SHEET_HEADER = [
     "Nr.",
     "Ordner",
@@ -18,8 +22,26 @@ OWNER_SHEET_HEADER = [
     "Kategorie",
     "Ort",
     "Aktionen",
+    "Notizen",
+    "Kategorie-Pfad",
+    "Eigentuemer",
+    "Groessengruppe",
 ]
-BOX_SHEET_HEADER = ["Nr.", "Box", None, None, "Inhalt", "Kategorie"]
+BOX_SHEET_HEADER = [
+    "Nr.",
+    "Box",
+    None,
+    None,
+    "Inhalt",
+    "Kategorie",
+    "Aktionen",
+    "Notizen",
+    "Kategorie-Pfad",
+    "Prioritaet",
+    "Eigentuemer",
+]
+CATEGORY_SHEET_HEADER = ["Pfad", "Anzeigename", "Elternpfad", "Ebene"]
+SHEET_KATEGORIEN = "Kategorien"
 
 PRIORITY_LABELS = {
     Priority.VERY_HIGH: "sehr hoch",
@@ -43,26 +65,46 @@ def _category_display_path(categories: dict[str, Category], path: str | None) ->
     display: list[str] = []
     for index in range(len(parts)):
         prefix = "/".join(parts[: index + 1])
-        display.append(categories.get(prefix).display_name if prefix in categories else parts[index])
+        display.append(
+            categories.get(prefix).display_name if prefix in categories else parts[index]
+        )
     return " / ".join(display)
 
 
-def _open_action_texts(container_item) -> str | None:
-    texts = [
-        action.text
-        for action in sorted(container_item.actions, key=lambda row: row.id)
-        if action.status == ActionStatus.OPEN
+def _encode_action(action) -> str:
+    """Encode one action so status, completion and due date survive.
+
+    An open action without a due date stays plain text (what the format
+    always looked like); anything else gets a bracket suffix, e.g.
+    ``"Pruefen [erledigt@2026-01-01|faellig:2026-02-01]"``. The importer
+    only reads a bracket as flags when the content parses as known
+    tokens, so an action whose text ends in brackets is left alone.
+    """
+    flags: list[str] = []
+    if action.status != ActionStatus.OPEN:
+        label = "erledigt" if action.status == ActionStatus.DONE else "archiviert"
+        if action.completed_at is not None:
+            label = f"{label}@{action.completed_at.date().isoformat()}"
+        flags.append(label)
+    elif action.completed_at is not None:
+        flags.append(f"erledigt@{action.completed_at.date().isoformat()}")
+    if action.due_date is not None:
+        flags.append(f"faellig:{action.due_date.date().isoformat()}")
+    return f"{action.text} [{'|'.join(flags)}]" if flags else action.text
+
+
+def _encoded_actions(container_item) -> str | None:
+    """Every action of an item, encoded; ``None`` when it has none."""
+    encoded = [
+        _encode_action(action) for action in sorted(container_item.actions, key=lambda row: row.id)
     ]
-    return "; ".join(texts) if texts else None
+    return "; ".join(encoded) if encoded else None
 
 
 def _write_owner_sheet(
     ws,
     containers: list[Container],
     categories: dict[str, Category],
-    *,
-    include_location: bool,
-    include_actions: bool,
 ) -> None:
     ws.append(OWNER_SHEET_HEADER)
     for container in containers:
@@ -73,8 +115,12 @@ def _write_owner_sheet(
                 None,
                 None,
                 None,
-                container.location if include_location else None,
+                container.location,
                 None,
+                None,
+                None,
+                container.owner.value,
+                container.size_group,
             ]
         )
         if container.description:
@@ -90,7 +136,9 @@ def _write_owner_sheet(
                     _priority_label(item.priority),
                     _category_display_path(categories, item.category_path),
                     None,
-                    _open_action_texts(item) if include_actions else None,
+                    _encoded_actions(item),
+                    item.notes,
+                    item.category_path,
                 ]
             )
 
@@ -106,7 +154,21 @@ def _write_box_sheet(
         if container.size_group and container.size_group != current_size_group:
             ws.append([container.size_group])
             current_size_group = container.size_group
-        ws.append([container.external_id, container.label])
+        ws.append(
+            [
+                container.external_id,
+                container.label,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                container.owner.value,
+            ]
+        )
         if container.description:
             for line in container.description.splitlines():
                 if line.strip():
@@ -120,8 +182,27 @@ def _write_box_sheet(
                     None,
                     item.content,
                     _category_display_path(categories, item.category_path),
+                    _encoded_actions(item),
+                    item.notes,
+                    item.category_path,
+                    _priority_label(item.priority),
                 ]
             )
+
+
+def _write_category_sheet(ws, categories: dict[str, Category]) -> None:
+    """The taxonomy verbatim: keeps slugs, display names, and categories
+    that no item references."""
+    ws.append(CATEGORY_SHEET_HEADER)
+    for category in sorted(categories.values(), key=lambda row: row.path):
+        ws.append(
+            [
+                category.path,
+                category.display_name,
+                category.parent_path,
+                category.level,
+            ]
+        )
 
 
 def _autosize(ws) -> None:
@@ -147,9 +228,7 @@ def export_workbook(db: Session) -> bytes:
         if row.type == ContainerType.FOLDER and row.owner in (Owner.SELF, Owner.SHARED)
     ]
     parent_folders = [
-        row
-        for row in containers
-        if row.type == ContainerType.FOLDER and row.owner == Owner.PARENTS
+        row for row in containers if row.type == ContainerType.FOLDER and row.owner == Owner.PARENTS
     ]
     boxes = [row for row in containers if row.type == ContainerType.BOX]
 
@@ -158,12 +237,12 @@ def export_workbook(db: Session) -> bytes:
     mine.title = SHEET_MEINE_ORDNER
     parents = wb.create_sheet(SHEET_ORDNER_ELTERN)
     box_sheet = wb.create_sheet(SHEET_BOXEN)
+    category_sheet = wb.create_sheet(SHEET_KATEGORIEN)
 
-    _write_owner_sheet(mine, own_folders, categories, include_location=True, include_actions=True)
-    _write_owner_sheet(
-        parents, parent_folders, categories, include_location=False, include_actions=False
-    )
+    _write_owner_sheet(mine, own_folders, categories)
+    _write_owner_sheet(parents, parent_folders, categories)
     _write_box_sheet(box_sheet, boxes, categories)
+    _write_category_sheet(category_sheet, categories)
     for ws in wb.worksheets:
         _autosize(ws)
         ws.freeze_panes = "A2"

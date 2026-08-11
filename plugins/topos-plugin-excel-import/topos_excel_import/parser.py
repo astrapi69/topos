@@ -1,6 +1,6 @@
 """Excel parser for the Ordner-Ordnung.xlsx shape.
 
-Three sheets, distinct semantics:
+Four sheets, distinct semantics:
 
 - ``"Meine Ordner"`` (29 cols): owner=SELF, type=FOLDER. Col 0 is a
   numeric external id; rows with col 0 empty either continue the
@@ -13,6 +13,16 @@ Three sheets, distinct semantics:
   numeric box id or a ``"<lo> bis <hi>"`` range header that defines
   the size-group for the following boxes.
 
+- ``"Kategorien"``: the taxonomy verbatim (path, display name, parent,
+  level), so slugs and categories no item references survive.
+
+Columns beyond the original layout (notes, category slug, owner, size
+group, box priority, encoded action state) and the ``Kategorien`` sheet
+are OPTIONAL - a workbook from an older version still parses with the
+previous semantics. The frontend importer
+(``frontend/src/excel/importWorkbook.ts``) implements the same contract;
+a file written by either side imports losslessly on the other.
+
 The parser is intentionally pure: it converts cells into in-memory
 dataclasses (no DB writes). The importer module turns those records
 into idempotent upserts.
@@ -22,6 +32,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import IO
 
@@ -32,10 +43,21 @@ from .mappings import SlugifiedPath, priority_from_german, slugify_category_path
 SHEET_MEINE_ORDNER = "Meine Ordner"
 SHEET_ORDNER_ELTERN = "Ordner Eltern"
 SHEET_BOXEN = "Boxen"
+SHEET_KATEGORIEN = "Kategorien"
 
 _RANGE_HEADER_RE = re.compile(r"^\s*(\d+)\s+bis\s+(\d+)\s*$", re.IGNORECASE)
 _ACTION_SPLIT_RE = re.compile(r"\s*;\s*")
 _NEGATIVE_ACTION_VALUES = {"", "keine", "nein", "no", "none"}
+
+
+@dataclass
+class ParsedAction:
+    """One decoded action cell entry: text plus its restored state."""
+
+    text: str
+    status: str = "open"
+    completed_at: datetime | None = None
+    due_date: datetime | None = None
 
 
 @dataclass
@@ -52,7 +74,17 @@ class ParsedItem:
     notes: str | None
     category_path: str | None
     category_segments: list[tuple[str, str]]
-    action_texts: list[str]
+    actions: list[ParsedAction]
+
+
+@dataclass
+class ParsedCategory:
+    """One row of the optional ``Kategorien`` sheet."""
+
+    path: str
+    display_name: str
+    parent_path: str | None
+    level: int
 
 
 @dataclass
@@ -91,6 +123,7 @@ class ParseResult:
     """
 
     containers: list[ParsedContainer] = field(default_factory=list)
+    categories: list[ParsedCategory] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
 
@@ -129,13 +162,79 @@ def _cell_int(row: tuple, index: int) -> int | None:
     return None
 
 
-def _split_actions(raw: str | None) -> list[str]:
+_DONE_FLAG_RE = re.compile(r"^erledigt(?:@(.+))?$")
+_ARCHIVED_FLAG_RE = re.compile(r"^archiviert(?:@(.+))?$")
+_DUE_FLAG_RE = re.compile(r"^faellig:(.+)$")
+_ACTION_FLAGS_RE = re.compile(r"^(.*?)\s*\[([^\]]*)\]$")
+
+
+def _parse_flag_date(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    try:
+        return datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+
+
+def _decode_action(token: str) -> ParsedAction:
+    """Decode one token written by the exporter's ``_encode_action``.
+
+    The bracket suffix counts as flags only when its content parses as
+    known tokens, so ``"Regal [oben]"`` stays a plain open action
+    instead of losing its brackets.
+    """
+    match = _ACTION_FLAGS_RE.match(token)
+    if match is None:
+        return ParsedAction(text=token)
+    text, flag_blob = match.group(1), match.group(2)
+    status = "open"
+    completed_at: datetime | None = None
+    due_date: datetime | None = None
+    for flag in (piece.strip() for piece in flag_blob.split("|")):
+        done = _DONE_FLAG_RE.match(flag)
+        archived = _ARCHIVED_FLAG_RE.match(flag)
+        due = _DUE_FLAG_RE.match(flag)
+        if done is not None:
+            status = "done"
+            completed_at = _parse_flag_date(done.group(1))
+        elif archived is not None:
+            status = "archived"
+            completed_at = _parse_flag_date(archived.group(1))
+        elif due is not None:
+            due_date = _parse_flag_date(due.group(1))
+        else:
+            # Unknown bracket content: not ours, keep the token verbatim.
+            return ParsedAction(text=token)
+    return ParsedAction(text=text, status=status, completed_at=completed_at, due_date=due_date)
+
+
+def _split_actions(raw: str | None) -> list[ParsedAction]:
     if raw is None:
         return []
     if raw.strip().lower() in _NEGATIVE_ACTION_VALUES:
         return []
     parts = [piece.strip() for piece in _ACTION_SPLIT_RE.split(raw)]
-    return [piece for piece in parts if piece]
+    return [_decode_action(piece) for piece in parts if piece]
+
+
+def _owner_from_cell(raw: str | None) -> str | None:
+    """Read the owner column; ``None`` when absent so the sheet decides."""
+    if raw is None:
+        return None
+    value = raw.strip().lower()
+    return value if value in {"self", "parents", "shared"} else None
+
+
+def _segments_from_slug_path(slug_path: str, display_cell: str | None) -> list[tuple[str, str]]:
+    """Pair an explicit slug path with the German display path so each
+    level keeps its display name."""
+    displays = [piece.strip() for piece in (display_cell or "").split("/") if piece.strip()]
+    slugs = [piece.strip() for piece in slug_path.split("/") if piece.strip()]
+    return [
+        (slug, displays[index] if index < len(displays) else slug)
+        for index, slug in enumerate(slugs)
+    ]
 
 
 def _build_item(
@@ -145,21 +244,32 @@ def _build_item(
     notes_cell: str | None,
     action_cell: str | None,
     result: ParseResult,
+    slug_path_cell: str | None = None,
 ) -> ParsedItem:
     priority, warning = priority_from_german(priority_cell)
     if warning:
         result.warnings.append(warning)
-    slug_result: SlugifiedPath | None = slugify_category_path(category_cell)
-    if slug_result is not None:
-        result.warnings.extend(slug_result.warnings)
-    actions = _split_actions(action_cell)
+
+    # The slug column is authoritative when present: it preserves a slug
+    # the German display name would not reproduce. Without it (legacy
+    # workbook, hand-written file) the display path is slugified.
+    if slug_path_cell:
+        category_path: str | None = slug_path_cell
+        category_segments = _segments_from_slug_path(slug_path_cell, category_cell)
+    else:
+        slug_result: SlugifiedPath | None = slugify_category_path(category_cell)
+        if slug_result is not None:
+            result.warnings.extend(slug_result.warnings)
+        category_path = slug_result.path if slug_result else None
+        category_segments = slug_result.segments if slug_result else []
+
     return ParsedItem(
         content=content,
         priority=priority,
         notes=notes_cell,
-        category_path=slug_result.path if slug_result else None,
-        category_segments=slug_result.segments if slug_result else [],
-        action_texts=actions,
+        category_path=category_path,
+        category_segments=category_segments,
+        actions=_split_actions(action_cell),
     )
 
 
@@ -183,17 +293,26 @@ def _parse_owner_sheet(
         col2 = _cell_str(row, 2)
         col3 = _cell_str(row, 3)
         col4 = _cell_str(row, 4)
-        col5 = _cell_str(row, 5) if has_location else None
-        col6 = _cell_str(row, 6) if has_actions else None
+        # Columns 5-6 exist on both folder sheets since the layout grew; a
+        # legacy "Ordner Eltern" simply leaves them empty.
+        col5 = _cell_str(row, 5)
+        col6 = _cell_str(row, 6)
+        notes = _cell_str(row, 7)
+        slug_path = _cell_str(row, 8)
+        owner_cell = _owner_from_cell(_cell_str(row, 9))
+        size_group_cell = _cell_str(row, 10)
 
         if external_id is not None:
             current = ParsedContainer(
                 external_id=external_id,
                 type=container_type,
-                owner=owner,
+                # The owner column wins when present; otherwise the sheet
+                # decides (which is why "shared" needed a column - it
+                # shares a sheet with "self").
+                owner=owner_cell or owner,
                 label=col1 or f"Container {external_id}",
                 location=col5,
-                size_group=None,
+                size_group=size_group_cell,
             )
             result.containers.append(current)
             continue
@@ -214,9 +333,10 @@ def _parse_owner_sheet(
                     content=col2,
                     priority_cell=col3,
                     category_cell=col4,
-                    notes_cell=None,
+                    notes_cell=notes,
                     action_cell=col6,
                     result=result,
+                    slug_path_cell=slug_path,
                 )
             )
             continue
@@ -239,6 +359,11 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
         col1 = _cell_str(row, 1)
         col4 = _cell_str(row, 4)
         col5 = _cell_str(row, 5)
+        action_cell = _cell_str(row, 6)
+        notes = _cell_str(row, 7)
+        slug_path = _cell_str(row, 8)
+        priority_cell = _cell_str(row, 9)
+        owner_cell = _owner_from_cell(_cell_str(row, 10))
 
         if col0_str is not None and col0_int is None:
             match = _RANGE_HEADER_RE.match(col0_str)
@@ -257,7 +382,7 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
             current = ParsedContainer(
                 external_id=col0_int,
                 type="box",
-                owner="self",
+                owner=owner_cell or "self",
                 label=col1 or f"Box {col0_int}",
                 location=None,
                 size_group=current_size_group,
@@ -276,13 +401,32 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
             current.items.append(
                 _build_item(
                     content=col4,
-                    priority_cell=None,
+                    priority_cell=priority_cell,
                     category_cell=col5,
-                    notes_cell=None,
-                    action_cell=None,
+                    notes_cell=notes,
+                    action_cell=action_cell,
                     result=result,
+                    slug_path_cell=slug_path,
                 )
             )
+
+
+def _parse_category_sheet(ws, *, result: ParseResult) -> None:
+    """Optional ``Kategorien`` sheet: the taxonomy verbatim, so slugs,
+    display names and categories no item references survive."""
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        path = _cell_str(row, 0)
+        if path is None:
+            continue
+        level = _cell_int(row, 3)
+        result.categories.append(
+            ParsedCategory(
+                path=path,
+                display_name=_cell_str(row, 1) or path.rsplit("/", 1)[-1],
+                parent_path=_cell_str(row, 2),
+                level=level if level is not None else path.count("/"),
+            )
+        )
 
 
 def parse_workbook(source: str | Path | IO[bytes]) -> ParseResult:
@@ -320,6 +464,9 @@ def parse_workbook(source: str | Path | IO[bytes]) -> ParseResult:
 
         if SHEET_BOXEN in wb.sheetnames:
             _parse_box_sheet(wb[SHEET_BOXEN], result=result)
+
+        if SHEET_KATEGORIEN in wb.sheetnames:
+            _parse_category_sheet(wb[SHEET_KATEGORIEN], result=result)
     finally:
         wb.close()
     return result

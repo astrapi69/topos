@@ -9,16 +9,13 @@
  *    a difference that does not exist. The meaningful comparison is a
  *    digest over the extracted cell matrix, which this file uses.
  *
- * 2. Is the round-trip lossless? No, not on the first cycle - and the
- *    losses are structural, not bugs: the Ordner-Ordnung sheet layout
- *    has no column for several Topos fields. After one cycle the
- *    workbook is a FIXED POINT (import -> export reproduces the exact
- *    same content), so data stops degrading; the loss happens once, on
- *    the way into the sheet format.
+ * 2. Is the round-trip lossless? Yes. The sheet layout was extended
+ *    (owner, notes, category slug, box priority, action status/dates,
+ *    plus a "Kategorien" sheet) so every field the model carries has a
+ *    column. Export -> import -> export reproduces identical content.
  *
- * Every loss below is asserted deliberately. If a future change makes
- * one of them lossless, this test fails and the expectation moves - it
- * is a ratchet, not a description.
+ * The added columns are appended, never reordered, so a workbook from
+ * an older version still imports - the last test pins that too.
  */
 
 import { createHash } from "node:crypto";
@@ -322,6 +319,45 @@ async function exportBytes(backup: ToposBackup): Promise<ArrayBuffer> {
   return (await buildExcelBackup(backup)).arrayBuffer();
 }
 
+/** A workbook in the pre-extension layout (7 / 6 columns, no extras). */
+async function legacyWorkbook(): Promise<ArrayBuffer> {
+  const workbook = new ExcelJS.Workbook();
+  const mine = workbook.addWorksheet("Meine Ordner");
+  mine.addRow([
+    "Nr.",
+    "Ordner",
+    "Inhalt",
+    "Prioritaet",
+    "Kategorie",
+    "Ort",
+    "Aktionen",
+  ]);
+  mine.addRow([10, "Selbst", null, null, null, "Regal 1", null]);
+  mine.addRow([
+    null,
+    null,
+    "Alt",
+    "hoch",
+    "Finanzen / Versicherung",
+    null,
+    "Alte Aktion",
+  ]);
+  const parents = workbook.addWorksheet("Ordner Eltern");
+  parents.addRow([
+    "Nr.",
+    "Ordner",
+    "Inhalt",
+    "Prioritaet",
+    "Kategorie",
+    "Ort",
+    "Aktionen",
+  ]);
+  parents.addRow([30, "Eltern", null, null, null, null, null]);
+  const boxes = workbook.addWorksheet("Boxen");
+  boxes.addRow(["Nr.", "Box", null, null, "Inhalt", "Kategorie"]);
+  return workbook.xlsx.writeBuffer() as Promise<ArrayBuffer>;
+}
+
 /** Export -> import -> export, returning both workbooks and the store. */
 async function cycle() {
   const first = await exportBytes(SOURCE);
@@ -343,19 +379,18 @@ describe("Excel round-trip fidelity", () => {
     expect(await contentDigest(once)).toBe(await contentDigest(twice));
   });
 
-  it("reaches a fixed point after one cycle", async () => {
+  it("is lossless: one cycle reproduces the identical workbook content", async () => {
     const { first, second, store } = await cycle();
 
-    // First cycle loses what the sheet format cannot carry (see below).
-    expect(await contentDigest(first)).not.toBe(await contentDigest(second));
+    // The whole point: export -> import -> export changes nothing.
+    expect(await contentDigest(second)).toBe(await contentDigest(first));
 
-    // Second cycle changes nothing further: no ongoing degradation.
+    // And it stays that way on a further cycle.
     const reimported = fakeStorage();
     await importWorkbook(second, reimported.service);
     const third = await exportBytes(backupOf(reimported));
-    expect(await contentDigest(third)).toBe(await contentDigest(second));
+    expect(await contentDigest(third)).toBe(await contentDigest(first));
 
-    // The store is what the workbook can represent, nothing dropped silently.
     expect(store.containers).toHaveLength(4);
     expect(store.items).toHaveLength(5);
   });
@@ -390,35 +425,54 @@ describe("Excel round-trip fidelity", () => {
     expect(store.actions.map((action) => action.text)).toContain("Offen");
   });
 
-  it("pins the structural losses of the Ordner-Ordnung format", async () => {
+  it("carries the fields older layouts had no column for", async () => {
     const { store } = await cycle();
     const item = (content: string) =>
       store.items.find((row) => row.content === content);
+    const container = (externalId: number) =>
+      store.containers.find((row) => row.externalId === externalId);
 
-    // owner "shared" shares the "Meine Ordner" sheet with "self" and comes
-    // back as "self" - the sheet encodes the owner, and there are only two.
+    // owner "shared" is explicit now, not implied by the sheet.
+    expect(container(20)?.owner).toBe("shared");
+    // "Ordner Eltern" carries a location column.
+    expect(container(30)?.location).toBe("Dachboden");
+    // Item notes have a column.
+    expect(item("Mit Notiz")?.notes).toBe("wichtige Notiz");
+    // The slug travels next to the German display path, so a slug that is
+    // not derivable from its display name survives verbatim.
+    expect(item("Sonderslug")?.categoryPath).toBe("custom-slug");
+    // "Boxen" carries priority.
+    expect(item("Box-Eintrag")?.priority).toBe("high");
+    // Every action survives with its status, on every sheet.
     expect(
-      store.containers.find((container) => container.externalId === 20)?.owner,
-    ).toBe("self");
-
-    // "Ordner Eltern" has no location column, so a parents location is lost.
+      store.actions.map((action) => `${action.text}:${action.status}`).sort(),
+    ).toEqual(["Eltern-Aktion:open", "Erledigt:done", "Offen:open"]);
     expect(
-      store.containers.find((container) => container.externalId === 30)
-        ?.location,
-    ).toBeNull();
+      store.actions.find((action) => action.text === "Erledigt")?.completedAt,
+    ).toBe("2026-01-01");
+  });
 
-    // No sheet has a notes column: item notes never reach the workbook.
-    expect(item("Mit Notiz")?.notes).toBeNull();
+  it("still reads a legacy workbook without the added columns", async () => {
+    // Files exported before the layout grew must keep importing: the
+    // added columns are optional, the old semantics are the fallback.
+    const legacy = await legacyWorkbook();
+    const store = fakeStorage();
+    await importWorkbook(legacy, store.service);
 
-    // A category slug that is not derivable from its display name is
-    // re-derived on import: the sheet stores "Sonderfall", not the slug.
-    expect(item("Sonderslug")?.categoryPath).toBe("sonderfall");
-
-    // "Boxen" has no priority column: box items come back as "none".
-    expect(item("Box-Eintrag")?.priority).toBe("none");
-
-    // Only OPEN actions are exported, and only on "Meine Ordner": the done
-    // action and the parents-sheet action do not survive.
-    expect(store.actions.map((action) => action.text)).toEqual(["Offen"]);
+    expect(
+      store.containers.map((row) => row.externalId).sort((a, b) => a - b),
+    ).toEqual([10, 30]);
+    // Owner comes from the sheet when no owner column is present.
+    expect(store.containers.find((c) => c.externalId === 10)?.owner).toBe(
+      "self",
+    );
+    expect(store.containers.find((c) => c.externalId === 30)?.owner).toBe(
+      "parents",
+    );
+    // Category falls back to slugifying the German display path.
+    expect(store.items.find((i) => i.content === "Alt")?.categoryPath).toBe(
+      "finance/insurance",
+    );
+    expect(store.actions.map((a) => a.text)).toEqual(["Alte Aktion"]);
   });
 });
