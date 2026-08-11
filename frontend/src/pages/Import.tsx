@@ -1,9 +1,15 @@
 /**
  * Excel import page.
  *
- * Drag-and-drop xlsx file -> POST /import/excel -> show
- * ImportReport summary card. On success, refresh every cached
- * table so the next page navigation reflects the new state.
+ * Drag-and-drop an xlsx file -> import -> show the ImportReport
+ * summary card. On success, refresh every cached table so the next page
+ * navigation reflects the new state.
+ *
+ * Dual-mode, like the rest of the app: with a backend the file is posted
+ * to the plugin endpoint (POST /api/import/excel); without one it is
+ * parsed in the browser and written through the storage service, so the
+ * offline PWA imports too. Both paths apply the same match keys and
+ * return the same ImportReport shape.
  */
 
 import { useState } from "react";
@@ -12,13 +18,15 @@ import { useFeature } from "@astrapi69/feature-strategy-react";
 
 import NavBar from "../components/NavBar";
 import { api } from "../api/client";
+import { importWorkbook } from "../excel/importWorkbook";
+import { getStorage } from "../storage";
 import { FEATURES } from "../features/featureConfig";
 import { refreshAll } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
 import { useDialog } from "../components/AppDialog";
 import { notify, errorMessage } from "../utils/notify";
 import { rebuildSearchIndex } from "../search/buildIndex";
-import { btnPrimary, muted, pageMainNarrow } from "../ui/classes";
+import { btnPrimary, pageMainNarrow } from "../ui/classes";
 import type { ImportReport } from "../types/topos";
 
 export default function Import() {
@@ -29,14 +37,16 @@ export default function Import() {
   const [submitting, setSubmitting] = useState(false);
   const [dragging, setDragging] = useState(false);
   const { confirm } = useDialog();
-  // Excel import posts to the backend; disabled (with a hint) when no
-  // backend is reachable - previously ungated, so offline the button was
-  // enabled and the POST failed with only a toast.
+  // Dual-mode, like the rest of the app: with a backend the workbook is
+  // posted to the plugin endpoint (server-side parse + upsert); without
+  // one it is parsed in the browser and written through the storage
+  // service. The feature flag now only picks the path, it no longer
+  // disables the form.
   const importFeature = useFeature(FEATURES.EXCEL_IMPORT);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file || !importFeature.isActive) return;
+    if (!file) return;
     if (pruneMissing) {
       const ok = await confirm(
         t("topos.confirm.prune_title", "Fehlende Einträge löschen?"),
@@ -55,7 +65,11 @@ export default function Import() {
     setSubmitting(true);
     setReport(null);
     try {
-      const result = await api.importExcel(file, { pruneMissing });
+      const result = importFeature.isActive
+        ? await api.importExcel(file, { pruneMissing })
+        : await importWorkbook(await file.arrayBuffer(), getStorage(), {
+            pruneMissing,
+          });
       setReport(result);
       await refreshAll();
       await rebuildSearchIndex();
@@ -159,22 +173,13 @@ export default function Import() {
           <button
             type="submit"
             className={btnPrimary}
-            disabled={!file || submitting || !importFeature.isActive}
+            disabled={!file || submitting}
             data-testid="import-submit"
           >
             {submitting
               ? t("topos.page.import.uploading", "Wird hochgeladen...")
               : t("topos.page.import.upload", "Hochladen")}
           </button>
-
-          {!importFeature.isActive && (
-            <span data-testid="import-backend-hint" className={muted}>
-              {t(
-                "topos.page.import.backend_required",
-                "Der Excel-Import benötigt eine Backend-Verbindung (Einstellungen: Backend).",
-              )}
-            </span>
-          )}
         </form>
 
         {report && (
