@@ -145,7 +145,7 @@ topos/
 
 ## Core conventions
 
-- i18n: 8 languages in `backend/config/i18n/{lang}.yaml`. DE + EN fully populated; the other 6 carry EN as placeholders. DE uses real umlauts.
+- i18n: 8 languages in `backend/config/i18n/{lang}.yaml`, all fully translated (DE uses real umlauts). `en.yaml` is the structural reference: every locale carries the same keys. Add a locale string via `scripts/apply_translation.py` (rebuilds from en.yaml, enforces placeholder parity, reports untranslated strings). The frontend bundles generated copies under `frontend/src/i18n/catalogs/` so the offline PWA can switch languages - regenerate with `scripts/generate_i18n_catalogs.py`; the `i18n-catalogs-in-sync` pre-commit hook blocks drift.
 - Python: type hints, snake_case, Pydantic v2, SQLAlchemy 2.0 mapped columns
 - TypeScript: strict mode, no `any`, Radix UI for primitives
 - Styling: CSS custom properties in `styles/global.css` are the single colour source (default palette: cool slate + Blue-800 accent, matching the PWA theme-color). `tailwind.config.js` bridges them into token utilities (`bg-surface`, `text-ink`, `border-line`, `bg-accent`, ...); `src/ui/classes.ts` composes the shared button/input/badge/card strings from them. Colours flip with `data-theme="dark"` via the variables - `dark:` variants only where the structure differs, not for palette. Fixed-palette Tailwind colours (gray-*/blue-*) are forbidden; semantic status colours (green/yellow/red badges) are the exception. Type pairing: JetBrains Mono (display, headings via the global type scale) + DM Sans (body), both bundled locally. See architecture.md "Theming and styling".
