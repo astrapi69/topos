@@ -113,6 +113,8 @@ topos:
       done: Erledigt
       archived: Archiviert
   item:
+    number: "Nr. im Container"
+    number_hint: "Nur innerhalb dieses Containers eindeutig. Leer lassen für die nächste freie Nummer."
     container: Container
     content: Inhalt
     priority: Priorität

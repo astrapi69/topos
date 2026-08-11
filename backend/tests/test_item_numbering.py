@@ -11,7 +11,10 @@ container re-numbers it there.
 
 from __future__ import annotations
 
+import pytest
+
 from app.database import SessionLocal
+from app.exceptions import ConflictError
 from app.models import Container, ContainerType, Item, Owner
 from app.schemas.item import ItemCreate, ItemUpdate
 from app.services import items as item_service
@@ -114,5 +117,90 @@ def test_existing_items_without_a_number_get_one_assigned():
         listed = item_service.list_items(db, container_id=container.id)
         assert all(row.external_id is not None for row in listed)
         assert listed[0].external_id == 1
+    finally:
+        db.close()
+
+
+def test_number_can_be_changed_within_the_container():
+    """The number is a label the user may correct - free within its own
+    container, since ``(container_id, external_id)`` is the pair that has
+    to stay unique."""
+    db = SessionLocal()
+    try:
+        container = _container(db, 12)
+        item = item_service.create_item(db, ItemCreate(container_id=container.id, content="A"))
+        assert item.external_id == 1
+
+        renumbered = item_service.update_item(db, item.id, ItemUpdate(external_id=17))
+        assert renumbered.external_id == 17
+
+        # The next auto-assigned number continues above the highest.
+        following = item_service.create_item(db, ItemCreate(container_id=container.id, content="B"))
+        assert following.external_id == 18
+    finally:
+        db.close()
+
+
+def test_duplicate_number_in_the_same_container_is_rejected():
+    db = SessionLocal()
+    try:
+        container = _container(db, 13)
+        item_service.create_item(db, ItemCreate(container_id=container.id, content="A"))
+        second = item_service.create_item(db, ItemCreate(container_id=container.id, content="B"))
+
+        with pytest.raises(ConflictError) as excinfo:
+            item_service.update_item(db, second.id, ItemUpdate(external_id=1))
+        # The message names the number and the container, so the toast is
+        # actionable without a follow-up question.
+        assert "1" in str(excinfo.value)
+    finally:
+        db.close()
+
+
+def test_same_number_in_a_different_container_is_fine():
+    """Only the pair has to be unique: 42-1 and 100-1 coexist."""
+    db = SessionLocal()
+    try:
+        first = _container(db, 14)
+        second = _container(db, 15)
+        a = item_service.create_item(db, ItemCreate(container_id=first.id, content="A"))
+        b = item_service.create_item(db, ItemCreate(container_id=second.id, content="B"))
+
+        renumbered = item_service.update_item(db, b.id, ItemUpdate(external_id=a.external_id))
+        assert renumbered.external_id == a.external_id
+    finally:
+        db.close()
+
+
+def test_keeping_its_own_number_is_not_a_conflict():
+    """Saving a form without touching the number must not trip the check
+    against the item itself."""
+    db = SessionLocal()
+    try:
+        container = _container(db, 16)
+        item = item_service.create_item(db, ItemCreate(container_id=container.id, content="A"))
+        updated = item_service.update_item(
+            db, item.id, ItemUpdate(external_id=item.external_id, content="A edited")
+        )
+        assert updated.external_id == item.external_id
+        assert updated.content == "A edited"
+    finally:
+        db.close()
+
+
+def test_moving_with_an_explicit_number_checks_the_target_container():
+    db = SessionLocal()
+    try:
+        source = _container(db, 17)
+        target = _container(db, 18)
+        taken = item_service.create_item(db, ItemCreate(container_id=target.id, content="taken"))
+        moving = item_service.create_item(db, ItemCreate(container_id=source.id, content="moving"))
+
+        with pytest.raises(ConflictError):
+            item_service.update_item(
+                db,
+                moving.id,
+                ItemUpdate(container_id=target.id, external_id=taken.external_id),
+            )
     finally:
         db.close()

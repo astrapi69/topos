@@ -213,6 +213,8 @@ export interface ItemCreate {
 
 export interface ItemUpdate {
   containerId?: number;
+  /** Per-container number; editable, unique within its container only. */
+  externalId?: number | null;
   content?: string;
   priority?: Priority;
   categoryPath?: string | null;
