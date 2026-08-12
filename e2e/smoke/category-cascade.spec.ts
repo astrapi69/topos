@@ -48,7 +48,7 @@ test.describe("category cascade UI", () => {
 
     test("orphan section renders in settings at phone width", async ({page}) => {
         await page.setViewportSize(MOBILE);
-        await page.goto("/settings");
+        await page.goto("/settings?tab=maintenance");
         await expect(page.getByTestId("settings-title")).toBeVisible();
         await expect(page.getByTestId("orphan-paths-section")).toBeVisible();
     });
