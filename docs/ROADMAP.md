@@ -72,29 +72,30 @@
       workspaces, Docker and the dev compose moved in the same commit.
       Resolution parity 781 = 781 against the deleted lock; the build is
       byte-identical in both modes.
+- [x] **PWA installability hardening**. Precache trimmed from 2.84 MB
+      over 79 entries to 1.62 MB over 67: the lazy exceljs chunk (908 KB)
+      moved to a CacheFirst runtime rule, 340 KB of unreferenced icons
+      deleted, og-image and the install screenshots excluded. Manifest
+      gained `id`, screenshots for both form factors (captured from the
+      real build by `e2e/tools/capture-manifest-screenshots.mjs`),
+      shortcuts, maskable-192, and `orientation: any`. The install prompt
+      moved out of Settings > About into an app-level dismissable banner,
+      so the platforms that fire `beforeinstallprompt` get the same
+      affordance iOS already had. Earlier in v0.2.0: prerendered static
+      routes (deep links answer 200), no dead API requests per load,
+      autoUpdate self-heal.
+- [x] **Desktop launcher build pipeline verified**. All three per-OS
+      workflows run green and attach their artifacts; checksums, file
+      types and the macOS CFBundleVersion verified against the v0.2.0
+      release. `topos-launcher --version` gives the binaries a headless
+      path, and the release template now matches the assets the
+      workflows actually attach. Starting them on macOS / Windows
+      hardware is tracked separately below.
 
 ## Next (P2 - high-value features)
 
-- [ ] **PWA installability hardening**. Manifest icons, install
-      prompt, offline shell, service-worker precache audit.
-      v0.2.0 did part of it: static routes are prerendered so deep
-      links answer 200, the build stopped firing four dead API
-      requests per load, and the SW self-heals on deploy
-      (autoUpdate). The precache audit and the icon/install-prompt
-      review are still open.
-- [ ] **Desktop launcher: hardware start unverified**. The CI half
-      is done: all three per-OS workflows have run green (7 runs
-      each, most recently on the v0.2.0 tag), the artifacts are
-      attached to the release, all three SHA256 checksums verify,
-      the file types match their platforms, and the macOS
-      Info.plist carries the right CFBundleVersion. The Linux
-      binary starts and reports its own version.
-      What is left needs the actual operating systems: does the
-      .exe get past SmartScreen, does the unsigned .app get past
-      Gatekeeper, does either reach the Docker check. Nobody has
-      run them on macOS or Windows hardware. Also open: no
-      workflow executes the artifact it just built - now possible
-      via `topos-launcher --version`, tracked separately.
+No open P2 items. The two that stood here closed on 2026-08-12; the
+launcher's remaining half is a hardware gate, see below.
 
 ## Later (P3 - quality + reach)
 
@@ -118,6 +119,18 @@
       `CategoryBrowse` currently threads `depth` through as a prop.
 - [ ] Family-shared mode: multi-user backend behind auth
 - [ ] Calendar integration for action `due_date` reminders
+
+## Blocked / Hardware
+
+- [ ] **Launcher start on macOS and Windows hardware**. The build side
+      is done (see Done above). What is left cannot be checked from
+      Linux or from CI: does the .exe get past SmartScreen, does the
+      unsigned .app get past Gatekeeper, does either reach the Docker
+      check. Needs someone on each OS.
+- [ ] **Native-speaker review of the six translated catalogs** (ES, FR,
+      PT, TR, EL, JA). All 458 keys are translated and placeholder-parity
+      is enforced by `scripts/apply_translation.py`; what is missing is a
+      human per language. Not a code task.
 
 ## Out of scope
 
