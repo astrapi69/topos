@@ -26,7 +26,7 @@ npx playwright test         # E2E tests
 
 ```bash
 # Frontend: TypeScript compiler
-cd frontend && npx tsc --noEmit
+cd frontend && bunx tsc --noEmit
 
 # Backend: mypy (optional, not set up yet)
 # cd backend && poetry run mypy app/
@@ -115,7 +115,7 @@ def test_image_roundtrip():
 **How to run:**
 ```bash
 make test-frontend          # all frontend tests
-cd frontend && npx vitest   # watch mode
+cd frontend && bunx vitest   # watch mode
 ```
 
 **Example:**
@@ -354,7 +354,7 @@ Important: use Poetry for everything, no pip calls.
 **Setup:**
 ```bash
 cd frontend
-npm install -D @stryker-mutator/core @stryker-mutator/vitest-runner @stryker-mutator/typescript-checker
+bun add -d @stryker-mutator/core @stryker-mutator/vitest-runner @stryker-mutator/typescript-checker
 ```
 
 **stryker.config.json:**
@@ -387,13 +387,13 @@ npm install -D @stryker-mutator/core @stryker-mutator/vitest-runner @stryker-mut
 **How to run:**
 ```bash
 # Full run (slow, nightly or manual)
-cd frontend && npx stryker run
+cd frontend && bunx stryker run
 
 # Just one directory
-cd frontend && npx stryker run --mutate "src/api/**/*.ts"
+cd frontend && bunx stryker run --mutate "src/api/**/*.ts"
 
 # Just one file
-cd frontend && npx stryker run --mutate "src/api/client.ts"
+cd frontend && bunx stryker run --mutate "src/api/client.ts"
 ```
 
 **Test the critical frontend modules first:**
@@ -422,7 +422,7 @@ Steps:
 ```makefile
 # Frontend type check
 check-types:
-	cd frontend && npx tsc --noEmit
+	cd frontend && bunx tsc --noEmit
 
 # Backend mutation testing (nightly/manual)
 mutmut-backend:
@@ -440,10 +440,10 @@ mutmut-html:
 
 # Frontend mutation testing (nightly/manual)
 stryker:
-	cd frontend && npx stryker run
+	cd frontend && bunx stryker run
 
 stryker-api:
-	cd frontend && npx stryker run --mutate "src/api/**/*.ts"
+	cd frontend && bunx stryker run --mutate "src/api/**/*.ts"
 
 # All checks together (before push)
 check-all: test check-types

@@ -31,7 +31,7 @@ dev: ## Start backend + frontend (backend first, then frontend)
 		sleep 1; \
 	done
 	@echo "Backend ready. Starting frontend..."
-	@cd frontend && npm run dev
+	@cd frontend && bun run dev
 
 DEV_LOG_DIR ?= /tmp/topos-logs
 
@@ -55,7 +55,7 @@ dev-bg: ## Start in background, logs to $(DEV_LOG_DIR) (stop with: make dev-down
 			< /dev/null > $(DEV_LOG_DIR)/backend.log 2>&1 & \
 		echo $$! > .pid-backend
 	@cd frontend && \
-		setsid npm run dev \
+		setsid bun run dev \
 			< /dev/null > $(DEV_LOG_DIR)/frontend.log 2>&1 & \
 		echo $$! > .pid-frontend
 	@sleep 2
@@ -110,7 +110,7 @@ dev-backend:
 	cd backend && poetry env use python3.12 -q 2>/dev/null; poetry run uvicorn app.main:app --reload --port 8010
 
 dev-frontend:
-	cd frontend && npm run dev
+	cd frontend && bun run dev
 
 # --- Install ---
 
@@ -120,10 +120,10 @@ install-backend:
 	cd backend && poetry install
 
 install-frontend:
-	cd frontend && npm install
+	cd frontend && bun install
 
 install-e2e:
-	cd e2e && npm install && npx playwright install chromium
+	cd e2e && bun install && npx playwright install chromium
 
 install-plugins:
 	@for dir in plugins/topos-plugin-*; do \
@@ -142,7 +142,7 @@ test: test-backend test-frontend ## Run ALL tests, no coverage (everyday use; co
 test-frontend: ## Run frontend unit tests (Vitest)
 	@echo ""
 	@echo "=== Frontend Tests ==="
-	cd frontend && npx vitest run
+	cd frontend && bunx vitest run
 
 test-backend: ## Run backend tests
 	@echo ""
@@ -163,17 +163,17 @@ test-fast: ## Fast PR-mirror gate: backend ruff+mypy+pytest, frontend tsc+vitest
 	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -q
 	@echo ""
 	@echo "=== test-fast: frontend tsc --noEmit ==="
-	cd frontend && npx tsc --noEmit
+	cd frontend && bunx tsc --noEmit
 	@echo ""
 	@echo "=== test-fast: frontend vitest run ==="
-	cd frontend && npx vitest run
+	cd frontend && bunx vitest run
 	@echo ""
 	@echo "test-fast mirrors the PR gate. Full suite incl. plugins: 'make test'."
 
 test-changed: ## Test Impact Analysis: only tests affected vs $(TIA_BASE) (vitest --changed + pytest --testmon)
 	@echo ""
 	@echo "=== test-changed: frontend Vitest --changed $(TIA_BASE) ==="
-	cd frontend && npx vitest run --changed $(TIA_BASE) --passWithNoTests
+	cd frontend && bunx vitest run --changed $(TIA_BASE) --passWithNoTests
 	@echo ""
 	@echo "=== test-changed: backend pytest --testmon (vs .testmondata) ==="
 	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry run pip install -q pytest-testmon
@@ -209,7 +209,7 @@ test-coverage-backend: ## Backend coverage report (htmlcov/)
 test-coverage-frontend: ## Frontend coverage report (coverage/)
 	@echo ""
 	@echo "=== Frontend Coverage ==="
-	cd frontend && npm run test:coverage
+	cd frontend && bun run test:coverage
 
 # Plugin coverage: same pattern as test-plugin-<name>. Wire each
 # plugin's `--cov=<package>` into test-coverage-plugin-<name> and
@@ -256,7 +256,7 @@ check-types-backend: ## Run mypy on backend
 check-types-frontend: ## Run tsc --noEmit on frontend
 	@echo ""
 	@echo "=== TypeScript Frontend ==="
-	cd frontend && npx tsc --noEmit
+	cd frontend && bunx tsc --noEmit
 
 # --- E2E Tests ---
 

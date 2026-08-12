@@ -269,7 +269,7 @@ that the local sweep would have caught first. Do not skip.
 make test
 
 # Frontend unit tests + type check
-cd frontend && npx tsc --noEmit && npm run test
+cd frontend && bunx tsc --noEmit && bun run test
 
 # Smoke tests (fast Playwright suite)
 npx playwright test --project=smoke
@@ -320,7 +320,7 @@ ALL must be green. On a red test:
 cd backend && poetry build
 
 # Frontend
-cd frontend && npm run build
+cd frontend && bun run build
 
 # Docker (if active)
 docker build -t topos:test .
@@ -440,14 +440,14 @@ as "done". Missing items block the release.
 - [ ] manuscripta and other Topos deps at the current version
 - [ ] `make test` green
 - [ ] Frontend `tsc --noEmit` clean
-- [ ] `npm run test` (Vitest) green
+- [ ] `bun run test` (Vitest) green
 - [ ] `npx playwright test --project=smoke` green
 - [ ] `ruff check` clean
 - [ ] `mypy app/` clean (MANDATORY since v0.26.x; not "if active")
 - [ ] `poetry run pre-commit run --all-files` clean (MANDATORY)
 - [ ] `make verify-docs-discipline` clean (MANDATORY since v0.30.0+: aggregates `verify-mkdocs-nav` + `check-mkdocs-orphans`; addresses the v0.30.0 docs+i18n drift audit findings)
 - [ ] Backend `poetry build` successful (skipped iff `package-mode = false`)
-- [ ] Frontend `npm run build` successful
+- [ ] Frontend `bun run build` successful
 - [ ] `cd launcher && poetry run pyinstaller topos-launcher.spec --clean --noconfirm` succeeds (MANDATORY for any release touching launcher/ or its embedded version)
 - [ ] Docker build successful (if active)
 - [ ] Git tag created and pushed
@@ -471,7 +471,7 @@ for this release".
 
 ### Build broken because of dependencies
 
-`poetry lock --no-update` and `npm install` in both projects, then
+`poetry lock --no-update` and `bun install` in both projects, then
 rebuild. On persistent errors: abort the release, solve the problem
 in its own commit.
 

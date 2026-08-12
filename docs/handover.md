@@ -51,13 +51,13 @@ cd plugins/topos-plugin-excel-import && PYTHONPATH=/home/astrapi69/dev/git/hub/a
     /home/astrapi69/dev/git/hub/astrapi69/topos/backend/.venv/bin/pytest -q tests/
 # Expect: 27 passed
 
-cd frontend && npm run test
+cd frontend && bun run test
 # Expect: 90 passed across 18 files
 
-cd frontend && npx tsc --noEmit
+cd frontend && bunx tsc --noEmit
 # Expect: clean (empty output)
 
-cd frontend && npm run build
+cd frontend && bun run build
 # Expect: 1811 modules, PWA precache ~880 KiB
 
 # Optional: Playwright e2e (auto-starts backend + frontend)

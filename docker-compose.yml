@@ -29,7 +29,14 @@ services:
       # frontend container's localhost is itself, so route via the
       # `backend` service name on the compose network.
       - VITE_API_PROXY_TARGET=http://backend:8010
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    # The image stays node:24-slim (Node is the runtime); bun is added
+    # as the package manager and script runner, pinned to the same
+    # 1.3.14 as CI. `npm install` here would regenerate the deleted
+    # package-lock.json and re-resolve the tree untracked.
+    command: >
+      sh -c "npm install -g bun@1.3.14 &&
+      bun install --frozen-lockfile &&
+      bun run dev -- --host 0.0.0.0"
     depends_on:
       - backend
 

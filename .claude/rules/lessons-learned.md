@@ -661,7 +661,7 @@ masquerading as feature delivery.
 ## Run vitest from `frontend/`, not the repo root
 
 Vitest's config lives in ``frontend/vite.config.ts``.
-Running ``npx vitest run`` from the repo root finds no
+Running ``bunx vitest run`` from the repo root finds no
 config, defaults to the `node` environment, and produces
 ``ReferenceError: document is not defined`` across every
 test that touches the DOM. In a real 2026-05-12 incident,
@@ -683,14 +683,14 @@ Three reliable invocations:
 
 - ``make test-frontend`` from anywhere (the Makefile
   cd's into ``frontend/`` before running vitest).
-- ``cd frontend && npx vitest run`` — direct, fast,
+- ``cd frontend && bunx vitest run`` — direct, fast,
   same result as the Makefile target.
-- ``cd frontend && npx vitest run src/path/to/file.test.tsx``
+- ``cd frontend && bunx vitest run src/path/to/file.test.tsx``
   for a targeted re-run.
 
 Failure modes:
 
-- ``npx vitest run`` from repo root → no config found
+- ``bunx vitest run`` from repo root → no config found
   → wrong environment → 100% red flag on DOM-touching
   tests.
 - ``poetry run vitest`` (mixed up with backend tooling)
@@ -1830,7 +1830,7 @@ trusting a green run or assuming the push deployed.
 The "AI providers not visible on GH Pages" report was dismissed three
 times as "works as designed (passphrase gate first)" from reading code.
 It was a real UX wall. Only a real-browser reproduction found it. Recipe:
-`GITHUB_PAGES=true VITE_STORAGE_MODE=dexie npm run build` then
+`GITHUB_PAGES=true VITE_STORAGE_MODE=dexie bun run build` then
 `vite preview`, drive `http://localhost:PORT/topos/<route>` with a
 Playwright script that lives IN `e2e/` (so `@astrapi69/... `/`@playwright/test`
 resolve; a /tmp script fails ERR_MODULE_NOT_FOUND). A repeated report
