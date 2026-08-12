@@ -28,7 +28,9 @@ let probe: Promise<boolean> | null = null;
  * this module free of the storage -> api-client import chain.
  */
 function backendImpossible(): boolean {
-  return import.meta.env.VITE_STORAGE_MODE === "dexie" && getBackendUrl() === "";
+  return (
+    import.meta.env.VITE_STORAGE_MODE === "dexie" && getBackendUrl() === ""
+  );
 }
 
 export function isBackendAvailable(): Promise<boolean> {
