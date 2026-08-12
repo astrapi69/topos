@@ -5,6 +5,12 @@
     "remove": "削除"
   },
   "pwa": {
+    "install": {
+      "aria_label": "Topos をアプリとしてインストール",
+      "dismiss": "非表示",
+      "subtitle": "Topos は独立したウィンドウで起動し、オフラインでも使えます。",
+      "title": "アプリとしてインストール"
+    },
     "install_app": "アプリをインストール",
     "ios": {
       "aria_label": "iPhoneにインストール",

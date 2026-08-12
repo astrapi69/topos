@@ -409,6 +409,11 @@ pwa:
   update_available: 新しいバージョンがあります
   update_action: 更新
   install_app: アプリをインストール
+  install:
+    title: "アプリとしてインストール"
+    subtitle: "Topos は独立したウィンドウで起動し、オフラインでも使えます。"
+    dismiss: "非表示"
+    aria_label: "Topos をアプリとしてインストール"
   ios:
     title: アプリとしてインストール
     steps: 共有アイコンをタップし、「ホーム画面に追加」を選ぶと、Safariのバーなしで開きます。

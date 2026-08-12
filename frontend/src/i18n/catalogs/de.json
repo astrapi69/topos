@@ -5,6 +5,12 @@
     "remove": "Entfernen"
   },
   "pwa": {
+    "install": {
+      "aria_label": "Topos als App installieren",
+      "dismiss": "Ausblenden",
+      "subtitle": "Topos startet dann im eigenen Fenster und funktioniert offline.",
+      "title": "Als App installieren"
+    },
     "install_app": "App installieren",
     "ios": {
       "aria_label": "Auf dem iPhone installieren",

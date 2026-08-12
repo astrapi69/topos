@@ -409,6 +409,11 @@ pwa:
   update_available: Yeni sürüm mevcut
   update_action: Güncelle
   install_app: Uygulamayı kur
+  install:
+    title: "Uygulama olarak yükle"
+    subtitle: "Topos kendi penceresinde açılır ve çevrimdışı çalışır."
+    dismiss: "Gizle"
+    aria_label: "Topos'u uygulama olarak yükle"
   ios:
     title: Uygulama olarak kur
     steps: Paylaş simgesine, ardından «Ana Ekrana Ekle» seçeneğine dokunun; Safari çubuğu olmadan açılır.
