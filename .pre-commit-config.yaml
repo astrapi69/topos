@@ -49,7 +49,9 @@ repos:
 
       - id: i18n-catalogs-in-sync
         name: bundled i18n catalogs match the backend YAML
-        entry: bash -c 'cd backend && poetry run python ../scripts/generate_i18n_catalogs.py --check'
+        # python3, not `poetry run`: the check only needs PyYAML, and
+        # the CI hook job has no poetry (it installs pre-commit alone).
+        entry: bash -c 'python3 scripts/generate_i18n_catalogs.py --check'
         language: system
         pass_filenames: false
         files: ^(backend/config/i18n/|frontend/src/i18n/catalogs/)

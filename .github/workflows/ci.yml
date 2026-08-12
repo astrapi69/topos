@@ -140,7 +140,17 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install pre-commit
-        run: pip install pre-commit
+        run: pip install pre-commit pyyaml
+      # The eslint hook runs the repo's flat config, which imports
+      # @eslint/js and typescript-eslint - `npx eslint` alone would
+      # fetch the binary but not the config's dependencies, so the
+      # frontend workspace has to be installed here.
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.14"
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
       - name: Run hooks on all files
         run: pre-commit run --all-files --show-diff-on-failure
 
