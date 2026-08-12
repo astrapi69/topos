@@ -18,6 +18,8 @@
 
 import { Copy, Download, Share2, X } from "lucide-react";
 import QRCode from "qrcode";
+
+import { btn, btnPrimary, iconButton } from "../ui/classes";
 import { type ReactNode, useEffect, useState } from "react";
 
 export interface QrCodeModalLabels {
@@ -254,7 +256,7 @@ export default function QrCodeModal({
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-line px-3 text-sm font-medium text-ink-secondary hover:bg-muted"
+              className={btn}
               data-testid={`${testId}-copy`}
             >
               <Copy size={14} aria-hidden="true" />
@@ -265,7 +267,7 @@ export default function QrCodeModal({
               <a
                 href={dataUrl}
                 download={fileName}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-line px-3 text-sm font-medium text-ink-secondary hover:bg-muted"
+                className={btn}
                 data-testid={`${testId}-download`}
               >
                 <Download size={14} aria-hidden="true" />
@@ -277,7 +279,7 @@ export default function QrCodeModal({
               <button
                 type="button"
                 onClick={handleShare}
-                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:opacity-90"
+                className={btnPrimary}
                 data-testid={`${testId}-share`}
               >
                 <Share2 size={14} aria-hidden="true" />

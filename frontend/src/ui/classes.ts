@@ -60,6 +60,36 @@ export const danger = "text-danger";
 // Link.
 export const link = "text-accent hover:underline";
 
+/**
+ * A <button> that should read as a link.
+ *
+ * Tailwind's Preflight is OFF here (it would clobber the hand-written
+ * base styles in global.css), so nothing resets the browser's own
+ * button chrome: a button carrying only `link` renders as grey
+ * 13.33px Arial with a 2px outset border next to 16px DM Sans links.
+ * This resets the chrome and inherits the surrounding type, so the
+ * button lines up with real links in the same list.
+ */
+export const linkButton = `appearance-none bg-transparent border-none p-0 cursor-pointer text-left [font:inherit] ${link}`;
+
+/**
+ * An icon-only <button> (close, delete, reveal, ...).
+ *
+ * Same chrome reset as {@link linkButton} - Preflight is off, so the
+ * browser's grey button face would otherwise show through - plus a
+ * padded hit area, because an icon alone is too small to hit reliably
+ * on a phone. Colour comes from the token palette; a fixed `text-red-*`
+ * here would ignore the theme (pinned by ui/linkButton.test.ts).
+ */
+export const iconButton =
+  "appearance-none bg-transparent border-none p-1 cursor-pointer rounded " +
+  "text-ink-muted hover:text-ink hover:bg-surface-hover";
+
+/** Destructive variant of {@link iconButton} (delete, remove). */
+export const iconButtonDanger =
+  "appearance-none bg-transparent border-none p-1 cursor-pointer rounded " +
+  `${danger} hover:bg-surface-hover`;
+
 // Surfaces / containers.
 export const card = "bg-surface border border-line rounded";
 export const rowBorder = "border-line";
