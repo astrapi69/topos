@@ -46,6 +46,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_PYPROJECT_RE = re.compile(r"^plugins/topos-plugin-[^/]+/pyproject\.toml$")
 
 
+VERSION_LINE_RE = re.compile(r'^version\s*=\s*"[^"]+"$')
+
+
 def _staged_files() -> set[str]:
     """Return paths staged for the current commit (`git diff --cached --name-only`)."""
     try:
@@ -80,6 +83,41 @@ def _normalize(arg: str) -> str:
     return p.as_posix().lstrip("./") or arg
 
 
+def _only_own_version_changed(path: str) -> bool:
+    """True when the staged diff touches nothing but this package's own
+    ``version = "..."`` line.
+
+    ``make sync-versions`` bumps every plugin's version at every release,
+    which is not dependency drift: a package's own version never appears
+    in its ``poetry.lock``, so ``poetry lock`` produces no change and the
+    lock CANNOT be staged alongside. Without this exemption the hook
+    fires on every release and the only way past it is ``--no-verify``,
+    which switches off every other guard too - a worse outcome than the
+    drift this hook exists to catch.
+
+    Anything else in the diff (a dependency pin, an extra, a new group)
+    still requires the paired lock.
+    """
+    try:
+        diff = subprocess.run(
+            ["git", "diff", "--cached", "-U0", "--", path],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return False  # cannot tell -> demand the lock, as before
+
+    changed = [
+        line
+        for line in diff.splitlines()
+        if (line.startswith(("+", "-")) and not line.startswith(("+++", "---")))
+    ]
+    if not changed:
+        return False
+    return all(VERSION_LINE_RE.match(line[1:].strip()) for line in changed)
+
+
 def main(argv: list[str]) -> int:
     if not argv:
         # The `files:` regex in .pre-commit-config.yaml matched
@@ -107,8 +145,12 @@ def main(argv: list[str]) -> int:
             continue
         plugin_dir = path.rsplit("/", 1)[0]
         lock_path = f"{plugin_dir}/poetry.lock"
-        if lock_path not in staged:
-            missing.append((path, lock_path))
+        if lock_path in staged:
+            continue
+        if _only_own_version_changed(path):
+            # Release bump, not dependency drift - see the helper.
+            continue
+        missing.append((path, lock_path))
 
     if not missing:
         return 0
