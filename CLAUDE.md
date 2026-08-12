@@ -47,7 +47,7 @@ On a conflict between CLAUDE.md and the rules, the rules win.
 - **Plugins:** pluginforge ^0.10.0 (PyPI), entry-point group `topos.plugins`. Host passes `app_id="topos"` + `app_version`; plugins must declare `target_application = "topos"` or are filtered at activation. User-overlay applied via `config_overlay.refresh_manager_overlay(manager)`.
 - **Launcher:** PyInstaller cross-OS desktop launcher (`launcher/`)
 - **Testing:** pytest (backend + plugins), Vitest (frontend), Playwright (e2e)
-- **Tooling:** Poetry, npm, Docker, Make, ruff, ESLint, Prettier, pre-commit
+- **Tooling:** Poetry, bun, Docker, Make, ruff, ESLint, Prettier, pre-commit
 
 ## Architecture (short)
 
@@ -63,7 +63,7 @@ between modes. Licensing infrastructure exists but is dormant
 ## Commands
 
 ```bash
-make install              # Poetry (backend + launcher) + npm (frontend)
+make install              # Poetry (backend + launcher) + bun (frontend)
 make dev                  # backend (8010) + frontend (5183) in parallel
 make test                 # backend pytest + frontend Vitest
 make test-backend         # backend only

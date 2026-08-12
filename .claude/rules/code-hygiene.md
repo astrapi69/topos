@@ -70,10 +70,10 @@ needs a full program per run, and `tsc --noEmit` already covers types.
 
 **Commands:**
 ```bash
-cd frontend && npm run lint        # eslint src
-cd frontend && npm run lint:fix    # eslint src --fix
-cd frontend && npx prettier --write src/
-cd frontend && npx tsc --noEmit
+cd frontend && bun run lint        # eslint src
+cd frontend && bun run lint:fix    # eslint src --fix
+cd frontend && bunx prettier --write src/
+cd frontend && bunx tsc --noEmit
 ```
 
 Prettier's settings live in `frontend/.prettierrc`; do not restate them
@@ -83,7 +83,7 @@ here - a second copy is a second source of truth.
 
 ```bash
 cd backend && poetry add --group dev ruff
-cd frontend && npm install   # eslint + prettier are devDependencies
+cd frontend && bun install   # eslint + prettier are devDependencies
 ```
 
 ---
@@ -100,9 +100,11 @@ notify-error coverage, theme-token completeness, module-state audit).
 
 Two shapes worth knowing when adding one:
 
-- Frontend hooks shell out to the installed `npx` binary
-  (`cd frontend && npx eslint src`), so they add no dependency of their
-  own and use the same versions a developer runs by hand.
+- Frontend hooks shell out to `npx` (`cd frontend && npx eslint src`)
+  even though bun is the package manager: `npx` resolves straight from
+  `node_modules/.bin`, which bun populates, so the hook runs the pinned
+  version without requiring every contributor to have bun on PATH
+  before their first commit.
 - Generated artefacts get a `--check` hook rather than a regeneration
   hook: `i18n-catalogs-in-sync` fails and tells you which command to
   run, instead of silently rewriting files mid-commit.

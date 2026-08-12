@@ -50,7 +50,7 @@ Topos is one of a family of MIT-licensed projects:
 ```bash
 git clone https://github.com/astrapi69/topos.git
 cd topos
-make install              # Poetry (backend + launcher) + npm (frontend)
+make install              # Poetry (backend + launcher) + bun (frontend)
 make test                 # backend pytest + frontend Vitest
 make dev                  # backend on :8010, frontend on :5183
 ```
