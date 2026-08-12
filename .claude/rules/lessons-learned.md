@@ -2004,3 +2004,101 @@ Pairs with the earlier "GitHub-Pages deploy can fail on transient GitHub
 infra" note: same family, different symptom - that one failed at
 Set-up-job while resolving actions, this one after a successful upload.
 Both are re-run-and-verify, never re-architect.
+
+## Swapping package managers: settle the lockfile, and move every install path in one commit
+
+Topos moved `frontend/` and `e2e/` from npm to bun (1.3.14) on
+2026-08-12. Three things are worth keeping; the first two cost the
+sibling project real breakage, the third cost an hour here.
+
+### Every install path moves in the SAME commit as the lockfile deletion
+
+`adaptive-learner` deleted `frontend/package-lock.json` in its Phase-1
+migration and left `frontend/Dockerfile` on `npm ci`. npm refuses to run
+`ci` without a lockfile (`npm error EUSAGE`), so the production frontend
+image was broken from that commit until a close-out three releases
+later. It stayed invisible because the Docker build is not on PR CI -
+every consumer of `docker-compose.prod.yml` (self-hosted deploy, desktop
+launcher, install.sh) was affected the whole time.
+
+Before deleting a lockfile, enumerate every place that installs:
+
+```bash
+grep -rn "npm ci\|npm install\|npm run\|npx " \
+  Makefile Dockerfile */Dockerfile docker-compose*.yml \
+  .github/workflows/ .pre-commit-config.yaml install.sh*
+```
+
+Paths that are not on PR CI (Dockerfiles, compose commands, release-only
+workflows, install scripts) are exactly the ones that rot silently, so
+they need a manual gate in the same session. The honest gate proves both
+directions: build the OLD file against the NEW tree and watch it fail,
+then build the new one and watch it pass. "The new one works" alone does
+not prove the old one was actually the thing that would have broken.
+
+### A migrated lockfile is not settled until the second install
+
+`bun install` converts `package-lock.json` to `bun.lock` in one step and
+reports success. That lockfile can still fail `bun install
+--frozen-lockfile`:
+
+```
+error: lockfile had changes, but lockfile is frozen
+```
+
+A second plain `bun install` normalises it (here: two more packages, lock
+rewritten), after which frozen installs are clean. CI and Docker both run
+`--frozen-lockfile`, so an unsettled lock passes locally and fails in
+every container. Run the frozen install yourself before committing.
+
+### Prove parity from the lockfiles, not from the installer's output
+
+`bun pm ls --all` prints the installed tree and dedups nested copies, so
+comparing it against `package-lock.json` invents differences that are not
+in the lock. Parse both lockfiles instead:
+
+```python
+# npm: packages{} keys are node_modules paths
+{f"{p.split('node_modules/')[-1]}@{m['version']}"
+ for p, m in json.load(open("package-lock.json"))["packages"].items()
+ if p and "version" in m}
+
+# bun.lock (JSONC): first element of each package entry is name@version
+set(re.findall(r'^\s*"[^"]+": \["(@?[^"@]+@[^"]+)"', open("bun.lock").read(), re.M))
+```
+
+Topos came out 781 = 781 with zero diff before the settle, 780 after -
+bun deduped `brace-expansion@2.1.0` onto 2.1.4 under the same `^2.0.1`.
+A resolution delta is only acceptable once the BUILD proves it inert:
+`dist/assets` identical in every build mode, same file names, same sizes,
+same workbox hash. Compare the GitHub-Pages build too
+(`GITHUB_PAGES=true VITE_STORAGE_MODE=dexie`), not just the default one -
+that is the bundle users actually get. Sibling-project experience: its
+delta DID move two chunk hashes (npm hoists the lower @radix-ui patch,
+bun the higher), which is fine but only knowable by diffing.
+
+### What deliberately does NOT move
+
+- **Playwright runners stay `npx`.** The browser build has to match the
+  pinned `@playwright/test`; only the install moves to bun.
+- **The build runtime stays Node.** bun is package manager and script
+  runner. In the deploy workflow `setup-node` stays beside `setup-bun`
+  on purpose - it is the only path to the live PWA.
+- **pre-commit hooks stay `npx`.** It resolves from `node_modules/.bin`,
+  which bun populates, so a fresh contributor needs no bun on PATH before
+  their first commit.
+
+### A hook is only as green as the job that runs it
+
+Adding `eslint` and an `i18n --check` as pre-commit hooks turned CI red
+five runs before the migration and stayed unnoticed because the failure
+lived in a job nobody was reading. Both had the same shape: the hook
+needs tooling the CI job does not install. `npx eslint` fetches the
+binary but NOT the flat config's imports (`@eslint/js`,
+`typescript-eslint`) - the job has to install the frontend workspace. A
+hook shelling out to `poetry run` dies with exit 127 in a job that
+installs pre-commit alone; drop the `poetry run` when the script only
+needs stdlib plus one package CI can `pip install`.
+
+When adding a local hook, run it in the CI job's environment, not only
+locally where everything is already installed.
