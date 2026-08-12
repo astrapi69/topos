@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import FormField from "../components/FormField";
 import ContainerLabelsDialog from "../components/ContainerLabelsDialog";
+import InventoryTreeView from "../components/InventoryTreeView";
 import { useContainers, useItems } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
 import { useDialog } from "../components/AppDialog";
@@ -30,6 +31,7 @@ import {
   danger,
   link,
   pageMain,
+  selected,
 } from "../ui/classes";
 import type { Container, ContainerType, Owner } from "../types/topos";
 
@@ -57,12 +59,23 @@ const EMPTY_FORM: FormState = {
   sizeGroup: "",
 };
 
+const VIEW_KEY = "topos.containers_view";
+
 export default function ContainerList() {
   const { t } = useI18n();
   const { confirm } = useDialog();
   const { data, loading, error, refresh } = useContainers();
   const [showLabels, setShowLabels] = useState(false);
   const items = useItems();
+  // "list" is the workhorse; "tree" shows the same rows as the workbook's
+  // forest (group -> container -> item). Persisted so the choice survives.
+  const [view, setView] = useState<"list" | "tree">(() => {
+    try {
+      return localStorage.getItem(VIEW_KEY) === "tree" ? "tree" : "list";
+    } catch {
+      return "list";
+    }
+  });
   const [owner, setOwner] = useState<Owner | "all">("all");
   const [type, setType] = useState<ContainerType | "all">("all");
   const [needle, setNeedle] = useState("");
@@ -96,6 +109,15 @@ export default function ContainerList() {
       return true;
     });
   }, [data, owner, type, needle]);
+
+  function switchView(next: "list" | "tree") {
+    setView(next);
+    try {
+      localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      /* private mode: the toggle still works for the session */
+    }
+  }
 
   function openCreate() {
     setEditingId(null);
@@ -259,6 +281,31 @@ export default function ContainerList() {
             {t("topos.page.containers.title", "Container")}
           </h1>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div
+              role="group"
+              aria-label={t("topos.page.containers.view_label", "Ansicht")}
+              className="flex"
+              data-testid="container-view-toggle"
+            >
+              <button
+                type="button"
+                className={`${btn} rounded-r-none ${view === "list" ? selected : ""}`}
+                aria-pressed={view === "list"}
+                onClick={() => switchView("list")}
+                data-testid="container-view-list"
+              >
+                {t("topos.page.containers.view_list", "Liste")}
+              </button>
+              <button
+                type="button"
+                className={`${btn} rounded-l-none border-l-0 ${view === "tree" ? selected : ""}`}
+                aria-pressed={view === "tree"}
+                onClick={() => switchView("tree")}
+                data-testid="container-view-tree"
+              >
+                {t("topos.page.containers.view_tree", "Baum")}
+              </button>
+            </div>
             <button
               type="button"
               className={btn}
@@ -475,7 +522,17 @@ export default function ContainerList() {
          * grid row from md up. One rendering keeps the test ids
          * stable across breakpoints.
          */}
-        <div data-testid="container-table" className="mt-2">
+        {view === "tree" && (
+          <div className="mt-2">
+            <InventoryTreeView containers={filtered} items={items.data} />
+          </div>
+        )}
+
+        <div
+          data-testid="container-table"
+          className="mt-2"
+          hidden={view === "tree"}
+        >
           <div className="hidden md:grid md:grid-cols-[4rem_1fr_6rem_7rem_1fr_auto] gap-2 px-2 py-2 border-b border-line text-left font-medium text-ink-secondary">
             <span>{t("topos.container.external_id", "Nr.")}</span>
             <span>{t("topos.container.label", "Bezeichnung")}</span>

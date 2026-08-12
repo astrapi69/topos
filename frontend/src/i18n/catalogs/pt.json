@@ -290,7 +290,10 @@
         "labels_select_all": "Selecionar tudo",
         "labels_title": "Etiquetas de contentor",
         "new_container": "Novo contentor",
-        "title": "Contentores"
+        "title": "Contentores",
+        "view_label": "Visualização",
+        "view_list": "Lista",
+        "view_tree": "Árvore"
       },
       "dashboard": {
         "categories": "Categorias",
@@ -549,6 +552,16 @@
       "item_updated": "Entrada atualizada",
       "photo_commit_failed": "Falha ao guardar",
       "photo_recognize_failed": "O reconhecimento falhou"
+    },
+    "tree": {
+      "empty": "Ainda não há contêineres.",
+      "group": {
+        "box": "Caixas",
+        "folder": "Pastas",
+        "parents": "{type} dos pais",
+        "self": "Minhas {type}",
+        "shared": "{type} compartilhadas"
+      }
     }
   },
   "ui": {

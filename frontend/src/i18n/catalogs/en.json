@@ -290,7 +290,10 @@
         "labels_select_all": "Select all",
         "labels_title": "Container labels",
         "new_container": "New container",
-        "title": "Containers"
+        "title": "Containers",
+        "view_label": "View",
+        "view_list": "List",
+        "view_tree": "Tree"
       },
       "dashboard": {
         "categories": "Categories",
@@ -549,6 +552,16 @@
       "item_updated": "Item updated",
       "photo_commit_failed": "Commit failed",
       "photo_recognize_failed": "Recognition failed"
+    },
+    "tree": {
+      "empty": "No containers yet.",
+      "group": {
+        "box": "Boxes",
+        "folder": "Folders",
+        "parents": "Parents' {type}",
+        "self": "My {type}",
+        "shared": "Shared {type}"
+      }
     }
   },
   "ui": {

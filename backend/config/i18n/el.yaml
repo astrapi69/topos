@@ -136,6 +136,9 @@ topos:
       labels_doc_title: Ετικέτες Topos
       labels_failed: Δεν ήταν δυνατή η δημιουργία ετικετών
       title: Δοχεία
+      view_label: "Προβολή"
+      view_list: "Λίστα"
+      view_tree: "Δέντρο"
       empty: Δεν βρέθηκαν δοχεία.
       new_container: Νέο δοχείο
       create_title: Νέο δοχείο
@@ -405,6 +408,15 @@ topos:
     delete_container_title: Διαγραφή δοχείου;
     delete_container_message: Το δοχείο «{label}» θα διαγραφεί οριστικά.
     delete_container_items_warning: 'Προσοχή: θα διαγραφούν επίσης {count} καταχωρίσεις που περιέχονται.'
+  tree:
+    group:
+      folder: "Φάκελοι"
+      box: "Κουτιά"
+      self: "Οι {type} μου"
+      parents: "{type} των γονιών"
+      shared: "Κοινόχρηστα {type}"
+    empty: "Δεν υπάρχουν ακόμη δοχεία."
+
 pwa:
   update_available: Διαθέσιμη νέα έκδοση
   update_action: Ενημέρωση

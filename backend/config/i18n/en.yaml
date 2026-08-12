@@ -140,6 +140,9 @@ topos:
       labels_doc_title: Topos labels
       labels_failed: Could not generate labels
       title: Containers
+      view_label: "View"
+      view_list: "List"
+      view_tree: "Tree"
       empty: No containers found.
       new_container: New container
       create_title: New container
@@ -413,6 +416,15 @@ topos:
     delete_container_title: Delete container?
     delete_container_message: The container "{label}" will be permanently deleted.
     delete_container_items_warning: "Warning: {count} contained items will also be deleted."
+
+  tree:
+    group:
+      folder: "Folders"
+      box: "Boxes"
+      self: "My {type}"
+      parents: "Parents' {type}"
+      shared: "Shared {type}"
+    empty: "No containers yet."
 
 pwa:
   update_available: New version available

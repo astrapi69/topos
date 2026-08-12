@@ -290,7 +290,10 @@
         "labels_select_all": "Alle auswählen",
         "labels_title": "Container-Etiketten",
         "new_container": "Neuer Container",
-        "title": "Container"
+        "title": "Container",
+        "view_label": "Ansicht",
+        "view_list": "Liste",
+        "view_tree": "Baum"
       },
       "dashboard": {
         "categories": "Kategorien",
@@ -549,6 +552,16 @@
       "item_updated": "Eintrag aktualisiert",
       "photo_commit_failed": "Übernahme fehlgeschlagen",
       "photo_recognize_failed": "Erkennung fehlgeschlagen"
+    },
+    "tree": {
+      "empty": "Keine Container vorhanden.",
+      "group": {
+        "box": "Boxen",
+        "folder": "Ordner",
+        "parents": "{type} Eltern",
+        "self": "Meine {type}",
+        "shared": "{type} geteilt"
+      }
     }
   },
   "ui": {

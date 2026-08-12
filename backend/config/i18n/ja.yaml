@@ -136,6 +136,9 @@ topos:
       labels_doc_title: Toposのラベル
       labels_failed: ラベルを生成できませんでした
       title: コンテナ
+      view_label: "表示"
+      view_list: "リスト"
+      view_tree: "ツリー"
       empty: コンテナが見つかりません。
       new_container: 新しいコンテナ
       create_title: 新しいコンテナ
@@ -405,6 +408,15 @@ topos:
     delete_container_title: コンテナを削除しますか？
     delete_container_message: コンテナ「{label}」は完全に削除されます。
     delete_container_items_warning: '注意: 含まれている{count}件の項目も削除されます。'
+  tree:
+    group:
+      folder: "フォルダー"
+      box: "ボックス"
+      self: "自分の{type}"
+      parents: "両親の{type}"
+      shared: "共有の{type}"
+    empty: "コンテナはまだありません。"
+
 pwa:
   update_available: 新しいバージョンがあります
   update_action: 更新

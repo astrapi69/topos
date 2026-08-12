@@ -290,7 +290,10 @@
         "labels_select_all": "Επιλογή όλων",
         "labels_title": "Ετικέτες δοχείων",
         "new_container": "Νέο δοχείο",
-        "title": "Δοχεία"
+        "title": "Δοχεία",
+        "view_label": "Προβολή",
+        "view_list": "Λίστα",
+        "view_tree": "Δέντρο"
       },
       "dashboard": {
         "categories": "Κατηγορίες",
@@ -549,6 +552,16 @@
       "item_updated": "Η καταχώριση ενημερώθηκε",
       "photo_commit_failed": "Η καταχώριση απέτυχε",
       "photo_recognize_failed": "Η αναγνώριση απέτυχε"
+    },
+    "tree": {
+      "empty": "Δεν υπάρχουν ακόμη δοχεία.",
+      "group": {
+        "box": "Κουτιά",
+        "folder": "Φάκελοι",
+        "parents": "{type} των γονιών",
+        "self": "Οι {type} μου",
+        "shared": "Κοινόχρηστα {type}"
+      }
     }
   },
   "ui": {
