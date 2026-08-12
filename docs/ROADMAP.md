@@ -91,6 +91,14 @@
       path, and the release template now matches the assets the
       workflows actually attach. Starting them on macOS / Windows
       hardware is tracked separately below.
+- [x] **`@astrapi69/tree-kit` adopted** (2026-08-12). The deferral
+      condition ("a second tree use case") arrived: the inventory tree
+      view (app root -> type/owner groups -> containers -> items) on the
+      Containers page, plus the category tree builder now delegating its
+      linking to the kit. `utils/categoryTree.ts` keeps only the
+      Topos-specific parts (orphan tolerance, the `CategoryNode` API
+      shape); `tree/inventoryTree.ts` owns group derivation, subtree item
+      counts and workbook ordering.
 
 ## Next (P2 - high-value features)
 
@@ -105,18 +113,6 @@ launcher's remaining half is a hardware gate, see below.
 
 ## Speculative (P5 - nice-to-have, no concrete trigger)
 
-- [ ] **Adopt `@astrapi69/tree-kit` for the category tree**. The
-      TypeScript port of `astrapi69/tree-api` + `astrapi69/gen-tree`
-      is done and published (0.1.0, MIT, zero dependencies);
-      `adaptive-learner` consumes it. Deferred here deliberately:
-      `frontend/src/utils/categoryTree.ts` already builds pure data
-      through an O(n) `Map` index and carries none of the defects
-      the port fixed, and `CategoryNode` is the response type of
-      `GET /api/categories/tree`, so switching means a mapping
-      layer on the online and the offline path both. The trade
-      turns favourable with a second tree use case, or once
-      breadcrumb / depth logic makes `TreeCursor` pay for itself -
-      `CategoryBrowse` currently threads `depth` through as a prop.
 - [ ] Family-shared mode: multi-user backend behind auth
 - [ ] Calendar integration for action `due_date` reminders
 
