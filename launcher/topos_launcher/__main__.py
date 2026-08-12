@@ -14,6 +14,7 @@ troubleshooting is possible without leaking complexity into the UI.
 
 from __future__ import annotations
 
+import argparse
 import logging
 import shutil
 import sys
@@ -33,7 +34,6 @@ from topos_launcher import (
     ui,
     update_check,
 )
-
 
 logger = logging.getLogger("topos_launcher")
 
@@ -55,7 +55,39 @@ def _docker_security_url() -> str:
     )
 
 
+def _handle_cli_query(argv: list[str]) -> int | None:
+    """Answer ``--version`` / ``--help`` without starting the launcher.
+
+    Returns an exit code when the invocation was a query, else ``None``
+    so ``main`` proceeds normally. Unknown arguments are ignored rather
+    than rejected: a stray flag must never be the reason someone cannot
+    start the app (same fail-open rule as the lockfile check below).
+    """
+    parser = argparse.ArgumentParser(
+        prog="topos-launcher",
+        add_help=False,
+        description="Starts Topos: checks Docker, boots the stack, opens the app.",
+    )
+    parser.add_argument("-V", "--version", action="store_true")
+    parser.add_argument("-h", "--help", action="store_true")
+    args, _unknown = parser.parse_known_args(argv)
+
+    if args.version:
+        print(f"topos-launcher {__version__}")
+        return 0
+    if args.help:
+        parser.print_help()
+        return 0
+    return None
+
+
 def main() -> int:
+    # Before logging: a version query should write nothing at all, so a
+    # build job can run the freshly built artifact as a smoke check.
+    cli_exit = _handle_cli_query(sys.argv[1:])
+    if cli_exit is not None:
+        return cli_exit
+
     _setup_logging()
     logger.info("Topos launcher v%s starting", __version__)
 

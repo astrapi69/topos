@@ -82,14 +82,19 @@
       requests per load, and the SW self-heals on deploy
       (autoUpdate). The precache audit and the icon/install-prompt
       review are still open.
-- [ ] **Desktop launcher build pipeline verified**. Per-OS GitHub
-      Actions builds for Linux / macOS / Windows currently exist
-      from the template; verify they still produce working
-      artifacts for Topos.
-      v0.1.0 and v0.2.0 are both released, and the PyInstaller spec
-      builds cleanly on Linux (checked at release time). The macOS
-      and Windows jobs remain unverified - that is what still
-      blocks this item.
+- [ ] **Desktop launcher: hardware start unverified**. The CI half
+      is done: all three per-OS workflows have run green (7 runs
+      each, most recently on the v0.2.0 tag), the artifacts are
+      attached to the release, all three SHA256 checksums verify,
+      the file types match their platforms, and the macOS
+      Info.plist carries the right CFBundleVersion. The Linux
+      binary starts and reports its own version.
+      What is left needs the actual operating systems: does the
+      .exe get past SmartScreen, does the unsigned .app get past
+      Gatekeeper, does either reach the Docker check. Nobody has
+      run them on macOS or Windows hardware. Also open: no
+      workflow executes the artifact it just built - now possible
+      via `topos-launcher --version`, tracked separately.
 
 ## Later (P3 - quality + reach)
 
