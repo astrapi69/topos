@@ -22,16 +22,35 @@ The launcher detects Docker, downloads Topos automatically, and opens it in your
 |----------|------|
 | Windows | `topos-launcher.exe` |
 | macOS (Apple silicon) | `topos-launcher-macos.zip` |
-| Linux | `topos-launcher-linux` (ELF binary) |
+| Linux | `topos-launcher` (ELF binary) |
 
 Each platform also ships a `*.sha256` checksum next to the binary.
+
+## Running it on Linux and macOS
+
+GitHub release assets carry no executable bit, so the Linux binary needs
+one before it will start:
+
+```bash
+chmod +x topos-launcher
+./topos-launcher --version   # prints the version, starts nothing
+./topos-launcher             # starts Topos
+```
+
+On macOS the app is unsigned: open `topos-launcher-macos.zip`, then
+right-click "Topos Launcher.app" and choose Open once to get past
+Gatekeeper. Double-clicking the first time shows a refusal instead.
 
 ## Verifying downloads
 
 ```bash
-# macOS / Linux
-shasum -a 256 topos-launcher-<platform>
-cat topos-launcher-<platform>.sha256
+# Linux
+shasum -a 256 topos-launcher
+cat topos-launcher.sha256
+
+# macOS
+shasum -a 256 topos-launcher-macos.zip
+cat topos-launcher-macos.zip.sha256
 ```
 
 ```powershell

@@ -10,6 +10,7 @@ import AppUpdateProvider from "./components/AppUpdateProvider";
 import AppFeatureProvider from "./features/AppFeatureProvider";
 import { DialogProvider } from "./components/AppDialog";
 import ErrorReportDialog from "./components/ErrorReportDialog";
+import InstallBanner from "./components/InstallBanner";
 import IosInstallHint from "./components/IosInstallHint";
 import { I18nProvider } from "./hooks/useI18n";
 import { useTheme } from "./hooks/useTheme";
@@ -68,6 +69,7 @@ export default function App() {
               theme="colored"
             />
             <UpdateBanner icon={<RefreshCw size={16} aria-hidden />} />
+            <InstallBanner />
             <IosInstallHint />
             <ErrorReportDialog />
           </DialogProvider>

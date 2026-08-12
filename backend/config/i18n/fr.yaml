@@ -409,6 +409,11 @@ pwa:
   update_available: Nouvelle version disponible
   update_action: Mettre à jour
   install_app: Installer l'application
+  install:
+    title: "Installer comme application"
+    subtitle: "Topos s'ouvrira dans sa propre fenêtre et fonctionnera hors ligne."
+    dismiss: "Masquer"
+    aria_label: "Installer Topos comme application"
   ios:
     title: Installer comme application
     steps: 'Touchez l''icône Partager, puis « Sur l''écran d''accueil » : l''application s''ouvre sans la barre Safari.'

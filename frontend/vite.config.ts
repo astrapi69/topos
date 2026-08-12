@@ -150,12 +150,26 @@ export default defineConfig({
                 theme_color: "#1e40af", // tailwind blue-800
                 background_color: "#111827", // tailwind gray-900
                 display: "standalone",
-                orientation: "portrait",
+                // Not "portrait": the same manifest serves phone and
+                // desktop installs, and locking a resizable window to
+                // portrait is wrong for the latter.
+                orientation: "any",
                 scope: base,
                 start_url: base,
+                // Explicit id, so the install keeps its identity even if
+                // start_url ever moves (default is start_url itself).
+                id: base,
                 icons: [
                     {src: "icons/icon-192x192.png", sizes: "192x192", type: "image/png"},
                     {src: "icons/icon-512x512.png", sizes: "512x512", type: "image/png"},
+                    {
+                        // Both maskable sizes: with only 512 present, small
+                        // launchers downscale a 512 PNG on every draw.
+                        src: "icons/maskable-icon-192x192.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                        purpose: "maskable",
+                    },
                     {
                         src: "icons/maskable-icon-512x512.png",
                         sizes: "512x512",
@@ -163,12 +177,75 @@ export default defineConfig({
                         purpose: "maskable",
                     },
                 ],
+                // Captured from the real build by
+                // e2e/tools/capture-manifest-screenshots.mjs. Android shows
+                // the wide one on tablets/desktop and the narrow one on
+                // phones; without any, the install dialog stays a one-liner.
+                screenshots: [
+                    {
+                        src: "screenshots/desktop-containers.png",
+                        sizes: "1280x800",
+                        type: "image/png",
+                        form_factor: "wide",
+                        label: "Container-Liste",
+                    },
+                    {
+                        src: "screenshots/mobile-container-detail.png",
+                        sizes: "400x800",
+                        type: "image/png",
+                        form_factor: "narrow",
+                        label: "Ordner mit Eintraegen",
+                    },
+                ],
+                // The three things people open the app to do.
+                shortcuts: [
+                    {
+                        name: "Container",
+                        short_name: "Container",
+                        url: `${base}containers`,
+                        icons: [{src: "icons/icon-192x192.png", sizes: "192x192"}],
+                    },
+                    {
+                        name: "Foto-Erfassung",
+                        short_name: "Foto",
+                        url: `${base}photo-intake`,
+                        icons: [{src: "icons/icon-192x192.png", sizes: "192x192"}],
+                    },
+                    {
+                        name: "Aktionen",
+                        short_name: "Aktionen",
+                        url: `${base}actions`,
+                        icons: [{src: "icons/icon-192x192.png", sizes: "192x192"}],
+                    },
+                ],
                 categories: ["utilities", "productivity"],
+                // The app switches between eight catalogs at runtime, so no
+                // static value is right for every user. Omitting the field
+                // is not an option: vite-plugin-pwa then injects `lang:
+                // "en"` itself, which is worse - it would contradict the
+                // German name right above it. So it names the default
+                // catalog, which is what an install actually starts in.
                 lang: "de",
                 dir: "ltr",
             },
             workbox: {
                 globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+                // Everything the glob picks up is downloaded before the
+                // app is usable, so anything a session may never ask for
+                // is excluded here and cached at runtime instead.
+                globIgnores: [
+                    // 908 KB, 31% of the v0.2.0 precache, for the workbook
+                    // export/import. It is behind a dynamic import for
+                    // exactly this reason; precaching it undid that.
+                    "assets/exceljs.min-*.js",
+                    // Link-unfurl images (og:image / twitter:image). The
+                    // running app never requests them, online or off.
+                    "og-image.png",
+                    "og-image.svg",
+                    // Install-dialog images. Same reasoning: the running
+                    // app never requests them, online or offline.
+                    "screenshots/*",
+                ],
                 // Evict precache entries from superseded builds so an old
                 // deploy's chunks do not accumulate in the cache storage.
                 cleanupOutdatedCaches: true,
@@ -178,6 +255,19 @@ export default defineConfig({
                 // error as a 200 HTML page).
                 navigateFallbackDenylist: [/^\/api\//],
                 runtimeCaching: [
+                    {
+                        // exceljs is precache-excluded above, so cache it
+                        // on first use: a session that exported once can
+                        // export again offline. CacheFirst is safe because
+                        // the filename carries a content hash.
+                        urlPattern: /\/assets\/exceljs\.min-[^/]+\.js$/,
+                        handler: "CacheFirst",
+                        options: {
+                            cacheName: "exceljs-chunk",
+                            expiration: {maxEntries: 2},
+                            cacheableResponse: {statuses: [0, 200]},
+                        },
+                    },
                     {
                         // NetworkFirst so the app keeps the last API responses
                         // available offline (relative path matches the dev
@@ -211,32 +301,6 @@ export default defineConfig({
                     if (!id.includes('node_modules')) return undefined;
                     const chunkMap: Record<string, string[]> = {
                         'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-                        'vendor-tiptap': [
-                            '@tiptap/react',
-                            '@tiptap/starter-kit',
-                            '@tiptap/extension-image',
-                            '@tiptap/extension-link',
-                            '@tiptap/extension-table',
-                            '@tiptap/extension-table-row',
-                            '@tiptap/extension-table-cell',
-                            '@tiptap/extension-table-header',
-                            '@tiptap/extension-task-list',
-                            '@tiptap/extension-task-item',
-                            '@tiptap/extension-text-align',
-                            '@tiptap/extension-text-style',
-                            '@tiptap/extension-underline',
-                            '@tiptap/extension-subscript',
-                            '@tiptap/extension-superscript',
-                            '@tiptap/extension-highlight',
-                            '@tiptap/extension-color',
-                            '@tiptap/extension-typography',
-                            '@tiptap/extension-character-count',
-                            '@tiptap/extension-placeholder',
-                            '@tiptap/extension-code-block-lowlight',
-                            '@pentestpad/tiptap-extension-figure',
-                            '@sereneinserenade/tiptap-search-and-replace',
-                            'tiptap-footnotes',
-                        ],
                         'vendor-ui': [
                             '@radix-ui/react-context-menu',
                             '@radix-ui/react-dialog',

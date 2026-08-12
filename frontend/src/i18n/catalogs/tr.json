@@ -5,6 +5,12 @@
     "remove": "Kaldır"
   },
   "pwa": {
+    "install": {
+      "aria_label": "Topos'u uygulama olarak yükle",
+      "dismiss": "Gizle",
+      "subtitle": "Topos kendi penceresinde açılır ve çevrimdışı çalışır.",
+      "title": "Uygulama olarak yükle"
+    },
     "install_app": "Uygulamayı kur",
     "ios": {
       "aria_label": "iPhone'unuza kurun",

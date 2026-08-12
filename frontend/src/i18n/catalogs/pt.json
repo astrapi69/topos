@@ -5,6 +5,12 @@
     "remove": "Remover"
   },
   "pwa": {
+    "install": {
+      "aria_label": "Instalar o Topos como aplicativo",
+      "dismiss": "Ocultar",
+      "subtitle": "O Topos abrirá na própria janela e funcionará offline.",
+      "title": "Instalar como aplicativo"
+    },
     "install_app": "Instalar a aplicação",
     "ios": {
       "aria_label": "Instalar no teu iPhone",

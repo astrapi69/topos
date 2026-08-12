@@ -418,6 +418,11 @@ pwa:
   update_available: New version available
   update_action: Update
   install_app: Install app
+  install:
+    title: "Install as an app"
+    subtitle: "Topos then opens in its own window and works offline."
+    dismiss: "Dismiss"
+    aria_label: "Install Topos as an app"
   ios:
     title: Install as an app
     steps: 'Tap the Share icon, then "Add to Home Screen" - it opens without the Safari bar.'
