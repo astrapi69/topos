@@ -13,10 +13,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const css = readFileSync(
-  join(__dirname, "..", "styles", "global.css"),
-  "utf8",
-);
+const css = readFileSync(join(__dirname, "..", "styles", "global.css"), "utf8");
 
 describe("kit file-input styling", () => {
   it("styles the file-selector button of .akv-file-input", () => {
@@ -24,7 +21,9 @@ describe("kit file-input styling", () => {
   });
 
   it("uses theme tokens rather than fixed colours", () => {
-    const rule = css.slice(css.indexOf(".akv-file-input::file-selector-button"));
+    const rule = css.slice(
+      css.indexOf(".akv-file-input::file-selector-button"),
+    );
     const block = rule.slice(0, rule.indexOf("}"));
     expect(block).toMatch(/var\(--/);
     expect(block).not.toMatch(/#[0-9a-fA-F]{3,6}\b/);

@@ -441,9 +441,10 @@ matches inside compound identifiers.
 ### Why this matters
 
 ASCII transliteration looks unprofessional to German readers and
-can break Pandoc / EPUB export rendering when the surrounding
-text uses proper umlauts (the mixed-encoding pattern is the
-worst case — same file, two styles, output renders as garbage).
+renders inconsistently once the surrounding text uses proper
+umlauts - the mixed-encoding pattern is the worst case (same
+file, two styles). It reaches users through the Excel export and
+the printed container labels, not just the screen.
 
 ### Known regression pattern
 
@@ -473,8 +474,13 @@ When a layout fix requires setting `overflow: hidden` on one of the three, think
 
 ### Incident record
 
-- `ef7ce5c`: added `html, body, #root { overflow: hidden; }` as fix for Issue #11 (chapter sidebar at 150% zoom). Broke scroll on Settings, Dashboard, GetStarted, Help pages.
-- `c25483e`: split the rule. Kept html/body locked (preserves zoom fix), restored `#root overflow-y: auto`.
+Inherited from the template lineage, and worth keeping: Topos hit
+the same shape when `#root` gained flex centring (see the CSS block
+in `frontend/src/styles/global.css`, which now documents why
+`height: 100%` + `overflow-y: auto` are load-bearing).
+
+- `ef7ce5c`: added `html, body, #root { overflow: hidden; }` to fix a sidebar at 150% zoom. Broke scrolling on every full-page view.
+- `c25483e`: split the rule. Kept html/body locked (preserves the zoom fix), restored `#root overflow-y: auto`.
 
 ## Filesystem isolation: production data lives outside the project tree
 
@@ -1062,11 +1068,10 @@ fixture. Symptoms:
 - The fake-schema dict from the last test in the file got
   cached; monkeypatch reverted `_SCHEMA_PATH` at teardown but
   the LRU cache stayed populated.
-- The NEXT test file that called `load_platform_schemas()` via
-  the real `/api/article-platforms` endpoint hit the LRU cache,
-  saw the stale fake dict, and 5 publications tests failed with
-  `ResponseValidationError: 'twitter' missing display_name` (the
-  shape `test_validate_max_chars_enforced` had written).
+- The NEXT test file that called the cached loader through its
+  real endpoint hit the LRU cache, saw the stale fake dict, and
+  five unrelated tests failed with a `ResponseValidationError`
+  describing the shape the *previous* test had written.
 
 Caught only in CI (the local pytest invocation in the same
 session ran `test_platform_schema.py` in isolation, missing the
@@ -1301,12 +1306,13 @@ the real production DB at ``~/.local/share/topos/topos.db``.
 ``DELETE /api/comments/trash/empty`` endpoint was run via a
 direct ``poetry run python -c "..."`` script (NOT pytest)
 against ``TestClient(app)``. The script ran successfully ―
-and emptied the user's real production ``article_comments``
-table, hard-deleting all 61 soft-deleted comments in one
-``empty_trash`` call. The 14:25 ``.bgb`` backup did not
-carry comments (Topos backup format only persists
-Article + Publication + ArticleAsset), so .bgb-based
-recovery was impossible.
+and emptied a real production table, hard-deleting 61
+soft-deleted rows in one ``empty_trash`` call. The most recent
+backup did not carry that table, so restoring from it was
+impossible. (The incident is the sibling project's; the Topos
+backup carries Container, Item, Category and Action - the point
+is that a backup only protects what its format persists, which
+is worth re-checking before trusting one.)
 
 The dev-mode context prevented worst-case impact: the data
 was reproducible from the original Medium archive. **But
@@ -1451,11 +1457,11 @@ real cause:
 
 Bug A's progression (2026-05-14):
 
-- User report: "Articles-Trash Restore broken; workbox blocks"
-- My audit: SW config is symmetric for books/articles; workbox
+- User report: "Restore from trash is broken; workbox blocks it"
+- Audit: the SW config treats every surface the same; workbox
   "No route found" is benign info, not blocking
-- Manual smoke: restore POST fires, backend processes, frontend
-  reloads — backend confirms article is restored
+- Manual smoke: the restore POST fires, the backend processes it,
+  the frontend reloads — the backend confirms the row is back
 - **Actual cause**: 419ms click-handler + post-restore feedback
   too subtle (stay-in-trash-view + transient toast + filtered-out
   row vanishing). User-perceived "broken" = user-perceived "lag
@@ -1467,7 +1473,7 @@ Bug A's progression (2026-05-14):
 layer the user thinks it is.** Specifically:
 
 1. **Check the Network tab + backend state FIRST.** If the
-   action's backend artifact exists (article restored, book
+   action's backend artifact exists (item restored, container
    created, etc.), the user's symptom is at a different layer.
 2. **Console messages are diagnostic clues, not bug citations.**
    Workbox passthrough logs, React StrictMode warnings, and
@@ -1531,13 +1537,13 @@ Two common mental models lead developers to add the
    precedes the imperative dialog open in your handler, so the
    focus moves from menu trigger → dialog confirm button cleanly.
 
-### Positive precedent (the bulk-action bars)
+### Inherited, not yet exercised here
 
-The Article / Book / Comment bulk-action bars (see
-`frontend/src/components/articles/ArticleBulkActionBar.tsx`,
-`BookBulkActionBar.tsx`,
-`comments/CommentBulkActionBar.tsx`) all use the correct
-pattern:
+Topos imports no Radix DropdownMenu today (verified: no source
+file imports `@radix-ui/react-dropdown-menu`), so this rule is
+carried forward for the first menu that does, not describing
+existing code. The sibling project's bulk-action bars are the
+precedent it came from; the correct pattern is:
 
 ```tsx
 <DropdownMenu.Item onSelect={() => onBulkDeletePermanent()}>

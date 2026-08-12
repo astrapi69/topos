@@ -33,6 +33,13 @@ repos:
 
   - repo: local
     hooks:
+      - id: prettier-frontend
+        name: prettier (frontend src)
+        entry: bash -c 'cd frontend && npx prettier --check "src/**/*.{ts,tsx,css}"'
+        language: system
+        pass_filenames: false
+        files: ^frontend/src/.*\.(ts|tsx|css)$
+
       - id: i18n-catalogs-in-sync
         name: bundled i18n catalogs match the backend YAML
         entry: bash -c 'cd backend && poetry run python ../scripts/generate_i18n_catalogs.py --check'
