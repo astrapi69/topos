@@ -66,6 +66,12 @@
       per-photo delete. Client-side Canvas downscale (full + thumb, EXIF
       stripped). Dual-mode: backend files under `<upload_dir>/containers/{id}/`
       (new endpoints + ContainerPhoto model) / offline Dexie blobs.
+- [x] **bun as package manager** (frontend + e2e). bun 1.3.14 installs
+      and runs scripts; Node 24 stays the runtime (Vite, Vitest, Workbox,
+      Playwright). `bun.lock` replaces `package-lock.json` in both
+      workspaces, Docker and the dev compose moved in the same commit.
+      Resolution parity 781 = 781 against the deleted lock; the build is
+      byte-identical in both modes.
 
 ## Next (P2 - high-value features)
 

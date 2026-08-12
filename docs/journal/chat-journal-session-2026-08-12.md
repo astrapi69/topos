@@ -126,6 +126,36 @@ Ursache beheben - mehrfach lag sie eine Ebene tiefer als der Bericht.
   Produktiv-DB vorher/nachher identisch.
 - Commits: 941410a, 65affd2, bb92d4e, Tag v0.2.0
 
+## 9. npm raus, bun rein (15:00)
+
+- Original prompt: "Referenz: adaptive-learner - dort laeuft Bun bereits.
+  Gleiche Migration fuer Topos" (erst Analyse, dann "Go. Ein Durchgang,
+  alles in einem Commit").
+- Goal: bun als Paketmanager, ohne die Fallen zu wiederholen, die das
+  Schwesterprojekt bezahlt hat.
+- Result: bun 1.3.14 fuer `frontend/` und `e2e/`, Node 24 bleibt Runtime
+  (Vite baut, Vitest testet, Workbox erzeugt den Service Worker,
+  Playwright faehrt e2e). Die Analyse vorab war der eigentliche Wert: sie
+  fand in adaptive-learner ein Prod-Docker-Image, das seit der Migration
+  ueber drei Releases kaputt war, weil das Dockerfile weiter `npm ci` rief
+  und der Docker-Build nicht auf PR-CI laeuft. Bei uns lag dieselbe
+  Dateiform vor, also ging Docker in denselben Commit - in beide
+  Richtungen belegt: altes Dockerfile scheitert jetzt an `npm ci`, neues
+  baut und traegt das volle dist.
+  Aufloesungs-Parity gegen die geloeschte package-lock.json: 781 = 781,
+  null Abweichung. Nach dem Settle 780, weil bun `brace-expansion@2.1.0`
+  auf 2.1.4 dedupliziert - dasselbe `^2.0.1`, und der Build beweist es
+  inert: `dist/assets` in beiden Build-Modi identisch, gleiche Namen,
+  gleiche Groessen, gleiches `workbox-efbd304a.js`.
+  Ein Stolperstein unterwegs: der aus package-lock migrierte Lockfile ist
+  nicht sofort `--frozen-lockfile`-fest, ein zweiter `bun install`
+  normalisiert ihn. Aufgefallen erst im Container.
+  Danach war CI rot - aber schon fuenf Laeufe vor dem Migrationscommit,
+  aus den heute Vormittag ergaenzten Hooks: der eslint-Hook laedt die
+  Flat Config ohne installierte Config-Deps, der i18n-Hook rief
+  `poetry run` in einem Job, der nur pre-commit installiert.
+- Commits: 9aa0cca, 1b3e0f2
+
 ## Zusammenfassung
 
 - 42 Commits seit v0.1.0, 138 Dateien, Release v0.2.0 veroeffentlicht.
