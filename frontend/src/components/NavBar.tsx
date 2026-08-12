@@ -120,12 +120,24 @@ export default function NavBar() {
         className="relative z-40 bg-surface-2 border-b border-line"
       >
         <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3">
-          <strong className="mr-1 sm:mr-2 font-bold text-ink font-display">
+          {/* Brand and the spacer below both claim flex-1 from md up, so
+              the nav group between them sits on the true centre of the
+              row instead of the centre of the space left over. */}
+          <strong
+            className="font-bold text-ink font-display md:flex-1"
+            data-testid="nav-brand"
+          >
             {t("topos.app.name", "Topos")}
           </strong>
 
           {/* Desktop links: horizontal from md up. */}
-          <div className="hidden md:flex items-center gap-4">
+          <div
+            // mx-auto centres the group in the row; the brand on the left
+            // and the (mobile-only) hamburger on the right are both out of
+            // flow for this purpose, so the links sit optically centred.
+            className="hidden md:flex items-center gap-4 mx-auto"
+            data-testid="nav-desktop-links"
+          >
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.to}
@@ -138,23 +150,28 @@ export default function NavBar() {
                 {t(link.labelKey, link.fallback)}
               </Link>
             ))}
+
+            {/* Search rides with the destinations rather than floating
+                at the far right: the bar reads as one nav block. It stays
+                a button (it opens the spotlight, it does not navigate),
+                and keeps the shortcut hint. */}
+            <button
+              type="button"
+              data-testid="nav-search"
+              onClick={() => setSearchOpen(true)}
+              title={t("topos.nav.search", "Suchen")}
+              className={`${inactiveCls} inline-flex items-center gap-1.5 bg-transparent border-none p-0 cursor-pointer`}
+            >
+              <Search size={16} aria-hidden />
+              <span>{t("topos.nav.search", "Suchen")}</span>
+              <kbd className="rounded border border-line px-1 text-xs">
+                Ctrl K
+              </kbd>
+            </button>
           </div>
 
-          {/* Desktop search trigger. */}
-          <button
-            type="button"
-            data-testid="nav-search"
-            onClick={() => setSearchOpen(true)}
-            aria-label={t("topos.nav.search", "Suchen")}
-            title={t("topos.nav.search", "Suchen")}
-            className="ml-auto hidden md:inline-flex items-center gap-1.5 rounded border border-line bg-surface px-2 py-1.5 text-sm text-ink-secondary hover:text-ink cursor-pointer"
-          >
-            <Search size={16} aria-hidden />
-            <span>{t("topos.nav.search", "Suchen")}</span>
-            <kbd className="rounded border border-line px-1 text-xs">
-              Ctrl K
-            </kbd>
-          </button>
+          {/* Counterweight to the brand; empty by design. */}
+          <div className="hidden md:block md:flex-1" data-testid="nav-spacer" />
 
           {/* Mobile hamburger: opens the dropdown menu below the bar. */}
           <button

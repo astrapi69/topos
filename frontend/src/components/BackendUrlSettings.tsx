@@ -18,6 +18,21 @@ import { btnPrimary, input, muted } from "../ui/classes";
 
 const TEST_TIMEOUT_MS = 5000;
 
+/**
+ * Whether configuring a backend URL is possible on this deployment.
+ *
+ * False on the public GitHub Pages build (served under /topos/): from an
+ * HTTPS PWA a cross-origin http backend is mixed-content-blocked, so the
+ * setting could not do anything. A same-origin deploy (make dev, Docker
+ * at root, base "/") keeps it.
+ *
+ * Exported so the Settings page can drop the whole tab there rather than
+ * render an empty panel - tabs are absent, never blank.
+ */
+export function backendUrlSettingsAvailable(): boolean {
+  return import.meta.env.BASE_URL === "/";
+}
+
 export default function BackendUrlSettings() {
   const { t } = useI18n();
   const [url, setUrl] = useState(getBackendUrl());
@@ -80,11 +95,7 @@ export default function BackendUrlSettings() {
     }
   }
 
-  // Hidden on the public GitHub Pages build (served under /topos/): from an
-  // HTTPS PWA a cross-origin http backend is mixed-content-blocked, so
-  // configuring a backend URL there is useless. A same-origin deploy
-  // (make dev, Docker at root, base "/") keeps it.
-  if (import.meta.env.BASE_URL !== "/") return null;
+  if (!backendUrlSettingsAvailable()) return null;
 
   return (
     <section

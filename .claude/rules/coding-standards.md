@@ -176,7 +176,9 @@ Chain: ToposError -> API response (detail + traceback) -> ApiError -> toast with
 ## Performance
 
 - SQLite is single-writer. Minimize writes, batch where possible.
-- TipTap JSON can get large. Autosave with debounce (not on every keystroke).
+- Photos and Excel workbooks are the heavy payloads: downscale images
+  client-side before upload, and keep exceljs behind a dynamic import so
+  it only ships to a session that actually exports or imports.
 - Plugin loading at app startup. Lazy-load plugin UI where possible.
 
 ## Dependencies
@@ -184,7 +186,7 @@ Chain: ToposError -> API response (detail + traceback) -> ApiError -> toast with
 New dependencies only after asking. Existing stack:
 
 Backend: FastAPI, SQLAlchemy, Pydantic v2, pluginforge, manuscripta, PyYAML, markdown (MD->HTML)
-Frontend: React 18, TypeScript, TipTap (15+1 extensions), Vite, Radix UI, @dnd-kit, Lucide, react-toastify
+Frontend: React 18, TypeScript, Vite, Tailwind (Preflight off), Radix UI, Dexie, exceljs, Lucide, react-toastify, @astrapi69 kits (ai-key-vault, pwa-update, feature-strategy)
 Testing: pytest, Playwright, Vitest, mutmut (Python mutation testing)
 Linting/formatting: ruff (Python), ESLint + Prettier (TypeScript), pre-commit
 Tooling: Poetry, npm, Docker, Make

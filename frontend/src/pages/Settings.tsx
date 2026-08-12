@@ -20,7 +20,9 @@ import NavBar from "../components/NavBar";
 import AboutSection from "../components/AboutSection";
 import AiProviderSettings from "../components/AiProviderSettings";
 import DataSection from "../components/DataSection";
-import BackendUrlSettings from "../components/BackendUrlSettings";
+import BackendUrlSettings, {
+  backendUrlSettingsAvailable,
+} from "../components/BackendUrlSettings";
 import OrphanPathsSection from "../components/OrphanPathsSection";
 import ThemePicker from "../components/ThemePicker";
 import SettingsSidebar from "../components/settings/SettingsSidebar";
@@ -60,11 +62,16 @@ export default function Settings() {
             label: t("topos.page.settings.tab_ai", "KI-Assistent"),
             testId: "settings-tab-ai",
           },
-          {
-            value: "backend",
-            label: t("topos.page.settings.tab_backend", "Backend"),
-            testId: "settings-tab-backend",
-          },
+          // Absent where the panel would be empty (subpath deploy).
+          ...(backendUrlSettingsAvailable()
+            ? [
+                {
+                  value: "backend",
+                  label: t("topos.page.settings.tab_backend", "Backend"),
+                  testId: "settings-tab-backend",
+                },
+              ]
+            : []),
         ],
       },
       {

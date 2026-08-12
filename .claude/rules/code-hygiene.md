@@ -454,12 +454,12 @@ logger.info(f"Exported {book}")  # no objects inside messages, use extra
 
 ```python
 # RIGHT: the why, not the what
-# TipTap uses 4-space indent, write-book-template uses 2-space.
-# Double the indentation before conversion.
-content = re.sub(r'^( +)', lambda m: m.group(1) * 2, content, flags=re.MULTILINE)
+# Numbers are per container ("42-3"), so the highest wins rather than
+# the count: deleting an entry must not hand its number to a later one.
+next_number = (highest_external_id or 0) + 1
 
 # WRONG: commenting the obvious
-# Create a new book
+# Create a new container
 book = Book(title=title, author=author)
 ```
 
@@ -476,8 +476,9 @@ book = Book(title=title, author=author)
 def export_book(book_id: str, fmt: str, options: ExportOptions) -> Path:
     """Export a book in the given format.
 
-    Converts TipTap JSON to Markdown, scaffolds the write-book-template
-    structure and calls manuscripta for the final conversion.
+    Reads the three Ordner-Ordnung sheets, maps German priority and
+    category labels onto their canonical values, and upserts the result
+    idempotently.
 
     Args:
         book_id: UUID of the book.
