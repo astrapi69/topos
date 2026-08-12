@@ -27,6 +27,36 @@ beforeEach(async () => {
 });
 
 describe("NavBar global search", () => {
+  it("keeps the search trigger inside the desktop link group", () => {
+    // Search sits with the destinations rather than floating at the far
+    // right: one nav block instead of a link row plus a stray control.
+    render(
+      <MemoryRouter>
+        <NavBar />
+      </MemoryRouter>,
+    );
+    const group = screen.getByTestId("nav-desktop-links");
+    expect(group).toContainElement(screen.getByTestId("nav-search"));
+    expect(screen.getByTestId("nav-search").className).not.toContain("ml-auto");
+  });
+
+  it("centres the desktop nav between brand and hamburger", () => {
+    // mx-auto on the link group is what centres it; without a matching
+    // spacer the brand's width would push it off-centre, so the row uses
+    // justify-between-style balance instead of a plain flex run.
+    render(
+      <MemoryRouter>
+        <NavBar />
+      </MemoryRouter>,
+    );
+    // Centring needs a counterweight, not just mx-auto: the brand on the
+    // left would otherwise push the group right by its own width
+    // (measured: 37px off at every viewport). Brand and spacer both take
+    // flex-1, so the middle column lands on the true centre.
+    expect(screen.getByTestId("nav-brand").className).toContain("md:flex-1");
+    expect(screen.getByTestId("nav-spacer")).toBeInTheDocument();
+  });
+
   it("renders the nav links and a search trigger", () => {
     render(
       <MemoryRouter>

@@ -56,6 +56,8 @@ export function useSearch(query: string, limit = 20): SearchResult[] {
       containerId: (r.containerId as number | null) ?? null,
       itemId: (r.itemId as number | null) ?? null,
     }));
-    // `version` is a dependency so results refresh when the index changes.
+    // `version` is a deliberate cache-buster: the memo body never reads
+    // it, but bumping it is how a rebuilt index forces fresh results.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debounced, version, limit]);
 }

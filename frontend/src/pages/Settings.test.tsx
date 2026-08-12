@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -80,6 +80,26 @@ describe("Settings", () => {
     expect(screen.getByTestId("theme-picker")).toBeInTheDocument();
     // Only the active panel renders - the rest is one click away.
     expect(screen.queryByTestId("about-section")).not.toBeInTheDocument();
+  });
+
+  it("drops the backend tab where its panel would be empty", () => {
+    // BackendUrlSettings hides itself under a subpath deploy (GitHub
+    // Pages): an HTTPS PWA cannot reach a cross-origin http backend, so
+    // configuring one is useless there. The tab has to go with it -
+    // absent, not an empty panel.
+    vi.stubEnv("BASE_URL", "/topos/");
+    renderSettings();
+    expect(
+      screen.queryByTestId("settings-tab-backend"),
+    ).not.toBeInTheDocument();
+    vi.unstubAllEnvs();
+  });
+
+  it("keeps the backend tab on a root deploy", () => {
+    vi.stubEnv("BASE_URL", "/");
+    renderSettings();
+    expect(screen.getByTestId("settings-tab-backend")).toBeInTheDocument();
+    vi.unstubAllEnvs();
   });
 
   it("switches panels when a sidebar tab is picked", () => {
