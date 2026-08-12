@@ -150,12 +150,26 @@ export default defineConfig({
                 theme_color: "#1e40af", // tailwind blue-800
                 background_color: "#111827", // tailwind gray-900
                 display: "standalone",
-                orientation: "portrait",
+                // Not "portrait": the same manifest serves phone and
+                // desktop installs, and locking a resizable window to
+                // portrait is wrong for the latter.
+                orientation: "any",
                 scope: base,
                 start_url: base,
+                // Explicit id, so the install keeps its identity even if
+                // start_url ever moves (default is start_url itself).
+                id: base,
                 icons: [
                     {src: "icons/icon-192x192.png", sizes: "192x192", type: "image/png"},
                     {src: "icons/icon-512x512.png", sizes: "512x512", type: "image/png"},
+                    {
+                        // Both maskable sizes: with only 512 present, small
+                        // launchers downscale a 512 PNG on every draw.
+                        src: "icons/maskable-icon-192x192.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                        purpose: "maskable",
+                    },
                     {
                         src: "icons/maskable-icon-512x512.png",
                         sizes: "512x512",
@@ -163,7 +177,54 @@ export default defineConfig({
                         purpose: "maskable",
                     },
                 ],
+                // Captured from the real build by
+                // e2e/tools/capture-manifest-screenshots.mjs. Android shows
+                // the wide one on tablets/desktop and the narrow one on
+                // phones; without any, the install dialog stays a one-liner.
+                screenshots: [
+                    {
+                        src: "screenshots/desktop-containers.png",
+                        sizes: "1280x800",
+                        type: "image/png",
+                        form_factor: "wide",
+                        label: "Container-Liste",
+                    },
+                    {
+                        src: "screenshots/mobile-container-detail.png",
+                        sizes: "400x800",
+                        type: "image/png",
+                        form_factor: "narrow",
+                        label: "Ordner mit Eintraegen",
+                    },
+                ],
+                // The three things people open the app to do.
+                shortcuts: [
+                    {
+                        name: "Container",
+                        short_name: "Container",
+                        url: `${base}containers`,
+                        icons: [{src: "icons/icon-192x192.png", sizes: "192x192"}],
+                    },
+                    {
+                        name: "Foto-Erfassung",
+                        short_name: "Foto",
+                        url: `${base}photo-intake`,
+                        icons: [{src: "icons/icon-192x192.png", sizes: "192x192"}],
+                    },
+                    {
+                        name: "Aktionen",
+                        short_name: "Aktionen",
+                        url: `${base}actions`,
+                        icons: [{src: "icons/icon-192x192.png", sizes: "192x192"}],
+                    },
+                ],
                 categories: ["utilities", "productivity"],
+                // The app switches between eight catalogs at runtime, so no
+                // static value is right for every user. Omitting the field
+                // is not an option: vite-plugin-pwa then injects `lang:
+                // "en"` itself, which is worse - it would contradict the
+                // German name right above it. So it names the default
+                // catalog, which is what an install actually starts in.
                 lang: "de",
                 dir: "ltr",
             },
@@ -181,6 +242,9 @@ export default defineConfig({
                     // running app never requests them, online or off.
                     "og-image.png",
                     "og-image.svg",
+                    // Install-dialog images. Same reasoning: the running
+                    // app never requests them, online or offline.
+                    "screenshots/*",
                 ],
                 // Evict precache entries from superseded builds so an old
                 // deploy's chunks do not accumulate in the cache storage.
