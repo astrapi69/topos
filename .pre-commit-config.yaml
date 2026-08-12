@@ -40,6 +40,13 @@ repos:
         pass_filenames: false
         files: ^frontend/src/.*\.(ts|tsx|css)$
 
+      - id: eslint-frontend
+        name: eslint (frontend src)
+        entry: bash -c 'cd frontend && npx eslint src'
+        language: system
+        pass_filenames: false
+        files: ^frontend/src/.*\.(ts|tsx)$
+
       - id: i18n-catalogs-in-sync
         name: bundled i18n catalogs match the backend YAML
         entry: bash -c 'cd backend && poetry run python ../scripts/generate_i18n_catalogs.py --check'

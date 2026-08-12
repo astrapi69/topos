@@ -19,7 +19,7 @@
 import { Copy, Download, Share2, X } from "lucide-react";
 import QRCode from "qrcode";
 
-import { btn, btnPrimary, iconButton } from "../ui/classes";
+import { btn, btnPrimary } from "../ui/classes";
 import { type ReactNode, useEffect, useState } from "react";
 
 export interface QrCodeModalLabels {

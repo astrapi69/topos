@@ -26,7 +26,6 @@ import type {
   CategoryDeleteResult,
   CategoryRenameResult,
   ContainerCreate,
-  ContainerUpdate,
   ItemCreate,
   ItemUpdate,
   OrphanReport,

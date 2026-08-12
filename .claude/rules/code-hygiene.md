@@ -46,113 +46,74 @@ cd backend && poetry run ruff format .        # format
 
 ### TypeScript (Frontend)
 
-```json
-// frontend/.eslintrc.json
-{
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react-hooks/recommended"
-  ],
-  "rules": {
-    "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "no-console": ["error", { "allow": ["warn", "error"] }],
-    "react-hooks/exhaustive-deps": "warn"
-  }
-}
-```
+ESLint 10 with flat config (`frontend/eslint.config.js`). Correctness
+only - Prettier owns formatting and runs as its own hook, so the linter
+carries no style rules.
 
-```json
-// frontend/.prettierrc
-{
-  "semi": false,
-  "singleQuote": true,
-  "trailingComma": "all",
-  "printWidth": 100,
-  "tabWidth": 2
-}
-```
+- `typescript-eslint` (the meta-package: parser + plugin in one import)
+- `eslint-plugin-react-hooks` v7
+- Project rules: `no-explicit-any` and `no-unused-vars` (with `^_`
+  escape) as errors, `no-console` allowing only `warn`/`error` - user
+  feedback belongs in toasts.
+- Tests relax `no-explicit-any` and `no-console`: casts and throwaway
+  shapes there are not the same defect they would be in production code.
+
+react-hooks v7 bundles the React Compiler checks. `rules-of-hooks` stays
+an error; the compiler-era rules (`set-state-in-effect`, `refs`,
+`preserve-manual-memoization`) report a preferred shape rather than a
+defect and this codebase predates them, so they are warnings - visible,
+not blocking. Work them off file by file, then raise the clean ones back
+to error.
+
+Type-aware linting (`recommendedTypeChecked`) is deliberately off: it
+needs a full program per run, and `tsc --noEmit` already covers types.
 
 **Commands:**
 ```bash
-cd frontend && npx eslint src/ --fix    # lint + auto-fix
-cd frontend && npx prettier --write src/ # format
+cd frontend && npm run lint        # eslint src
+cd frontend && npm run lint:fix    # eslint src --fix
+cd frontend && npx prettier --write src/
+cd frontend && npx tsc --noEmit
 ```
+
+Prettier's settings live in `frontend/.prettierrc`; do not restate them
+here - a second copy is a second source of truth.
 
 ### Setup (one-time)
 
 ```bash
-# Backend
 cd backend && poetry add --group dev ruff
-
-# Frontend
-cd frontend && npm install -D eslint @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-react-hooks prettier
+cd frontend && npm install   # eslint + prettier are devDependencies
 ```
 
 ---
 
 ## Pre-commit hooks
 
-Automatic checks before every commit. Prevents unformatted or broken code from reaching the repo in the first place.
+The live list is `.pre-commit-config.yaml` - read it there rather than
+from a copy here, which only ever drifts. As of this writing the chain
+is: whitespace / EOF / YAML / JSON / large-file / merge-conflict
+guards, `ruff` + `ruff-format` (backend), `prettier-frontend` and
+`eslint-frontend`, `i18n-catalogs-in-sync`, plus the project-specific
+guards (roadmap-archive reminder, plugin-lock pairing,
+notify-error coverage, theme-token completeness, module-state audit).
 
-```yaml
-# .pre-commit-config.yaml (in the project root)
-repos:
-  - repo: local
-    hooks:
-      - id: ruff-check
-        name: ruff lint
-        entry: bash -c 'cd backend && poetry run ruff check .'
-        language: system
-        pass_filenames: false
-        files: ^backend/
+Two shapes worth knowing when adding one:
 
-      - id: ruff-format
-        name: ruff format check
-        entry: bash -c 'cd backend && poetry run ruff format --check .'
-        language: system
-        pass_filenames: false
-        files: ^backend/
+- Frontend hooks shell out to the installed `npx` binary
+  (`cd frontend && npx eslint src`), so they add no dependency of their
+  own and use the same versions a developer runs by hand.
+- Generated artefacts get a `--check` hook rather than a regeneration
+  hook: `i18n-catalogs-in-sync` fails and tells you which command to
+  run, instead of silently rewriting files mid-commit.
 
-      - id: eslint
-        name: eslint
-        entry: bash -c 'cd frontend && npx eslint src/ --max-warnings=0'
-        language: system
-        pass_filenames: false
-        files: ^frontend/src/
-
-      - id: prettier
-        name: prettier check
-        entry: bash -c 'cd frontend && npx prettier --check src/'
-        language: system
-        pass_filenames: false
-        files: ^frontend/src/
-
-      - id: pytest-quick
-        name: pytest (backend only)
-        entry: bash -c 'cd backend && poetry run pytest tests/ -x -q'
-        language: system
-        pass_filenames: false
-        files: ^backend/
-```
+The backend test suite is deliberately NOT a hook: it takes ~10 s, which
+is too slow for every commit. `make test` is the gate before pushing.
 
 **Setup:**
 ```bash
-pip install pre-commit
-pre-commit install
+cd backend && poetry run pre-commit install
 ```
-
-**After that, on every `git commit` the following happens automatically:**
-1. Python code is checked for lint errors (ruff)
-2. Python formatting is checked (ruff format)
-3. TypeScript is checked for errors (ESLint)
-4. TypeScript formatting is checked (Prettier)
-5. Backend tests run (quick smoke test)
-
-If anything fails: the commit is rejected and the errors are shown.
-
----
 
 ## Error handling architecture
 
