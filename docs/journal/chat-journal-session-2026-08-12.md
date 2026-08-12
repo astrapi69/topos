@@ -154,7 +154,7 @@ Ursache beheben - mehrfach lag sie eine Ebene tiefer als der Bericht.
   aus den heute Vormittag ergaenzten Hooks: der eslint-Hook laedt die
   Flat Config ohne installierte Config-Deps, der i18n-Hook rief
   `poetry run` in einem Job, der nur pre-commit installiert.
-- Commits: 9aa0cca, 1b3e0f2
+- Commits: 9aa0cca, 45bd95a, 77f2cba
 
 ## Zusammenfassung
 
