@@ -290,7 +290,10 @@
         "labels_select_all": "Tout sélectionner",
         "labels_title": "Étiquettes de conteneur",
         "new_container": "Nouveau conteneur",
-        "title": "Conteneurs"
+        "title": "Conteneurs",
+        "view_label": "Affichage",
+        "view_list": "Liste",
+        "view_tree": "Arborescence"
       },
       "dashboard": {
         "categories": "Catégories",
@@ -549,6 +552,16 @@
       "item_updated": "Entrée mise à jour",
       "photo_commit_failed": "L'enregistrement a échoué",
       "photo_recognize_failed": "Échec de la reconnaissance"
+    },
+    "tree": {
+      "empty": "Aucun conteneur pour l'instant.",
+      "group": {
+        "box": "Boîtes",
+        "folder": "Classeurs",
+        "parents": "{type} des parents",
+        "self": "Mes {type}",
+        "shared": "{type} partagés"
+      }
     }
   },
   "ui": {

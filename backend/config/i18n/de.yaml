@@ -139,6 +139,9 @@ topos:
       labels_doc_title: Topos Etiketten
       labels_failed: Etiketten konnten nicht erstellt werden
       title: Container
+      view_label: "Ansicht"
+      view_list: "Liste"
+      view_tree: "Baum"
       empty: Keine Container gefunden.
       new_container: Neuer Container
       create_title: Neuer Container
@@ -413,6 +416,15 @@ topos:
     delete_container_title: Container löschen?
     delete_container_message: Der Container "{label}" wird dauerhaft gelöscht.
     delete_container_items_warning: "Achtung: {count} zugehörige Einträge werden ebenfalls gelöscht."
+
+  tree:
+    group:
+      folder: "Ordner"
+      box: "Boxen"
+      self: "Meine {type}"
+      parents: "{type} Eltern"
+      shared: "{type} geteilt"
+    empty: "Keine Container vorhanden."
 
 pwa:
   update_available: Neue Version verfügbar

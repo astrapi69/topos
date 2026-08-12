@@ -290,7 +290,10 @@
         "labels_select_all": "すべて選択",
         "labels_title": "コンテナのラベル",
         "new_container": "新しいコンテナ",
-        "title": "コンテナ"
+        "title": "コンテナ",
+        "view_label": "表示",
+        "view_list": "リスト",
+        "view_tree": "ツリー"
       },
       "dashboard": {
         "categories": "カテゴリ",
@@ -549,6 +552,16 @@
       "item_updated": "項目を更新しました",
       "photo_commit_failed": "確定できませんでした",
       "photo_recognize_failed": "認識に失敗しました"
+    },
+    "tree": {
+      "empty": "コンテナはまだありません。",
+      "group": {
+        "box": "ボックス",
+        "folder": "フォルダー",
+        "parents": "両親の{type}",
+        "self": "自分の{type}",
+        "shared": "共有の{type}"
+      }
     }
   },
   "ui": {

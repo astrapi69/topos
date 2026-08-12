@@ -136,6 +136,9 @@ topos:
       labels_doc_title: Étiquettes Topos
       labels_failed: Impossible de générer les étiquettes
       title: Conteneurs
+      view_label: "Affichage"
+      view_list: "Liste"
+      view_tree: "Arborescence"
       empty: Aucun conteneur trouvé.
       new_container: Nouveau conteneur
       create_title: Nouveau conteneur
@@ -405,6 +408,15 @@ topos:
     delete_container_title: Supprimer le conteneur ?
     delete_container_message: Le conteneur « {label} » sera définitivement supprimé.
     delete_container_items_warning: 'Attention : {count} entrées contenues seront également supprimées.'
+  tree:
+    group:
+      folder: "Classeurs"
+      box: "Boîtes"
+      self: "Mes {type}"
+      parents: "{type} des parents"
+      shared: "{type} partagés"
+    empty: "Aucun conteneur pour l'instant."
+
 pwa:
   update_available: Nouvelle version disponible
   update_action: Mettre à jour

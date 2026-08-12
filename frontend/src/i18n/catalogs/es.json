@@ -290,7 +290,10 @@
         "labels_select_all": "Seleccionar todo",
         "labels_title": "Etiquetas de contenedor",
         "new_container": "Nuevo contenedor",
-        "title": "Contenedores"
+        "title": "Contenedores",
+        "view_label": "Vista",
+        "view_list": "Lista",
+        "view_tree": "Árbol"
       },
       "dashboard": {
         "categories": "Categorías",
@@ -549,6 +552,16 @@
       "item_updated": "Entrada actualizada",
       "photo_commit_failed": "No se pudo confirmar",
       "photo_recognize_failed": "Falló el reconocimiento"
+    },
+    "tree": {
+      "empty": "Todavía no hay contenedores.",
+      "group": {
+        "box": "Cajas",
+        "folder": "Carpetas",
+        "parents": "{type} de los padres",
+        "self": "Mis {type}",
+        "shared": "{type} compartidas"
+      }
     }
   },
   "ui": {

@@ -136,6 +136,9 @@ topos:
       labels_doc_title: Topos etiketleri
       labels_failed: Etiketler oluşturulamadı
       title: Kaplar
+      view_label: "Görünüm"
+      view_list: "Liste"
+      view_tree: "Ağaç"
       empty: Kap bulunamadı.
       new_container: Yeni kap
       create_title: Yeni kap
@@ -405,6 +408,15 @@ topos:
     delete_container_title: Kap silinsin mi?
     delete_container_message: «{label}» kabı kalıcı olarak silinecek.
     delete_container_items_warning: 'Dikkat: içindeki {count} kayıt da silinecek.'
+  tree:
+    group:
+      folder: "Klasörler"
+      box: "Kutular"
+      self: "Kendi {type}"
+      parents: "Ebeveynlerin {type}"
+      shared: "Paylaşılan {type}"
+    empty: "Henüz kap yok."
+
 pwa:
   update_available: Yeni sürüm mevcut
   update_action: Güncelle

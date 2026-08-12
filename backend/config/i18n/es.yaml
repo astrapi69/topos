@@ -136,6 +136,9 @@ topos:
       labels_doc_title: Etiquetas de Topos
       labels_failed: No se pudieron generar las etiquetas
       title: Contenedores
+      view_label: "Vista"
+      view_list: "Lista"
+      view_tree: "Árbol"
       empty: No se encontraron contenedores.
       new_container: Nuevo contenedor
       create_title: Nuevo contenedor
@@ -405,6 +408,15 @@ topos:
     delete_container_title: ¿Eliminar el contenedor?
     delete_container_message: El contenedor «{label}» se eliminará permanentemente.
     delete_container_items_warning: 'Atención: también se eliminarán {count} entradas contenidas.'
+  tree:
+    group:
+      folder: "Carpetas"
+      box: "Cajas"
+      self: "Mis {type}"
+      parents: "{type} de los padres"
+      shared: "{type} compartidas"
+    empty: "Todavía no hay contenedores."
+
 pwa:
   update_available: Nueva versión disponible
   update_action: Actualizar

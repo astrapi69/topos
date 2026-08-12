@@ -290,7 +290,10 @@
         "labels_select_all": "Tümünü seç",
         "labels_title": "Kap etiketleri",
         "new_container": "Yeni kap",
-        "title": "Kaplar"
+        "title": "Kaplar",
+        "view_label": "Görünüm",
+        "view_list": "Liste",
+        "view_tree": "Ağaç"
       },
       "dashboard": {
         "categories": "Kategoriler",
@@ -549,6 +552,16 @@
       "item_updated": "Kayıt güncellendi",
       "photo_commit_failed": "Kaydetme başarısız",
       "photo_recognize_failed": "Tanıma başarısız"
+    },
+    "tree": {
+      "empty": "Henüz kap yok.",
+      "group": {
+        "box": "Kutular",
+        "folder": "Klasörler",
+        "parents": "Ebeveynlerin {type}",
+        "self": "Kendi {type}",
+        "shared": "Paylaşılan {type}"
+      }
     }
   },
   "ui": {
