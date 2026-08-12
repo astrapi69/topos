@@ -169,6 +169,19 @@ export default defineConfig({
             },
             workbox: {
                 globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+                // Everything the glob picks up is downloaded before the
+                // app is usable, so anything a session may never ask for
+                // is excluded here and cached at runtime instead.
+                globIgnores: [
+                    // 908 KB, 31% of the v0.2.0 precache, for the workbook
+                    // export/import. It is behind a dynamic import for
+                    // exactly this reason; precaching it undid that.
+                    "assets/exceljs.min-*.js",
+                    // Link-unfurl images (og:image / twitter:image). The
+                    // running app never requests them, online or off.
+                    "og-image.png",
+                    "og-image.svg",
+                ],
                 // Evict precache entries from superseded builds so an old
                 // deploy's chunks do not accumulate in the cache storage.
                 cleanupOutdatedCaches: true,
@@ -178,6 +191,19 @@ export default defineConfig({
                 // error as a 200 HTML page).
                 navigateFallbackDenylist: [/^\/api\//],
                 runtimeCaching: [
+                    {
+                        // exceljs is precache-excluded above, so cache it
+                        // on first use: a session that exported once can
+                        // export again offline. CacheFirst is safe because
+                        // the filename carries a content hash.
+                        urlPattern: /\/assets\/exceljs\.min-[^/]+\.js$/,
+                        handler: "CacheFirst",
+                        options: {
+                            cacheName: "exceljs-chunk",
+                            expiration: {maxEntries: 2},
+                            cacheableResponse: {statuses: [0, 200]},
+                        },
+                    },
                     {
                         // NetworkFirst so the app keeps the last API responses
                         // available offline (relative path matches the dev
@@ -211,32 +237,6 @@ export default defineConfig({
                     if (!id.includes('node_modules')) return undefined;
                     const chunkMap: Record<string, string[]> = {
                         'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-                        'vendor-tiptap': [
-                            '@tiptap/react',
-                            '@tiptap/starter-kit',
-                            '@tiptap/extension-image',
-                            '@tiptap/extension-link',
-                            '@tiptap/extension-table',
-                            '@tiptap/extension-table-row',
-                            '@tiptap/extension-table-cell',
-                            '@tiptap/extension-table-header',
-                            '@tiptap/extension-task-list',
-                            '@tiptap/extension-task-item',
-                            '@tiptap/extension-text-align',
-                            '@tiptap/extension-text-style',
-                            '@tiptap/extension-underline',
-                            '@tiptap/extension-subscript',
-                            '@tiptap/extension-superscript',
-                            '@tiptap/extension-highlight',
-                            '@tiptap/extension-color',
-                            '@tiptap/extension-typography',
-                            '@tiptap/extension-character-count',
-                            '@tiptap/extension-placeholder',
-                            '@tiptap/extension-code-block-lowlight',
-                            '@pentestpad/tiptap-extension-figure',
-                            '@sereneinserenade/tiptap-search-and-replace',
-                            'tiptap-footnotes',
-                        ],
                         'vendor-ui': [
                             '@radix-ui/react-context-menu',
                             '@radix-ui/react-dialog',
