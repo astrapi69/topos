@@ -71,15 +71,22 @@
 
 - [ ] **PWA installability hardening**. Manifest icons, install
       prompt, offline shell, service-worker precache audit.
+      v0.2.0 did part of it: static routes are prerendered so deep
+      links answer 200, the build stopped firing four dead API
+      requests per load, and the SW self-heals on deploy
+      (autoUpdate). The precache audit and the icon/install-prompt
+      review are still open.
 - [ ] **Desktop launcher build pipeline verified**. Per-OS GitHub
       Actions builds for Linux / macOS / Windows currently exist
       from the template; verify they still produce working
-      artifacts for Topos and ship a v0.1.0 release.
+      artifacts for Topos.
+      v0.1.0 and v0.2.0 are both released, and the PyInstaller spec
+      builds cleanly on Linux (checked at release time). The macOS
+      and Windows jobs remain unverified - that is what still
+      blocks this item.
 
 ## Later (P3 - quality + reach)
 
-- [ ] i18n: translate the six placeholder catalogs (EL, ES, FR,
-      JA, PT, TR) into their target languages
 - [ ] CSV-import plugin (sibling to Excel)
 - [ ] Voice-input plugin for hands-free item entry (mobile-first,
       basement / shelf-side use case)
@@ -99,7 +106,6 @@
       breadcrumb / depth logic makes `TreeCursor` pay for itself -
       `CategoryBrowse` currently threads `depth` through as a prop.
 - [ ] Family-shared mode: multi-user backend behind auth
-- [ ] Export plugin (back to xlsx for offline backup)
 - [ ] Calendar integration for action `due_date` reminders
 
 ## Out of scope
