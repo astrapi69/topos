@@ -28,6 +28,7 @@ import { isBackendAvailable } from "../utils/backendStatus";
 import { buildCategoryTree } from "../utils/categoryTree";
 import { notify, errorMessage } from "../utils/notify";
 import {
+  iconButton,
   pageMain,
   text,
   muted,
@@ -363,7 +364,7 @@ function TreeNode({
             aria-label={t("topos.category.rename", "Umbenennen")}
             title={t("topos.category.rename", "Umbenennen")}
             onClick={() => onRename(node)}
-            className="text-ink-muted hover:text-ink bg-transparent border-0 cursor-pointer p-1 min-h-[44px] md:min-h-0 shrink-0"
+            className={`${iconButton} min-h-[44px] md:min-h-0 shrink-0`}
           >
             <Pencil size={15} aria-hidden />
           </button>
@@ -375,7 +376,7 @@ function TreeNode({
             aria-label={t("topos.common.delete", "Löschen")}
             title={t("topos.common.delete", "Löschen")}
             onClick={() => onDelete(node)}
-            className="text-ink-muted hover:text-danger bg-transparent border-0 cursor-pointer p-1 min-h-[44px] md:min-h-0 shrink-0"
+            className={`${iconButton} hover:text-danger min-h-[44px] md:min-h-0 shrink-0`}
           >
             <Trash2 size={15} aria-hidden />
           </button>

@@ -20,7 +20,7 @@ import { useI18n } from "../hooks/useI18n";
 import { usePwaInstall } from "../pwa/usePwaInstall";
 import { appShareUrl } from "../utils/shareUrl";
 import { qrLabels } from "../utils/qrLabels";
-import { card, link, muted, pill } from "../ui/classes";
+import { card, link, linkButton, muted, pill } from "../ui/classes";
 
 const REPO_URL = "https://github.com/astrapi69/topos";
 const LICENSE_URL = "https://github.com/astrapi69/topos/blob/main/LICENSE";
@@ -131,7 +131,7 @@ export default function AboutSection() {
         <li>
           <button
             type="button"
-            className={link}
+            className={linkButton}
             onClick={openErrorReport}
             data-testid="about-report-issue"
           >
@@ -141,7 +141,7 @@ export default function AboutSection() {
         <li>
           <button
             type="button"
-            className={link}
+            className={linkButton}
             onClick={() => setShowShare(true)}
             data-testid="about-share-app"
           >
@@ -152,7 +152,7 @@ export default function AboutSection() {
           <li>
             <button
               type="button"
-              className={link}
+              className={linkButton}
               onClick={() => void promptInstall()}
               data-testid="about-install-app"
             >

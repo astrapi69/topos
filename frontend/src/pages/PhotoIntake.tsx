@@ -58,6 +58,8 @@ import {
   card,
   input,
   link,
+  iconButtonDanger,
+  linkButton,
   muted,
   text,
   pageMainNarrow,
@@ -629,7 +631,7 @@ export default function PhotoIntake() {
                         )}{" "}
                 <button
                   type="button"
-                  className={link}
+                  className={linkButton}
                   onClick={() => navigate("/settings")}
                   data-testid="photo-intake-ai-settings-link"
                 >
@@ -818,7 +820,7 @@ function StagingRowCard({
           data-testid={`${testId}-remove`}
           aria-label={t("topos.page.photo_intake.remove_row", "Entfernen")}
           title={t("topos.page.photo_intake.remove_row", "Entfernen")}
-          className="text-red-600 dark:text-red-400 bg-transparent border-0 cursor-pointer p-1"
+          className={iconButtonDanger}
           onClick={onRemove}
         >
           <Trash2 size={18} aria-hidden />

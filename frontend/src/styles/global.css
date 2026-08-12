@@ -358,6 +358,28 @@ body {
     line-height: 1.6;
 }
 
+/* Form controls inherit the page typeface.
+   This is Tailwind Preflight's rule, restored by hand: Preflight is
+   deliberately off here (it would clobber the base styles above and the
+   .btn system below), so without this every <button>, <input> and
+   <select> renders in the browser's own 13.33px Arial while the text
+   around it is 16px DM Sans. Measured across the app before this rule:
+   26 controls on Arial.
+   Deliberately a base rule rather than a font utility inside `btn` and
+   friends in ui/classes.ts: a new component that forgets the utility
+   would drift again, and this also covers inputs, selects and the
+   Radix primitives that render their own elements. Size still comes
+   from the utilities (text-sm and so on) - only family, weight and
+   letter-spacing are inherited. */
+button,
+input,
+select,
+optgroup,
+textarea {
+    font: inherit;
+    letter-spacing: inherit;
+}
+
 /* --- Topos type scale ---
    Headings use the display face (mono). The universal reset above
    zeroes all margins, so the small bottom margins here are the only
@@ -456,6 +478,38 @@ h3 {
    browser's default chrome shows through, which is unreadable on the
    dark themes (see lessons-learned: never rely on bare button colour).
    Mirrors .btn-secondary so it matches the surrounding controls. */
+/* Controls the AI key-vault kit renders itself.
+   The kit ships structure and leaves appearance to the host (same slot
+   philosophy as its Button/Input props and the file input below), so
+   without these rules its eye-toggles and provider select show the
+   browser's grey buttonface next to our themed controls. */
+.akv-secret-toggle {
+    appearance: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: color var(--transition);
+}
+
+.akv-secret-toggle:hover {
+    color: var(--text-primary);
+}
+
+/* A <select> with no class at all can only come from a third-party kit;
+   ours always carry the `input` utility string. Give it the same look
+   instead of leaving UA chrome in the middle of a themed panel. */
+select:not([class]) {
+    appearance: none;
+    font: inherit;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
 .akv-file-input::file-selector-button {
     margin-right: 12px;
     padding: 6px 12px;

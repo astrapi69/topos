@@ -18,6 +18,7 @@ import { Share, X } from "lucide-react";
 
 import { useI18n } from "../hooks/useI18n";
 import { isStandalone, shouldShowIosInstallHint } from "../pwa/iosInstall";
+import { iconButton } from "../ui/classes";
 
 const STORAGE_KEY = "topos.ios_install_dismissed";
 
@@ -92,7 +93,7 @@ export default function IosInstallHint() {
         type="button"
         onClick={dismiss}
         aria-label={t("pwa.ios.dismiss", "Ausblenden")}
-        className="shrink-0 rounded p-1 text-ink-muted hover:bg-surface-hover hover:text-ink"
+        className={`${iconButton} shrink-0`}
         data-testid="ios-install-hint-dismiss"
       >
         <X size={18} aria-hidden="true" />
