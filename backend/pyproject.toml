@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "topos"
-version = "0.1.0"
+version = "0.2.0"
 description = "Personal inventory tracker for folders, boxes, and what's inside them."
 authors = ["Asterios Raptis"]
 license = "MIT"

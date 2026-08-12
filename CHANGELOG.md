@@ -5,6 +5,88 @@ All notable changes to Topos are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
 
+## [0.2.0] - 2026-08-12
+
+The offline release. v0.1.0 shipped a PWA that could show data without a
+backend; this one can actually work without one - create containers,
+recognise photos, import and export Excel, and run in eight languages,
+all from the browser alone.
+
+### Added
+
+#### Excel export, and import without a backend
+- `GET /api/export/excel` writes an import-compatible workbook, and the
+  browser can build the same file itself - so the offline PWA exports too.
+- The importer now runs client-side as well (`src/excel/`), applying the
+  same match keys as the backend plugin: container by number, item by
+  (container, content), action by (item, text), category by path.
+- The round-trip is lossless. The sheet layout gained the columns that were
+  missing for it - owner, notes, category slug, box priority, item number -
+  plus a `Kategorien` sheet carrying the taxonomy verbatim, and actions now
+  encode their status and dates. Columns were appended, never reordered, so
+  workbooks written by older versions still import.
+- Verified across runtimes: a file written by the browser imports losslessly
+  in the backend plugin, and the reverse.
+
+#### Per-container item numbers
+- Items carry a user-facing number counted per container, shown as `42-3`:
+  the third entry in folder 42. Assigned as "highest + 1" so deleting an
+  entry never hands its number to a later one, re-assigned when an item
+  moves, editable when a label already exists on paper - checked for
+  uniqueness inside its container only.
+- Existing rows are numbered by an Alembic migration and, independently, by
+  a lazy backfill on read, so nothing stays unnumbered even where no
+  migration runs (the browser).
+
+#### Offline-first storage
+- All pages go through a storage service (`getStorage()`): the backend is
+  the source of truth in api mode, IndexedDB is the real store in dexie
+  mode. The GitHub Pages build is now a genuine offline app rather than a
+  read-only view - no demo data.
+
+#### AI and photo intake
+- Photo recognition works browser-direct where the provider allows it.
+  Which providers those are was measured, not assumed: Anthropic, Google
+  and Perplexity reach their vision endpoints from a browser; OpenAI's chat
+  endpoint sends no CORS headers, so it stays backend-only.
+- Perplexity added as a provider; AI keys can be imported from a sibling
+  app's encrypted vault; the local vault asks for its passphrase lazily, on
+  the first key save, instead of gating the provider list behind it.
+
+#### Settings, navigation, languages
+- Settings is organised as tabs behind a left sidebar, with the active tab
+  in `?tab=`. One shared model drives the desktop sidebar and the mobile
+  menu; a test pins that neither can gain a tab the other lacks.
+- All eight locales are fully translated. They were byte-identical copies
+  of English before, so picking Spanish showed English.
+- Manual "check for updates" control in the About panel.
+
+### Fixed
+- Language switching did nothing in the deployed app: the catalogs came only
+  from the backend. They ship in the build now, one lazy chunk per language.
+- The offline PWA could not create a container inline, nor commit recognised
+  items - both were gated on a backend they never had. Photo intake was
+  unusable as a result.
+- Deep links returned HTTP 404 on GitHub Pages. Every static route now gets
+  its own prerendered shell, so Pages answers 200.
+- The static build fired four requests per load at an API that does not
+  exist there, one of them against the wrong host path entirely.
+- Controls rendered in the browser's 13.33px Arial with grey system chrome
+  next to 16px DM Sans text, because Tailwind's Preflight is deliberately
+  off. Form controls inherit the page typeface now.
+- Page content clung to the left edge on wide screens; every page column is
+  centred.
+- Form controls without an accessible name (the language select among them).
+
+### Changed
+- GitHub Pages deploys from `main` instead of `develop`, so the version the
+  app reports matches the newest commit rather than the one before the merge.
+- 37 unused packages removed: 27 TipTap/ProseMirror, plus dompurify, xstate,
+  react-markdown and friends, and four text-to-speech engines in the backend
+  - all inherited from the book-authoring template, none imported.
+- ESLint is real now (flat config, correctness rules only) and Prettier runs
+  as a pre-commit hook; both were documented but never installed.
+
 ## [0.1.0] - 2026-08-06
 
 First public release. Topos is a personal inventory tracker for physical

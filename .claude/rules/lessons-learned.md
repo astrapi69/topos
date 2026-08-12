@@ -1962,3 +1962,45 @@ matrix`) so a future edit that re-guesses fails loudly.
 Generalises: any "can I call X from the browser?" question is answerable
 in 30 seconds with a real-origin fetch probe. A guessed CORS flag is a
 bug with a UI. Measure, then encode, then regression-pin.
+
+## "No artifacts named github-pages" is a GitHub flake, not a build bug
+
+Twice on 2026-08-12 the Pages deploy failed with:
+
+```
+Fetching artifact metadata for "github-pages" in this workflow run
+Found 0 artifact(s)
+##[error]No artifacts named "github-pages" were found for this workflow run.
+```
+
+It reads like the build produced nothing, and the temptation is to go
+hunting through `vite.config.ts` or the workflow's `path:`. Do not: check
+the upload step first. In both cases it had plainly succeeded seconds
+earlier —
+
+```
+Run actions/upload-pages-artifact@v5 ... Uploaded bytes 1589685
+```
+
+— and `deploy-pages` simply could not see the artifact metadata yet. The
+action's own error text says as much ("Is githubstatus.com reporting
+issues with API requests, Pages, or Actions?"). It is a propagation race
+inside GitHub, and the second occurrence came with runs sitting `queued`
+for minutes, i.e. a congested Actions backend.
+
+Remedy: `gh run rerun <id>`, and if runs are queueing, wait for the
+platform rather than pushing a "fix". Nothing in the repo changes.
+
+Diagnostic that separates the two cases in one command:
+
+```bash
+gh run view <id> --log | grep -iE "Uploaded bytes|Found 0 artifact"
+```
+
+Bytes uploaded + 0 artifacts found = platform. No upload line at all =
+our problem (wrong `path:`, empty `dist/`, a build that failed silently).
+
+Pairs with the earlier "GitHub-Pages deploy can fail on transient GitHub
+infra" note: same family, different symptom - that one failed at
+Set-up-job while resolving actions, this one after a successful upload.
+Both are re-run-and-verify, never re-architect.

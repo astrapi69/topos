@@ -265,3 +265,60 @@ def test_multiple_pyprojects_partial_pairing_fails(
     # Must name the unpaired plugin specifically:
     assert "plugins/topos-plugin-export-2/pyproject.toml" in result.stderr
     assert "plugins/topos-plugin-export-2/poetry.lock" in result.stderr
+
+
+def _set_version(work: Path, path: str, version: str) -> None:
+    """Rewrite the package's own ``version = "..."`` line, as
+    ``make sync-versions`` does at release time."""
+    full = work / path
+    lines = full.read_text(encoding="utf-8").split("\n")
+    for index, line in enumerate(lines):
+        if line.startswith("version ="):
+            lines[index] = f'version = "{version}"'
+            break
+    else:
+        # The fixture's minimal pyproject carries no version line; adding
+        # one is still a version-only diff, which is what we are pinning.
+        lines.insert(1, f'version = "{version}"')
+    full.write_text("\n".join(lines), encoding="utf-8")
+
+
+def test_release_version_bump_passes_without_the_lock(isolated_git: Path) -> None:
+    """A version-only bump needs no lock, and must not need one.
+
+    ``make sync-versions`` rewrites every plugin's own version at every
+    release. That version never appears in the plugin's ``poetry.lock``,
+    so ``poetry lock`` produces no change and the lock CANNOT be staged
+    alongside it. Failing here would make every release reach for
+    ``--no-verify``, switching off every other guard as collateral.
+    """
+    _set_version(isolated_git, "plugins/topos-plugin-export/pyproject.toml", "9.9.9")
+    _stage(isolated_git, "plugins/topos-plugin-export/pyproject.toml")
+
+    result = _run_hook(isolated_git, ["plugins/topos-plugin-export/pyproject.toml"])
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_dependency_change_still_needs_the_lock(isolated_git: Path) -> None:
+    """The exemption is narrow: anything beyond the version line still
+    demands the paired lockfile - that is the drift the hook exists for."""
+    full = isolated_git / "plugins/topos-plugin-export/pyproject.toml"
+    full.write_text(full.read_text(encoding="utf-8") + '\nhttpx = "^0.28.0"\n', encoding="utf-8")
+    _stage(isolated_git, "plugins/topos-plugin-export/pyproject.toml")
+
+    result = _run_hook(isolated_git, ["plugins/topos-plugin-export/pyproject.toml"])
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "poetry.lock" in result.stdout + result.stderr
+
+
+def test_version_bump_together_with_a_dependency_change_needs_the_lock(
+    isolated_git: Path,
+) -> None:
+    """A release bump does not launder a dependency edit riding along."""
+    _set_version(isolated_git, "plugins/topos-plugin-export/pyproject.toml", "9.9.9")
+    full = isolated_git / "plugins/topos-plugin-export/pyproject.toml"
+    full.write_text(full.read_text(encoding="utf-8") + '\nhttpx = "^0.28.0"\n', encoding="utf-8")
+    _stage(isolated_git, "plugins/topos-plugin-export/pyproject.toml")
+
+    result = _run_hook(isolated_git, ["plugins/topos-plugin-export/pyproject.toml"])
+    assert result.returncode == 1, result.stdout + result.stderr
