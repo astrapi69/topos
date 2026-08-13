@@ -45,16 +45,20 @@ test.describe("container tree view", () => {
         await expect(page.getByTestId("tree-node-group:folder:self")).toBeVisible();
 
         // The container is there; its items are not, until expanded.
-        await expect(page.getByText(CONTAINER_LABEL)).toBeVisible();
-        await expect(page.getByText(ITEM_CONTENT)).toBeHidden();
+        // Scoped to the tree: the list stays in the DOM under `hidden`
+        // when the tree is active, so a page-wide getByText resolves the
+        // label twice and trips Playwright's strict mode.
+        const tree = page.getByTestId("inventory-tree");
+        await expect(tree.getByText(CONTAINER_LABEL)).toBeVisible();
+        await expect(tree.getByText(ITEM_CONTENT)).toBeHidden();
 
         // Expand: the item leaf appears, numbered container-item.
         const row = page
             .locator(`[data-testid^="tree-node-container:"]`)
             .filter({hasText: CONTAINER_LABEL});
         await row.locator(`[data-testid^="tree-toggle-"]`).click();
-        await expect(page.getByText(ITEM_CONTENT)).toBeVisible();
-        await expect(page.getByText(`${CONTAINER_NR}-1`)).toBeVisible();
+        await expect(tree.getByText(ITEM_CONTENT)).toBeVisible();
+        await expect(tree.getByText(`${CONTAINER_NR}-1`)).toBeVisible();
 
         // The item leaf links into the editor.
         await page
