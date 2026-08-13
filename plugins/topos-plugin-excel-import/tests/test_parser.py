@@ -163,3 +163,28 @@ def test_sheets_missing_yields_warning_no_crash(write_workbook):
     parsed = parse_workbook(__import__("io").BytesIO(data))
     assert parsed.containers == []
     assert any("Meine Ordner" in w for w in parsed.warnings)
+
+
+def test_unknown_typ_cell_warns_and_falls_back(write_workbook):
+    """A typo in the Typ column must not crash the import - the importer
+    constructs ContainerType(value), so the parser resolves unknowns to
+    the sheet default and says so."""
+    from io import BytesIO
+
+    from topos_excel_import.parser import parse_workbook
+
+    source = write_workbook(
+        {
+            "Boxen": [
+                ["Nr.", "Box", None, None, "Inhalt", "Kategorie", "Aktionen",
+                 "Notizen", "Kategorie-Pfad", "Prioritaet", "Eigentuemer",
+                 "Eintrag-Nr.", "Typ"],
+                [7, "Kiste", None, None, None, None, None, None, None, None,
+                 "self", None, "raumschiff"],
+            ]
+        }
+    )
+    parsed = parse_workbook(BytesIO(source))
+
+    assert parsed.containers[0].type == "box"
+    assert any("raumschiff" in warning for warning in parsed.warnings)

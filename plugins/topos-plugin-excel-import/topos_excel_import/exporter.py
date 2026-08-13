@@ -27,6 +27,7 @@ OWNER_SHEET_HEADER = [
     "Eigentuemer",
     "Groessengruppe",
     "Eintrag-Nr.",
+    "Typ",
 ]
 BOX_SHEET_HEADER = [
     "Nr.",
@@ -41,6 +42,7 @@ BOX_SHEET_HEADER = [
     "Prioritaet",
     "Eigentuemer",
     "Eintrag-Nr.",
+    "Typ",
 ]
 CATEGORY_SHEET_HEADER = ["Pfad", "Anzeigename", "Elternpfad", "Ebene"]
 SHEET_KATEGORIEN = "Kategorien"
@@ -123,6 +125,8 @@ def _write_owner_sheet(
                 None,
                 container.owner.value,
                 container.size_group,
+                None,
+                container.type.value,
             ]
         )
         if container.description:
@@ -172,6 +176,8 @@ def _write_box_sheet(
                 None,
                 None,
                 container.owner.value,
+                None,
+                container.type.value,
             ]
         )
         if container.description:
@@ -237,7 +243,10 @@ def export_workbook(db: Session) -> bytes:
     parent_folders = [
         row for row in containers if row.type == ContainerType.FOLDER and row.owner == Owner.PARENTS
     ]
-    boxes = [row for row in containers if row.type == ContainerType.BOX]
+    # Everything that is not a folder shares the Boxen sheet - its owner
+    # is already a column, and the appended Typ column distinguishes the
+    # curated non-folder types (box, drawer, shelf, case, safe).
+    boxes = [row for row in containers if row.type != ContainerType.FOLDER]
 
     wb = openpyxl.Workbook()
     mine = wb.active
