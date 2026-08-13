@@ -102,6 +102,9 @@ class ParsedContainer:
     label: str
     location: str | None
     size_group: str | None
+    # External id of the parent container (nesting), resolved to a
+    # database id by the importer's second pass. None = top level.
+    parent_external_id: int | None = None
     description_lines: list[str] = field(default_factory=list)
     items: list[ParsedItem] = field(default_factory=list)
 
@@ -328,11 +331,13 @@ def _parse_owner_sheet(
         # Appended 2026-08-13. Empty in every workbook written before the
         # column existed, so the sheet's default keeps deciding there.
         type_cell = _cell_str(row, 12)
+        parent_nr = _cell_int(row, 13)
 
         if external_id is not None:
             current = ParsedContainer(
                 external_id=external_id,
                 type=_type_from_cell(type_cell, container_type, result=result),
+                parent_external_id=parent_nr,
                 # The owner column wins when present; otherwise the sheet
                 # decides (which is why "shared" needed a column - it
                 # shares a sheet with "self").
@@ -394,6 +399,7 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
         owner_cell = _owner_from_cell(_cell_str(row, 10))
         item_number = _cell_int(row, 11)
         type_cell = _cell_str(row, 12)
+        parent_nr = _cell_int(row, 13)
 
         if col0_str is not None and col0_int is None:
             match = _RANGE_HEADER_RE.match(col0_str)
@@ -412,6 +418,7 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
             current = ParsedContainer(
                 external_id=col0_int,
                 type=_type_from_cell(type_cell, "box", result=result),
+                parent_external_id=parent_nr,
                 owner=owner_cell or "self",
                 label=col1 or f"Box {col0_int}",
                 location=None,

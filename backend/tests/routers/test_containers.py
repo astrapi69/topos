@@ -125,3 +125,99 @@ def test_unknown_container_type_still_rejected(client: TestClient) -> None:
         json={"external_id": 4199, "label": "x", "type": "spaceship", "owner": "self"},
     )
     assert r.status_code == 422
+
+
+def test_container_nesting_roundtrip(client: TestClient) -> None:
+    """A container can live inside another (folder in a shelf, box in a
+    cabinet). parent_container_id is optional and nullable - top-level
+    stays the default."""
+    shelf = client.post(
+        "/api/containers",
+        json={"external_id": 4200, "label": "Regal", "type": "shelf", "owner": "self"},
+    ).json()
+    folder = client.post(
+        "/api/containers",
+        json={
+            "external_id": 4201,
+            "label": "Ordner im Regal",
+            "type": "folder",
+            "owner": "self",
+            "parent_container_id": shelf["id"],
+        },
+    ).json()
+    assert folder["parent_container_id"] == shelf["id"]
+
+    # Detach: back to top level.
+    r = client.patch(
+        f"/api/containers/{folder['id']}", json={"parent_container_id": None}
+    )
+    assert r.status_code == 200
+    assert r.json()["parent_container_id"] is None
+
+
+def test_container_nesting_rejects_cycles(client: TestClient) -> None:
+    """A -> B -> A must fail, as must A -> A. The service walks the
+    parent chain of the target before writing."""
+    a = client.post(
+        "/api/containers",
+        json={"external_id": 4210, "label": "A", "type": "box", "owner": "self"},
+    ).json()
+    b = client.post(
+        "/api/containers",
+        json={
+            "external_id": 4211,
+            "label": "B",
+            "type": "box",
+            "owner": "self",
+            "parent_container_id": a["id"],
+        },
+    ).json()
+
+    r = client.patch(
+        f"/api/containers/{a['id']}", json={"parent_container_id": b["id"]}
+    )
+    assert r.status_code == 400
+    r = client.patch(
+        f"/api/containers/{a['id']}", json={"parent_container_id": a["id"]}
+    )
+    assert r.status_code == 400
+
+
+def test_container_nesting_rejects_missing_parent(client: TestClient) -> None:
+    r = client.post(
+        "/api/containers",
+        json={
+            "external_id": 4220,
+            "label": "Waise",
+            "type": "box",
+            "owner": "self",
+            "parent_container_id": 999999,
+        },
+    )
+    assert r.status_code == 404
+
+
+def test_deleting_a_parent_detaches_children(client: TestClient) -> None:
+    """Deleting a shelf must not delete the folders standing in it -
+    they lose the parent and return to the top level. Contents of the
+    container itself (items) keep cascading as before."""
+    shelf = client.post(
+        "/api/containers",
+        json={"external_id": 4230, "label": "Regal", "type": "shelf", "owner": "self"},
+    ).json()
+    folder = client.post(
+        "/api/containers",
+        json={
+            "external_id": 4231,
+            "label": "Ordner",
+            "type": "folder",
+            "owner": "self",
+            "parent_container_id": shelf["id"],
+        },
+    ).json()
+
+    assert client.delete(f"/api/containers/{shelf['id']}").status_code == 204
+
+    r = client.get(f"/api/containers/{folder['id']}")
+    assert r.status_code == 200
+    assert r.json()["parent_container_id"] is None

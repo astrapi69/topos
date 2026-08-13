@@ -62,6 +62,9 @@ class BackupContainer(BaseModel):
     description: str | None = None
     location: str | None = None
     size_group: str | None = None
+    # Backup-file id of the parent container (nesting). Remapped to the
+    # target database's ids on import; absent in pre-nesting backups.
+    parent_container_id: int | None = None
 
 
 class BackupItem(BaseModel):

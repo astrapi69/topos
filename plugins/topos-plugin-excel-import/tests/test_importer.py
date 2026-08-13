@@ -187,3 +187,44 @@ def test_synthetic_parse_result_imports_without_openpyxl(db):
     assert report.items_created == 1
     assert report.actions_created == 2
     assert report.categories_created == 1
+
+
+def test_workbook_cycle_is_cut_with_warning(db):
+    """A in B and B in A: no single link is invalid, only the pair. The
+    importer cuts the closing link so the database never holds a cycle
+    (the tree view would crash on one)."""
+    from topos_excel_import.importer import import_parsed_result
+    from topos_excel_import.parser import ParsedContainer, ParseResult
+
+    parsed = ParseResult()
+    parsed.containers.append(
+        ParsedContainer(
+            external_id=70,
+            type="box",
+            owner="self",
+            label="A",
+            location=None,
+            size_group=None,
+            parent_external_id=71,
+        )
+    )
+    parsed.containers.append(
+        ParsedContainer(
+            external_id=71,
+            type="box",
+            owner="self",
+            label="B",
+            location=None,
+            size_group=None,
+            parent_external_id=70,
+        )
+    )
+    report = import_parsed_result(db, parsed)
+
+    from app.models import Container
+
+    a = db.query(Container).filter_by(external_id=70).one()
+    b = db.query(Container).filter_by(external_id=71).one()
+    # One of the two links was cut; no chain loops.
+    assert a.parent_container_id is None or b.parent_container_id is None
+    assert any("cycle" in warning for warning in report.warnings)

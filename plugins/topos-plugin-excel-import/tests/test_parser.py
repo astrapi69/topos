@@ -176,11 +176,36 @@ def test_unknown_typ_cell_warns_and_falls_back(write_workbook):
     source = write_workbook(
         {
             "Boxen": [
-                ["Nr.", "Box", None, None, "Inhalt", "Kategorie", "Aktionen",
-                 "Notizen", "Kategorie-Pfad", "Prioritaet", "Eigentuemer",
-                 "Eintrag-Nr.", "Typ"],
-                [7, "Kiste", None, None, None, None, None, None, None, None,
-                 "self", None, "raumschiff"],
+                [
+                    "Nr.",
+                    "Box",
+                    None,
+                    None,
+                    "Inhalt",
+                    "Kategorie",
+                    "Aktionen",
+                    "Notizen",
+                    "Kategorie-Pfad",
+                    "Prioritaet",
+                    "Eigentuemer",
+                    "Eintrag-Nr.",
+                    "Typ",
+                ],
+                [
+                    7,
+                    "Kiste",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    "self",
+                    None,
+                    "raumschiff",
+                ],
             ]
         }
     )

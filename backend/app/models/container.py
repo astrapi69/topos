@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -47,6 +47,16 @@ class Container(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     external_id: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    # Physical nesting: a folder stands in a shelf, a box in a cabinet.
+    # Optional - top level is the default. Deleting a parent DETACHES its
+    # children (ondelete SET NULL): removing a shelf must not delete the
+    # folders standing in it; only a container's own items cascade.
+    parent_container_id: Mapped[int | None] = mapped_column(
+        ForeignKey("containers.id", ondelete="SET NULL"),
+        default=None,
+        nullable=True,
+        index=True,
+    )
     type: Mapped[ContainerType] = mapped_column(SAEnum(ContainerType), index=True)
     owner: Mapped[Owner] = mapped_column(SAEnum(Owner), index=True)
     label: Mapped[str] = mapped_column(String(500))
