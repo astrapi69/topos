@@ -58,10 +58,28 @@ jobs:
         # ``-q`` only quietens the per-test pass logs.
         run: poetry run pytest tests/ -q
 
-  # Plugin matrix job: skeleton ships zero plugins, so this job is
-  # disabled. When the user adds their first plugin, re-enable by
-  # populating the `matrix.plugin` list with the plugin directory
-  # name(s) under plugins/, and remove the `if: false` gate.
+      # Plugin tests import the backend (`from app.main import app`),
+      # so they run HERE in the backend venv - the plugin is already
+      # path-installed by `poetry install` above, and PYTHONPATH makes
+      # `app` resolvable. A standalone per-plugin venv cannot run this
+      # plugin type; the commented matrix below documents why it stays
+      # off. This step went missing when the project was bootstrapped
+      # from the zero-plugin skeleton: the excel-import plugin shipped
+      # with 31 tests that no gate executed ("wired != working").
+      - name: Run plugin tests
+        working-directory: backend
+        run: |
+          for dir in ../plugins/topos-plugin-*/tests; do
+            [ -d "$dir" ] || continue
+            echo "--- $dir ---"
+            PYTHONPATH=. poetry run pytest "$dir" -q || exit 1
+          done
+
+  # Plugin matrix job (per-plugin venv): stays disabled ON PURPOSE.
+  # Topos's plugins import the backend application (`app.*`) in their
+  # tests, so an isolated per-plugin venv cannot execute them - they
+  # run as a step of the backend job above instead. Re-enable this
+  # matrix only for a future plugin whose tests are self-contained.
   #
   # plugin-tests:
   #   name: Plugin Tests

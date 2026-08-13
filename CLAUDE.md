@@ -77,7 +77,7 @@ E2E (needs a running app): `npx playwright test` from `e2e/`.
 ## Session start
 
 1. `git log --oneline -10` - recent changes
-2. `make test` - green baseline (322 backend + 27 plugin + 90 frontend Vitest as of v0.1.0)
+2. `make test` - green baseline (462 backend + 31 plugin + 438 frontend Vitest as of 2026-08-13)
 3. Read this file + relevant rules per the task
 
 ## Data model

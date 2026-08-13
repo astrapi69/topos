@@ -135,7 +135,7 @@ install-plugins:
 
 # --- Test ---
 
-test: test-backend test-frontend ## Run ALL tests, no coverage (everyday use; coverage runs in CI - see test-coverage)
+test: test-backend test-plugins test-frontend ## Run ALL tests, no coverage (everyday use; coverage runs in CI - see test-coverage)
 	@echo ""
 	@echo "=== All tests complete ==="
 
@@ -148,6 +148,20 @@ test-backend: ## Run backend tests
 	@echo ""
 	@echo "=== Backend Tests ==="
 	cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; poetry run pytest tests/ -v
+
+# Plugin tests import the backend (`from app.main import app`), so they
+# run in the BACKEND venv with the backend dir on PYTHONPATH - a
+# standalone per-plugin venv cannot resolve `app` and fails on import.
+# Iterates so the next plugin joins without a Makefile change.
+test-plugins: ## Run all plugin test suites (backend venv, PYTHONPATH=backend)
+	@echo ""
+	@echo "=== Plugin Tests ==="
+	@for dir in plugins/topos-plugin-*/tests; do \
+		[ -d "$$dir" ] || continue; \
+		echo "--- $$dir ---"; \
+		(cd backend && unset VIRTUAL_ENV POETRY_ACTIVE && poetry env use python3.12 -q 2>/dev/null; \
+			PYTHONPATH=. poetry run pytest "../$$dir" -q) || exit 1; \
+	done
 
 # --- Fast gates + Test Impact Analysis ---
 
