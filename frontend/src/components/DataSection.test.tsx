@@ -67,6 +67,18 @@ describe("DataSection", () => {
     expect(screen.getByTestId("data-import")).toBeInTheDocument();
   });
 
+  it("does not filter the restore picker by type (iOS greys out real files)", () => {
+    // Same failure mode as the Import page: iOS filters the picker by UTI
+    // derived from the file NAME, so a backup that lost its extension in
+    // transit is unselectable even though its content is fine. The restore
+    // validates the envelope and reports precisely, so the filter added no
+    // safety.
+    render(<DataSection />);
+    expect(screen.getByTestId("data-import-input")).not.toHaveAttribute(
+      "accept",
+    );
+  });
+
   it("exports and downloads on click", async () => {
     mocks.exportToposData.mockResolvedValue(BACKUP);
     render(<DataSection />);
