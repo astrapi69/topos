@@ -96,6 +96,10 @@ topos:
     type:
       folder: Ordner
       box: Box
+      drawer: "Schublade"
+      shelf: "Regal"
+      case: "Koffer"
+      safe: "Tresor"
   owner:
     self: Ich
     parents: Eltern
@@ -252,6 +256,10 @@ topos:
         donate_github: Über dein bestehendes GitHub-Konto.
         donate_kofi: Einmalige Trinkgelder, kein Login nötig.
       title: Einstellungen
+      types:
+        heading: "Container-Typen"
+        intro: "Bestimmt, welche Typen die Formulare anbieten. Vorhandene Container und Importe funktionieren unabhängig davon mit jedem Typ."
+        defaults: "Immer verfügbar:"
       language: Sprache
       theme: Erscheinungsbild
       theme_current: Theme
@@ -436,6 +444,10 @@ topos:
     group:
       folder: "Ordner"
       box: "Boxen"
+      drawer: "Schubladen"
+      shelf: "Regale"
+      case: "Koffer"
+      safe: "Tresore"
       self: "Meine {type}"
       parents: "{type} Eltern"
       shared: "{type} geteilt"

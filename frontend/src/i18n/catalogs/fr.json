@@ -177,7 +177,11 @@
       "size_group": "Groupe de taille",
       "type": {
         "box": "Boîte",
-        "folder": "Classeur"
+        "case": "Valise",
+        "drawer": "Tiroir",
+        "folder": "Classeur",
+        "safe": "Coffre-fort",
+        "shelf": "Étagère"
       },
       "type_label": "Type"
     },
@@ -493,7 +497,12 @@
         "tab_security": "Clé d'application",
         "theme": "Apparence",
         "theme_current": "Thème",
-        "title": "Réglages"
+        "title": "Réglages",
+        "types": {
+          "defaults": "Toujours disponibles :",
+          "heading": "Types de conteneur",
+          "intro": "Détermine les types proposés par les formulaires. Les conteneurs existants et les imports fonctionnent avec tous les types."
+        }
       }
     },
     "priority": {
@@ -573,10 +582,14 @@
       "empty": "Aucun conteneur pour l'instant.",
       "group": {
         "box": "Boîtes",
+        "case": "Valises",
+        "drawer": "Tiroirs",
         "folder": "Classeurs",
         "parents": "{type} des parents",
+        "safe": "Coffres-forts",
         "self": "Mes {type}",
-        "shared": "{type} partagés"
+        "shared": "{type} partagés",
+        "shelf": "Étagères"
       }
     }
   },

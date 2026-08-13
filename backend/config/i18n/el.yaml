@@ -93,6 +93,10 @@ topos:
     type:
       folder: Ντοσιέ
       box: Κουτί
+      drawer: "Συρτάρι"
+      shelf: "Ράφι"
+      case: "Βαλίτσα"
+      safe: "Χρηματοκιβώτιο"
   owner:
     self: Δικά μου
     parents: Γονείς
@@ -247,6 +251,10 @@ topos:
         donate_github: Μέσω του υπάρχοντος λογαριασμού σας στο GitHub.
         donate_kofi: Εφάπαξ ενισχύσεις, χωρίς σύνδεση.
       title: Ρυθμίσεις
+      types:
+        heading: "Τύποι δοχείων"
+        intro: "Καθορίζει ποιους τύπους προσφέρουν οι φόρμες. Τα υπάρχοντα δοχεία και οι εισαγωγές λειτουργούν με κάθε τύπο."
+        defaults: "Πάντα διαθέσιμα:"
       language: Γλώσσα
       theme: Εμφάνιση
       theme_current: Θέμα
@@ -427,6 +435,10 @@ topos:
     group:
       folder: "Φάκελοι"
       box: "Κουτιά"
+      drawer: "Συρτάρια"
+      shelf: "Ράφια"
+      case: "Βαλίτσες"
+      safe: "Χρηματοκιβώτια"
       self: "Οι {type} μου"
       parents: "{type} των γονιών"
       shared: "Κοινόχρηστα {type}"

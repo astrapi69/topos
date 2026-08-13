@@ -177,7 +177,11 @@
       "size_group": "Grupo de tamaño",
       "type": {
         "box": "Caja",
-        "folder": "Carpeta"
+        "case": "Maleta",
+        "drawer": "Cajón",
+        "folder": "Carpeta",
+        "safe": "Caja fuerte",
+        "shelf": "Estantería"
       },
       "type_label": "Tipo"
     },
@@ -493,7 +497,12 @@
         "tab_security": "Clave de la aplicación",
         "theme": "Apariencia",
         "theme_current": "Tema",
-        "title": "Ajustes"
+        "title": "Ajustes",
+        "types": {
+          "defaults": "Siempre disponibles:",
+          "heading": "Tipos de contenedor",
+          "intro": "Determina qué tipos ofrecen los formularios. Los contenedores existentes y las importaciones funcionan con cualquier tipo."
+        }
       }
     },
     "priority": {
@@ -573,10 +582,14 @@
       "empty": "Todavía no hay contenedores.",
       "group": {
         "box": "Cajas",
+        "case": "Maletas",
+        "drawer": "Cajones",
         "folder": "Carpetas",
         "parents": "{type} de los padres",
+        "safe": "Cajas fuertes",
         "self": "Mis {type}",
-        "shared": "{type} compartidas"
+        "shared": "{type} compartidas",
+        "shelf": "Estanterías"
       }
     }
   },

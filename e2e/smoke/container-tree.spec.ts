@@ -78,6 +78,18 @@ test.describe("container tree view", () => {
 
     test("filters apply to the tree as well", async ({page}) => {
         await page.goto("/containers");
+
+        // The type filter is data-driven (it offers the types that occur),
+        // so make sure a box exists before filtering by it.
+        await page.getByTestId("container-new-button").click();
+        await page.getByTestId("container-form-external-id").fill("88");
+        await page.getByTestId("container-form-label").fill("Filter-Box");
+        await page.getByTestId("container-form-type").selectOption("box");
+        await page.getByTestId("container-form-submit").click();
+        await expect(
+            page.getByTestId("container-table").getByText("Filter-Box"),
+        ).toBeVisible();
+
         await page.getByTestId("container-view-tree").click();
 
         // Filtering by box hides the folder group entirely (its containers

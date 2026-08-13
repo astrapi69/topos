@@ -276,11 +276,14 @@ function parseOwnerSheet(
     const ownerCell = cellStr(row, 9);
     const sizeGroupCell = cellStr(row, 10);
     const itemNumber = cellInt(row, 11);
+    // Appended 2026-08-13; empty in every older workbook, where the
+    // sheet's default keeps deciding.
+    const typeCell = cellStr(row, 12);
 
     if (externalId !== null) {
       current = {
         externalId,
-        type: options.containerType,
+        type: typeFromCell(typeCell, options.containerType, result),
         // The owner column wins when present; otherwise the sheet decides
         // (which is why "shared" needed a column - it shares a sheet).
         owner: parseOwner(ownerCell) ?? options.owner,
@@ -339,6 +342,7 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
     const priorityCell = cellStr(row, 9);
     const ownerCell = cellStr(row, 10);
     const itemNumber = cellInt(row, 11);
+    const typeCell = cellStr(row, 12);
 
     if (col0Str !== null && col0Int === null) {
       const match = RANGE_HEADER_RE.exec(col0Str);
@@ -357,7 +361,7 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
     if (col0Int !== null) {
       current = {
         externalId: col0Int,
-        type: "box",
+        type: typeFromCell(typeCell, "box", result),
         owner: parseOwner(ownerCell) ?? "self",
         label: col1 ?? `Box ${col0Int}`,
         location: null,
@@ -415,6 +419,33 @@ function sheetRows(worksheet: {
 }
 
 /** Optional "Kategorien" sheet: the taxonomy verbatim. */
+const KNOWN_TYPES: readonly string[] = [
+  "folder",
+  "box",
+  "drawer",
+  "shelf",
+  "case",
+  "safe",
+];
+
+/**
+ * Resolve the Typ column against the curated set. Unknown values fall
+ * back to the sheet's default WITH a warning instead of writing an
+ * invalid type into storage - a typo in one cell must not corrupt the
+ * import. Mirrors the plugin parser's _type_from_cell.
+ */
+function typeFromCell(
+  cell: string | null,
+  fallback: ContainerType,
+  result: ParseResult,
+): ContainerType {
+  if (cell === null) return fallback;
+  const value = cell.trim().toLowerCase();
+  if (KNOWN_TYPES.includes(value)) return value as ContainerType;
+  result.warnings.push(`Unknown container type "${cell}", using "${fallback}"`);
+  return fallback;
+}
+
 function parseCategorySheet(rows: Row[]): ParsedCategory[] {
   const parsed: ParsedCategory[] = [];
   for (const row of rows) {

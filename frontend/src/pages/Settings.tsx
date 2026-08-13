@@ -17,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import NavBar from "../components/NavBar";
+import ContainerTypesSection from "../components/settings/ContainerTypesSection";
 import AboutSection from "../components/AboutSection";
 import AiProviderSettings from "../components/AiProviderSettings";
 import DataSection from "../components/DataSection";
@@ -223,10 +224,12 @@ export default function Settings() {
                   </select>
                 </section>
 
-                <section>
+                <section style={{ marginBottom: "1.5rem" }}>
                   <h2>{t("topos.page.settings.theme", "Erscheinungsbild")}</h2>
                   <ThemePicker />
                 </section>
+
+                <ContainerTypesSection />
               </>
             )}
 

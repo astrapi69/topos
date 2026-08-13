@@ -16,6 +16,8 @@ import { containerShareUrl } from "../utils/shareUrl";
 import { qrLabels } from "../utils/qrLabels";
 import { useActions, useContainer, useItems } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
+import { useContainerTypes } from "../hooks/useContainerTypes";
+import { containerTypeLabel } from "../utils/containerTypeLabel";
 import { useDialog } from "../components/AppDialog";
 import { getStorage } from "../storage";
 import { notify, errorMessage } from "../utils/notify";
@@ -65,6 +67,14 @@ export default function ContainerDetail() {
 
   const [editing, setEditing] = useState(false);
   const [edit, setEdit] = useState<EditState | null>(null);
+  const { enabled: enabledTypes } = useContainerTypes();
+  // The current type is ALWAYS an option, even when its toggle is off:
+  // opening the edit form must never silently migrate a container to
+  // another type just because this device does not offer it.
+  const editTypeOptions =
+    edit && !enabledTypes.includes(edit.type)
+      ? [edit.type, ...enabledTypes]
+      : enabledTypes;
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const { hash } = useLocation();
@@ -334,12 +344,11 @@ export default function ContainerDetail() {
                   setEdit({ ...edit, type: e.target.value as ContainerType })
                 }
               >
-                <option value="folder">
-                  {t("topos.container.type.folder", "Ordner")}
-                </option>
-                <option value="box">
-                  {t("topos.container.type.box", "Box")}
-                </option>
+                {editTypeOptions.map((containerType) => (
+                  <option key={containerType} value={containerType}>
+                    {containerTypeLabel(containerType, t)}
+                  </option>
+                ))}
               </select>
             </FormField>
             <FormField label={t("topos.container.owner", "Eigentümer")}>

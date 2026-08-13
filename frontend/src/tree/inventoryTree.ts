@@ -28,7 +28,13 @@
 
 import { buildTreeFromFlat, type TreeNode } from "@astrapi69/tree-kit";
 
-import type { Container, ContainerType, Item, Owner } from "../types/topos";
+import {
+  CONTAINER_TYPES,
+  type Container,
+  type ContainerType,
+  type Item,
+  type Owner,
+} from "../types/topos";
 
 /** What a node stands for. The four levels are never mixed up by accident. */
 export type InventoryNodeKind = "root" | "group" | "container" | "item";
@@ -63,7 +69,14 @@ export interface GroupLabels {
 }
 
 const DEFAULT_GROUP_LABELS: GroupLabels = {
-  type: { folder: "Ordner", box: "Boxen" },
+  type: {
+    folder: "Ordner",
+    box: "Boxen",
+    drawer: "Schubladen",
+    shelf: "Regale",
+    case: "Koffer",
+    safe: "Tresore",
+  },
   template: {
     self: "Meine {type}",
     parents: "{type} Eltern",
@@ -125,9 +138,11 @@ function groupRows(containers: Container[], labels: GroupLabels): FlatRow[] {
       kind: "group",
       label: groupLabel(container.type, container.owner, labels),
       number: null,
-      // Folders before boxes, own before other people's - the workbook order.
+      // Curated-enum order (folders first, like the workbook), own
+      // before other people's within a type. Every type gets a distinct
+      // band so two groups never tie on the sort key.
       sortKey:
-        (container.type === "folder" ? 0 : 100) +
+        CONTAINER_TYPES.indexOf(container.type) * 100 +
         (container.owner === "self"
           ? 0
           : container.owner === "parents"

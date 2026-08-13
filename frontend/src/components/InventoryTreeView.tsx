@@ -143,6 +143,10 @@ export default function InventoryTreeView({
     type: {
       folder: t("topos.tree.group.folder", "Ordner"),
       box: t("topos.tree.group.box", "Boxen"),
+      drawer: t("topos.tree.group.drawer", "Schubladen"),
+      shelf: t("topos.tree.group.shelf", "Regale"),
+      case: t("topos.tree.group.case", "Koffer"),
+      safe: t("topos.tree.group.safe", "Tresore"),
     },
     template: {
       self: t("topos.tree.group.self", "Meine {type}"),

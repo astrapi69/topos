@@ -93,6 +93,10 @@ topos:
     type:
       folder: Klasör
       box: Kutu
+      drawer: "Çekmece"
+      shelf: "Raf"
+      case: "Bavul"
+      safe: "Kasa"
   owner:
     self: Benim
     parents: Ebeveynler
@@ -247,6 +251,10 @@ topos:
         donate_github: Mevcut GitHub hesabınız üzerinden.
         donate_kofi: Tek seferlik bağış, giriş gerekmez.
       title: Ayarlar
+      types:
+        heading: "Kap türleri"
+        intro: "Formların hangi türleri sunacağını belirler. Mevcut kaplar ve içe aktarmalar her türle çalışır."
+        defaults: "Her zaman kullanılabilir:"
       language: Dil
       theme: Görünüm
       theme_current: Tema
@@ -427,6 +435,10 @@ topos:
     group:
       folder: "Klasörler"
       box: "Kutular"
+      drawer: "Çekmeceler"
+      shelf: "Raflar"
+      case: "Bavullar"
+      safe: "Kasalar"
       self: "Kendi {type}"
       parents: "Ebeveynlerin {type}"
       shared: "Paylaşılan {type}"

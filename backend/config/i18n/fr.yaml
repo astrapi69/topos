@@ -93,6 +93,10 @@ topos:
     type:
       folder: Classeur
       box: Boîte
+      drawer: "Tiroir"
+      shelf: "Étagère"
+      case: "Valise"
+      safe: "Coffre-fort"
   owner:
     self: À moi
     parents: Parents
@@ -247,6 +251,10 @@ topos:
         donate_github: Via votre compte GitHub existant.
         donate_kofi: Pourboires ponctuels, sans inscription.
       title: Réglages
+      types:
+        heading: "Types de conteneur"
+        intro: "Détermine les types proposés par les formulaires. Les conteneurs existants et les imports fonctionnent avec tous les types."
+        defaults: "Toujours disponibles :"
       language: Langue
       theme: Apparence
       theme_current: Thème
@@ -427,6 +435,10 @@ topos:
     group:
       folder: "Classeurs"
       box: "Boîtes"
+      drawer: "Tiroirs"
+      shelf: "Étagères"
+      case: "Valises"
+      safe: "Coffres-forts"
       self: "Mes {type}"
       parents: "{type} des parents"
       shared: "{type} partagés"
