@@ -84,6 +84,18 @@ jobs:
       - name: Build topos-launcher.exe
         run: poetry run pyinstaller topos-launcher.spec --clean --noconfirm
 
+      # Exec smoke: the artifact must not just exist, it must START. The
+      # v0.2.0 audit found that no workflow ever executed what it built -
+      # a PyInstaller binary can be produced successfully and still die on
+      # startup (missing hook, broken spec). --version exits before any
+      # GUI or lockfile work, so it is safe on a headless runner and
+      # proves the frozen entrypoint plus the embedded version in one go.
+      - name: Exec smoke (--version)
+        run: |
+          $out = & .\dist\topos-launcher.exe --version | Out-String
+          Write-Host $out
+          if ($out -notmatch "topos-launcher") { exit 1 }
+
       - name: Compute SHA256 checksum
         run: |
           $hash = (Get-FileHash -Algorithm SHA256 dist\topos-launcher.exe).Hash.ToLower()
