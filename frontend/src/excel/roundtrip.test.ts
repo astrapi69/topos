@@ -176,6 +176,30 @@ const SOURCE: ToposBackup = {
         createdAt: "",
         updatedAt: "",
       },
+      {
+        id: 5,
+        externalId: 50,
+        type: "drawer",
+        owner: "self",
+        label: "Kommode 3",
+        description: null,
+        location: null,
+        sizeGroup: null,
+        createdAt: "",
+        updatedAt: "",
+      },
+      {
+        id: 6,
+        externalId: 51,
+        type: "safe",
+        owner: "parents",
+        label: "Tresor",
+        description: null,
+        location: null,
+        sizeGroup: null,
+        createdAt: "",
+        updatedAt: "",
+      },
     ],
     items: [
       {
@@ -396,7 +420,7 @@ describe("Excel round-trip fidelity", () => {
     const third = await exportBytes(backupOf(reimported));
     expect(await contentDigest(third)).toBe(await contentDigest(first));
 
-    expect(store.containers).toHaveLength(4);
+    expect(store.containers).toHaveLength(6);
     expect(store.items).toHaveLength(5);
   });
 
@@ -428,6 +452,19 @@ describe("Excel round-trip fidelity", () => {
     expect(item("Eltern-Eintrag")).toMatchObject({ priority: "very_high" });
     // Open actions on "Meine Ordner" survive.
     expect(store.actions.map((action) => action.text)).toContain("Offen");
+  });
+
+  it("round-trips the curated non-folder types via the Typ column", async () => {
+    // drawer/shelf/case/safe share the Boxen sheet (owner is a column
+    // there); the appended Typ cell wins on import, an empty one keeps
+    // the sheet default - so the legacy-workbook test below still holds.
+    const { store } = await cycle();
+    const byExternalId = (externalId: number) =>
+      store.containers.find((container) => container.externalId === externalId);
+
+    expect(byExternalId(50)).toMatchObject({ type: "drawer", owner: "self" });
+    expect(byExternalId(51)).toMatchObject({ type: "safe", owner: "parents" });
+    expect(byExternalId(40)).toMatchObject({ type: "box" });
   });
 
   it("carries the fields older layouts had no column for", async () => {

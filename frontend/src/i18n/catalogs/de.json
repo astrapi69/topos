@@ -177,7 +177,11 @@
       "size_group": "Größengruppe",
       "type": {
         "box": "Box",
-        "folder": "Ordner"
+        "case": "Koffer",
+        "drawer": "Schublade",
+        "folder": "Ordner",
+        "safe": "Tresor",
+        "shelf": "Regal"
       },
       "type_label": "Typ"
     },
@@ -493,7 +497,12 @@
         "tab_security": "Anwendungsschlüssel",
         "theme": "Erscheinungsbild",
         "theme_current": "Theme",
-        "title": "Einstellungen"
+        "title": "Einstellungen",
+        "types": {
+          "defaults": "Immer verfügbar:",
+          "heading": "Container-Typen",
+          "intro": "Bestimmt, welche Typen die Formulare anbieten. Vorhandene Container und Importe funktionieren unabhängig davon mit jedem Typ."
+        }
       }
     },
     "priority": {
@@ -573,10 +582,14 @@
       "empty": "Keine Container vorhanden.",
       "group": {
         "box": "Boxen",
+        "case": "Koffer",
+        "drawer": "Schubladen",
         "folder": "Ordner",
         "parents": "{type} Eltern",
+        "safe": "Tresore",
         "self": "Meine {type}",
-        "shared": "{type} geteilt"
+        "shared": "{type} geteilt",
+        "shelf": "Regale"
       }
     }
   },

@@ -58,7 +58,33 @@ function renderList() {
 }
 
 describe("ContainerList", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
+
+  it("offers only the enabled container types in the create form", async () => {
+    // The Settings toggle is a per-device visibility filter for the
+    // FORMS; out of the box that is folder and box.
+    renderList();
+    fireEvent.click(await screen.findByTestId("container-new-button"));
+    const select = await screen.findByTestId("container-form-type");
+    const values = [...select.querySelectorAll("option")].map((option) =>
+      option.getAttribute("value"),
+    );
+    expect(values).toEqual(["folder", "box"]);
+  });
+
+  it("offers an optional type once its toggle is on", async () => {
+    localStorage.setItem("topos.container_types", JSON.stringify(["drawer"]));
+    renderList();
+    fireEvent.click(await screen.findByTestId("container-new-button"));
+    const select = await screen.findByTestId("container-form-type");
+    const values = [...select.querySelectorAll("option")].map((option) =>
+      option.getAttribute("value"),
+    );
+    expect(values).toEqual(["folder", "box", "drawer"]);
+  });
 
   it("renders header, table, and row actions", async () => {
     renderList();

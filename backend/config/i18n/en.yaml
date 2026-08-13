@@ -97,6 +97,10 @@ topos:
     type:
       folder: Folder
       box: Box
+      drawer: "Drawer"
+      shelf: "Shelf"
+      case: "Case"
+      safe: "Safe"
   owner:
     self: Mine
     parents: Parents
@@ -253,6 +257,10 @@ topos:
         donate_github: Via your existing GitHub account.
         donate_kofi: One-time tips, no login needed.
       title: Settings
+      types:
+        heading: "Container types"
+        intro: "Controls which types the forms offer. Existing containers and imports work with every type regardless."
+        defaults: "Always available:"
       language: Language
       theme: Appearance
       theme_current: Theme
@@ -436,6 +444,10 @@ topos:
     group:
       folder: "Folders"
       box: "Boxes"
+      drawer: "Drawers"
+      shelf: "Shelves"
+      case: "Cases"
+      safe: "Safes"
       self: "My {type}"
       parents: "Parents' {type}"
       shared: "Shared {type}"

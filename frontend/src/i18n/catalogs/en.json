@@ -177,7 +177,11 @@
       "size_group": "Size group",
       "type": {
         "box": "Box",
-        "folder": "Folder"
+        "case": "Case",
+        "drawer": "Drawer",
+        "folder": "Folder",
+        "safe": "Safe",
+        "shelf": "Shelf"
       },
       "type_label": "Type"
     },
@@ -493,7 +497,12 @@
         "tab_security": "Application key",
         "theme": "Appearance",
         "theme_current": "Theme",
-        "title": "Settings"
+        "title": "Settings",
+        "types": {
+          "defaults": "Always available:",
+          "heading": "Container types",
+          "intro": "Controls which types the forms offer. Existing containers and imports work with every type regardless."
+        }
       }
     },
     "priority": {
@@ -573,10 +582,14 @@
       "empty": "No containers yet.",
       "group": {
         "box": "Boxes",
+        "case": "Cases",
+        "drawer": "Drawers",
         "folder": "Folders",
         "parents": "Parents' {type}",
+        "safe": "Safes",
         "self": "My {type}",
-        "shared": "Shared {type}"
+        "shared": "Shared {type}",
+        "shelf": "Shelves"
       }
     }
   },

@@ -276,6 +276,26 @@ def _build_item(
     )
 
 
+_KNOWN_TYPES = {"folder", "box", "drawer", "shelf", "case", "safe"}
+
+
+def _type_from_cell(cell: str | None, default: str, *, result: ParseResult) -> str:
+    """Resolve the Typ column against the curated enum.
+
+    An unknown value falls back to the sheet's default WITH a warning
+    instead of crashing the import later (the importer constructs
+    ``ContainerType(value)``, which raises on anything unknown). A typo
+    in one cell must not take down the whole workbook.
+    """
+    if cell is None:
+        return default
+    value = cell.strip().lower()
+    if value in _KNOWN_TYPES:
+        return value
+    result.warnings.append(f"Unknown container type {cell!r}, using {default!r}")
+    return default
+
+
 def _parse_owner_sheet(
     ws: openpyxl.worksheet.worksheet.Worksheet,
     *,
@@ -305,11 +325,14 @@ def _parse_owner_sheet(
         owner_cell = _owner_from_cell(_cell_str(row, 9))
         size_group_cell = _cell_str(row, 10)
         item_number = _cell_int(row, 11)
+        # Appended 2026-08-13. Empty in every workbook written before the
+        # column existed, so the sheet's default keeps deciding there.
+        type_cell = _cell_str(row, 12)
 
         if external_id is not None:
             current = ParsedContainer(
                 external_id=external_id,
-                type=container_type,
+                type=_type_from_cell(type_cell, container_type, result=result),
                 # The owner column wins when present; otherwise the sheet
                 # decides (which is why "shared" needed a column - it
                 # shares a sheet with "self").
@@ -370,6 +393,7 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
         priority_cell = _cell_str(row, 9)
         owner_cell = _owner_from_cell(_cell_str(row, 10))
         item_number = _cell_int(row, 11)
+        type_cell = _cell_str(row, 12)
 
         if col0_str is not None and col0_int is None:
             match = _RANGE_HEADER_RE.match(col0_str)
@@ -387,7 +411,7 @@ def _parse_box_sheet(ws: openpyxl.worksheet.worksheet.Worksheet, *, result: Pars
         if col0_int is not None:
             current = ParsedContainer(
                 external_id=col0_int,
-                type="box",
+                type=_type_from_cell(type_cell, "box", result=result),
                 owner=owner_cell or "self",
                 label=col1 or f"Box {col0_int}",
                 location=None,

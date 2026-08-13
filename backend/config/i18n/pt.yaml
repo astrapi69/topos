@@ -93,6 +93,10 @@ topos:
     type:
       folder: Pasta
       box: Caixa
+      drawer: "Gaveta"
+      shelf: "Prateleira"
+      case: "Mala"
+      safe: "Cofre"
   owner:
     self: Meu
     parents: Pais
@@ -247,6 +251,10 @@ topos:
         donate_github: Através da tua conta GitHub existente.
         donate_kofi: Contribuições pontuais, sem necessidade de registo.
       title: Definições
+      types:
+        heading: "Tipos de contêiner"
+        intro: "Define quais tipos os formulários oferecem. Contêineres existentes e importações funcionam com qualquer tipo."
+        defaults: "Sempre disponíveis:"
       language: Idioma
       theme: Aparência
       theme_current: Tema
@@ -427,6 +435,10 @@ topos:
     group:
       folder: "Pastas"
       box: "Caixas"
+      drawer: "Gavetas"
+      shelf: "Prateleiras"
+      case: "Malas"
+      safe: "Cofres"
       self: "Minhas {type}"
       parents: "{type} dos pais"
       shared: "{type} compartilhadas"

@@ -202,3 +202,34 @@ def test_export_import_roundtrip_is_lossless(db):
 
     # And the workbook is a fixed point.
     assert parse_workbook(BytesIO(export_workbook(db))).containers is not None
+
+
+def test_extended_types_roundtrip_via_typ_column(db):
+    """drawer/shelf/case/safe survive export -> parse.
+
+    Non-folder types share the Boxen sheet (its owner is already a
+    column), distinguished by the appended "Typ" column. An empty Typ
+    cell keeps the sheet's default, so workbooks written before the
+    column still import unchanged.
+    """
+    db.add_all(
+        [
+            Container(
+                external_id=50, type=ContainerType.DRAWER, owner=Owner.SELF, label="Kommode 3"
+            ),
+            Container(
+                external_id=51, type=ContainerType.SAFE, owner=Owner.PARENTS, label="Tresor"
+            ),
+            Container(external_id=52, type=ContainerType.BOX, owner=Owner.SELF, label="Kiste"),
+        ]
+    )
+    db.flush()
+
+    parsed = parse_workbook(BytesIO(export_workbook(db)))
+
+    by_nr = {c.external_id: c for c in parsed.containers}
+    assert by_nr[50].type == "drawer"
+    assert by_nr[50].owner == "self"
+    assert by_nr[51].type == "safe"
+    assert by_nr[51].owner == "parents"
+    assert by_nr[52].type == "box"

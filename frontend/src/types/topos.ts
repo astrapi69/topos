@@ -5,7 +5,26 @@
  * boundary (snake_case is normalised inside ``api/client.ts``).
  */
 
-export type ContainerType = "folder" | "box";
+// Curated set; folder and box are the defaults every install offers,
+// the rest are opt-in per device (Settings). The toggle filters what
+// the forms OFFER, never what storage accepts.
+export type ContainerType =
+  "folder" | "box" | "drawer" | "shelf" | "case" | "safe";
+
+export const CONTAINER_TYPES: readonly ContainerType[] = [
+  "folder",
+  "box",
+  "drawer",
+  "shelf",
+  "case",
+  "safe",
+];
+
+/** Always-on types; the Settings toggle cannot remove them. */
+export const DEFAULT_CONTAINER_TYPES: readonly ContainerType[] = [
+  "folder",
+  "box",
+];
 export type Owner = "self" | "parents" | "shared";
 export type Priority = "none" | "low" | "medium" | "high" | "very_high";
 export type ActionStatus = "open" | "done" | "archived";

@@ -93,6 +93,10 @@ topos:
     type:
       folder: ファイル
       box: 箱
+      drawer: "引き出し"
+      shelf: "棚"
+      case: "スーツケース"
+      safe: "金庫"
   owner:
     self: 自分
     parents: 両親
@@ -247,6 +251,10 @@ topos:
         donate_github: お使いのGitHubアカウント経由。
         donate_kofi: 1回限りの支援、ログイン不要。
       title: 設定
+      types:
+        heading: "コンテナの種類"
+        intro: "フォームで選べる種類を決めます。既存のコンテナやインポートは、どの種類でも問題なく機能します。"
+        defaults: "常に利用可能:"
       language: 言語
       theme: 外観
       theme_current: テーマ
@@ -427,6 +435,10 @@ topos:
     group:
       folder: "フォルダー"
       box: "ボックス"
+      drawer: "引き出し"
+      shelf: "棚"
+      case: "スーツケース"
+      safe: "金庫"
       self: "自分の{type}"
       parents: "両親の{type}"
       shared: "共有の{type}"

@@ -16,8 +16,22 @@ if TYPE_CHECKING:
 
 
 class ContainerType(str, Enum):
+    """Curated set - extending it is a code change on purpose.
+
+    folder and box are the defaults every install offers; the rest are
+    opt-in per device (Settings > Container-Typen). That toggle filters
+    which types the FORMS offer, never what the API accepts: rows and
+    imports carrying a de-selected type must keep working everywhere.
+    Stored as VARCHAR in SQLite (no CHECK constraint), so adding a
+    member here needs no migration.
+    """
+
     FOLDER = "folder"
     BOX = "box"
+    DRAWER = "drawer"
+    SHELF = "shelf"
+    CASE = "case"
+    SAFE = "safe"
 
 
 class Owner(str, Enum):

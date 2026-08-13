@@ -19,6 +19,8 @@ import { useContainers, useItems } from "../hooks/useTopos";
 import { useI18n } from "../hooks/useI18n";
 import { useDialog } from "../components/AppDialog";
 import { getStorage } from "../storage";
+import { useContainerTypes } from "../hooks/useContainerTypes";
+import { containerTypeLabel } from "../utils/containerTypeLabel";
 import { notify, errorMessage } from "../utils/notify";
 import { indexRemove, indexUpsertContainer } from "../search/buildIndex";
 import {
@@ -67,6 +69,13 @@ export default function ContainerList() {
   const { data, loading, error, refresh } = useContainers();
   const [showLabels, setShowLabels] = useState(false);
   const items = useItems();
+  const { enabled: enabledTypes } = useContainerTypes();
+  // Filter options come from the DATA (see below), the create form from
+  // the device preference - different concerns, different sources.
+  const typesInData = useMemo(
+    () => [...new Set(data.map((container) => container.type))],
+    [data],
+  );
   // "list" is the workhorse; "tree" shows the same rows as the workbook's
   // forest (group -> container -> item). Persisted so the choice survives.
   const [view, setView] = useState<"list" | "tree">(() => {
@@ -364,12 +373,11 @@ export default function ContainerList() {
                   }))
                 }
               >
-                <option value="folder">
-                  {t("topos.container.type.folder", "Ordner")}
-                </option>
-                <option value="box">
-                  {t("topos.container.type.box", "Box")}
-                </option>
+                {enabledTypes.map((containerType) => (
+                  <option key={containerType} value={containerType}>
+                    {containerTypeLabel(containerType, t)}
+                  </option>
+                ))}
               </select>
             </FormField>
             <FormField label={t("topos.container.owner", "Eigentümer")}>
@@ -485,8 +493,16 @@ export default function ContainerList() {
             onChange={(v) => setType(v as ContainerType | "all")}
             options={[
               ["all", t("topos.filter.all", "Alle")],
-              ["folder", t("topos.container.type.folder", "Ordner")],
-              ["box", t("topos.container.type.box", "Box")],
+              // The filter is about the DATA, not the device preference:
+              // every type that actually occurs is offered, so imported
+              // containers of a not-enabled type stay findable.
+              ...typesInData.map(
+                (containerType) =>
+                  [containerType, containerTypeLabel(containerType, t)] as [
+                    string,
+                    string,
+                  ],
+              ),
             ]}
             testId="filter-type"
           />

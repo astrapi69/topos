@@ -177,7 +177,11 @@
       "size_group": "サイズ区分",
       "type": {
         "box": "箱",
-        "folder": "ファイル"
+        "case": "スーツケース",
+        "drawer": "引き出し",
+        "folder": "ファイル",
+        "safe": "金庫",
+        "shelf": "棚"
       },
       "type_label": "種類"
     },
@@ -493,7 +497,12 @@
         "tab_security": "アプリケーションキー",
         "theme": "外観",
         "theme_current": "テーマ",
-        "title": "設定"
+        "title": "設定",
+        "types": {
+          "defaults": "常に利用可能:",
+          "heading": "コンテナの種類",
+          "intro": "フォームで選べる種類を決めます。既存のコンテナやインポートは、どの種類でも問題なく機能します。"
+        }
       }
     },
     "priority": {
@@ -573,10 +582,14 @@
       "empty": "コンテナはまだありません。",
       "group": {
         "box": "ボックス",
+        "case": "スーツケース",
+        "drawer": "引き出し",
         "folder": "フォルダー",
         "parents": "両親の{type}",
+        "safe": "金庫",
         "self": "自分の{type}",
-        "shared": "共有の{type}"
+        "shared": "共有の{type}",
+        "shelf": "棚"
       }
     }
   },

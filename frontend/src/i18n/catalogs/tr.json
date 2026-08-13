@@ -177,7 +177,11 @@
       "size_group": "Boyut grubu",
       "type": {
         "box": "Kutu",
-        "folder": "Klasör"
+        "case": "Bavul",
+        "drawer": "Çekmece",
+        "folder": "Klasör",
+        "safe": "Kasa",
+        "shelf": "Raf"
       },
       "type_label": "Tür"
     },
@@ -493,7 +497,12 @@
         "tab_security": "Uygulama anahtarı",
         "theme": "Görünüm",
         "theme_current": "Tema",
-        "title": "Ayarlar"
+        "title": "Ayarlar",
+        "types": {
+          "defaults": "Her zaman kullanılabilir:",
+          "heading": "Kap türleri",
+          "intro": "Formların hangi türleri sunacağını belirler. Mevcut kaplar ve içe aktarmalar her türle çalışır."
+        }
       }
     },
     "priority": {
@@ -573,10 +582,14 @@
       "empty": "Henüz kap yok.",
       "group": {
         "box": "Kutular",
+        "case": "Bavullar",
+        "drawer": "Çekmeceler",
         "folder": "Klasörler",
         "parents": "Ebeveynlerin {type}",
+        "safe": "Kasalar",
         "self": "Kendi {type}",
-        "shared": "Paylaşılan {type}"
+        "shared": "Paylaşılan {type}",
+        "shelf": "Raflar"
       }
     }
   },

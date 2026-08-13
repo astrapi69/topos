@@ -95,3 +95,33 @@ def test_get_by_external_id(client: TestClient) -> None:
 
     r = client.get("/api/containers/by-external-id/99999")
     assert r.status_code == 404
+
+
+def test_extended_container_types_roundtrip(client: TestClient) -> None:
+    """The curated enum beyond folder/box: drawer, shelf, case, safe.
+
+    The Settings toggle that offers these is a UI visibility filter
+    only - the API accepts every enum value unconditionally, so imports
+    and existing rows never depend on a per-device preference.
+    """
+    for offset, new_type in enumerate(["drawer", "shelf", "case", "safe"]):
+        payload = {
+            "external_id": 4100 + offset,
+            "label": f"Typ-Test {new_type}",
+            "type": new_type,
+            "owner": "self",
+        }
+        r = client.post("/api/containers", json=payload)
+        assert r.status_code == 201, (new_type, r.text)
+        assert r.json()["type"] == new_type
+
+        r = client.get(f"/api/containers/{r.json()['id']}")
+        assert r.json()["type"] == new_type
+
+
+def test_unknown_container_type_still_rejected(client: TestClient) -> None:
+    r = client.post(
+        "/api/containers",
+        json={"external_id": 4199, "label": "x", "type": "spaceship", "owner": "self"},
+    )
+    assert r.status_code == 422

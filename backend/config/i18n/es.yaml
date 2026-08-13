@@ -93,6 +93,10 @@ topos:
     type:
       folder: Carpeta
       box: Caja
+      drawer: "Cajón"
+      shelf: "Estantería"
+      case: "Maleta"
+      safe: "Caja fuerte"
   owner:
     self: Mío
     parents: Padres
@@ -247,6 +251,10 @@ topos:
         donate_github: A través de tu cuenta de GitHub existente.
         donate_kofi: Propinas puntuales, sin necesidad de registrarse.
       title: Ajustes
+      types:
+        heading: "Tipos de contenedor"
+        intro: "Determina qué tipos ofrecen los formularios. Los contenedores existentes y las importaciones funcionan con cualquier tipo."
+        defaults: "Siempre disponibles:"
       language: Idioma
       theme: Apariencia
       theme_current: Tema
@@ -427,6 +435,10 @@ topos:
     group:
       folder: "Carpetas"
       box: "Cajas"
+      drawer: "Cajones"
+      shelf: "Estanterías"
+      case: "Maletas"
+      safe: "Cajas fuertes"
       self: "Mis {type}"
       parents: "{type} de los padres"
       shared: "{type} compartidas"

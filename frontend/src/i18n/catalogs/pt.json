@@ -177,7 +177,11 @@
       "size_group": "Grupo de tamanho",
       "type": {
         "box": "Caixa",
-        "folder": "Pasta"
+        "case": "Mala",
+        "drawer": "Gaveta",
+        "folder": "Pasta",
+        "safe": "Cofre",
+        "shelf": "Prateleira"
       },
       "type_label": "Tipo"
     },
@@ -493,7 +497,12 @@
         "tab_security": "Chave da aplicação",
         "theme": "Aparência",
         "theme_current": "Tema",
-        "title": "Definições"
+        "title": "Definições",
+        "types": {
+          "defaults": "Sempre disponíveis:",
+          "heading": "Tipos de contêiner",
+          "intro": "Define quais tipos os formulários oferecem. Contêineres existentes e importações funcionam com qualquer tipo."
+        }
       }
     },
     "priority": {
@@ -573,10 +582,14 @@
       "empty": "Ainda não há contêineres.",
       "group": {
         "box": "Caixas",
+        "case": "Malas",
+        "drawer": "Gavetas",
         "folder": "Pastas",
         "parents": "{type} dos pais",
+        "safe": "Cofres",
         "self": "Minhas {type}",
-        "shared": "{type} compartilhadas"
+        "shared": "{type} compartilhadas",
+        "shelf": "Prateleiras"
       }
     }
   },

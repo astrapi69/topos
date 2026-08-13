@@ -114,6 +114,7 @@ function ownerRows(
       "Eigentuemer",
       "Groessengruppe",
       "Eintrag-Nr.",
+      "Typ",
     ],
   ];
   for (const container of containers) {
@@ -129,6 +130,8 @@ function ownerRows(
       null,
       container.owner,
       container.sizeGroup,
+      null,
+      container.type,
     ]);
     for (const line of (container.description ?? "").split("\n")) {
       if (line.trim()) rows.push([null, line.trim()]);
@@ -183,6 +186,7 @@ function boxRows(
       "Prioritaet",
       "Eigentuemer",
       "Eintrag-Nr.",
+      "Typ",
     ],
   ];
   let currentSizeGroup: string | null = null;
@@ -203,6 +207,8 @@ function boxRows(
       null,
       null,
       container.owner,
+      null,
+      container.type,
     ]);
     for (const line of (container.description ?? "").split("\n")) {
       if (line.trim()) rows.push([null, line.trim()]);
@@ -297,7 +303,9 @@ export async function buildExcelBackup(backup: ToposBackup): Promise<Blob> {
   const parentFolders = containers.filter(
     (container) => container.type === "folder" && container.owner === "parents",
   );
-  const boxes = containers.filter((container) => container.type === "box");
+  // Everything that is not a folder shares the Boxen sheet - owner is
+  // already a column there, the appended Typ column tells them apart.
+  const boxes = containers.filter((container) => container.type !== "folder");
 
   const workbook = new ExcelJS.Workbook();
   const sheets: Array<[string, SheetRows]> = [
