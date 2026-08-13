@@ -77,6 +77,24 @@
   (3) Docker-Push uebersprungen - keine Registry aktiv.
 - Commits: 76def0e, 9e732fd, 59c195c, e9ced3b, Tag v0.3.0
 
+## 5. Nacharbeiten: error_report-i18n + Launcher-Exec-Smoke (14:45)
+
+- Original prompt: "go" (auf die zwei angekuendigten P1-Punkte).
+- Goal: die zwei im Statusbericht dokumentierten Luecken schliessen.
+- Result: (1) Der komplette error_report-Namespace (13 Keys) steht
+  jetzt in allen acht Katalogen (485 Keys je Locale, Paritaet
+  geprueft) - vorher sah jede Sprache deutsche Fallbacks auf genau dem
+  Dialog, den ein Nutzer in Not liest. Issue-BODY bleibt bewusst
+  deutsch (geht an den deutschsprachigen Maintainer); der
+  "Issue melden"-Toast-Button liegt ausserhalb React und bleibt als
+  separater Fall offen. (2) Alle drei Launcher-Workflows fuehren ihr
+  frisch gebautes Artefakt jetzt mit --version aus. Beleg vom ersten
+  Lauf: Linux, macOS und Windows antworten "topos-launcher 0.3.0" -
+  macOS/Windows haben damit erstmals ueberhaupt ein Topos-Binary
+  gestartet. Offen bleibt nur, was Runner nicht beantworten koennen:
+  SmartScreen/Gatekeeper-Quarantaene und der Docker-Pfad.
+- Commits: 9657f97, 5b2c9f6 (Hash des Smoke-Commits siehe git log)
+
 ## Zusammenfassung
 
 - Release v0.3.0 veroeffentlicht: Inventarbaum, Install-Banner,

@@ -122,7 +122,11 @@ launcher's remaining half is a hardware gate, see below.
       is done (see Done above). What is left cannot be checked from
       Linux or from CI: does the .exe get past SmartScreen, does the
       unsigned .app get past Gatekeeper, does either reach the Docker
-      check. Needs someone on each OS.
+      check. Needs someone on each OS. Narrowed 2026-08-13: every build
+      workflow now exec-smokes its artifact (`--version`), so the
+      binaries provably START on real macOS and Windows runners - what
+      remains is only the quarantine/signing UX (SmartScreen,
+      Gatekeeper) and the Docker path, which runners cannot answer.
 - [ ] **Native-speaker review of the six translated catalogs** (ES, FR,
       PT, TR, EL, JA). All 458 keys are translated and placeholder-parity
       is enforced by `scripts/apply_translation.py`; what is missing is a
