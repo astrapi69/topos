@@ -366,6 +366,20 @@ topos:
       actions_created: Oluşturulan görevler
       categories_created: Oluşturulan kategoriler
       warnings: Uyarılar
+  error_report:
+    title: "Sorun bildir"
+    intro: "Topos bir hata yakaladı ve geliştiriciler için bir hata raporu hazırlayabilir. Göndermeden önce tam olarak neyin iletileceğini görürsün."
+    steps_label: "Yeniden üretme adımları (isteğe bağlı)"
+    steps_placeholder: "Hata oluştuğunda ne yapıyordun? Atlamak için boş bırak."
+    include_env: "Ortam bilgisi (sürüm, tarayıcı, işletim sistemi)"
+    privacy: "İçerik, parola veya API anahtarı iletilmez."
+    preview: "Önizlemeyi göster"
+    close: "Kapat"
+    open_github: "GitHub'da bildir"
+    truncated: "Rapor, GitHub'ın URL uzunluk sınırına uymak için kısaltıldı."
+    copied: "Kopyalandı!"
+    copy_failed: "Kopyalama başarısız"
+    copy: "Raporu kopyala"
   toast:
     item_created: Kayıt oluşturuldu
     item_updated: Kayıt güncellendi

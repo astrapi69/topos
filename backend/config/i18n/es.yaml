@@ -366,6 +366,20 @@ topos:
       actions_created: Acciones creadas
       categories_created: Categorías creadas
       warnings: Avisos
+  error_report:
+    title: "Informar de un problema"
+    intro: "Topos ha detectado un error y puede preparar un informe para los desarrolladores. Antes de enviarlo verás exactamente qué se transmite."
+    steps_label: "Pasos para reproducirlo (opcional)"
+    steps_placeholder: "¿Qué estabas haciendo cuando ocurrió el error? Déjalo vacío para omitirlo."
+    include_env: "Información del entorno (versión, navegador, SO)"
+    privacy: "No se transmiten contenidos, contraseñas ni claves API."
+    preview: "Mostrar vista previa"
+    close: "Cerrar"
+    open_github: "Informar en GitHub"
+    truncated: "Informe recortado para respetar el límite de longitud de URL de GitHub."
+    copied: "¡Copiado!"
+    copy_failed: "Error al copiar"
+    copy: "Copiar informe"
   toast:
     item_created: Entrada creada
     item_updated: Entrada actualizada

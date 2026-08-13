@@ -374,6 +374,20 @@ topos:
       actions_created: Aktionen neu
       categories_created: Kategorien neu
       warnings: Warnungen
+  error_report:
+    title: "Problem melden"
+    intro: "Topos hat einen Fehler erkannt und kann einen Bug-Bericht für die Entwickler vorbereiten. Du siehst vor dem Absenden genau, was übermittelt wird."
+    steps_label: "Schritte zur Reproduktion (optional)"
+    steps_placeholder: "Was hast du gemacht, als der Fehler auftrat? Leer lassen zum Überspringen."
+    include_env: "Umgebungsinfo (Version, Browser, OS)"
+    privacy: "Es werden keine Inhalte, Passwörter oder API-Schlüssel übermittelt."
+    preview: "Vorschau anzeigen"
+    close: "Schließen"
+    open_github: "Auf GitHub melden"
+    truncated: "Bericht gekürzt, um GitHubs URL-Längenlimit einzuhalten."
+    copied: "Kopiert!"
+    copy_failed: "Kopieren fehlgeschlagen"
+    copy: "Bericht kopieren"
   toast:
     item_created: Eintrag erstellt
     item_updated: Eintrag aktualisiert

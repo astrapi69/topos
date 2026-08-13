@@ -184,6 +184,21 @@
     "demo": {
       "seeded": "Dados de demonstração carregados. Liga um servidor para dados reais."
     },
+    "error_report": {
+      "close": "Fechar",
+      "copied": "Copiado!",
+      "copy": "Copiar relatório",
+      "copy_failed": "Falha ao copiar",
+      "include_env": "Informações do ambiente (versão, navegador, SO)",
+      "intro": "O Topos detectou um erro e pode preparar um relatório de bug para os desenvolvedores. Você vê exatamente o que será enviado antes do envio.",
+      "open_github": "Relatar no GitHub",
+      "preview": "Mostrar prévia",
+      "privacy": "Nenhum conteúdo, senha ou chave de API é transmitido.",
+      "steps_label": "Passos para reproduzir (opcional)",
+      "steps_placeholder": "O que você estava fazendo quando o erro ocorreu? Deixe vazio para pular.",
+      "title": "Relatar um problema",
+      "truncated": "Relatório encurtado para respeitar o limite de comprimento de URL do GitHub."
+    },
     "filter": {
       "all": "Tudo",
       "owner": "Proprietário",

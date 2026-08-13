@@ -374,6 +374,20 @@ topos:
       actions_created: Actions created
       categories_created: Categories created
       warnings: Warnings
+  error_report:
+    title: "Report a problem"
+    intro: "Topos caught an error and can prepare a bug report for the developers. You see exactly what will be sent before anything leaves your device."
+    steps_label: "Steps to reproduce (optional)"
+    steps_placeholder: "What were you doing when the error occurred? Leave empty to skip."
+    include_env: "Environment info (version, browser, OS)"
+    privacy: "No content, passwords or API keys are transmitted."
+    preview: "Show preview"
+    close: "Close"
+    open_github: "Report on GitHub"
+    truncated: "Report trimmed to fit GitHub's URL length limit."
+    copied: "Copied!"
+    copy_failed: "Copy failed"
+    copy: "Copy report"
   toast:
     item_created: Item created
     item_updated: Item updated

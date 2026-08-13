@@ -366,6 +366,20 @@ topos:
       actions_created: 作成したタスク
       categories_created: 作成したカテゴリ
       warnings: 警告
+  error_report:
+    title: "問題を報告"
+    intro: "Toposがエラーを検出し、開発者向けのバグレポートを準備できます。送信前に、何が送られるかを正確に確認できます。"
+    steps_label: "再現手順（任意）"
+    steps_placeholder: "エラーが発生したとき、何をしていましたか？スキップする場合は空欄のままにしてください。"
+    include_env: "環境情報（バージョン、ブラウザ、OS）"
+    privacy: "コンテンツ、パスワード、APIキーは送信されません。"
+    preview: "プレビューを表示"
+    close: "閉じる"
+    open_github: "GitHubで報告"
+    truncated: "GitHubのURL長制限に合わせてレポートを短縮しました。"
+    copied: "コピーしました！"
+    copy_failed: "コピーに失敗しました"
+    copy: "レポートをコピー"
   toast:
     item_created: 項目を作成しました
     item_updated: 項目を更新しました
