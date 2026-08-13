@@ -9,6 +9,9 @@ const mocks = vi.hoisted(() => ({
   downloadExcelBackup: vi.fn(),
   importToposData: vi.fn(),
   readBackupFile: vi.fn(),
+  importWorkbook: vi.fn(),
+  apiImportExcel: vi.fn(),
+  featureActive: { value: false },
   promptMock: vi.fn(),
   success: vi.fn(),
   error: vi.fn(),
@@ -28,6 +31,20 @@ vi.mock("../backup", () => ({
       this.code = code;
     }
   },
+}));
+vi.mock("../excel/importWorkbook", () => ({
+  importWorkbook: mocks.importWorkbook,
+}));
+vi.mock("../api/client", () => ({
+  api: { importExcel: mocks.apiImportExcel },
+}));
+vi.mock("@astrapi69/feature-strategy-react", () => ({
+  useFeature: () => ({ isActive: mocks.featureActive.value }),
+}));
+vi.mock("../storage", () => ({ getStorage: () => ({}) }));
+vi.mock("../hooks/useTopos", () => ({ refreshAll: vi.fn(async () => {}) }));
+vi.mock("../search/buildIndex", () => ({
+  rebuildSearchIndex: vi.fn(async () => {}),
 }));
 vi.mock("../hooks/useI18n", () => ({
   useI18n: () => ({ t: (_k: string, fb?: string) => fb ?? _k, lang: "en" }),
@@ -65,6 +82,79 @@ describe("DataSection", () => {
     expect(screen.getByTestId("data-export")).toBeInTheDocument();
     expect(screen.getByTestId("data-export-excel")).toBeInTheDocument();
     expect(screen.getByTestId("data-import")).toBeInTheDocument();
+  });
+
+  it("routes a picked xlsx through the Excel importer, not the backup parser", async () => {
+    // Reported from an iPhone: picking the Excel export here answered
+    // "Ungueltige Backup-Datei". The picker is shared, the content is
+    // unmistakable (xlsx is a ZIP, PK\x03\x04), so the section dispatches
+    // on the magic bytes instead of telling the user they chose the wrong
+    // page.
+    const EMPTY_REPORT = {
+      containersCreated: 1,
+      containersUpdated: 0,
+      itemsCreated: 2,
+      itemsUpdated: 0,
+      itemsPruned: 0,
+      actionsCreated: 0,
+      categoriesCreated: 0,
+      warnings: [],
+    };
+    mocks.importWorkbook.mockResolvedValue(EMPTY_REPORT);
+    render(<DataSection />);
+
+    const xlsx = new File(
+      [new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x00])],
+      "export.xlsx",
+    );
+    fireEvent.change(screen.getByTestId("data-import-input"), {
+      target: { files: [xlsx] },
+    });
+
+    await waitFor(() => expect(mocks.importWorkbook).toHaveBeenCalledTimes(1));
+    expect(mocks.readBackupFile).not.toHaveBeenCalled();
+    expect(mocks.error).not.toHaveBeenCalled();
+    expect(mocks.success).toHaveBeenCalledTimes(1);
+  });
+
+  it("posts the xlsx to the backend when the excel-import feature is active", async () => {
+    mocks.featureActive.value = true;
+    mocks.apiImportExcel.mockResolvedValue({
+      containersCreated: 0,
+      containersUpdated: 1,
+      itemsCreated: 0,
+      itemsUpdated: 3,
+      itemsPruned: 0,
+      actionsCreated: 0,
+      categoriesCreated: 0,
+      warnings: [],
+    });
+    render(<DataSection />);
+
+    const xlsx = new File(
+      [new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x00])],
+      "export.xlsx",
+    );
+    fireEvent.change(screen.getByTestId("data-import-input"), {
+      target: { files: [xlsx] },
+    });
+
+    await waitFor(() => expect(mocks.apiImportExcel).toHaveBeenCalledTimes(1));
+    expect(mocks.importWorkbook).not.toHaveBeenCalled();
+    mocks.featureActive.value = false;
+  });
+
+  it("still parses a JSON pick as a backup", async () => {
+    mocks.readBackupFile.mockResolvedValue(BACKUP);
+    render(<DataSection />);
+
+    const json = new File(['{"format":"topos-backup"}'], "backup.topos.json");
+    fireEvent.change(screen.getByTestId("data-import-input"), {
+      target: { files: [json] },
+    });
+
+    await waitFor(() => expect(mocks.readBackupFile).toHaveBeenCalledTimes(1));
+    expect(mocks.importWorkbook).not.toHaveBeenCalled();
   });
 
   it("does not filter the restore picker by type (iOS greys out real files)", () => {

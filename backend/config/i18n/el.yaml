@@ -221,6 +221,7 @@ topos:
         export_success: Η εξαγωγή ολοκληρώθηκε. {containers} δοχεία, {items} καταχωρίσεις.
         export_excel: Εξαγωγή σε Excel
         excel_export_success: Η εξαγωγή σε Excel ολοκληρώθηκε. {containers} δοχεία, {items} καταχωρίσεις.
+        excel_import_success: "Η εισαγωγή Excel ολοκληρώθηκε. {containers} δοχεία, {items} καταχωρήσεις."
         excel_export_failed: Η εξαγωγή σε Excel απέτυχε
         import: Εισαγωγή δεδομένων
         import_preview: '{containers} δοχεία, {items} καταχωρίσεις, {categories} κατηγορίες, {actions} ενέργειες'

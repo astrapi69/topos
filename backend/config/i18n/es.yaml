@@ -221,6 +221,7 @@ topos:
         export_success: Exportación completada. {containers} contenedores, {items} entradas.
         export_excel: Exportar a Excel
         excel_export_success: Exportación a Excel completada. {containers} contenedores, {items} entradas.
+        excel_import_success: "Importación de Excel completada. {containers} contenedores, {items} entradas."
         excel_export_failed: Falló la exportación a Excel
         import: Importar datos
         import_preview: '{containers} contenedores, {items} entradas, {categories} categorías, {actions} acciones'

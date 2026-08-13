@@ -221,6 +221,7 @@ topos:
         export_success: エクスポートが完了しました。コンテナ{containers}件、項目{items}件。
         export_excel: Excelにエクスポート
         excel_export_success: Excelへのエクスポートが完了しました。コンテナ{containers}件、項目{items}件。
+        excel_import_success: "Excelインポートが完了しました。コンテナ{containers}件、項目{items}件。"
         excel_export_failed: Excelへのエクスポートに失敗しました
         import: データをインポート
         import_preview: コンテナ{containers}件、項目{items}件、カテゴリ{categories}件、タスク{actions}件

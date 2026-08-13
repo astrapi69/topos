@@ -440,6 +440,7 @@
           "empty": "エクスポートするデータがありません",
           "excel_export_failed": "Excelへのエクスポートに失敗しました",
           "excel_export_success": "Excelへのエクスポートが完了しました。コンテナ{containers}件、項目{items}件。",
+          "excel_import_success": "Excelインポートが完了しました。コンテナ{containers}件、項目{items}件。",
           "export": "データをエクスポート",
           "export_excel": "Excelにエクスポート",
           "export_success": "エクスポートが完了しました。コンテナ{containers}件、項目{items}件。",
