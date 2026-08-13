@@ -70,6 +70,36 @@ describe("ErrorReportDialog", () => {
     clickSpy.mockRestore();
   });
 
+  it("copies the report to the clipboard", async () => {
+    // Reported from an iPhone: the preview <pre> cannot be selected there,
+    // so without a button the report text is unreachable - the GitHub
+    // deep-link is the only exit, and it needs a GitHub account. Same
+    // pattern as adaptive-learner's dialog.
+    const writeText = vi.fn(async (_text: string) => {});
+    vi.stubGlobal("navigator", { ...navigator, clipboard: { writeText } });
+
+    render(<ErrorReportDialog />);
+    fireOpen("Kaputt");
+    fireEvent.click(await screen.findByTestId("error-report-copy"));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
+    expect(writeText.mock.calls[0][0]).toContain("Kaputt");
+    // Feedback lands in the button itself, not a toast over the dialog.
+    await screen.findByText("Kopiert!");
+  });
+
+  it("says so when the clipboard is unavailable", async () => {
+    // No clipboard API (http, permission denied): the button must report
+    // failure instead of pretending success.
+    vi.stubGlobal("navigator", { ...navigator, clipboard: undefined });
+
+    render(<ErrorReportDialog />);
+    fireOpen("Kaputt");
+    fireEvent.click(await screen.findByTestId("error-report-copy"));
+
+    await screen.findByText("Kopieren fehlgeschlagen");
+  });
+
   it("closes after submitting", async () => {
     const clickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
