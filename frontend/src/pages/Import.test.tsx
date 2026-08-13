@@ -84,6 +84,20 @@ describe("Import", () => {
     expect(screen.getByTestId("import-submit")).toBeDisabled();
   });
 
+  it("does not filter the file picker by type (iOS greys out real xlsx)", () => {
+    // Measured on an iPhone: a genuine workbook - QuickLook previews the
+    // table - stayed greyed out in the picker behind
+    // accept=".xlsx,application/vnd...spreadsheetml.sheet". iOS filters by
+    // UTI, and files that lose or hide their extension in transit (Google
+    // Drive download named the file "Unbekannt") never match. The importer
+    // validates CONTENT and reports a precise error, so the picker filter
+    // added no safety - only this failure mode.
+    renderImport({ backendAvailable: true, hasAiKey: false });
+    expect(screen.getByTestId("import-file-input")).not.toHaveAttribute(
+      "accept",
+    );
+  });
+
   it("shows no backend hint when the backend is reachable", () => {
     renderImport({ backendAvailable: true, hasAiKey: false });
     expect(screen.queryByTestId("import-backend-hint")).not.toBeInTheDocument();

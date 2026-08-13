@@ -138,7 +138,12 @@ export default function Import() {
             )}
             <input
               type="file"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              // No accept filter: iOS derives the picker's UTI filter from
+              // the file NAME, so a genuine workbook that lost its
+              // extension in transit (Google Drive download -> "Unbekannt")
+              // is greyed out and unselectable - measured on an iPhone,
+              // QuickLook previewing the table while the picker refused it.
+              // The importer validates content and reports precisely.
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               aria-label={t(
                 "topos.page.import.pick_file",

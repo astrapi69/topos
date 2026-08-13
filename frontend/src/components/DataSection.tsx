@@ -236,7 +236,8 @@ export default function DataSection() {
         <input
           ref={fileRef}
           type="file"
-          accept=".topos.json,.json,application/json"
+          // No accept filter - see Import.tsx: iOS greys out files whose
+          // name lost its extension, and the restore validates content.
           hidden
           onChange={onFilePicked}
           aria-label={t("topos.page.settings.data.import", "Daten importieren")}
