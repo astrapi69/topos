@@ -10,6 +10,7 @@
 import { useRef, useState } from "react";
 
 import { Download, FileSpreadsheet, Upload } from "lucide-react";
+import { useFeature } from "@astrapi69/feature-strategy-react";
 
 import {
   BackupValidationError,
@@ -21,10 +22,32 @@ import {
   type ImportMode,
   type ToposBackup,
 } from "../backup";
+import { api } from "../api/client";
+import { importWorkbook } from "../excel/importWorkbook";
+import { FEATURES } from "../features/featureConfig";
 import { useI18n } from "../hooks/useI18n";
+import { refreshAll } from "../hooks/useTopos";
+import { rebuildSearchIndex } from "../search/buildIndex";
+import { getStorage } from "../storage";
 import { useDialog } from "./AppDialog";
 import { notify, errorMessage } from "../utils/notify";
 import { btn, btnDanger, card, muted } from "../ui/classes";
+
+/**
+ * xlsx (like every OOXML file) is a ZIP archive, and ZIP starts with the
+ * four bytes PK\x03\x04. Content, not name: on iOS the name is routinely
+ * lost in transit, which is exactly how a workbook ends up in this picker.
+ */
+async function isZipFile(file: File): Promise<boolean> {
+  const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+  return (
+    head.length === 4 &&
+    head[0] === 0x50 &&
+    head[1] === 0x4b &&
+    head[2] === 0x03 &&
+    head[3] === 0x04
+  );
+}
 
 function fill(
   template: string,
@@ -42,6 +65,7 @@ export default function DataSection() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<ToposBackup | null>(null);
   const [busy, setBusy] = useState(false);
+  const importFeature = useFeature(FEATURES.EXCEL_IMPORT);
 
   async function handleExport() {
     setBusy(true);
@@ -122,10 +146,56 @@ export default function DataSection() {
     }
   }
 
+  /**
+   * A picked workbook runs the same dual-mode import as the Import page.
+   * Users land here with an xlsx because the button says "Daten
+   * importieren" - answering "Ungueltige Backup-Datei" to a valid export
+   * of this very app was a dead end. No prune option from here: the
+   * upsert is idempotent and non-destructive.
+   */
+  async function runExcelImport(file: File) {
+    setBusy(true);
+    try {
+      const report = importFeature.isActive
+        ? await api.importExcel(file, { pruneMissing: false })
+        : await importWorkbook(await file.arrayBuffer(), getStorage(), {
+            pruneMissing: false,
+          });
+      await refreshAll();
+      await rebuildSearchIndex();
+      notify.success(
+        fill(
+          t(
+            "topos.page.settings.data.excel_import_success",
+            "Excel-Import abgeschlossen. {containers} Container, {items} Einträge.",
+          ),
+          {
+            containers: report.containersCreated + report.containersUpdated,
+            items: report.itemsCreated + report.itemsUpdated,
+          },
+        ),
+      );
+    } catch (err) {
+      notify.error(
+        errorMessage(
+          err,
+          t("topos.toast.import_failed", "Import fehlgeschlagen"),
+        ),
+        err,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onFilePicked(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+    if (await isZipFile(file)) {
+      await runExcelImport(file);
+      return;
+    }
     try {
       setPending(await readBackupFile(file));
     } catch (err) {

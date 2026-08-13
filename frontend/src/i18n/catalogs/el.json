@@ -440,6 +440,7 @@
           "empty": "Δεν υπάρχουν δεδομένα για εξαγωγή",
           "excel_export_failed": "Η εξαγωγή σε Excel απέτυχε",
           "excel_export_success": "Η εξαγωγή σε Excel ολοκληρώθηκε. {containers} δοχεία, {items} καταχωρίσεις.",
+          "excel_import_success": "Η εισαγωγή Excel ολοκληρώθηκε. {containers} δοχεία, {items} καταχωρήσεις.",
           "export": "Εξαγωγή δεδομένων",
           "export_excel": "Εξαγωγή σε Excel",
           "export_success": "Η εξαγωγή ολοκληρώθηκε. {containers} δοχεία, {items} καταχωρίσεις.",

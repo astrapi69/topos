@@ -440,6 +440,7 @@
           "empty": "Keine Daten zum Exportieren",
           "excel_export_failed": "Excel-Export fehlgeschlagen",
           "excel_export_success": "Excel-Export abgeschlossen. {containers} Container, {items} Einträge.",
+          "excel_import_success": "Excel-Import abgeschlossen. {containers} Container, {items} Einträge.",
           "export": "Daten exportieren",
           "export_excel": "Excel exportieren",
           "export_success": "Export abgeschlossen. {containers} Container, {items} Einträge.",

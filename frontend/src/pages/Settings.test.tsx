@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import Settings from "./Settings";
+import { TestFeatureProvider } from "../features/testFeatureProvider";
 import { DialogProvider } from "../components/AppDialog";
 import AppUpdateProvider from "../components/AppUpdateProvider";
 
@@ -49,14 +50,17 @@ async function openSecurityTab() {
 
 function renderSettings() {
   // AppUpdateProvider supplies the PwaUpdateProvider context the About
-  // section's VersionCard reads.
+  // section's VersionCard reads; TestFeatureProvider the feature registry
+  // DataSection's excel-import dispatch reads.
   return render(
     <MemoryRouter>
-      <AppUpdateProvider>
-        <DialogProvider>
-          <Settings />
-        </DialogProvider>
-      </AppUpdateProvider>
+      <TestFeatureProvider>
+        <AppUpdateProvider>
+          <DialogProvider>
+            <Settings />
+          </DialogProvider>
+        </AppUpdateProvider>
+      </TestFeatureProvider>
     </MemoryRouter>,
   );
 }
@@ -120,11 +124,13 @@ describe("Settings", () => {
   it("restores the tab from the URL", () => {
     render(
       <MemoryRouter initialEntries={["/settings?tab=data"]}>
-        <AppUpdateProvider>
-          <DialogProvider>
-            <Settings />
-          </DialogProvider>
-        </AppUpdateProvider>
+        <TestFeatureProvider>
+          <AppUpdateProvider>
+            <DialogProvider>
+              <Settings />
+            </DialogProvider>
+          </AppUpdateProvider>
+        </TestFeatureProvider>
       </MemoryRouter>,
     );
     expect(screen.getByTestId("data-export")).toBeInTheDocument();

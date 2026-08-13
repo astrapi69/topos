@@ -221,6 +221,7 @@ topos:
         export_success: Dışa aktarma tamamlandı. {containers} kap, {items} kayıt.
         export_excel: Excel'e aktar
         excel_export_success: Excel dışa aktarımı tamamlandı. {containers} kap, {items} kayıt.
+        excel_import_success: "Excel içe aktarımı tamamlandı. {containers} kap, {items} kayıt."
         excel_export_failed: Excel dışa aktarımı başarısız
         import: Verileri içe aktar
         import_preview: '{containers} kap, {items} kayıt, {categories} kategori, {actions} görev'

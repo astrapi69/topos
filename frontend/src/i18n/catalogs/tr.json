@@ -440,6 +440,7 @@
           "empty": "Dışa aktarılacak veri yok",
           "excel_export_failed": "Excel dışa aktarımı başarısız",
           "excel_export_success": "Excel dışa aktarımı tamamlandı. {containers} kap, {items} kayıt.",
+          "excel_import_success": "Excel içe aktarımı tamamlandı. {containers} kap, {items} kayıt.",
           "export": "Verileri dışa aktar",
           "export_excel": "Excel'e aktar",
           "export_success": "Dışa aktarma tamamlandı. {containers} kap, {items} kayıt.",
