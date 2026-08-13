@@ -12,12 +12,13 @@
  * to mount it once, next to OfflineBanner.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Bug, X } from "lucide-react";
+import { Bug, Check, Copy, X } from "lucide-react";
 
 import { ApiError } from "../api/client";
 import { useI18n } from "../hooks/useI18n";
+import { copyToClipboard } from "../utils/clipboard";
 import { btn, btnPrimary, card, input, muted } from "../ui/classes";
 
 const ISSUES_URL = "https://github.com/astrapi69/topos/issues/new";
@@ -55,12 +56,27 @@ export default function ErrorReportDialog() {
   const [state, setState] = useState<ReportState>({ open: false, message: "" });
   const [description, setDescription] = useState("");
   const [includeEnv, setIncludeEnv] = useState(true);
+  // Feedback lives in the button label (Kopiert! / fehlgeschlagen), not a
+  // toast: a toast would stack over the modal, and on iOS - where this
+  // matters most, the preview <pre> is unselectable there - it can land
+  // behind the dialog entirely.
+  const [copyState, setCopyState] = useState<"idle" | "ok" | "fail">("idle");
+  const copyTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     function handleOpen(event: Event) {
       const detail = (event as CustomEvent).detail ?? {};
       setDescription("");
       setIncludeEnv(true);
+      setCopyState("idle");
       setState({
         open: true,
         message: typeof detail.message === "string" ? detail.message : "",
@@ -86,6 +102,18 @@ export default function ErrorReportDialog() {
     description,
   );
   const issueTitle = `Bug: ${state.message.substring(0, 80)}`;
+
+  async function handleCopy() {
+    const ok = await copyToClipboard(issueBody);
+    setCopyState(ok ? "ok" : "fail");
+    if (copyTimerRef.current !== null) {
+      window.clearTimeout(copyTimerRef.current);
+    }
+    copyTimerRef.current = window.setTimeout(() => {
+      setCopyState("idle");
+      copyTimerRef.current = null;
+    }, 1500);
+  }
 
   function handleSubmit() {
     const encodedTitle = encodeURIComponent(issueTitle);
@@ -189,6 +217,26 @@ export default function ErrorReportDialog() {
 
           <div className="flex flex-wrap gap-2 mt-2">
             <div className="grow" />
+            <button
+              type="button"
+              className={btn}
+              onClick={() => void handleCopy()}
+              data-testid="error-report-copy"
+            >
+              {copyState === "ok" ? (
+                <Check size={14} aria-hidden />
+              ) : (
+                <Copy size={14} aria-hidden />
+              )}
+              {copyState === "ok"
+                ? t("topos.error_report.copied", "Kopiert!")
+                : copyState === "fail"
+                  ? t(
+                      "topos.error_report.copy_failed",
+                      "Kopieren fehlgeschlagen",
+                    )
+                  : t("topos.error_report.copy", "Bericht kopieren")}
+            </button>
             <button
               type="button"
               className={btn}
