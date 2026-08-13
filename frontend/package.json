@@ -2,7 +2,7 @@
   "name": "topos-frontend",
   "description": "Topos frontend. Personal inventory tracker for physical storage with hierarchical categories.",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
