@@ -184,6 +184,21 @@
     "demo": {
       "seeded": "Örnek veriler yüklendi. Gerçek veriler için bir sunucu bağlayın."
     },
+    "error_report": {
+      "close": "Kapat",
+      "copied": "Kopyalandı!",
+      "copy": "Raporu kopyala",
+      "copy_failed": "Kopyalama başarısız",
+      "include_env": "Ortam bilgisi (sürüm, tarayıcı, işletim sistemi)",
+      "intro": "Topos bir hata yakaladı ve geliştiriciler için bir hata raporu hazırlayabilir. Göndermeden önce tam olarak neyin iletileceğini görürsün.",
+      "open_github": "GitHub'da bildir",
+      "preview": "Önizlemeyi göster",
+      "privacy": "İçerik, parola veya API anahtarı iletilmez.",
+      "steps_label": "Yeniden üretme adımları (isteğe bağlı)",
+      "steps_placeholder": "Hata oluştuğunda ne yapıyordun? Atlamak için boş bırak.",
+      "title": "Sorun bildir",
+      "truncated": "Rapor, GitHub'ın URL uzunluk sınırına uymak için kısaltıldı."
+    },
     "filter": {
       "all": "Tümü",
       "owner": "Sahip",

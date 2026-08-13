@@ -184,6 +184,21 @@
     "demo": {
       "seeded": "Demo data loaded. Connect a backend for real data."
     },
+    "error_report": {
+      "close": "Close",
+      "copied": "Copied!",
+      "copy": "Copy report",
+      "copy_failed": "Copy failed",
+      "include_env": "Environment info (version, browser, OS)",
+      "intro": "Topos caught an error and can prepare a bug report for the developers. You see exactly what will be sent before anything leaves your device.",
+      "open_github": "Report on GitHub",
+      "preview": "Show preview",
+      "privacy": "No content, passwords or API keys are transmitted.",
+      "steps_label": "Steps to reproduce (optional)",
+      "steps_placeholder": "What were you doing when the error occurred? Leave empty to skip.",
+      "title": "Report a problem",
+      "truncated": "Report trimmed to fit GitHub's URL length limit."
+    },
     "filter": {
       "all": "All",
       "owner": "Owner",

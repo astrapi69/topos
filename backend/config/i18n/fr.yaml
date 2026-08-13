@@ -366,6 +366,20 @@ topos:
       actions_created: Actions créées
       categories_created: Catégories créées
       warnings: Avertissements
+  error_report:
+    title: "Signaler un problème"
+    intro: "Topos a détecté une erreur et peut préparer un rapport de bug pour les développeurs. Tu vois exactement ce qui sera transmis avant l'envoi."
+    steps_label: "Étapes de reproduction (facultatif)"
+    steps_placeholder: "Que faisais-tu quand l'erreur est survenue ? Laisse vide pour passer."
+    include_env: "Infos d'environnement (version, navigateur, OS)"
+    privacy: "Aucun contenu, mot de passe ou clé API n'est transmis."
+    preview: "Afficher l'aperçu"
+    close: "Fermer"
+    open_github: "Signaler sur GitHub"
+    truncated: "Rapport raccourci pour respecter la limite de longueur d'URL de GitHub."
+    copied: "Copié !"
+    copy_failed: "Échec de la copie"
+    copy: "Copier le rapport"
   toast:
     item_created: Entrée créée
     item_updated: Entrée mise à jour
