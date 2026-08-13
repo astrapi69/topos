@@ -93,7 +93,7 @@
   macOS/Windows haben damit erstmals ueberhaupt ein Topos-Binary
   gestartet. Offen bleibt nur, was Runner nicht beantworten koennen:
   SmartScreen/Gatekeeper-Quarantaene und der Docker-Pfad.
-- Commits: 9657f97, 5b2c9f6 (Hash des Smoke-Commits siehe git log)
+- Commits: 9657f97, 2090555
 
 ## Zusammenfassung
 
