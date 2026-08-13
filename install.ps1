@@ -15,7 +15,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$Version = if ($env:TOPOS_VERSION) { $env:TOPOS_VERSION } else { "v0.2.0" }
+$Version = if ($env:TOPOS_VERSION) { $env:TOPOS_VERSION } else { "v0.3.0" }
 $Repo = "astrapi69/topos"
 $InstallDir = if ($env:TOPOS_DIR) { $env:TOPOS_DIR } else { Join-Path $HOME "topos" }
 

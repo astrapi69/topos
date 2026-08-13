@@ -23,7 +23,7 @@ export default defineConfig({
             timeout: 30_000,
         },
         {
-            command: "cd ../frontend && npm run dev",
+            command: "cd ../frontend && bun run dev",
             url: "http://localhost:5183",
             reuseExistingServer: !process.env.CI,
             timeout: 30_000,

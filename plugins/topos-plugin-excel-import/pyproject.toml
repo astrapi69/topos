@@ -1,6 +1,6 @@
 [project]
 name = "topos-plugin-excel-import"
-version = "0.2.0"
+version = "0.3.0"
 description = "Import an Ordner-Ordnung.xlsx file (or any compatible Topos seed Excel) into the Topos database."
 authors = [{name = "Asterios Raptis"}]
 license = "MIT"
