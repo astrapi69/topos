@@ -12,7 +12,7 @@
         "@astrapi69/passphrase-vault": "0.1.1",
         "@astrapi69/pwa-update": "0.2.0",
         "@astrapi69/pwa-update-react": "0.2.0",
-        "@astrapi69/tree-kit": "^0.1.0",
+        "@astrapi69/tree-kit": "^0.2.0",
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
@@ -86,7 +86,7 @@
 
     "@astrapi69/pwa-update-react": ["@astrapi69/pwa-update-react@0.2.0", "", { "dependencies": { "@astrapi69/pwa-update": "^0.2.0" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-Gkmvy/yDwoE/VkNxNQ8NHaDOgYdWd5TMhIHOMBimHNQ+I1+wSfogULbm00ruTDxEDh8oAPUvoUa8Bw+jsMS6Jw=="],
 
-    "@astrapi69/tree-kit": ["@astrapi69/tree-kit@0.1.0", "", {}, "sha512-ePSH3t2jTwGs24IRH6/c7lNx7ekizdMbN8GFqc/p8yCG+WPM+3JNc3IsmpTWA2Q+0vvmAmNsYg+aWazuHukJfg=="],
+    "@astrapi69/tree-kit": ["@astrapi69/tree-kit@0.2.0", "", {}, "sha512-WpBr+FlUpxTSVYZCGH+tt1l83KQT+s9A7ezvuoRsF3v17UnnhUtxRStfMJqBogaswdTwyFdnxtIerNs/DrhXmw=="],
 
     "@axe-core/react": ["@axe-core/react@4.12.1", "", { "dependencies": { "axe-core": "~4.12.1", "requestidlecallback": "^0.3.0" } }, "sha512-8tZysxguMYomHHFA1iPSpJfWiHX0LPSXdHxboR1YKPs+taNOG8wiEqLaGdgXaFDZ2WKyX/+bzvlLcqdNsR/Gdg=="],
 
