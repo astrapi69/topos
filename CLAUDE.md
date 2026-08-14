@@ -19,6 +19,7 @@ Topos is part of a small family of MIT-licensed projects:
 - **[pluginforge-app-template](https://github.com/astrapi69/pluginforge-app-template)** - the scaffold Topos was bootstrapped from.
 - **[adaptive-learner](https://github.com/astrapi69/adaptive-learner)** - sibling application built on the same template (the patterns in `.claude/rules/` originated there).
 - **[bibliogon](https://github.com/astrapi69/bibliogon)** - book-authoring sibling. The Topos bootstrap inherited the template that bibliogon's lineage produced.
+- **[tree-kit](https://github.com/astrapi69/tree-kit)** - typed, serialisable tree structures (npm). Builds the category and inventory trees; its tolerant build mode (0.2.0) was extracted FROM this codebase's duplicated sanitizers.
 
 ## Development guidelines
 
@@ -43,7 +44,7 @@ On a conflict between CLAUDE.md and the rules, the rules win.
 ## Tech stack
 
 - **Backend:** Python 3.11+, FastAPI, SQLAlchemy 2.0, SQLite, Pydantic v2, Alembic, Poetry
-- **Frontend:** React 18+, TypeScript (strict), Vite, Radix UI, Tailwind CSS (v3, Preflight off), Dexie, Lucide, react-toastify, `@astrapi69/ai-key-vault` (+`-react`, `passphrase-vault`) for AI provider settings + the passphrase-encrypted local key vault
+- **Frontend:** React 18+, TypeScript (strict), Vite, Radix UI, Tailwind CSS (v3, Preflight off), Dexie, Lucide, react-toastify, `@astrapi69/tree-kit` (category + inventory trees), `@astrapi69/ai-key-vault` (+`-react`, `passphrase-vault`) for AI provider settings + the passphrase-encrypted local key vault
 - **Plugins:** pluginforge ^0.10.0 (PyPI), entry-point group `topos.plugins`. Host passes `app_id="topos"` + `app_version`; plugins must declare `target_application = "topos"` or are filtered at activation. User-overlay applied via `config_overlay.refresh_manager_overlay(manager)`.
 - **Launcher:** PyInstaller cross-OS desktop launcher (`launcher/`)
 - **Testing:** pytest (backend + plugins), Vitest (frontend), Playwright (e2e)
