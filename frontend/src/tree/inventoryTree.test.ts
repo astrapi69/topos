@@ -26,6 +26,7 @@ function container(
   label: string,
   type: Container["type"] = "folder",
   owner: Container["owner"] = "self",
+  parentContainerId: number | null = null,
 ): Container {
   return {
     id,
@@ -36,6 +37,7 @@ function container(
     description: null,
     location: null,
     sizeGroup: null,
+    parentContainerId,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
   };
@@ -174,6 +176,68 @@ describe("buildInventoryTree", () => {
       "zweiter",
       "dritter",
     ]);
+  });
+
+  it("nests a container under its parent container", () => {
+    const root = buildInventoryTree(
+      [
+        container(1, 10, "Regal", "shelf", "self"),
+        container(2, 11, "Ordner im Regal", "folder", "self", 1),
+      ],
+      [item(20, 2, "Police")],
+    );
+    const shelfGroup = groupsOf(root).find(
+      (group) => group.id === "group:shelf:self",
+    )!;
+    const shelf = shelfGroup.children[0];
+    expect(shelf.label).toBe("Regal");
+    const nested = shelf.children.find((child) => child.kind === "container")!;
+    expect(nested.label).toBe("Ordner im Regal");
+    // ... and the nested container still carries its own items.
+    expect(nested.children.map((leaf) => leaf.label)).toEqual(["Police"]);
+    // The nested folder does NOT additionally appear under the folder group.
+    expect(
+      groupsOf(root).find((group) => group.id === "group:folder:self"),
+    ).toBeUndefined();
+    // Item counts roll up through the nesting.
+    expect(shelf.itemCount).toBe(1);
+    expect(shelfGroup.itemCount).toBe(1);
+  });
+
+  it("falls back to the group when the parent is filtered out", () => {
+    // The page filters by owner/type; a visible child of an invisible
+    // parent must not vanish (and must not crash the build).
+    const root = buildInventoryTree(
+      [container(2, 11, "Ordner", "folder", "self", 1)],
+      [],
+    );
+    const folderGroup = groupsOf(root).find(
+      (group) => group.id === "group:folder:self",
+    )!;
+    expect(folderGroup.children[0].label).toBe("Ordner");
+  });
+
+  it("degrades a data cycle to the group instead of crashing", () => {
+    // Should never happen (every write path guards), but if corrupted
+    // data arrives the view must render, not throw - tree-kit would.
+    const root = buildInventoryTree(
+      [
+        container(1, 10, "A", "box", "self", 2),
+        container(2, 11, "B", "box", "self", 1),
+      ],
+      [],
+    );
+    const boxGroup = groupsOf(root).find(
+      (group) => group.id === "group:box:self",
+    )!;
+    // Both render; at least one was detached to break the cycle.
+    const labels = new Set<string>();
+    const collect = (node: (typeof boxGroup.children)[0]) => {
+      labels.add(node.label);
+      node.children.forEach(collect);
+    };
+    boxGroup.children.forEach(collect);
+    expect(labels.has("A") && labels.has("B")).toBe(true);
   });
 
   it("drops an item whose container is not in the input", () => {

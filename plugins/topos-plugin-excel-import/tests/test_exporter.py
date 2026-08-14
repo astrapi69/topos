@@ -217,9 +217,7 @@ def test_extended_types_roundtrip_via_typ_column(db):
             Container(
                 external_id=50, type=ContainerType.DRAWER, owner=Owner.SELF, label="Kommode 3"
             ),
-            Container(
-                external_id=51, type=ContainerType.SAFE, owner=Owner.PARENTS, label="Tresor"
-            ),
+            Container(external_id=51, type=ContainerType.SAFE, owner=Owner.PARENTS, label="Tresor"),
             Container(external_id=52, type=ContainerType.BOX, owner=Owner.SELF, label="Kiste"),
         ]
     )
@@ -233,3 +231,39 @@ def test_extended_types_roundtrip_via_typ_column(db):
     assert by_nr[51].type == "safe"
     assert by_nr[51].owner == "parents"
     assert by_nr[52].type == "box"
+
+
+def test_nesting_roundtrips_via_eltern_nr_column(db):
+    """parent_container_id survives export -> parse -> import via an
+    appended "Eltern-Nr." column carrying the PARENT'S EXTERNAL id -
+    the user-facing number is the only container identity that is
+    stable across databases (import upserts by external_id)."""
+    from topos_excel_import.importer import import_parsed_result
+
+    shelf = Container(external_id=60, type=ContainerType.SHELF, owner=Owner.SELF, label="Regal")
+    db.add(shelf)
+    db.flush()
+    db.add(
+        Container(
+            external_id=61,
+            type=ContainerType.FOLDER,
+            owner=Owner.SELF,
+            label="Ordner im Regal",
+            parent_container_id=shelf.id,
+        )
+    )
+    db.flush()
+
+    parsed = parse_workbook(BytesIO(export_workbook(db)))
+    by_nr = {c.external_id: c for c in parsed.containers}
+    assert by_nr[61].parent_external_id == 60
+    assert by_nr[60].parent_external_id is None
+
+    # And into a FRESH database: the reference resolves by external id.
+    for row in db.query(Container).all():
+        db.delete(row)
+    db.flush()
+    import_parsed_result(db, parsed)
+    imported_shelf = db.query(Container).filter_by(external_id=60).one()
+    imported_folder = db.query(Container).filter_by(external_id=61).one()
+    assert imported_folder.parent_container_id == imported_shelf.id

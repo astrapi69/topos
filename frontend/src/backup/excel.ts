@@ -99,6 +99,7 @@ function ownerRows(
   itemsByContainer: Map<number, Item[]>,
   actionsByItem: Map<number, ActionRow[]>,
   categories: Map<string, Category>,
+  parentExternalIds: Map<number, number>,
 ): SheetRows {
   const rows: SheetRows = [
     [
@@ -115,6 +116,7 @@ function ownerRows(
       "Groessengruppe",
       "Eintrag-Nr.",
       "Typ",
+      "Eltern-Nr.",
     ],
   ];
   for (const container of containers) {
@@ -132,6 +134,7 @@ function ownerRows(
       container.sizeGroup,
       null,
       container.type,
+      parentExternalIds.get(container.id) ?? null,
     ]);
     for (const line of (container.description ?? "").split("\n")) {
       if (line.trim()) rows.push([null, line.trim()]);
@@ -171,6 +174,7 @@ function boxRows(
   itemsByContainer: Map<number, Item[]>,
   actionsByItem: Map<number, ActionRow[]>,
   categories: Map<string, Category>,
+  parentExternalIds: Map<number, number>,
 ): SheetRows {
   const rows: SheetRows = [
     [
@@ -187,6 +191,7 @@ function boxRows(
       "Eigentuemer",
       "Eintrag-Nr.",
       "Typ",
+      "Eltern-Nr.",
     ],
   ];
   let currentSizeGroup: string | null = null;
@@ -209,6 +214,7 @@ function boxRows(
       container.owner,
       null,
       container.type,
+      parentExternalIds.get(container.id) ?? null,
     ]);
     for (const line of (container.description ?? "").split("\n")) {
       if (line.trim()) rows.push([null, line.trim()]);
@@ -307,17 +313,50 @@ export async function buildExcelBackup(backup: ToposBackup): Promise<Blob> {
   // already a column there, the appended Typ column tells them apart.
   const boxes = containers.filter((container) => container.type !== "folder");
 
+  // Parent references leave the store as the PARENT'S EXTERNAL id - the
+  // only container identity stable across databases (mirrors the plugin).
+  const containersById = new Map(
+    containers.map((container) => [container.id, container]),
+  );
+  const parentExternalIds = new Map<number, number>();
+  for (const container of containers) {
+    if (container.parentContainerId == null) continue;
+    const parent = containersById.get(container.parentContainerId);
+    if (parent) parentExternalIds.set(container.id, parent.externalId);
+  }
+
   const workbook = new ExcelJS.Workbook();
   const sheets: Array<[string, SheetRows]> = [
     [
       "Meine Ordner",
-      ownerRows(ownFolders, itemsByContainer, actionsByItem, categories),
+      ownerRows(
+        ownFolders,
+        itemsByContainer,
+        actionsByItem,
+        categories,
+        parentExternalIds,
+      ),
     ],
     [
       "Ordner Eltern",
-      ownerRows(parentFolders, itemsByContainer, actionsByItem, categories),
+      ownerRows(
+        parentFolders,
+        itemsByContainer,
+        actionsByItem,
+        categories,
+        parentExternalIds,
+      ),
     ],
-    ["Boxen", boxRows(boxes, itemsByContainer, actionsByItem, categories)],
+    [
+      "Boxen",
+      boxRows(
+        boxes,
+        itemsByContainer,
+        actionsByItem,
+        categories,
+        parentExternalIds,
+      ),
+    ],
     ["Kategorien", categoryRows(backup.data.categories)],
   ];
   for (const [name, rows] of sheets) {

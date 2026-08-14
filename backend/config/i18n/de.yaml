@@ -452,6 +452,13 @@ topos:
       parents: "{type} Eltern"
       shared: "{type} geteilt"
     empty: "Keine Container vorhanden."
+    move:
+      button: "Verschieben nach..."
+      title: "Verschieben nach..."
+      detach: "Auf oberste Ebene (aus dem Container lösen)"
+      done: "Verschoben: {what} → {where}"
+      failed: "Verschieben fehlgeschlagen"
+      no_targets: "Kein mögliches Ziel vorhanden."
 
 pwa:
   update_available: Neue Version verfügbar

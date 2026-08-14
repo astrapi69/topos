@@ -590,6 +590,14 @@
         "self": "Kendi {type}",
         "shared": "Paylaşılan {type}",
         "shelf": "Raflar"
+      },
+      "move": {
+        "button": "Şuraya taşı...",
+        "detach": "En üst düzey (kabından ayır)",
+        "done": "Taşındı: {what} → {where}",
+        "failed": "Taşıma başarısız",
+        "no_targets": "Uygun hedef yok.",
+        "title": "Şuraya taşı..."
       }
     }
   },

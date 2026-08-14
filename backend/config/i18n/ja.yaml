@@ -443,6 +443,13 @@ topos:
       parents: "両親の{type}"
       shared: "共有の{type}"
     empty: "コンテナはまだありません。"
+    move:
+      button: "移動先..."
+      title: "移動先..."
+      detach: "最上位へ（コンテナから外す）"
+      done: "移動しました: {what} → {where}"
+      failed: "移動に失敗しました"
+      no_targets: "移動できる先がありません。"
 
 pwa:
   update_available: 新しいバージョンがあります

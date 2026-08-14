@@ -186,11 +186,14 @@ export interface ContainerCreate {
   description?: string | null;
   location?: string | null;
   sizeGroup?: string | null;
+  parentContainerId?: number | null;
 }
 
 export interface ContainerUpdate {
   type?: ContainerType;
   owner?: Owner;
+  /** Explicit null detaches (top level); omitted leaves the parent alone. */
+  parentContainerId?: number | null;
   label?: string;
   description?: string | null;
   location?: string | null;

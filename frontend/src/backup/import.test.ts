@@ -138,6 +138,36 @@ describe("importToposData (dexie path)", () => {
     expect(externals).toEqual([9001]); // the old external_id 1 is gone
   });
 
+  it("merge remaps nested parent references through the id map", async () => {
+    // In the backup, folder 12 stands in shelf 11 (backup ids). Merging
+    // into a store where the shelf already exists under a DIFFERENT id
+    // must relink the folder to the shelf's FINAL id - a raw copy of the
+    // backup id would point anywhere.
+    await db.containers.bulkPut([
+      { ...CONTAINER, id: 50, externalId: 9011, label: "Regal (alt)" },
+    ]);
+    await importToposData(
+      backupOf({
+        containers: [
+          { ...CONTAINER, id: 11, externalId: 9011, label: "Regal" },
+          {
+            ...CONTAINER,
+            id: 12,
+            externalId: 9012,
+            label: "Ordner",
+            parentContainerId: 11,
+          },
+        ],
+      }),
+      "merge",
+    );
+    const rows = await db.containers.toArray();
+    const shelf = rows.find((row) => row.externalId === 9011)!;
+    const folder = rows.find((row) => row.externalId === 9012)!;
+    expect(shelf.id).toBe(50); // upserted under its existing id
+    expect(folder.parentContainerId).toBe(50);
+  });
+
   it("merge dedups items by (containerId, content)", async () => {
     await db.containers.bulkPut([CONTAINER]);
     await db.items.bulkPut([ITEM]); // same (containerId, content) as the backup item

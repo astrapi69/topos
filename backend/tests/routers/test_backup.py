@@ -135,3 +135,33 @@ def test_unsupported_version_is_rejected(client: TestClient):
         json={"format": "topos-backup", "version": 2, "data": {}},
     )
     assert resp.status_code == 400
+
+
+def test_backup_roundtrip_preserves_nesting(client) -> None:
+    """parent_container_id survives export -> import. Parent references
+    are backup-ids and must be remapped to the target database's ids."""
+    shelf = client.post(
+        "/api/containers",
+        json={"external_id": 4300, "label": "Regal", "type": "shelf", "owner": "self"},
+    ).json()
+    client.post(
+        "/api/containers",
+        json={
+            "external_id": 4301,
+            "label": "Ordner im Regal",
+            "type": "folder",
+            "owner": "self",
+            "parent_container_id": shelf["id"],
+        },
+    )
+
+    exported = client.get("/api/backup/export").json()
+
+    # replace wipes first, so the import itself is the reset.
+    r = client.post("/api/backup/import?mode=replace", json=exported)
+    assert r.status_code == 200, r.text
+
+    rows = client.get("/api/containers").json()
+    by_nr = {row["external_id"]: row for row in rows}
+    assert by_nr[4301]["parent_container_id"] == by_nr[4300]["id"]
+    assert by_nr[4300]["parent_container_id"] is None

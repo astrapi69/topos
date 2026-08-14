@@ -443,6 +443,13 @@ topos:
       parents: "Ebeveynlerin {type}"
       shared: "Paylaşılan {type}"
     empty: "Henüz kap yok."
+    move:
+      button: "Şuraya taşı..."
+      title: "Şuraya taşı..."
+      detach: "En üst düzey (kabından ayır)"
+      done: "Taşındı: {what} → {where}"
+      failed: "Taşıma başarısız"
+      no_targets: "Uygun hedef yok."
 
 pwa:
   update_available: Yeni sürüm mevcut

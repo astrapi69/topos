@@ -127,12 +127,28 @@ async function importIntoDexie(
       const contByExt = new Map(
         (await db.containers.toArray()).map((row) => [row.externalId, row.id]),
       );
+      // backup-file id -> final id in this store, for relinking parents.
+      const contIdRemap = new Map<number, number>();
       for (const cont of data.containers) {
         const existingId = contByExt.get(cont.externalId);
-        await db.containers.put(
-          existingId != null ? { ...cont, id: existingId } : cont,
-        );
+        const finalId = existingId ?? cont.id;
+        contIdRemap.set(cont.id, finalId);
+        await db.containers.put({ ...cont, id: finalId });
         imported++;
+      }
+      // Second pass: parentContainerId in the file is a BACKUP id and the
+      // parent may appear later in the list, so links resolve only after
+      // every container has its final id. Unresolvable -> top level.
+      for (const cont of data.containers) {
+        const finalId = contIdRemap.get(cont.id);
+        if (finalId == null) continue;
+        const parentFinal =
+          cont.parentContainerId != null
+            ? (contIdRemap.get(cont.parentContainerId) ?? null)
+            : null;
+        await db.containers.update(finalId, {
+          parentContainerId: parentFinal === finalId ? null : parentFinal,
+        });
       }
 
       const itemKeys = new Set(

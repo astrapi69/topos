@@ -28,6 +28,7 @@ OWNER_SHEET_HEADER = [
     "Groessengruppe",
     "Eintrag-Nr.",
     "Typ",
+    "Eltern-Nr.",
 ]
 BOX_SHEET_HEADER = [
     "Nr.",
@@ -43,6 +44,7 @@ BOX_SHEET_HEADER = [
     "Eigentuemer",
     "Eintrag-Nr.",
     "Typ",
+    "Eltern-Nr.",
 ]
 CATEGORY_SHEET_HEADER = ["Pfad", "Anzeigename", "Elternpfad", "Ebene"]
 SHEET_KATEGORIEN = "Kategorien"
@@ -109,6 +111,7 @@ def _write_owner_sheet(
     ws,
     containers: list[Container],
     categories: dict[str, Category],
+    parent_external_ids: dict[int, int],
 ) -> None:
     ws.append(OWNER_SHEET_HEADER)
     for container in containers:
@@ -127,6 +130,7 @@ def _write_owner_sheet(
                 container.size_group,
                 None,
                 container.type.value,
+                parent_external_ids.get(container.id),
             ]
         )
         if container.description:
@@ -156,6 +160,7 @@ def _write_box_sheet(
     ws,
     containers: list[Container],
     categories: dict[str, Category],
+    parent_external_ids: dict[int, int],
 ) -> None:
     ws.append(BOX_SHEET_HEADER)
     current_size_group: str | None = None
@@ -178,6 +183,7 @@ def _write_box_sheet(
                 container.owner.value,
                 None,
                 container.type.value,
+                parent_external_ids.get(container.id),
             ]
         )
         if container.description:
@@ -255,9 +261,19 @@ def export_workbook(db: Session) -> bytes:
     box_sheet = wb.create_sheet(SHEET_BOXEN)
     category_sheet = wb.create_sheet(SHEET_KATEGORIEN)
 
-    _write_owner_sheet(mine, own_folders, categories)
-    _write_owner_sheet(parents, parent_folders, categories)
-    _write_box_sheet(box_sheet, boxes, categories)
+    # Parent references leave the database as the PARENT'S EXTERNAL id -
+    # the only container identity stable across databases (import
+    # upserts by external_id, database ids do not survive).
+    by_id = {row.id: row for row in containers}
+    parent_external_ids = {
+        row.id: by_id[row.parent_container_id].external_id
+        for row in containers
+        if row.parent_container_id is not None and row.parent_container_id in by_id
+    }
+
+    _write_owner_sheet(mine, own_folders, categories, parent_external_ids)
+    _write_owner_sheet(parents, parent_folders, categories, parent_external_ids)
+    _write_box_sheet(box_sheet, boxes, categories, parent_external_ids)
     _write_category_sheet(category_sheet, categories)
     for ws in wb.worksheets:
         _autosize(ws)

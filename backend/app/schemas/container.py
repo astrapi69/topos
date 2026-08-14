@@ -12,6 +12,7 @@ class ContainerCreate(BaseModel):
     type: ContainerType
     owner: Owner
     label: str
+    parent_container_id: int | None = None
     description: str | None = None
     location: str | None = None
     size_group: str | None = None
@@ -20,6 +21,9 @@ class ContainerCreate(BaseModel):
 class ContainerUpdate(BaseModel):
     type: ContainerType | None = None
     owner: Owner | None = None
+    # PATCH semantics via exclude_unset: an explicit null DETACHES (back
+    # to top level), an omitted field leaves the parent untouched.
+    parent_container_id: int | None = None
     label: str | None = None
     description: str | None = None
     location: str | None = None
@@ -31,6 +35,7 @@ class ContainerRead(BaseModel):
 
     id: int
     external_id: int
+    parent_container_id: int | None
     type: ContainerType
     owner: Owner
     label: str

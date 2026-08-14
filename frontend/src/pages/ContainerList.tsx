@@ -540,7 +540,14 @@ export default function ContainerList() {
          */}
         {view === "tree" && (
           <div className="mt-2">
-            <InventoryTreeView containers={filtered} items={items.data} />
+            <InventoryTreeView
+              containers={filtered}
+              items={items.data}
+              onMoved={async () => {
+                await refresh();
+                await items.refresh();
+              }}
+            />
           </div>
         )}
 

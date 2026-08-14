@@ -128,6 +128,21 @@ def _upsert_containers(db: Session, data: BackupImportData) -> tuple[int, dict[i
             db.add(resolved)
         db.flush()
         id_map[row.id] = resolved.id
+
+    # Second pass: parent references are backup-file ids and can point
+    # at a container that appears LATER in the list, so they can only be
+    # remapped once every container has a target-database id. A parent
+    # missing from the backup resolves to top level rather than failing
+    # the whole import.
+    for row in data.containers:
+        resolved_id = id_map[row.id]
+        parent_db_id = (
+            id_map.get(row.parent_container_id) if row.parent_container_id is not None else None
+        )
+        db.query(Container).filter(Container.id == resolved_id).update(
+            {"parent_container_id": parent_db_id}
+        )
+    db.flush()
     return len(data.containers), id_map
 
 

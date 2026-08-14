@@ -51,8 +51,40 @@ function notFound(kind: string, id: number): never {
 
 // --- containers ---
 
+/**
+ * Nesting guard, mirroring the backend service: the parent must exist,
+ * and linking must not make the container its own ancestor. Walks the
+ * parent chain upward from the target with a seen-set so pre-existing
+ * corruption cannot loop it.
+ */
+async function assertValidParent(
+  containerId: number | null,
+  parentId: number | null | undefined,
+): Promise<void> {
+  if (parentId === null || parentId === undefined) return;
+  const parent = await db.containers.get(parentId);
+  if (!parent) throw new Error(`Parent container ${parentId} not found`);
+  if (containerId === null) return;
+  const seen = new Set<number>();
+  let current: Container | undefined = parent;
+  while (current) {
+    if (current.id === containerId) {
+      throw new Error(
+        `Container ${containerId} cannot be moved into ${parentId}: it would become its own ancestor`,
+      );
+    }
+    if (seen.has(current.id)) break;
+    seen.add(current.id);
+    current =
+      current.parentContainerId != null
+        ? await db.containers.get(current.parentContainerId)
+        : undefined;
+  }
+}
+
 async function createContainer(payload: ContainerCreate): Promise<Container> {
   return db.transaction("rw", db.containers, async () => {
+    await assertValidParent(null, payload.parentContainerId);
     const id = await nextId(db.containers);
     const ts = nowIso();
     const container: Container = {
@@ -64,6 +96,7 @@ async function createContainer(payload: ContainerCreate): Promise<Container> {
       description: payload.description ?? null,
       location: payload.location ?? null,
       sizeGroup: payload.sizeGroup ?? null,
+      parentContainerId: payload.parentContainerId ?? null,
       createdAt: ts,
       updatedAt: ts,
     };
@@ -79,6 +112,15 @@ async function deleteContainer(id: number): Promise<void> {
     if (itemIds.length > 0) {
       await db.actions.where("itemId").anyOf(itemIds).delete();
       await db.items.where("containerId").equals(id).delete();
+    }
+    // Detach nested children (mirrors the backend's ON DELETE SET NULL):
+    // deleting a shelf must not delete the folders standing in it.
+    // filter() rather than where(): parentContainerId is unindexed.
+    const children = await db.containers
+      .filter((row) => row.parentContainerId === id)
+      .toArray();
+    for (const child of children) {
+      await db.containers.update(child.id, { parentContainerId: null });
     }
     await db.containers.delete(id);
   });
@@ -433,13 +475,17 @@ export const dexieStorage: IStorageService = {
     get: async (id) =>
       (await db.containers.get(id)) ?? notFound("Container", id),
     create: createContainer,
-    update: (id, payload) =>
-      updateRow<Container>(
+    update: async (id, payload) => {
+      if ("parentContainerId" in payload) {
+        await assertValidParent(id, payload.parentContainerId);
+      }
+      return updateRow<Container>(
         db.containers,
         id,
         payload as Partial<Container>,
         "Container",
-      ),
+      );
+    },
     delete: deleteContainer,
   },
   items: {

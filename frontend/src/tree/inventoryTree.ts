@@ -52,6 +52,8 @@ export interface InventoryNode {
   /** The row this node came from, so a click can route to it. */
   container?: Container;
   item?: Item;
+  /** On group nodes: the (type, owner) pair the group stands for. */
+  group?: { type: ContainerType; owner: Owner };
   children: InventoryNode[];
 }
 
@@ -105,6 +107,7 @@ interface FlatRow {
   sortKey: number;
   container?: Container;
   item?: Item;
+  group?: { type: ContainerType; owner: Owner };
 }
 
 function groupLabel(
@@ -138,6 +141,7 @@ function groupRows(containers: Container[], labels: GroupLabels): FlatRow[] {
       kind: "group",
       label: groupLabel(container.type, container.owner, labels),
       number: null,
+      group: { type: container.type, owner: container.owner },
       // Curated-enum order (folders first, like the workbook), own
       // before other people's within a type. Every type gets a distinct
       // band so two groups never tie on the sort key.
@@ -153,16 +157,63 @@ function groupRows(containers: Container[], labels: GroupLabels): FlatRow[] {
   return [...seen.values()];
 }
 
-function containerRows(containers: Container[]): FlatRow[] {
-  return containers.map((container) => ({
-    id: `container:${container.id}`,
-    parentId: groupKeyOf(container.type, container.owner),
-    kind: "container" as const,
-    label: container.label,
-    number: String(container.externalId),
-    sortKey: container.externalId,
-    container,
-  }));
+/**
+ * Resolve each container's effective tree parent: its parent container
+ * when that is visible and the chain is sound, else its (type, owner)
+ * group. Two degradations, both deliberate:
+ *
+ * - The page filters the container list, so a visible child of an
+ *   invisible parent falls back to its group instead of vanishing.
+ * - A cycle in the data (should never happen - every write path guards)
+ *   would make tree-kit throw; the members fall back to their group so
+ *   the view renders corrupted data instead of crashing on it.
+ */
+function effectiveParents(containers: Container[]): Map<number, number | null> {
+  const byId = new Map(
+    containers.map((container) => [container.id, container]),
+  );
+  const resolved = new Map<number, number | null>();
+  for (const container of containers) {
+    let parentId: number | null = container.parentContainerId ?? null;
+    if (parentId !== null && !byId.has(parentId)) parentId = null;
+    if (parentId !== null) {
+      const seen = new Set<number>([container.id]);
+      let current: number | null = parentId;
+      while (current !== null) {
+        if (seen.has(current)) {
+          parentId = null; // cycle: degrade to the group
+          break;
+        }
+        seen.add(current);
+        const next: number | null | undefined =
+          byId.get(current)?.parentContainerId;
+        current = next != null && byId.has(next) ? next : null;
+      }
+    }
+    resolved.set(container.id, parentId);
+  }
+  return resolved;
+}
+
+function containerRows(
+  containers: Container[],
+  parents: Map<number, number | null>,
+): FlatRow[] {
+  return containers.map((container) => {
+    const parentId = parents.get(container.id) ?? null;
+    return {
+      id: `container:${container.id}`,
+      parentId:
+        parentId !== null
+          ? `container:${parentId}`
+          : groupKeyOf(container.type, container.owner),
+      kind: "container" as const,
+      label: container.label,
+      number: String(container.externalId),
+      sortKey: container.externalId,
+      container,
+    };
+  });
 }
 
 function itemRows(
@@ -205,6 +256,7 @@ function toInventoryNode(node: TreeNode<FlatRow, string>): InventoryNode {
       own + children.reduce((total, child) => total + child.itemCount, 0),
     container: node.value.container,
     item: node.value.item,
+    group: node.value.group,
     children,
   };
 }
@@ -226,10 +278,16 @@ export function buildInventoryTree(
   const byId = new Map(
     containers.map((container) => [container.id, container]),
   );
+  const parents = effectiveParents(containers);
+  // Groups exist for the containers that hang off one: a folder nested
+  // inside a shelf lives under the shelf, not under a folder group.
+  const topLevel = containers.filter(
+    (container) => parents.get(container.id) === null,
+  );
   const rows = [
     rootRow(),
-    ...groupRows(containers, labels),
-    ...containerRows(containers),
+    ...groupRows(topLevel, labels),
+    ...containerRows(containers, parents),
     ...itemRows(items, byId),
   ];
 

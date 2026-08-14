@@ -259,6 +259,63 @@ def import_parsed_result(
             category_cache,
             prune_missing=prune_missing,
         )
+
+    # Second pass: the Eltern-Nr. column carries the PARENT'S EXTERNAL
+    # id, and the parent may appear later in the workbook (or already
+    # exist in the database), so links resolve only after every
+    # container is upserted. Unresolvable references degrade to top
+    # level with a warning instead of failing the import.
+    for parsed_container in parsed.containers:
+        container = (
+            db.query(Container).filter(Container.external_id == parsed_container.external_id).one()
+        )
+        if parsed_container.parent_external_id is None:
+            container.parent_container_id = None
+            continue
+        parent = (
+            db.query(Container)
+            .filter(Container.external_id == parsed_container.parent_external_id)
+            .one_or_none()
+        )
+        if parent is None:
+            report.warnings.append(
+                f"Container {parsed_container.external_id}: parent "
+                f"{parsed_container.parent_external_id} not found, kept at top level"
+            )
+            container.parent_container_id = None
+        elif parent.id == container.id:
+            report.warnings.append(
+                f"Container {parsed_container.external_id}: is its own parent "
+                "in the workbook, kept at top level"
+            )
+            container.parent_container_id = None
+        else:
+            container.parent_container_id = parent.id
+    db.flush()
+
+    # A workbook can close a cycle (A in B, B in A) that no single link
+    # reveals. Walk each chain once; the link that closes a cycle is cut
+    # so the database never holds one - the tree view would crash on it.
+    for container in db.query(Container).filter(Container.parent_container_id.isnot(None)):
+        seen: set[int] = {container.id}
+        current = container
+        while current.parent_container_id is not None:
+            if current.parent_container_id in seen:
+                report.warnings.append(
+                    f"Container {container.external_id}: parent chain closes "
+                    "a cycle, kept at top level"
+                )
+                container.parent_container_id = None
+                break
+            seen.add(current.parent_container_id)
+            next_row = (
+                db.query(Container)
+                .filter(Container.id == current.parent_container_id)
+                .one_or_none()
+            )
+            if next_row is None:
+                break
+            current = next_row
     db.commit()
     return report
 
