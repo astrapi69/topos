@@ -165,8 +165,13 @@ function groupRows(containers: Container[], labels: GroupLabels): FlatRow[] {
  * - The page filters the container list, so a visible child of an
  *   invisible parent falls back to its group instead of vanishing.
  * - A cycle in the data (should never happen - every write path guards)
- *   would make tree-kit throw; the members fall back to their group so
- *   the view renders corrupted data instead of crashing on it.
+ *   degrades its members to their group, so the view renders corrupted
+ *   data instead of crashing on it.
+ *
+ * This resolver is NOT replaceable by tree-kit's `promoteToRoot` mode:
+ * that promotes to the FOREST root, but Topos containers degrade to
+ * their (type, owner) GROUP - a domain decision the lib cannot know.
+ * The lib option still rides along below as a second net.
  */
 function effectiveParents(containers: Container[]): Map<number, number | null> {
   const byId = new Map(
@@ -295,6 +300,10 @@ export function buildInventoryTree(
     getId: (row) => row.id,
     getParentId: (row) => row.parentId,
     sort: (a, b) => a.sortKey - b.sortKey,
+    // effectiveParents already routes every invalid chain to its group;
+    // this is defence in depth so a future gap degrades instead of
+    // throwing in the one view that could show the data.
+    onInvalidParent: "promoteToRoot",
   });
 
   return toInventoryNode(forest[0]);
