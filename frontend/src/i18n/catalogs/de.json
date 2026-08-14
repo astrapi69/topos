@@ -590,6 +590,14 @@
         "self": "Meine {type}",
         "shared": "{type} geteilt",
         "shelf": "Regale"
+      },
+      "move": {
+        "button": "Verschieben nach...",
+        "detach": "Auf oberste Ebene (aus dem Container lösen)",
+        "done": "Verschoben: {what} → {where}",
+        "failed": "Verschieben fehlgeschlagen",
+        "no_targets": "Kein mögliches Ziel vorhanden.",
+        "title": "Verschieben nach..."
       }
     }
   },

@@ -452,6 +452,13 @@ topos:
       parents: "Parents' {type}"
       shared: "Shared {type}"
     empty: "No containers yet."
+    move:
+      button: "Move to..."
+      title: "Move to..."
+      detach: "Top level (detach from its container)"
+      done: "Moved: {what} → {where}"
+      failed: "Move failed"
+      no_targets: "No possible target."
 
 pwa:
   update_available: New version available

@@ -110,3 +110,83 @@ describe("dexieStorage", () => {
     expect((await db.items.get(item.id))!.categoryPath).toBeNull();
   });
 });
+
+describe("container nesting (dexie mirrors the backend service)", () => {
+  it("stores a parent, detaches on explicit null", async () => {
+    const shelf = await store.containers.create({
+      externalId: 60,
+      type: "shelf",
+      owner: "self",
+      label: "Regal",
+    });
+    const folder = await store.containers.create({
+      externalId: 61,
+      type: "folder",
+      owner: "self",
+      label: "Ordner",
+      parentContainerId: shelf.id,
+    });
+    expect(folder.parentContainerId).toBe(shelf.id);
+
+    const detached = await store.containers.update(folder.id, {
+      parentContainerId: null,
+    });
+    expect(detached.parentContainerId).toBeNull();
+  });
+
+  it("rejects cycles and self-parenting like the backend does", async () => {
+    const a = await store.containers.create({
+      externalId: 70,
+      type: "box",
+      owner: "self",
+      label: "A",
+    });
+    const b = await store.containers.create({
+      externalId: 71,
+      type: "box",
+      owner: "self",
+      label: "B",
+      parentContainerId: a.id,
+    });
+
+    await expect(
+      store.containers.update(a.id, { parentContainerId: b.id }),
+    ).rejects.toThrow();
+    await expect(
+      store.containers.update(a.id, { parentContainerId: a.id }),
+    ).rejects.toThrow();
+  });
+
+  it("rejects a missing parent", async () => {
+    const a = await store.containers.create({
+      externalId: 80,
+      type: "box",
+      owner: "self",
+      label: "A",
+    });
+    await expect(
+      store.containers.update(a.id, { parentContainerId: 999 }),
+    ).rejects.toThrow();
+  });
+
+  it("deleting a parent detaches its children instead of deleting them", async () => {
+    const shelf = await store.containers.create({
+      externalId: 90,
+      type: "shelf",
+      owner: "self",
+      label: "Regal",
+    });
+    const folder = await store.containers.create({
+      externalId: 91,
+      type: "folder",
+      owner: "self",
+      label: "Ordner",
+      parentContainerId: shelf.id,
+    });
+
+    await store.containers.delete(shelf.id);
+
+    const survivor = await store.containers.get(folder.id);
+    expect(survivor.parentContainerId).toBeNull();
+  });
+});

@@ -38,6 +38,12 @@ export interface Container {
   description: string | null;
   location: string | null;
   sizeGroup: string | null;
+  /**
+   * Physical nesting: the container this one stands in (folder in a
+   * shelf, box in a cabinet). Null = top level. Optional so rows cached
+   * before the field existed still typecheck.
+   */
+  parentContainerId?: number | null;
   createdAt: string;
   updatedAt: string;
 }

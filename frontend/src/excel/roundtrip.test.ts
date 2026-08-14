@@ -185,6 +185,7 @@ const SOURCE: ToposBackup = {
         description: null,
         location: null,
         sizeGroup: null,
+        parentContainerId: 4,
         createdAt: "",
         updatedAt: "",
       },
@@ -452,6 +453,18 @@ describe("Excel round-trip fidelity", () => {
     expect(item("Eltern-Eintrag")).toMatchObject({ priority: "very_high" });
     // Open actions on "Meine Ordner" survive.
     expect(store.actions.map((action) => action.text)).toContain("Offen");
+  });
+
+  it("round-trips nesting via the Eltern-Nr. column", async () => {
+    // Kommode 50 stands in Kiste 40. The column carries the parent's
+    // EXTERNAL id; the importer relinks against the store's local ids.
+    const { store } = await cycle();
+    const byExternalId = (externalId: number) =>
+      store.containers.find((container) => container.externalId === externalId);
+
+    const kiste = byExternalId(40)!;
+    expect(byExternalId(50)!.parentContainerId).toBe(kiste.id);
+    expect(byExternalId(51)!.parentContainerId ?? null).toBeNull();
   });
 
   it("round-trips the curated non-folder types via the Typ column", async () => {

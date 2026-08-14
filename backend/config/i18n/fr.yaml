@@ -443,6 +443,13 @@ topos:
       parents: "{type} des parents"
       shared: "{type} partagés"
     empty: "Aucun conteneur pour l'instant."
+    move:
+      button: "Déplacer vers..."
+      title: "Déplacer vers..."
+      detach: "Niveau supérieur (détacher de son conteneur)"
+      done: "Déplacé : {what} → {where}"
+      failed: "Échec du déplacement"
+      no_targets: "Aucune cible possible."
 
 pwa:
   update_available: Nouvelle version disponible

@@ -91,6 +91,8 @@ interface ParsedContainer {
   sizeGroup: string | null;
   descriptionLines: string[];
   items: ParsedItem[];
+  /** Parent's EXTERNAL id (Eltern-Nr. column); null = top level. */
+  parentExternalId: number | null;
 }
 
 interface ParseResult {
@@ -279,11 +281,13 @@ function parseOwnerSheet(
     // Appended 2026-08-13; empty in every older workbook, where the
     // sheet's default keeps deciding.
     const typeCell = cellStr(row, 12);
+    const parentNr = cellInt(row, 13);
 
     if (externalId !== null) {
       current = {
         externalId,
         type: typeFromCell(typeCell, options.containerType, result),
+        parentExternalId: parentNr,
         // The owner column wins when present; otherwise the sheet decides
         // (which is why "shared" needed a column - it shares a sheet).
         owner: parseOwner(ownerCell) ?? options.owner,
@@ -343,6 +347,7 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
     const ownerCell = cellStr(row, 10);
     const itemNumber = cellInt(row, 11);
     const typeCell = cellStr(row, 12);
+    const parentNr = cellInt(row, 13);
 
     if (col0Str !== null && col0Int === null) {
       const match = RANGE_HEADER_RE.exec(col0Str);
@@ -362,6 +367,7 @@ function parseBoxSheet(rows: Row[], result: ParseResult): void {
       current = {
         externalId: col0Int,
         type: typeFromCell(typeCell, "box", result),
+        parentExternalId: parentNr,
         owner: parseOwner(ownerCell) ?? "self",
         label: col1 ?? `Box ${col0Int}`,
         location: null,
@@ -687,6 +693,49 @@ export async function importWorkbook(
         await storage.items.delete(item.id);
         report.itemsPruned += 1;
       }
+    }
+  }
+
+  // Second pass: the Eltern-Nr. column carries the PARENT'S EXTERNAL id
+  // and the parent may appear later in the workbook (or already exist),
+  // so links resolve only after every container is upserted. Unknown or
+  // self-referencing parents degrade to top level with a warning; the
+  // storage seam rejects anything that would close a cycle, which is
+  // reported rather than failing the whole import (mirrors the plugin).
+  for (const parsedContainer of parsed.containers) {
+    const container = containersByExternalId.get(parsedContainer.externalId);
+    if (!container) continue;
+    let parentId: number | null = null;
+    if (parsedContainer.parentExternalId !== null) {
+      const parent = containersByExternalId.get(
+        parsedContainer.parentExternalId,
+      );
+      if (!parent) {
+        report.warnings.push(
+          `Container ${parsedContainer.externalId}: parent ` +
+            `${parsedContainer.parentExternalId} not found, kept at top level`,
+        );
+      } else if (parent.id === container.id) {
+        report.warnings.push(
+          `Container ${parsedContainer.externalId}: is its own parent ` +
+            `in the workbook, kept at top level`,
+        );
+      } else {
+        parentId = parent.id;
+      }
+    }
+    try {
+      await storage.containers.update(container.id, {
+        parentContainerId: parentId,
+      });
+    } catch {
+      report.warnings.push(
+        `Container ${parsedContainer.externalId}: parent chain closes ` +
+          `a cycle, kept at top level`,
+      );
+      await storage.containers.update(container.id, {
+        parentContainerId: null,
+      });
     }
   }
 

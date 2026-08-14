@@ -1,93 +1,184 @@
 /**
- * The tree view renders the inventory forest: groups open, containers
- * closed until clicked (a folder's contents are detail, not overview),
- * every node routable - a container chevron expands, its label navigates.
+ * The tree's move surfaces. The drag gesture itself is not unit-testable
+ * (pointer-event choreography; covered by the smoke spec and the rules'
+ * own tests in treeMove.test.ts) - what these pins cover is the
+ * "Verschieben nach..." button: it exists exactly on movable rows, its
+ * dialog offers only canDrop-approved targets, and a pick ends in the
+ * storage write plus the onMoved refresh.
  */
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Container, Item } from "../types/topos";
 import InventoryTreeView from "./InventoryTreeView";
+import type { Container, Item } from "../types/topos";
 
-vi.mock("../hooks/useI18n", () => ({
-  useI18n: () => ({
-    t: (_key: string, fallback?: string) => fallback ?? _key,
-    lang: "de",
-    setLang: vi.fn(),
-  }),
+const mocks = vi.hoisted(() => ({
+  choose: vi.fn(),
+  containersUpdate: vi.fn(async () => ({})),
+  itemsUpdate: vi.fn(async () => ({})),
+  success: vi.fn(),
+  error: vi.fn(),
+  warning: vi.fn(),
 }));
 
-const CONTAINERS: Container[] = [
-  {
-    id: 1,
-    externalId: 42,
-    label: "Versicherungen",
+vi.mock("../hooks/useI18n", () => ({
+  useI18n: () => ({ t: (_k: string, fb?: string) => fb ?? _k, lang: "de" }),
+}));
+vi.mock("./AppDialog", () => ({
+  useDialog: () => ({
+    choose: mocks.choose,
+    confirm: vi.fn(),
+    prompt: vi.fn(),
+    alert: vi.fn(),
+  }),
+}));
+vi.mock("../storage", () => ({
+  getStorage: () => ({
+    containers: { update: mocks.containersUpdate },
+    items: { update: mocks.itemsUpdate },
+  }),
+}));
+vi.mock("../utils/notify", () => ({
+  notify: {
+    success: mocks.success,
+    error: mocks.error,
+    warning: mocks.warning,
+  },
+  errorMessage: (_e: unknown, fb: string) => fb,
+}));
+
+function container(
+  id: number,
+  externalId: number,
+  label: string,
+  parentContainerId: number | null = null,
+): Container {
+  return {
+    id,
+    externalId,
+    label,
     type: "folder",
     owner: "self",
     description: null,
     location: null,
     sizeGroup: null,
-    createdAt: "2026-01-01T00:00:00Z",
-    updatedAt: "2026-01-01T00:00:00Z",
-  },
-];
-
-const ITEMS: Item[] = [
-  {
-    id: 10,
-    containerId: 1,
-    externalId: 1,
-    content: "Hausrat - Police",
-    priority: "none",
-    categoryPath: null,
-    notes: null,
-    createdAt: "2026-01-01T00:00:00Z",
-    updatedAt: "2026-01-01T00:00:00Z",
-  },
-];
-
-function renderTree() {
-  return render(
-    <MemoryRouter>
-      <InventoryTreeView containers={CONTAINERS} items={ITEMS} />
-    </MemoryRouter>,
-  );
+    parentContainerId,
+    createdAt: "",
+    updatedAt: "",
+  };
 }
 
-describe("InventoryTreeView", () => {
-  it("shows the app root, groups and containers, but not items, initially", () => {
+const ITEM: Item = {
+  id: 10,
+  containerId: 1,
+  externalId: 1,
+  content: "Police",
+  priority: "none",
+  categoryPath: null,
+  notes: null,
+  createdAt: "",
+  updatedAt: "",
+};
+
+function renderTree(onMoved = vi.fn()) {
+  render(
+    <MemoryRouter>
+      <InventoryTreeView
+        containers={[container(1, 42, "Quelle"), container(2, 43, "Ziel")]}
+        items={[ITEM]}
+        onMoved={onMoved}
+      />
+    </MemoryRouter>,
+  );
+  return onMoved;
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  localStorage.clear();
+});
+
+describe("InventoryTreeView move button", () => {
+  it("renders on containers, not on groups or the root", () => {
     renderTree();
-    expect(screen.getByTestId("tree-node-root").textContent).toContain("Topos");
-    expect(screen.getByText(/Versicherungen/)).toBeTruthy();
-    expect(screen.queryByText(/Hausrat/)).toBeNull();
+    expect(screen.getByTestId("tree-move-container:1")).toBeInTheDocument();
+    expect(screen.queryByTestId("tree-move-root")).toBeNull();
+    expect(screen.queryByTestId("tree-move-group:folder:self")).toBeNull();
   });
 
-  it("expands a container's items on toggle", () => {
-    renderTree();
+  it("moves an item to the picked container and refreshes", async () => {
+    mocks.choose.mockResolvedValue("container:2");
+    const onMoved = renderTree();
+
+    // Items are under a collapsed container; expand first.
     fireEvent.click(screen.getByTestId("tree-toggle-container:1"));
-    expect(screen.getByText(/Hausrat/)).toBeTruthy();
-    expect(screen.getByText("42-1")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("tree-move-item:10"));
+
+    await waitFor(() =>
+      expect(mocks.itemsUpdate).toHaveBeenCalledWith(10, { containerId: 2 }),
+    );
+    await waitFor(() => expect(onMoved).toHaveBeenCalled());
+    expect(mocks.success).toHaveBeenCalled();
   });
 
-  it("links the container label to its detail page", () => {
+  it("offers an item only foreign containers, no groups", async () => {
+    mocks.choose.mockResolvedValue(null);
     renderTree();
-    const label = screen.getByTestId("tree-link-container:1");
-    expect(label.getAttribute("href")).toBe("/containers/1");
-  });
 
-  it("links an expanded item to its editor", () => {
-    renderTree();
     fireEvent.click(screen.getByTestId("tree-toggle-container:1"));
-    const leaf = screen.getByTestId("tree-link-item:10");
-    expect(leaf.getAttribute("href")).toBe("/items/10");
+    fireEvent.click(screen.getByTestId("tree-move-item:10"));
+
+    await waitFor(() => expect(mocks.choose).toHaveBeenCalled());
+    const values = (
+      mocks.choose.mock.calls[0][2] as Array<{ value: string }>
+    ).map((choice) => choice.value);
+    // Its own container (1) is a no-op and must not be offered.
+    expect(values).toEqual(["container:2"]);
   });
 
-  it("shows the subtree item count on the group", () => {
+  it("nests a container into the picked container", async () => {
+    mocks.choose.mockResolvedValue("container:2");
     renderTree();
-    expect(
-      screen.getByTestId("tree-node-group:folder:self").textContent,
-    ).toContain("(1)");
+
+    fireEvent.click(screen.getByTestId("tree-move-container:1"));
+
+    await waitFor(() =>
+      expect(mocks.containersUpdate).toHaveBeenCalledWith(1, {
+        parentContainerId: 2,
+      }),
+    );
+  });
+
+  it("offers detach only to a nested container", async () => {
+    mocks.choose.mockResolvedValue(null);
+    render(
+      <MemoryRouter>
+        <InventoryTreeView
+          containers={[container(1, 42, "Regal"), container(2, 43, "Drin", 1)]}
+          items={[]}
+        />
+      </MemoryRouter>,
+    );
+
+    // Nested container: root option present.
+    fireEvent.click(screen.getByTestId("tree-toggle-container:1"));
+    fireEvent.click(screen.getByTestId("tree-move-container:2"));
+    await waitFor(() => expect(mocks.choose).toHaveBeenCalled());
+    const nestedValues = (
+      mocks.choose.mock.calls[0][2] as Array<{ value: string }>
+    ).map((choice) => choice.value);
+    expect(nestedValues).toContain("root");
+
+    // Top-level container: no root option.
+    mocks.choose.mockClear();
+    mocks.choose.mockResolvedValue(null);
+    fireEvent.click(screen.getByTestId("tree-move-container:1"));
+    await waitFor(() => expect(mocks.choose).toHaveBeenCalled());
+    const topValues = (
+      mocks.choose.mock.calls[0][2] as Array<{ value: string }>
+    ).map((choice) => choice.value);
+    expect(topValues).not.toContain("root");
   });
 });

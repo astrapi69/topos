@@ -590,6 +590,14 @@
         "self": "My {type}",
         "shared": "Shared {type}",
         "shelf": "Shelves"
+      },
+      "move": {
+        "button": "Move to...",
+        "detach": "Top level (detach from its container)",
+        "done": "Moved: {what} → {where}",
+        "failed": "Move failed",
+        "no_targets": "No possible target.",
+        "title": "Move to..."
       }
     }
   },

@@ -590,6 +590,14 @@
         "self": "Mes {type}",
         "shared": "{type} partagés",
         "shelf": "Étagères"
+      },
+      "move": {
+        "button": "Déplacer vers...",
+        "detach": "Niveau supérieur (détacher de son conteneur)",
+        "done": "Déplacé : {what} → {where}",
+        "failed": "Échec du déplacement",
+        "no_targets": "Aucune cible possible.",
+        "title": "Déplacer vers..."
       }
     }
   },
