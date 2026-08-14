@@ -99,6 +99,17 @@
       Topos-specific parts (orphan tolerance, the `CategoryNode` API
       shape); `tree/inventoryTree.ts` owns group derivation, subtree item
       counts and workbook ordering.
+- [x] **Container nesting + tree move** (2026-08-14). Containers nest
+      physically (folder in shelf, box in cabinet): `parent_container_id`
+      FK with ON DELETE SET NULL (deleting a shelf detaches, never
+      deletes), cycle guards on every write path (API service, Dexie,
+      both Excel importers), backup import remaps parent references,
+      Excel carries an appended "Eltern-Nr." column keyed on the
+      parent's external number. The tree renders the nesting and moves
+      things: drag-and-drop (@dnd-kit) plus a "Verschieben nach..."
+      menu as the touch/a11y surface, both over one canDrop/applyMove
+      rule set. tree-kit stayed untouched by design - a move is a
+      flat-row update, the tree is a projection.
 
 ## Next (P2 - high-value features)
 
