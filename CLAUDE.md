@@ -19,7 +19,7 @@ Topos is part of a small family of MIT-licensed projects:
 - **[pluginforge-app-template](https://github.com/astrapi69/pluginforge-app-template)** - the scaffold Topos was bootstrapped from.
 - **[adaptive-learner](https://github.com/astrapi69/adaptive-learner)** - sibling application built on the same template (the patterns in `.claude/rules/` originated there).
 - **[bibliogon](https://github.com/astrapi69/bibliogon)** - book-authoring sibling. The Topos bootstrap inherited the template that bibliogon's lineage produced.
-- **[tree-kit](https://github.com/astrapi69/tree-kit)** - typed, serialisable tree structures (npm). Builds the category and inventory trees; its tolerant build mode (0.2.0) was extracted FROM this codebase's duplicated sanitizers.
+- **[tree-kit](https://github.com/astrapi69/tree-kit)** - typed, serialisable tree structures (npm). Builds the category and inventory trees; its tolerant build mode (0.2.0) was extracted FROM this codebase's duplicated sanitizers; 0.3.0 added copy-on-write mutations (unused here on purpose - the tree is a projection).
 
 ## Development guidelines
 
