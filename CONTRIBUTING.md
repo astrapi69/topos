@@ -1,193 +1,128 @@
-# Contributing to Adaptive Learner
+# Contributing to Topos
 
-Thank you for considering a contribution. Adaptive Learner is a
-project skeleton template built on PluginForge. The skeleton
-ships with a working full-stack foundation; most non-trivial
-features should land as plugins, not core changes.
+Thank you for considering a contribution. Topos is a personal
+inventory tracker for physical storage - folders, boxes, shelves
+and what's inside them - built as an offline-first PWA with an
+optional self-hosted backend.
 
 ## Project Layout
 
 - `backend/` - FastAPI app, SQLAlchemy models, Alembic migrations
-- `frontend/` - React + TypeScript + Vite, TipTap editor
-- `plugins/` - empty placeholder + plugin loader (zero plugins ship)
-- `launcher/` - Cross-platform launcher (PyInstaller)
-- `docs/` - Architecture overview, MkDocs site, in-app help structure
-- `.claude/rules/` - Project rules read on demand
+- `frontend/` - React + TypeScript + Vite; offline-first via a
+  storage seam (`src/storage/`: backend API or IndexedDB)
+- `plugins/` - PluginForge plugins (ships with excel-import)
+- `launcher/` - cross-platform desktop launcher (PyInstaller)
 - `e2e/` - Playwright smoke + full suites
+- `docs/` - concept, roadmap, configuration, session journals
+- `.claude/rules/` - project rules; `architecture.md`,
+  `coding-standards.md` and `tdd.md` apply to every change
 
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.11 or newer
-- Node.js 24 (Active LTS; 20.19+ also works for tests but the
-  full Vite 8 build requires 24)
+- Node.js 24 (runtime for Vite builds)
+- bun 1.3.14 (package manager + script runner for `frontend/`
+  and `e2e/`)
 - Poetry (Python dependency management)
-- Docker + Docker Compose v2+ (for the prod-shape integration
-  flow; not required for `make dev`)
+- Docker + Docker Compose v2+ (for the prod-shape flow; not
+  required for `make dev`)
 
 ### Bootstrap
 
 ```bash
-git clone https://github.com/astrapi69/pluginforge-app-template.git
+git clone https://github.com/astrapi69/topos.git
 cd topos
-make install      # Poetry + npm + plugin path-deps
+make install      # Poetry (backend + launcher) + bun (frontend + e2e)
 make test         # baseline; should be green before you start
 make dev          # backend on :8010, frontend on :5183
 ```
 
 `make help` lists every available target. The
 [Makefile](Makefile) is the canonical source of truth for build
-commands - this file references targets that exist there; do
-not invent new ones in PRs without adding them to the Makefile
-in the same change.
+commands; do not invent new ones in PRs without adding them to
+the Makefile in the same change.
 
 ### Running tests
 
 ```bash
-make test                     # all tests (backend + plugins + frontend)
-make test-backend             # backend only
-make test-frontend            # Vitest only
-make test-plugin-{name}       # single plugin (export, kdp, audiobook, ...)
-make check-types              # mypy + tsc --noEmit
+make test              # backend + plugins + frontend (must stay green)
+make test-backend      # pytest + mypy
+make test-plugins      # plugin suites (run in the backend venv)
+make test-frontend     # Vitest
+cd e2e && npx playwright test   # E2E (needs a running app)
 ```
 
-## Plugin Development
+## Architecture ground rules
 
-Adaptive Learner plugins are standalone Poetry packages that register
-through PluginForge ^0.10.0 entry points. New format-specific or
-workflow-specific features generally belong in a plugin, not in
-core.
+The long versions live in `.claude/rules/`; the short ones:
 
-### Quickstart
-
-The smallest existing plugin to copy is
-[`plugins/topos-plugin-getstarted/`](plugins/topos-plugin-getstarted/).
-Mirror its shape:
-
-```
-plugins/topos-plugin-yourname/
-  pyproject.toml                # name, version, pluginforge dep, entry point
-  topos_yourname/
-    __init__.py
-    plugin.py                   # YourPlugin(BasePlugin)
-    routes.py                   # FastAPI APIRouter (optional)
-  tests/                        # pytest tests
-  README.md
-```
-
-Steps:
-
-1. Copy the directory; rename `topos-plugin-getstarted` and
-   `topos_getstarted` to your plugin name.
-2. Edit `pyproject.toml`: package name, description, the
-   `[tool.poetry.plugins."topos.plugins"]` entry point.
-3. Implement `plugin.py` extending `BasePlugin` with `name`,
-   `version`, `api_version = "1"`, `license_tier = "core"`.
-   Override `activate()`, `get_routes()`,
-   `get_frontend_manifest()` as needed.
-4. Add a path-dep in `backend/pyproject.toml` mirroring the
-   existing entries.
-5. Add the plugin slug to `backend/config/app.yaml.example`
-   under `plugins.enabled`.
-6. If your plugin has runtime settings, drop them at
-   `backend/config/plugins/{slug}.yaml` (PluginForge reads from
-   there, not from inside the plugin's own dir).
-7. `cd backend && poetry lock && poetry install`, then
-   `make test-plugin-{yourname}`.
-
-The plugin development guide at
-[docs/help/en/developers/plugins.md](docs/help/en/developers/plugins.md)
-covers the hook spec catalogue, frontend manifest slots, and
-ZIP-distribution layout in more depth.
-
-### Plugin licensing
-
-All plugins currently ship under MIT with
-`license_tier = "core"`. A licensing layer in
-`backend/app/licensing.py` exists but is dormant
-(`LICENSING_ENABLED = False`); no plugin is gated at runtime
-today. If a future plugin adopts a paid tier, source remains
-public and licensing affects only runtime activation.
+- **Four layers**: Frontend → Backend → PluginForge → Plugins.
+  New features belong in a plugin unless they touch the core
+  (Container/Item/Category/Action CRUD, the storage seam,
+  backup/restore, the UI shell).
+- **Storage seam is law**: pages and components call
+  `getStorage().<entity>.<op>` - never `api.*` or `fetch()`
+  directly. Both deployments (backend and offline PWA) work
+  through this one seam.
+- **Errors**: services throw `ToposError` subclasses, never
+  `HTTPException`; routers catch nothing; the frontend surfaces
+  every failure as a toast with detail. Generic "it failed"
+  messages are rejected in review.
+- **Both modes or neither**: a data feature that works against
+  the backend must work in the offline PWA too (and its Excel/
+  backup round-trip must stay lossless - there are pins that
+  will fail if it does not).
 
 ## Coding Standards
 
-Project rules live in [`.claude/rules/`](.claude/rules/) and are
-read on demand:
-
-- [architecture.md](.claude/rules/architecture.md) - layered
-  architecture, plugin structure, UI strategy
-- [coding-standards.md](.claude/rules/coding-standards.md) -
-  naming, function design, dependency policy
-- [code-hygiene.md](.claude/rules/code-hygiene.md) - linting,
-  pre-commit, error-handling architecture, API conventions
-- [quality-checks.md](.claude/rules/quality-checks.md) - test
-  pyramid, coverage targets, mutation testing
-- [lessons-learned.md](.claude/rules/lessons-learned.md) - known
-  pitfalls (TipTap, import, export, Alembic logging)
-- [ai-workflow.md](.claude/rules/ai-workflow.md) - session
-  workflow, documentation protocol
-- [release-workflow.md](.claude/rules/release-workflow.md) -
-  release process
-
-The pre-commit hooks (ruff, ruff-format, trailing-whitespace,
-end-of-file, YAML/JSON validation) run automatically on
-`git commit`. Install them once with
-`cd backend && poetry run pre-commit install`.
-
-### Internationalization
-
-Adaptive Learner ships in 8 languages: DE, EN, ES, FR, EL, PT, TR, JA.
-Every user-facing change must add or update keys in all 8
-catalogs under `backend/config/i18n/{lang}.yaml`. Parity tests
-fail the build if a key is missing in any language.
-
-German content (i18n catalogs, help docs, README-de) uses real
-UTF-8 umlauts. ASCII transliterations like `fuer`, `ueber`,
-`oeffentlich` are forbidden. The
-`scripts/find_umlaut_candidates.py` and
-`scripts/replace_umlauts.py` tooling enforces this with a
-whitelist.
+- **TDD**: behaviour changes start with a failing test - run it,
+  see it fail, then implement (`.claude/rules/tdd.md`). Bug
+  fixes keep their reproduction test as a regression pin.
+- Python: type hints always, snake_case, Pydantic v2, ruff +
+  ruff-format, mypy clean.
+- TypeScript: strict mode, no `any` without a comment, Radix UI
+  for primitives, @dnd-kit for drag-and-drop, Lucide icons,
+  react-toastify for user feedback.
+- Styling: token-backed Tailwind utilities from `src/ui/classes.ts`;
+  fixed-palette colours (`gray-*`, `blue-*`) are forbidden for
+  chrome.
+- i18n: Topos ships in 8 languages (DE, EN, ES, FR, EL, PT, TR,
+  JA). New user-facing strings go into ALL catalogs
+  (`backend/config/i18n/`), then `python3
+  scripts/generate_i18n_catalogs.py` regenerates the bundled
+  copies - a pre-commit hook blocks drift.
+- E2E selectors: `data-testid` only.
 
 ## Commit Conventions
 
-Adaptive Learner uses [Conventional Commits](https://www.conventionalcommits.org/).
-There is no commit-msg-time tool enforcing this; the convention
-is documentation-only and reinforced through code review.
+Topos uses [Conventional Commits](https://www.conventionalcommits.org/):
+`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:` - with a
+scope when it is clear (`feat(tree): ...`). One logical change
+per commit, and every commit leaves `make test` green.
 
-Common types: `feat`, `fix`, `refactor`, `docs`, `test`,
-`chore`. Provide a scope when one is obvious:
-`feat(export): ...`, `fix(editor): ...`.
+Install the hooks once:
 
-Atomic commits. Each commit must leave the tree green
-(`make test` passes); intermediate commits with broken tests
-break bisect. Combine source + test changes in the same commit
-when splitting them would create a red intermediate state.
+```bash
+cd backend && poetry run pre-commit install
+```
 
 ## Pull Requests
 
-1. Fork the repository and clone your fork.
-2. Branch: `git checkout -b feat/short-name` or
-   `fix/short-name`.
-3. Make changes; keep commits atomic.
-4. Run `make test` and `make check-types` locally; both must be
-   green.
-5. Push and open a PR. The PR template asks for type, testing
-   evidence, doc updates, and plugin impact.
-
-For larger changes, open an issue first to discuss design. Use
-the
-[Feature Request](.github/ISSUE_TEMPLATE/feature_request.yml)
-template.
+- Branch from `develop` (`feature/{name}`, `fix/{name}`).
+- Keep one concern per PR.
+- `make test` green, `tsc --noEmit` clean, hooks passing.
+- New UI features come with a Playwright smoke spec under
+  `e2e/smoke/`.
+- Reference the issue (`Closes #NN`) where one exists.
 
 ## Code of Conduct
 
-Adaptive Learner follows
-[Contributor Covenant 2.1](CODE_OF_CONDUCT.md). Reports go to
-asterios.raptis@web.de.
+Be respectful and constructive. This is a small project run in
+spare time; patience in both directions is appreciated.
 
 ## Security
 
-For security vulnerabilities, do not open a public issue. Use
-GitHub Private Vulnerability Reporting per
-[SECURITY.md](SECURITY.md).
+Please do not report security issues in public GitHub Issues -
+see [SECURITY.md](SECURITY.md) for the private reporting channel.
