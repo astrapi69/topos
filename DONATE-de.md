@@ -1,16 +1,16 @@
-# Adaptive Learner unterstuetzen
+# Topos unterstuetzen
 
-Adaptive Learner ist ein Open-Source-Projekt, das von einer einzelnen Person
+Topos ist ein Open-Source-Projekt, das von einer einzelnen Person
 entwickelt wird. Keine Cloud, kein Tracking, keine Werbung - alles
 bleibt auf deinem Geraet.
 
 Die Entwicklung findet neben der Erziehung von drei Kindern statt, eines
 davon mit dauerhaftem medizinischem und pflegerischem Betreuungsbedarf.
 Spenden helfen dabei, trotz dichter Wochen verlaessliche Entwicklungszeit
-zu sichern. Sie fliessen direkt in die Arbeit an Adaptive Learner, nicht in
+zu sichern. Sie fliessen direkt in die Arbeit an Topos, nicht in
 private Ausgaben.
 
-Wenn Adaptive Learner dir hilft und du die Entwicklung unterstuetzen moechtest,
+Wenn Topos dir hilft und du die Entwicklung unterstuetzen moechtest,
 sind Spenden sehr willkommen. Mehrere Wege stehen zur Verfuegung:
 
 ---
@@ -72,7 +72,7 @@ kein PayPal-Account erforderlich, Kreditkarte funktioniert ebenfalls.
 
 ### Wofuer werden Spenden verwendet?
 
-Adaptive Learner wird von einer einzelnen Person entwickelt, parallel zu
+Topos wird von einer einzelnen Person entwickelt, parallel zu
 Vollzeit-Verantwortung in der Familie inklusive Pflege fuer ein Kind
 mit chronischen medizinischen Anforderungen. Spenden decken:
 
@@ -88,7 +88,7 @@ helfen bei spezifischen Features und Infrastruktur-Kosten.
 ### Bekomme ich eine Spendenquittung?
 
 Ueber die jeweilige Plattform erhaelst du eine Zahlungsbestaetigung. Da
-Adaptive Learner kein eingetragener Verein ist, sind Spenden nicht steuerlich
+Topos kein eingetragener Verein ist, sind Spenden nicht steuerlich
 absetzbar.
 
 ### Was ist der Unterschied zwischen wiederkehrenden und einmaligen Spenden?
@@ -107,7 +107,7 @@ Abonnements.
 ### Sind Spenden anonym?
 
 Auf allen Plattformen kannst du waehlen, ob dein Name oeffentlich
-angezeigt wird. Adaptive Learner selbst erhaelt keine Spenderdaten ueber das
+angezeigt wird. Topos selbst erhaelt keine Spenderdaten ueber das
 hinaus, was du aktiv teilst.
 
 ### Warum keine direkte Bankueberweisung?
@@ -136,4 +136,4 @@ oder kontaktiere mich per E-Mail (siehe Projekt-Profil).
 ---
 
 _Danke fuer deine Unterstuetzung. Jede Spende, egal wie klein, haelft
-Adaptive Learner am Leben._
+Topos am Leben._
