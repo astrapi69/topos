@@ -231,6 +231,14 @@
       "number_hint": "Único apenas dentro deste contentor. Deixa vazio para o próximo número livre.",
       "priority": "Prioridade"
     },
+    "legal": {
+      "fallback_hint": "Este texto está disponível apenas em alemão e inglês.",
+      "footer_aria": "Informação legal",
+      "imprint": "Ficha técnica",
+      "privacy": "Política de privacidade",
+      "privacy_short": "Privacidade",
+      "updated": "Última atualização"
+    },
     "nav": {
       "actions": "Ações",
       "categories": "Categorias",

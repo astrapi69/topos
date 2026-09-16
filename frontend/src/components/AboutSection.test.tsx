@@ -5,6 +5,7 @@ import {
   act,
   waitFor,
 } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi } from "vitest";
 
 import AboutSection from "./AboutSection";
@@ -21,13 +22,27 @@ vi.mock("../hooks/useI18n", () => ({
 
 function renderAbout() {
   return render(
-    <AppUpdateProvider>
-      <AboutSection />
-    </AppUpdateProvider>,
+    <MemoryRouter>
+      <AppUpdateProvider>
+        <AboutSection />
+      </AppUpdateProvider>
+    </MemoryRouter>,
   );
 }
 
 describe("AboutSection", () => {
+  it("links to the imprint and the privacy policy", () => {
+    renderAbout();
+    expect(screen.getByTestId("about-imprint-link")).toHaveAttribute(
+      "href",
+      "/impressum",
+    );
+    expect(screen.getByTestId("about-privacy-link")).toHaveAttribute(
+      "href",
+      "/datenschutz",
+    );
+  });
+
   it("renders the version card with the build version", () => {
     renderAbout();
     expect(screen.getByTestId("about-section")).toBeInTheDocument();

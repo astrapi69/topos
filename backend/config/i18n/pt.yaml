@@ -50,6 +50,13 @@ topos:
     settings: Definições
     photo_intake: Captura por foto
     more: Mais
+  legal:
+    imprint: "Ficha técnica"
+    privacy: "Política de privacidade"
+    privacy_short: "Privacidade"
+    updated: "Última atualização"
+    fallback_hint: "Este texto está disponível apenas em alemão e inglês."
+    footer_aria: "Informação legal"
   demo:
     seeded: Dados de demonstração carregados. Liga um servidor para dados reais.
   common:

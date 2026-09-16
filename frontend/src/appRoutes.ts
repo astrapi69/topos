@@ -24,4 +24,6 @@ export const STATIC_ROUTES = [
   "/import",
   "/photo-intake",
   "/settings",
+  "/impressum",
+  "/datenschutz",
 ] as const;
