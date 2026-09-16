@@ -231,6 +231,14 @@
       "number_hint": "Nur innerhalb dieses Containers eindeutig. Leer lassen für die nächste freie Nummer.",
       "priority": "Priorität"
     },
+    "legal": {
+      "fallback_hint": "Dieser Text ist nur auf Deutsch und Englisch verfügbar.",
+      "footer_aria": "Rechtliches",
+      "imprint": "Impressum",
+      "privacy": "Datenschutzerklärung",
+      "privacy_short": "Datenschutz",
+      "updated": "Stand"
+    },
     "nav": {
       "actions": "Aktionen",
       "categories": "Kategorien",

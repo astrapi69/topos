@@ -106,7 +106,9 @@ the Import page). For complex plugin UIs: Web Components as custom elements
 ### Component structure
 
 - Pages in frontend/src/pages/ (Dashboard, ContainerList, ContainerDetail,
-  ItemEditor, CategoryBrowse, Actions, Import, PhotoIntake, Settings).
+  ItemEditor, CategoryBrowse, Actions, Import, PhotoIntake, Settings,
+  Imprint, Privacy). The legal texts live in frontend/src/legal/ (DE + EN,
+  other locales fall back to EN); AppFooter links them from every page.
 - Shared components in frontend/src/components/.
 - Data access ONLY through the storage service (`getStorage()`,
   `src/storage/`) - never `api.*` or `fetch()` directly in components. The

@@ -12,6 +12,7 @@
  */
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import { UpdateCheckControl, VersionCard } from "@astrapi69/pwa-update-react";
 
@@ -20,10 +21,8 @@ import { useI18n } from "../hooks/useI18n";
 import { usePwaInstall } from "../pwa/usePwaInstall";
 import { appShareUrl } from "../utils/shareUrl";
 import { qrLabels } from "../utils/qrLabels";
+import { LICENSE_URL, REPO_URL } from "../utils/projectLinks";
 import { card, link, linkButton, muted, pill } from "../ui/classes";
-
-const REPO_URL = "https://github.com/astrapi69/topos";
-const LICENSE_URL = "https://github.com/astrapi69/topos/blob/main/LICENSE";
 
 interface DonationChannel {
   id: string;
@@ -160,6 +159,24 @@ export default function AboutSection() {
             </button>
           </li>
         )}
+        <li>
+          <Link
+            className={link}
+            to="/impressum"
+            data-testid="about-imprint-link"
+          >
+            {t("topos.legal.imprint", "Impressum")}
+          </Link>
+        </li>
+        <li>
+          <Link
+            className={link}
+            to="/datenschutz"
+            data-testid="about-privacy-link"
+          >
+            {t("topos.legal.privacy", "Datenschutzerklärung")}
+          </Link>
+        </li>
       </ul>
 
       <div className={`${card} mt-3 p-3`} data-testid="about-donations">

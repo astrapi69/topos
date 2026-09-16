@@ -53,6 +53,13 @@ topos:
     settings: Einstellungen
     photo_intake: "Foto-Erfassung"
     more: Mehr
+  legal:
+    imprint: "Impressum"
+    privacy: "Datenschutzerklärung"
+    privacy_short: "Datenschutz"
+    updated: "Stand"
+    fallback_hint: "Dieser Text ist nur auf Deutsch und Englisch verfügbar."
+    footer_aria: "Rechtliches"
   demo:
     seeded: Demo-Daten geladen. Verbinde ein Backend für echte Daten.
   common:

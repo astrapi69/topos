@@ -231,6 +231,14 @@
       "number_hint": "このコンテナ内でのみ一意です。空欄にすると次の空き番号が使われます。",
       "priority": "優先度"
     },
+    "legal": {
+      "fallback_hint": "この文書はドイツ語と英語でのみ提供されています。",
+      "footer_aria": "法的情報",
+      "imprint": "運営者情報",
+      "privacy": "プライバシーポリシー",
+      "privacy_short": "プライバシー",
+      "updated": "最終更新"
+    },
     "nav": {
       "actions": "タスク",
       "categories": "カテゴリ",

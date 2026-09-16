@@ -41,6 +41,31 @@
       "purpose": "Donation link in Settings > About.",
       "trigger": "User click."
     },
+    "docs.github.com": {
+      "category": "link",
+      "purpose": "GitHub privacy statement, linked from the privacy policy page.",
+      "trigger": "User click."
+    },
+    "www.anthropic.com": {
+      "category": "link",
+      "purpose": "Anthropic privacy policy, linked from the privacy policy page.",
+      "trigger": "User click."
+    },
+    "openai.com": {
+      "category": "link",
+      "purpose": "OpenAI privacy policy, linked from the privacy policy page.",
+      "trigger": "User click."
+    },
+    "policies.google.com": {
+      "category": "link",
+      "purpose": "Google privacy policy, linked from the privacy policy page.",
+      "trigger": "User click."
+    },
+    "www.perplexity.ai": {
+      "category": "link",
+      "purpose": "Perplexity privacy policy, linked from the privacy policy page.",
+      "trigger": "User click."
+    },
     "opensource.org": {
       "category": "link",
       "purpose": "MIT license URL in the JSON-LD structured data block.",

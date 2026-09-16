@@ -50,6 +50,13 @@ topos:
     settings: Ayarlar
     photo_intake: Fotoğrafla kayıt
     more: Daha fazla
+  legal:
+    imprint: "Künye"
+    privacy: "Gizlilik politikası"
+    privacy_short: "Gizlilik"
+    updated: "Son güncelleme"
+    fallback_hint: "Bu metin yalnızca Almanca ve İngilizce olarak mevcuttur."
+    footer_aria: "Yasal bilgiler"
   demo:
     seeded: Örnek veriler yüklendi. Gerçek veriler için bir sunucu bağlayın.
   common:

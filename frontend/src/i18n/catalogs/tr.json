@@ -231,6 +231,14 @@
       "number_hint": "Yalnızca bu kap içinde benzersiz. Sıradaki boş numara için boş bırakın.",
       "priority": "Öncelik"
     },
+    "legal": {
+      "fallback_hint": "Bu metin yalnızca Almanca ve İngilizce olarak mevcuttur.",
+      "footer_aria": "Yasal bilgiler",
+      "imprint": "Künye",
+      "privacy": "Gizlilik politikası",
+      "privacy_short": "Gizlilik",
+      "updated": "Son güncelleme"
+    },
     "nav": {
       "actions": "Görevler",
       "categories": "Kategoriler",
