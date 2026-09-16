@@ -27,7 +27,11 @@ export default function LegalPage({ kind }: { kind: LegalKind }) {
     <>
       <NavBar />
       <main className={pageMainNarrow}>
-        <article data-testid={`legal-${kind}`} lang={locale}>
+        <article
+          data-testid={`legal-${kind}`}
+          lang={locale}
+          className="leading-relaxed [&_h2]:mt-8 [&_h2]:mb-2 [&_p]:my-3 [&_ul]:my-3 [&_li]:my-1"
+        >
           <h1 data-testid={`legal-${kind}-title`}>{doc.title}</h1>
           <p
             className={`${muted} text-sm`}
