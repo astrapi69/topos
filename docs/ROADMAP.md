@@ -113,11 +113,25 @@
 
 ## Next (P2 - high-value features)
 
-No open P2 items. The two that stood here closed on 2026-08-12; the
-launcher's remaining half is a hardware gate, see below.
+- [ ] **Browser build: "Reset cache" is a full delete** (issue #16):
+      Settings > Maintenance clears the four IndexedDB tables that ARE
+      the data in the Pages build, while the confirmation promises a
+      reload from the server. Hide in dexie mode or relabel with a
+      build-aware confirmation. Surfaced by the PRIVACY.md inventory.
+- [ ] **Photos in the backup file** (issue #17): `exportToposData` and
+      `GET /api/backup/export` skip the `photos` table / upload dir, so
+      "export, then clear site data" loses every photo. Include them
+      (size question: base64 in JSON or a zip) or state the gap in the
+      Data tab.
 
 ## Later (P3 - quality + reach)
 
+- [ ] `install.sh.template` + `uninstall.sh` still print "Adaptive
+      Learner" (issue #18); the generated `install.sh` inherits it.
+- [ ] Legal texts: lawyer review of `/datenschutz` and `/impressum`;
+      confirm the imprint mailbox (`TODO(clarify)` in
+      `frontend/src/legal/operator.ts`) and whether a VAT id applies,
+      then merge `develop` -> `main` so the pages go live.
 - [ ] CSV-import plugin (sibling to Excel)
 - [ ] Voice-input plugin for hands-free item entry (mobile-first,
       basement / shelf-side use case)
