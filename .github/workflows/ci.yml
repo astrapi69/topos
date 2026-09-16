@@ -148,6 +148,19 @@ jobs:
         working-directory: frontend
         run: bunx vite build
 
+      # The GitHub-Pages variant is the artifact users actually get, and
+      # the external-hosts guard scans that build: any host outside
+      # frontend/external-hosts.allowlist.json, or any third-party
+      # <script>/<link>/<img> tag, fails the PR here before the deploy
+      # workflow ever sees it.
+      - name: Build for GitHub Pages
+        working-directory: frontend
+        run: GITHUB_PAGES=true VITE_STORAGE_MODE=dexie bunx vite build
+
+      - name: Guard external hosts in the Pages build
+        working-directory: frontend
+        run: TOPOS_REQUIRE_DIST=1 bunx vitest run src/artifact/externalHosts.dist.test.ts
+
   pre-commit:
     name: Pre-commit hooks
     runs-on: ubuntu-latest

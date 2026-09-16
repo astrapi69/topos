@@ -1,0 +1,115 @@
+{
+  "comment": "Every host the GitHub-Pages build may reference. Checked by src/artifact/externalHosts.dist.test.ts against dist/; a host missing here fails the build, a host listed here but gone from the build fails too. Categories: self (deployment origin), api (called only on an explicit user action with the user's own key), link (plain hyperlink, user must click), identifier (XML namespace / JSON-LD context, never fetched), vendor-docs (documentation URL inside a library error message, never fetched). Nothing on page view may contact a third party; the HTML tag check enforces that regardless of this list.",
+  "hosts": {
+    "astrapi69.github.io": {
+      "category": "self",
+      "purpose": "Deployment origin: canonical link, Open Graph URLs, sitemap, robots.txt.",
+      "trigger": "Page view (same origin, the GitHub Pages host itself)."
+    },
+    "api.anthropic.com": {
+      "category": "api",
+      "purpose": "Anthropic Messages API for photo recognition (PhotoIntake) and the key probe in Settings > AI.",
+      "trigger": "Explicit user action with the user's own API key: Recognize or Test connection. Never on page view."
+    },
+    "api.openai.com": {
+      "category": "api",
+      "purpose": "OpenAI chat completions for photo recognition and the key probe. CORS-blocked in the browser build, reachable only through a user-run backend.",
+      "trigger": "Explicit user action with the user's own API key."
+    },
+    "generativelanguage.googleapis.com": {
+      "category": "api",
+      "purpose": "Google Gemini generateContent for photo recognition and the key probe.",
+      "trigger": "Explicit user action with the user's own API key."
+    },
+    "api.perplexity.ai": {
+      "category": "api",
+      "purpose": "Perplexity (OpenAI-compatible) chat completions for photo recognition and the key probe.",
+      "trigger": "Explicit user action with the user's own API key."
+    },
+    "github.com": {
+      "category": "link",
+      "purpose": "Repository, MIT license and 'Report issue' links in Settings > About; author URL in the JSON-LD block; exceljs upgrade note inside a library error string.",
+      "trigger": "User click opens a new tab. The issue link carries the error detail, stack trace, browser and app version the user saw in the dialog."
+    },
+    "liberapay.com": {
+      "category": "link",
+      "purpose": "Donation link in Settings > About.",
+      "trigger": "User click."
+    },
+    "ko-fi.com": {
+      "category": "link",
+      "purpose": "Donation link in Settings > About.",
+      "trigger": "User click."
+    },
+    "opensource.org": {
+      "category": "link",
+      "purpose": "MIT license URL in the JSON-LD structured data block.",
+      "trigger": "Never fetched by the app; only crawlers read it."
+    },
+    "schema.org": {
+      "category": "identifier",
+      "purpose": "JSON-LD @context in index.html.",
+      "trigger": "Never fetched."
+    },
+    "www.w3.org": {
+      "category": "identifier",
+      "purpose": "SVG / XHTML XML namespaces (favicon, icons, React DOM, exceljs).",
+      "trigger": "Never fetched."
+    },
+    "purl.org": {
+      "category": "identifier",
+      "purpose": "Dublin Core namespaces exceljs writes into workbook metadata.",
+      "trigger": "Never fetched."
+    },
+    "schemas.microsoft.com": {
+      "category": "identifier",
+      "purpose": "Office Open XML namespaces exceljs writes into workbooks.",
+      "trigger": "Never fetched."
+    },
+    "schemas.openxmlformats.org": {
+      "category": "identifier",
+      "purpose": "Office Open XML namespaces exceljs writes into workbooks.",
+      "trigger": "Never fetched."
+    },
+    "www.sitemaps.org": {
+      "category": "identifier",
+      "purpose": "Sitemap XML namespace in sitemap.xml.",
+      "trigger": "Never fetched."
+    },
+    "bit.ly": {
+      "category": "vendor-docs",
+      "purpose": "Short links inside workbox and Dexie warning messages.",
+      "trigger": "Never fetched."
+    },
+    "react.dev": {
+      "category": "vendor-docs",
+      "purpose": "React production error URL template.",
+      "trigger": "Never fetched."
+    },
+    "reactrouter.com": {
+      "category": "vendor-docs",
+      "purpose": "React Router error message link.",
+      "trigger": "Never fetched."
+    },
+    "rolldown.rs": {
+      "category": "vendor-docs",
+      "purpose": "Rolldown runtime error message link.",
+      "trigger": "Never fetched."
+    },
+    "radix-ui.com": {
+      "category": "vendor-docs",
+      "purpose": "Radix UI development warning link.",
+      "trigger": "Never fetched."
+    },
+    "stuk.github.io": {
+      "category": "vendor-docs",
+      "purpose": "JSZip (via exceljs) error message link.",
+      "trigger": "Never fetched."
+    },
+    "tinyurl.com": {
+      "category": "vendor-docs",
+      "purpose": "Dexie 'IndexedDB API missing' error message link.",
+      "trigger": "Never fetched."
+    }
+  }
+}
