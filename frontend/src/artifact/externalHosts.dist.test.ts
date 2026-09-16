@@ -12,9 +12,9 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
-import { auditDist, type Allowlist } from "./externalHosts";
+import { auditDist, type Allowlist, type DistReport } from "./externalHosts";
 
 const ROOT = join(__dirname, "..", "..");
 const DIST = join(ROOT, "dist");
@@ -31,10 +31,16 @@ if (required && !hasDist) {
 describe.skipIf(!hasDist)(
   "built artifact references only allowlisted hosts",
   () => {
-    const allowlist = JSON.parse(
-      readFileSync(ALLOWLIST_PATH, "utf8"),
-    ) as Allowlist;
-    const report = auditDist(DIST, allowlist);
+    // Vitest still runs a skipped describe's body to collect its tests, so
+    // the scan must not happen here: without dist/ it would throw ENOENT
+    // during collection and fail the file instead of skipping it.
+    let allowlist: Allowlist;
+    let report: DistReport;
+
+    beforeAll(() => {
+      allowlist = JSON.parse(readFileSync(ALLOWLIST_PATH, "utf8")) as Allowlist;
+      report = auditDist(DIST, allowlist);
+    });
 
     it("scanned the Pages build", () => {
       expect(report.filesScanned).toBeGreaterThan(10);
