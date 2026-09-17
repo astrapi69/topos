@@ -5,7 +5,6 @@ import {
   act,
   waitFor,
 } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi } from "vitest";
 
 import AboutSection from "./AboutSection";
@@ -22,24 +21,23 @@ vi.mock("../hooks/useI18n", () => ({
 
 function renderAbout() {
   return render(
-    <MemoryRouter>
-      <AppUpdateProvider>
-        <AboutSection />
-      </AppUpdateProvider>
-    </MemoryRouter>,
+    <AppUpdateProvider>
+      <AboutSection />
+    </AppUpdateProvider>,
   );
 }
 
 describe("AboutSection", () => {
-  it("links to the imprint and the privacy policy", () => {
+  it("links to the static legal pages in the UI language", () => {
+    // The i18n mock reports "en", so the English pages are the target.
     renderAbout();
     expect(screen.getByTestId("about-imprint-link")).toHaveAttribute(
       "href",
-      "/impressum",
+      "/imprint.html",
     );
     expect(screen.getByTestId("about-privacy-link")).toHaveAttribute(
       "href",
-      "/datenschutz",
+      "/privacy.html",
     );
   });
 

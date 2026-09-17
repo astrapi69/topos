@@ -53,9 +53,6 @@ topos:
   legal:
     imprint: "運営者情報"
     privacy: "プライバシーポリシー"
-    privacy_short: "プライバシー"
-    updated: "最終更新"
-    fallback_hint: "この文書はドイツ語と英語でのみ提供されています。"
     footer_aria: "法的情報"
   demo:
     seeded: デモデータを読み込みました。実データにはサーバーへの接続が必要です。

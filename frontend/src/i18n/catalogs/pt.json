@@ -232,12 +232,9 @@
       "priority": "Prioridade"
     },
     "legal": {
-      "fallback_hint": "Este texto está disponível apenas em alemão e inglês.",
       "footer_aria": "Informação legal",
       "imprint": "Ficha técnica",
-      "privacy": "Política de privacidade",
-      "privacy_short": "Privacidade",
-      "updated": "Última atualização"
+      "privacy": "Política de privacidade"
     },
     "nav": {
       "actions": "Ações",

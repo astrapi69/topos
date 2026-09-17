@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Privacy policy · Topos</title>
+    <script src="./legal/theme.js"></script>
+    <link rel="stylesheet" href="./legal/legal.css" />
+  </head>
+  <body>
+    <main data-testid="legal-page-privacy">
+      <nav aria-label="Legal">
+        <a href="./" data-testid="legal-link-app">Back to the app</a>
+        <a href="./imprint.html" data-testid="legal-link-imprint">Legal notice</a>
+        <a href="./datenschutz.html" lang="de" data-testid="legal-link-lang">Deutsch</a>
+      </nav>
+      <h1>Privacy policy</h1>
+      <p>Version: 17 September 2026</p>
+
+      <p>This policy applies to the public web version of Topos at <code>astrapi69.github.io/topos</code>. If you install Topos yourself (desktop launcher or Docker), you run the app on your own device or server; the operator of these pages then processes no data at all.</p>
+
+      <h2>Controller</h2>
+      <p>Asterios Raptis, Seestraße 68, 71638 Ludwigsburg, Germany<br />Email: <a href="mailto:asterios.raptis@web.de">asterios.raptis@web.de</a></p>
+
+      <h2>The short version</h2>
+      <ul>
+        <li>Topos has no server of its own. Your inventory (containers, entries, categories, actions, photos) and your settings live only in your browser (IndexedDB and localStorage). The operator never sees them.</li>
+        <li>The app sets no cookies, uses no analytics or tracking services and needs no account. Fonts and scripts ship with the app and are not loaded from third parties.</li>
+        <li>When you open the pages, GitHub, as the host, processes your IP address. Everything else reaches a third party only when you use a feature that needs it.</li>
+      </ul>
+
+      <h2>Hosting on GitHub Pages</h2>
+      <p>The app is served by GitHub Pages, a service of GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. On every request GitHub processes your device's IP address and the usual connection data (time, requested file, browser type) for security purposes; according to GitHub these data are kept only for operational security and are not passed on to the operator. More: <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>.</p>
+
+      <h2>Storage in your browser</h2>
+      <p>Everything you create in the app is stored locally by your browser: containers, entries, categories, actions and photos in IndexedDB, language, theme and settings in localStorage. A service worker keeps the app's own files so it starts offline. This storage is necessary for the app to work; nothing is sent to a server.</p>
+      <p>API keys for AI providers are, if you store any, kept locally as well, encrypted with a passphrase you choose yourself and which is never stored. You remove them in Settings under "AI assistant".</p>
+      <p>You can save your inventory as a file at any time under Settings › Import &amp; export; photos are currently not part of that file. Settings › Maintenance › "Reset cache" deletes containers, entries, categories and actions. When you remove the site data in your browser, all of the data above is gone, photos and keys included.</p>
+
+      <h2>Update check</h2>
+      <p>Your browser receives new versions of the web app through the service worker from GitHub Pages, the same host as the app itself; to detect a new version the app requests the file <code>version.json</code> there. No other service is contacted for this.</p>
+
+      <h2>AI photo recognition with your own key</h2>
+      <p>Photo recognition is active only if you store your own API key for a provider in Settings and start the recognition for a photo. Your browser then sends the photo, downscaled to at most 1568 pixels on the long edge, together with the kind of container (for example folder or box) and the names of your existing categories directly to that provider. In the web version these are Anthropic, Google or Perplexity; OpenAI does not allow calls straight from the browser and can be used only in a self-hosted version with a server. The operator of Topos is not involved in this transfer and receives no data. The contract is between you and the provider; its privacy notice applies:</p>
+      <ul>
+        <li><a href="https://www.anthropic.com/privacy">Anthropic</a></li>
+        <li><a href="https://openai.com/policies/privacy-policy">OpenAI</a></li>
+        <li><a href="https://policies.google.com/privacy">Google</a></li>
+        <li><a href="https://www.perplexity.ai/hub/legal/privacy-policy">Perplexity</a></li>
+      </ul>
+
+      <h2>Error reports via GitHub</h2>
+      <p>When an error occurs you can open a report; the app shows it to you in full first. Only when you choose "Report on GitHub" does a new tab open at GitHub with a prefilled issue (error message, technical details if available, browser identification, app version and your own description). The report is sent only when you submit it there with your GitHub account; from then on GitHub's privacy notice applies. Alternatively you can just copy the report to the clipboard.</p>
+
+      <h2>External links</h2>
+      <p>The app contains links to external services (GitHub, Liberapay, GitHub Sponsors, Ko-fi). Only when you click do you leave the app; from then on the privacy notice of the respective provider applies. No scripts or buttons of these providers are embedded. The QR code for sharing the app is generated by your browser itself.</p>
+
+      <h2>Desktop version</h2>
+      <p>The installed version runs on your device; your data lives there in a local database. On start, the desktop launcher asks GitHub (<code>api.github.com</code>) whether a new version has been released. GitHub receives your IP address; no content from the app is sent. The check can be switched off in the launcher's settings. For installation and updates the launcher downloads the source code from GitHub and the base images from Docker Hub. AI photo recognition runs through the local server there, with the key you give it. The complete technical inventory is in the file <a href="https://github.com/astrapi69/topos/blob/main/PRIVACY.md">PRIVACY.md</a> in the source code.</p>
+
+      <h2>Contact by email</h2>
+      <p>If you write to the operator by email, your details are stored to handle the request and deleted once the request is settled and no statutory retention obligation stands in the way.</p>
+
+      <h2>Your rights</h2>
+      <p>You have the right to access, rectification, erasure, restriction of processing, data portability and objection towards the controller, and you can lodge a complaint with a data protection supervisory authority. As the operator does not hold your inventory, requests for access or erasure concerning it are addressed to your own device: Settings › Import &amp; export or Maintenance, or the site data in your browser.</p>
+
+      <h2>Changes</h2>
+      <p>This policy is updated when the app or the legal situation changes. The date of the current version is shown at the top.</p>
+
+      <footer>See also the <a href="./imprint.html">legal notice</a>.</footer>
+    </main>
+  </body>
+</html>

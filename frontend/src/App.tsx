@@ -8,10 +8,10 @@ import { UpdateBanner } from "@astrapi69/pwa-update-react";
 
 import AppUpdateProvider from "./components/AppUpdateProvider";
 import AppFeatureProvider from "./features/AppFeatureProvider";
-import AppFooter from "./components/AppFooter";
 import { DialogProvider } from "./components/AppDialog";
 import ErrorReportDialog from "./components/ErrorReportDialog";
 import InstallBanner from "./components/InstallBanner";
+import LegalFooter from "./components/LegalFooter";
 import IosInstallHint from "./components/IosInstallHint";
 import { I18nProvider } from "./hooks/useI18n";
 import { useTheme } from "./hooks/useTheme";
@@ -27,10 +27,8 @@ const ContainerDetail = lazyWithReload(() => import("./pages/ContainerDetail"));
 const ContainerList = lazyWithReload(() => import("./pages/ContainerList"));
 const Dashboard = lazyWithReload(() => import("./pages/Dashboard"));
 const Import = lazyWithReload(() => import("./pages/Import"));
-const Imprint = lazyWithReload(() => import("./pages/Imprint"));
 const ItemEditor = lazyWithReload(() => import("./pages/ItemEditor"));
 const PhotoIntake = lazyWithReload(() => import("./pages/PhotoIntake"));
-const Privacy = lazyWithReload(() => import("./pages/Privacy"));
 const Settings = lazyWithReload(() => import("./pages/Settings"));
 
 export default function App() {
@@ -60,11 +58,10 @@ export default function App() {
                 <Route path="/import" element={<Import />} />
                 <Route path="/photo-intake" element={<PhotoIntake />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/impressum" element={<Imprint />} />
-                <Route path="/datenschutz" element={<Privacy />} />
               </Routes>
             </Suspense>
-            <AppFooter />
+            {/* Imprint + privacy policy (static pages), one click from every route. */}
+            <LegalFooter />
             <ToastContainer
               position="bottom-right"
               autoClose={3000}

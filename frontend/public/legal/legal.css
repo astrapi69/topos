@@ -1,0 +1,78 @@
+/*
+ * Shared styles of the static legal pages (impressum/datenschutz/imprint/
+ * privacy.html). Plain CSS on purpose: the pages must render without the
+ * app bundle. Colours are the default Topos palette from
+ * src/styles/global.css; data-theme (set by theme.js from the in-app
+ * choice) wins over the OS preference in both directions.
+ */
+@font-face {
+  font-family: "DM Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../fonts/dm-sans-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url("../fonts/jetbrains-mono-latin.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --accent: #1e40af;
+  --line: #e2e8f0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0f172a;
+    --fg: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #60a5fa;
+    --line: #334155;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f172a;
+  --fg: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #60a5fa;
+  --line: #334155;
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.65 "DM Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+body { margin: 0; }
+main { max-width: 44rem; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+a { color: var(--accent); overflow-wrap: anywhere; }
+nav a { display: inline-flex; min-height: 44px; align-items: center; }
+h1, h2 { font-family: "JetBrains Mono", ui-monospace, monospace; font-weight: 500; line-height: 1.3; }
+h1 { font-size: 1.6rem; margin: 0.5rem 0 1rem; }
+h2 { font-size: 1.05rem; margin: 2rem 0 0.5rem; }
+code { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.88em; }
+li { margin: 0.35rem 0; }
+footer {
+  border-top: 1px solid var(--line);
+  margin-top: 3rem;
+  padding-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}

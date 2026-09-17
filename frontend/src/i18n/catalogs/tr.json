@@ -232,12 +232,9 @@
       "priority": "Öncelik"
     },
     "legal": {
-      "fallback_hint": "Bu metin yalnızca Almanca ve İngilizce olarak mevcuttur.",
       "footer_aria": "Yasal bilgiler",
       "imprint": "Künye",
-      "privacy": "Gizlilik politikası",
-      "privacy_short": "Gizlilik",
-      "updated": "Son güncelleme"
+      "privacy": "Gizlilik politikası"
     },
     "nav": {
       "actions": "Görevler",

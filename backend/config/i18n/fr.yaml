@@ -53,9 +53,6 @@ topos:
   legal:
     imprint: "Mentions légales"
     privacy: "Politique de confidentialité"
-    privacy_short: "Confidentialité"
-    updated: "Dernière mise à jour"
-    fallback_hint: "Ce texte n'est disponible qu'en allemand et en anglais."
     footer_aria: "Mentions légales"
   demo:
     seeded: Données de démonstration chargées. Connectez un serveur pour des données réelles.

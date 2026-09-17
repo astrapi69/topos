@@ -232,12 +232,9 @@
       "priority": "Priorität"
     },
     "legal": {
-      "fallback_hint": "Dieser Text ist nur auf Deutsch und Englisch verfügbar.",
       "footer_aria": "Rechtliches",
       "imprint": "Impressum",
-      "privacy": "Datenschutzerklärung",
-      "privacy_short": "Datenschutz",
-      "updated": "Stand"
+      "privacy": "Datenschutzerklärung"
     },
     "nav": {
       "actions": "Aktionen",

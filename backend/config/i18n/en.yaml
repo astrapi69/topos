@@ -57,9 +57,6 @@ topos:
   legal:
     imprint: "Legal notice"
     privacy: "Privacy policy"
-    privacy_short: "Privacy"
-    updated: "Last updated"
-    fallback_hint: "This text is available in German and English only."
     footer_aria: "Legal"
   demo:
     seeded: Demo data loaded. Connect a backend for real data.
