@@ -107,6 +107,14 @@ the Import page). For complex plugin UIs: Web Components as custom elements
 
 - Pages in frontend/src/pages/ (Dashboard, ContainerList, ContainerDetail,
   ItemEditor, CategoryBrowse, Actions, Import, PhotoIntake, Settings).
+- Legal pages are static HTML in frontend/public/ (impressum.html,
+  datenschutz.html, imprint.html, privacy.html + legal/legal.css +
+  legal/theme.js), NOT SPA routes: they must stay reachable without the
+  bundle. navigateFallbackDenylist in vite.config.ts keeps the service
+  worker from answering them with the app shell; LegalFooter (every route)
+  and Settings > About link them via legal/legalPages.ts. Same shape as
+  bibliogon. A change to a network call or a store updates PRIVACY.md AND
+  the two privacy pages.
 - Shared components in frontend/src/components/.
 - Data access ONLY through the storage service (`getStorage()`,
   `src/storage/`) - never `api.*` or `fetch()` directly in components. The

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Datenschutzerklärung · Topos</title>
+    <script src="./legal/theme.js"></script>
+    <link rel="stylesheet" href="./legal/legal.css" />
+  </head>
+  <body>
+    <main data-testid="legal-page-datenschutz">
+      <nav aria-label="Rechtliches">
+        <a href="./" data-testid="legal-link-app">Zur App</a>
+        <a href="./impressum.html" data-testid="legal-link-imprint">Impressum</a>
+        <a href="./privacy.html" lang="en" data-testid="legal-link-lang">English</a>
+      </nav>
+      <h1>Datenschutzerklärung</h1>
+      <p>Stand: 17. September 2026</p>
+
+      <p>Diese Erklärung gilt für die öffentliche Web-Version von Topos unter <code>astrapi69.github.io/topos</code>. Wer Topos selbst installiert (Desktop-Launcher oder Docker), betreibt die App auf dem eigenen Gerät oder Server; dann verarbeitet der Betreiber dieser Seiten keine Daten.</p>
+
+      <h2>Verantwortlicher</h2>
+      <p>Asterios Raptis, Seestraße 68, 71638 Ludwigsburg, Deutschland<br />E-Mail: <a href="mailto:asterios.raptis@web.de">asterios.raptis@web.de</a></p>
+
+      <h2>Das Wichtigste in Kürze</h2>
+      <ul>
+        <li>Topos hat keinen eigenen Server. Dein Inventar (Container, Einträge, Kategorien, Aktionen, Fotos) und deine Einstellungen liegen ausschließlich in deinem Browser (IndexedDB und localStorage). Der Betreiber sieht sie nicht.</li>
+        <li>Die App setzt keine Cookies, nutzt keine Analyse- oder Tracking-Dienste und braucht kein Konto. Schriften und Skripte sind mitgeliefert und werden nicht von Dritten geladen.</li>
+        <li>Beim Aufruf der Seiten verarbeitet GitHub als Hoster deine IP-Adresse. Alles andere geht nur dann an Dritte, wenn du eine Funktion nutzt, die das erfordert.</li>
+      </ul>
+
+      <h2>Hosting bei GitHub Pages</h2>
+      <p>Die App wird von GitHub Pages ausgeliefert, einem Dienst der GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, USA. Bei jedem Aufruf verarbeitet GitHub die IP-Adresse deines Geräts und die üblichen Verbindungsdaten (Zeitpunkt, aufgerufene Datei, Browsertyp) zu Sicherheitszwecken; nach Angaben von GitHub werden diese Daten nur für die Betriebssicherheit gespeichert und nicht an den Betreiber weitergegeben. Weitere Informationen: <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>.</p>
+
+      <h2>Speicherung im Browser</h2>
+      <p>Alles, was du in der App anlegst, speichert dein Browser lokal: Container, Einträge, Kategorien, Aktionen und Fotos in IndexedDB, Sprache, Design und Einstellungen in localStorage. Die Dateien der App selbst hält ein Service Worker vor, damit sie offline startet. Diese Speicherung ist für den Betrieb der App erforderlich; es wird nichts an einen Server übertragen.</p>
+      <p>API-Schlüssel für KI-Anbieter speichert die App, falls du welche hinterlegst, ebenfalls nur lokal, verschlüsselt mit einer Passphrase, die du selbst festlegst und die nicht gespeichert wird. Du entfernst sie in den Einstellungen unter „KI-Assistent“.</p>
+      <p>Dein Inventar sicherst du jederzeit unter Einstellungen › Import &amp; Export als Datei; Fotos sind darin derzeit nicht enthalten. Einstellungen › Wartung › „Cache zurücksetzen“ löscht Container, Einträge, Kategorien und Aktionen. Entfernst du die Website-Daten in deinem Browser, sind alle genannten Daten gelöscht, auch Fotos und Schlüssel.</p>
+
+      <h2>Update-Prüfung</h2>
+      <p>Neue Versionen der Web-App lädt dein Browser über den Service Worker von GitHub Pages, also vom selben Hoster wie die App; um eine neue Version zu erkennen, ruft die App dort die Datei <code>version.json</code> ab. Ein anderer Dienst wird dafür nicht kontaktiert.</p>
+
+      <h2>KI-Foto-Erkennung mit eigenem Schlüssel</h2>
+      <p>Die Foto-Erkennung ist nur aktiv, wenn du in den Einstellungen einen eigenen API-Schlüssel eines Anbieters hinterlegst und die Erkennung für ein Foto auslöst. Dann sendet dein Browser das Foto, verkleinert auf höchstens 1568 Pixel Kantenlänge, zusammen mit der Art des Containers (zum Beispiel Ordner oder Box) und den Namen deiner vorhandenen Kategorien direkt an diesen Anbieter. In der Web-Version sind das Anthropic, Google oder Perplexity; OpenAI lässt Aufrufe direkt aus dem Browser nicht zu und ist nur in einer selbst betriebenen Version mit Server nutzbar. Der Betreiber von Topos ist an dieser Übermittlung nicht beteiligt und erhält keine Daten. Das Vertragsverhältnis besteht zwischen dir und dem Anbieter; es gelten dessen Datenschutzhinweise:</p>
+      <ul>
+        <li><a href="https://www.anthropic.com/privacy">Anthropic</a></li>
+        <li><a href="https://openai.com/policies/privacy-policy">OpenAI</a></li>
+        <li><a href="https://policies.google.com/privacy">Google</a></li>
+        <li><a href="https://www.perplexity.ai/hub/legal/privacy-policy">Perplexity</a></li>
+      </ul>
+
+      <h2>Fehlerberichte über GitHub</h2>
+      <p>Tritt ein Fehler auf, kannst du einen Bericht öffnen; die App zeigt ihn dir vorher vollständig an. Erst wenn du „Auf GitHub melden“ wählst, öffnet sich ein neuer Tab bei GitHub mit einem vorausgefüllten Issue (Fehlermeldung, gegebenenfalls technische Details, Browserkennung, App-Version und deine eigene Beschreibung). Gesendet wird der Bericht erst, wenn du ihn dort mit deinem GitHub-Konto abschickst; ab dann gelten die Datenschutzhinweise von GitHub. Alternativ kannst du den Bericht nur in die Zwischenablage kopieren.</p>
+
+      <h2>Externe Links</h2>
+      <p>Die App enthält Links zu externen Angeboten (GitHub, Liberapay, GitHub Sponsors, Ko-fi). Erst mit dem Klick verlässt du die App; ab dann gelten die Datenschutzhinweise des jeweiligen Anbieters. Es sind keine Skripte oder Schaltflächen dieser Anbieter eingebettet. Den QR-Code zum Teilen der App erzeugt dein Browser selbst.</p>
+
+      <h2>Desktop-Version</h2>
+      <p>Die installierte Version läuft auf deinem Gerät; deine Daten liegen dort in einer lokalen Datenbank. Der Desktop-Launcher fragt beim Start bei GitHub (<code>api.github.com</code>) nach, ob eine neue Version veröffentlicht wurde. Dabei erhält GitHub deine IP-Adresse; es werden keine Inhalte aus der App übertragen. Die Prüfung lässt sich in den Einstellungen des Launchers abschalten. Bei Installation und Aktualisierung lädt der Launcher den Quellcode von GitHub und die Basis-Images von Docker Hub. Die KI-Foto-Erkennung läuft dort über den lokalen Server mit dem Schlüssel, den du ihm gibst. Eine vollständige technische Aufstellung steht in der Datei <a href="https://github.com/astrapi69/topos/blob/main/PRIVACY.md">PRIVACY.md</a> im Quellcode.</p>
+
+      <h2>Kontakt per E-Mail</h2>
+      <p>Wenn du dem Betreiber eine E-Mail schreibst, werden deine Angaben zur Bearbeitung der Anfrage gespeichert und gelöscht, sobald die Anfrage erledigt ist und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+
+      <h2>Deine Rechte</h2>
+      <p>Du hast gegenüber dem Verantwortlichen das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch, und du kannst dich bei einer Datenschutzaufsichtsbehörde beschweren. Da der Betreiber dein Inventar nicht besitzt, richten sich Auskunfts- und Löschbegehren zu diesen Daten an dein eigenes Gerät: Einstellungen › Import &amp; Export oder Wartung, oder die Website-Daten in deinem Browser.</p>
+
+      <h2>Änderungen</h2>
+      <p>Diese Erklärung wird angepasst, wenn sich die App oder die Rechtslage ändert. Das Datum der jeweils aktuellen Fassung steht oben.</p>
+
+      <footer>Siehe auch das <a href="./impressum.html">Impressum</a>.</footer>
+    </main>
+  </body>
+</html>

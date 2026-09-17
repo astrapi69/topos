@@ -253,7 +253,10 @@ export default defineConfig({
                 // /api is the backend, not an SPA route: never answer an API
                 // request with the app shell (it would mask a real network
                 // error as a 200 HTML page).
-                navigateFallbackDenylist: [/^\/api\//],
+                // The static legal pages are real files next to index.html; without
+                // this an active service worker answers a navigation to them with
+                // the SPA shell and the page never shows.
+                navigateFallbackDenylist: [/^\/api\//, /\/(impressum|datenschutz|imprint|privacy)\.html$/],
                 runtimeCaching: [
                     {
                         // exceljs is precache-excluded above, so cache it

@@ -231,6 +231,11 @@
       "number_hint": "Único apenas dentro deste contentor. Deixa vazio para o próximo número livre.",
       "priority": "Prioridade"
     },
+    "legal": {
+      "footer_aria": "Informação legal",
+      "imprint": "Ficha técnica",
+      "privacy": "Política de privacidade"
+    },
     "nav": {
       "actions": "Ações",
       "categories": "Categorias",

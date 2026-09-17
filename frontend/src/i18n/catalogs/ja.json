@@ -231,6 +231,11 @@
       "number_hint": "このコンテナ内でのみ一意です。空欄にすると次の空き番号が使われます。",
       "priority": "優先度"
     },
+    "legal": {
+      "footer_aria": "法的情報",
+      "imprint": "運営者情報",
+      "privacy": "プライバシーポリシー"
+    },
     "nav": {
       "actions": "タスク",
       "categories": "カテゴリ",

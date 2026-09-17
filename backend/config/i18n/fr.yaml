@@ -50,6 +50,10 @@ topos:
     settings: Réglages
     photo_intake: Saisie par photo
     more: Plus
+  legal:
+    imprint: "Mentions légales"
+    privacy: "Politique de confidentialité"
+    footer_aria: "Mentions légales"
   demo:
     seeded: Données de démonstration chargées. Connectez un serveur pour des données réelles.
   common:

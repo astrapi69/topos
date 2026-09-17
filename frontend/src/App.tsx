@@ -11,6 +11,7 @@ import AppFeatureProvider from "./features/AppFeatureProvider";
 import { DialogProvider } from "./components/AppDialog";
 import ErrorReportDialog from "./components/ErrorReportDialog";
 import InstallBanner from "./components/InstallBanner";
+import LegalFooter from "./components/LegalFooter";
 import IosInstallHint from "./components/IosInstallHint";
 import { I18nProvider } from "./hooks/useI18n";
 import { useTheme } from "./hooks/useTheme";
@@ -59,6 +60,8 @@ export default function App() {
                 <Route path="/settings" element={<Settings />} />
               </Routes>
             </Suspense>
+            {/* Imprint + privacy policy (static pages), one click from every route. */}
+            <LegalFooter />
             <ToastContainer
               position="bottom-right"
               autoClose={3000}

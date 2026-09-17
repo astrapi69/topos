@@ -231,6 +231,11 @@
       "number_hint": "Unique uniquement dans ce conteneur. Laissez vide pour le prochain numéro libre.",
       "priority": "Priorité"
     },
+    "legal": {
+      "footer_aria": "Mentions légales",
+      "imprint": "Mentions légales",
+      "privacy": "Politique de confidentialité"
+    },
     "nav": {
       "actions": "Actions",
       "categories": "Catégories",

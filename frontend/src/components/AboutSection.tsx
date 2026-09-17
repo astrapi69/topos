@@ -20,10 +20,9 @@ import { useI18n } from "../hooks/useI18n";
 import { usePwaInstall } from "../pwa/usePwaInstall";
 import { appShareUrl } from "../utils/shareUrl";
 import { qrLabels } from "../utils/qrLabels";
+import { LICENSE_URL, REPO_URL } from "../utils/projectLinks";
+import { legalPageHref } from "../legal/legalPages";
 import { card, link, linkButton, muted, pill } from "../ui/classes";
-
-const REPO_URL = "https://github.com/astrapi69/topos";
-const LICENSE_URL = "https://github.com/astrapi69/topos/blob/main/LICENSE";
 
 interface DonationChannel {
   id: string;
@@ -66,7 +65,7 @@ function openErrorReport() {
 }
 
 export default function AboutSection() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [showShare, setShowShare] = useState(false);
   const { canInstall, promptInstall } = usePwaInstall();
 
@@ -160,6 +159,24 @@ export default function AboutSection() {
             </button>
           </li>
         )}
+        <li>
+          <a
+            className={link}
+            href={legalPageHref("imprint", lang)}
+            data-testid="about-imprint-link"
+          >
+            {t("topos.legal.imprint", "Impressum")}
+          </a>
+        </li>
+        <li>
+          <a
+            className={link}
+            href={legalPageHref("privacy", lang)}
+            data-testid="about-privacy-link"
+          >
+            {t("topos.legal.privacy", "Datenschutzerklärung")}
+          </a>
+        </li>
       </ul>
 
       <div className={`${card} mt-3 p-3`} data-testid="about-donations">

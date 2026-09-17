@@ -2102,3 +2102,31 @@ needs stdlib plus one package CI can `pip install`.
 
 When adding a local hook, run it in the CI job's environment, not only
 locally where everything is already installed.
+
+## Vitest runs a skipped `describe` body during collection
+
+`describe.skipIf(cond)` (and `describe.skip`) still executes the
+describe callback to collect its `it` blocks; only the tests inside are
+skipped. Anything the callback does at that level runs on every machine,
+including the ones where the skip condition is true.
+
+Concrete: the external-hosts guard (`frontend/src/artifact/
+externalHosts.dist.test.ts`) called `auditDist(DIST, ...)` directly in
+the `describe.skipIf(!hasDist)` body. Locally `dist/` existed and the
+file was green; in CI, where the Vitest step runs before any build, the
+call threw `ENOENT: scandir .../frontend/dist` during collection and
+the FILE failed instead of skipping (PR #13, first run red).
+
+Rule: expensive or environment-dependent work in a conditionally skipped
+suite goes into `beforeAll` (or inside the tests), never into the
+describe body. Reproduce the skip path once with the precondition
+removed (`mv dist dist.moved && bunx vitest run <file>`): "5 skipped" is
+the proof, "1 failed" means the body still does work.
+
+## `pkill -f` matches the shell that is running it
+
+`pkill -f "http.server 4174" && ...` inside a longer Bash one-liner
+kills the shell executing that one-liner, because the pattern also
+matches the shell's own command line. The whole command dies with a
+signal exit code and nothing after it runs. Kill by port instead
+(`lsof -ti tcp:4174 | xargs -r kill`) or by a PID you recorded.

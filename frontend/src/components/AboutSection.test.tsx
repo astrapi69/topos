@@ -28,6 +28,19 @@ function renderAbout() {
 }
 
 describe("AboutSection", () => {
+  it("links to the static legal pages in the UI language", () => {
+    // The i18n mock reports "en", so the English pages are the target.
+    renderAbout();
+    expect(screen.getByTestId("about-imprint-link")).toHaveAttribute(
+      "href",
+      "/imprint.html",
+    );
+    expect(screen.getByTestId("about-privacy-link")).toHaveAttribute(
+      "href",
+      "/privacy.html",
+    );
+  });
+
   it("renders the version card with the build version", () => {
     renderAbout();
     expect(screen.getByTestId("about-section")).toBeInTheDocument();

@@ -231,6 +231,11 @@
       "number_hint": "Nur innerhalb dieses Containers eindeutig. Leer lassen für die nächste freie Nummer.",
       "priority": "Priorität"
     },
+    "legal": {
+      "footer_aria": "Rechtliches",
+      "imprint": "Impressum",
+      "privacy": "Datenschutzerklärung"
+    },
     "nav": {
       "actions": "Aktionen",
       "categories": "Kategorien",

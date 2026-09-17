@@ -231,6 +231,11 @@
       "number_hint": "Yalnızca bu kap içinde benzersiz. Sıradaki boş numara için boş bırakın.",
       "priority": "Öncelik"
     },
+    "legal": {
+      "footer_aria": "Yasal bilgiler",
+      "imprint": "Künye",
+      "privacy": "Gizlilik politikası"
+    },
     "nav": {
       "actions": "Görevler",
       "categories": "Kategoriler",

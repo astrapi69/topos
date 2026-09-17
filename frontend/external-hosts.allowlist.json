@@ -28,7 +28,7 @@
     },
     "github.com": {
       "category": "link",
-      "purpose": "Repository, MIT license and 'Report issue' links in Settings > About; author URL in the JSON-LD block; exceljs upgrade note inside a library error string.",
+      "purpose": "Repository, MIT license and 'Report issue' links in Settings > About; license and PRIVACY.md links on the static legal pages; author URL in the JSON-LD block; exceljs upgrade note inside a library error string.",
       "trigger": "User click opens a new tab. The issue link carries the error detail, stack trace, browser and app version the user saw in the dialog."
     },
     "liberapay.com": {
@@ -39,6 +39,31 @@
     "ko-fi.com": {
       "category": "link",
       "purpose": "Donation link in Settings > About.",
+      "trigger": "User click."
+    },
+    "docs.github.com": {
+      "category": "link",
+      "purpose": "GitHub privacy statement, linked from the static privacy policy pages (datenschutz.html, privacy.html).",
+      "trigger": "User click."
+    },
+    "www.anthropic.com": {
+      "category": "link",
+      "purpose": "Anthropic privacy policy, linked from the static privacy policy pages (datenschutz.html, privacy.html).",
+      "trigger": "User click."
+    },
+    "openai.com": {
+      "category": "link",
+      "purpose": "OpenAI privacy policy, linked from the static privacy policy pages (datenschutz.html, privacy.html).",
+      "trigger": "User click."
+    },
+    "policies.google.com": {
+      "category": "link",
+      "purpose": "Google privacy policy, linked from the static privacy policy pages (datenschutz.html, privacy.html).",
+      "trigger": "User click."
+    },
+    "www.perplexity.ai": {
+      "category": "link",
+      "purpose": "Perplexity privacy policy, linked from the static privacy policy pages (datenschutz.html, privacy.html).",
       "trigger": "User click."
     },
     "opensource.org": {

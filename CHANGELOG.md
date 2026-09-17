@@ -5,6 +5,33 @@ All notable changes to Topos are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0/).
 
+## [Unreleased]
+
+### Added
+
+#### Imprint and privacy policy
+- The web app now carries an imprint and a privacy policy as static
+  pages next to the app (`impressum.html`, `datenschutz.html`, English
+  `imprint.html`, `privacy.html`), linked from a footer under every page
+  and from Settings > About; German UI languages get the German pages,
+  all others the English ones. Being plain HTML, they stay reachable
+  without the app bundle, follow the theme chosen in the app, and the
+  service worker never answers them with the app shell. Same shape and
+  operator details as bibliogon. The privacy text describes what the app
+  actually does: GitHub Pages as host, everything else stored in the
+  browser, AI photo recognition only with the user's own key, the error
+  report as a GitHub issue the user submits, the update check on the
+  same host, the desktop launcher's version check.
+- `PRIVACY.md` at the repo root is the code-verified inventory behind
+  those texts: every outbound call with trigger, content, recipient and
+  off switch; every local store with how to delete it.
+- The GitHub Pages build is audited for foreign hosts: a static scan of
+  `dist/` plus a runtime capture (273 requests, none external) showed that
+  nothing loads from a third party on page view. A guard
+  (`frontend/external-hosts.allowlist.json`) fails PR CI and the Pages
+  deploy when the bundle starts referencing a host that is not documented
+  with a reason.
+
 ## [0.3.0] - 2026-08-13
 
 The installability release. v0.2.0 made Topos work offline; this one

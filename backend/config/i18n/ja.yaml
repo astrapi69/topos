@@ -50,6 +50,10 @@ topos:
     settings: 設定
     photo_intake: 写真から登録
     more: その他
+  legal:
+    imprint: "運営者情報"
+    privacy: "プライバシーポリシー"
+    footer_aria: "法的情報"
   demo:
     seeded: デモデータを読み込みました。実データにはサーバーへの接続が必要です。
   common:

@@ -231,6 +231,11 @@
       "number_hint": "Unique within this container only. Leave empty for the next free number.",
       "priority": "Priority"
     },
+    "legal": {
+      "footer_aria": "Legal",
+      "imprint": "Legal notice",
+      "privacy": "Privacy policy"
+    },
     "nav": {
       "actions": "Actions",
       "categories": "Categories",
