@@ -12,7 +12,6 @@
  */
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 import { UpdateCheckControl, VersionCard } from "@astrapi69/pwa-update-react";
 
@@ -22,6 +21,7 @@ import { usePwaInstall } from "../pwa/usePwaInstall";
 import { appShareUrl } from "../utils/shareUrl";
 import { qrLabels } from "../utils/qrLabels";
 import { LICENSE_URL, REPO_URL } from "../utils/projectLinks";
+import { legalPageHref } from "../legal/legalPages";
 import { card, link, linkButton, muted, pill } from "../ui/classes";
 
 interface DonationChannel {
@@ -65,7 +65,7 @@ function openErrorReport() {
 }
 
 export default function AboutSection() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [showShare, setShowShare] = useState(false);
   const { canInstall, promptInstall } = usePwaInstall();
 
@@ -160,22 +160,22 @@ export default function AboutSection() {
           </li>
         )}
         <li>
-          <Link
+          <a
             className={link}
-            to="/impressum"
+            href={legalPageHref("imprint", lang)}
             data-testid="about-imprint-link"
           >
             {t("topos.legal.imprint", "Impressum")}
-          </Link>
+          </a>
         </li>
         <li>
-          <Link
+          <a
             className={link}
-            to="/datenschutz"
+            href={legalPageHref("privacy", lang)}
             data-testid="about-privacy-link"
           >
             {t("topos.legal.privacy", "Datenschutzerklärung")}
-          </Link>
+          </a>
         </li>
       </ul>
 

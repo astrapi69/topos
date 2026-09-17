@@ -128,10 +128,9 @@
 
 - [ ] `install.sh.template` + `uninstall.sh` still print "Adaptive
       Learner" (issue #18); the generated `install.sh` inherits it.
-- [ ] Legal texts: lawyer review of `/datenschutz` and `/impressum`;
-      confirm the imprint mailbox (`TODO(clarify)` in
-      `frontend/src/legal/operator.ts`) and whether a VAT id applies,
-      then merge `develop` -> `main` so the pages go live.
+- [ ] Legal texts: lawyer review of `datenschutz.html` / `privacy.html`
+      and `impressum.html` / `imprint.html` (live since 2026-09-17, same
+      wording base as bibliogon).
 - [ ] CSV-import plugin (sibling to Excel)
 - [ ] Voice-input plugin for hands-free item entry (mobile-first,
       basement / shelf-side use case)

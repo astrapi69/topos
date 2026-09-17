@@ -135,7 +135,7 @@ topos/
 │   ├── storage/           # getStorage() seam: apiStorage + dexieStorage (offline-first)
 │   ├── db/schema.ts       # Dexie store (dexie mode) / read-through cache (api mode)
 │   ├── hooks/useTopos.ts  # stale-while-revalidate hooks
-│   ├── pages/             # Dashboard, ContainerList, ContainerDetail, ItemEditor, CategoryBrowse, Actions, Import, Settings, Imprint, Privacy
+│   ├── pages/             # Dashboard, ContainerList, ContainerDetail, ItemEditor, CategoryBrowse, Actions, Import, Settings (legal pages: static HTML in public/)
 │   ├── ui/classes.ts      # shared Tailwind class strings (light+dark)
 │   └── styles/global.css  # CSS variables, themes, @tailwind directives
 ├── e2e/                   # Playwright spec (import-roundtrip)

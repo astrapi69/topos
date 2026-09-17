@@ -3,7 +3,7 @@
 Technical inventory for Topos, kept next to [SECURITY.md](SECURITY.md) and
 reviewed with the code that changes it. It is not the legal privacy policy:
 the policy the public PWA shows to its users is derived from this file
-(issue #15). Measured on 2026-09-16, see
+(`frontend/public/datenschutz.html` and `privacy.html`, issue #21). Measured on 2026-09-16, see
 [docs/audit/2026-09-16-external-hosts.md](docs/audit/2026-09-16-external-hosts.md).
 The host guard (`frontend/external-hosts.allowlist.json`, checked by
 `frontend/src/artifact/externalHosts.dist.test.ts`) turns the build red when
