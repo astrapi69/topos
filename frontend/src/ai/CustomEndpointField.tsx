@@ -96,6 +96,9 @@ export default function CustomEndpointField() {
           placeholder="http://localhost:1234/v1"
           value={baseUrl}
           onChange={(e) => setBaseUrl(e.target.value)}
+          // Until the stored value has loaded, typing would be overwritten
+          // by it (#27).
+          disabled={!loaded}
           data-testid="ai-custom-base-url"
         />
       </label>
