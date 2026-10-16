@@ -127,6 +127,9 @@ describe("AiProviderSettings", () => {
     renderPanel();
     const input = await screen.findByTestId("ai-custom-base-url");
     expect(input).toBeInTheDocument();
+    // The save button stays disabled until the settings have loaded; typing
+    // and clicking before that was a no-op on a slow runner (#27).
+    await waitFor(() => expect(input).toBeEnabled());
     fireEvent.change(input, { target: { value: "http://localhost:1234/v1" } });
     fireEvent.click(screen.getByTestId("ai-custom-base-url-save"));
     await waitFor(() => {
@@ -134,6 +137,36 @@ describe("AiProviderSettings", () => {
         ai: { baseUrls: { custom: "http://localhost:1234/v1" } },
       });
     });
+  });
+
+  it("keeps the custom base-URL field disabled until its settings have loaded", async () => {
+    mockGetApp.mockResolvedValue({
+      ai: { enabled: true, activeProvider: "custom", models: {}, baseUrls: {} },
+    });
+    await refreshApiKeyStatus(createBackendAdapter(), TOPOS_REGISTRY, "topos");
+    // Hold the field's own settings read open (it awaits getApp and the key
+    // status together): a value typed now would be overwritten by the stored
+    // one when the read resolves (#27).
+    mockGetApp.mockResolvedValue({
+      ai: {
+        enabled: true,
+        activeProvider: "custom",
+        models: {},
+        baseUrls: { custom: "http://stored:1/v1" },
+      },
+    });
+    const keyStatus = keyStatuses();
+    const held: Array<(value: unknown) => void> = [];
+    mockGetKeyStatus.mockImplementation(
+      () => new Promise((resolve) => held.push(resolve)),
+    );
+    renderPanel();
+    const input = await screen.findByTestId("ai-custom-base-url");
+    expect(input).toBeDisabled();
+    expect(screen.getByTestId("ai-custom-base-url-save")).toBeDisabled();
+    held.forEach((resolve) => resolve(keyStatus));
+    await waitFor(() => expect(input).toBeEnabled());
+    expect(input).toHaveValue("http://stored:1/v1");
   });
 
   it("persists the enable flag to the backend", async () => {
