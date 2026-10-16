@@ -32,6 +32,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   deploy when the bundle starts referencing a host that is not documented
   with a reason.
 
+### Changed
+
+- bun 1.3.14 -> 1.4.2 in every place that pins it (the three workflows,
+  `frontend/Dockerfile`, the dev compose command, CONTRIBUTING) (#25).
+  bun 1.3 reads only `lockfileVersion: 1`; a lock written by a newer bun
+  (a developer's global bun, Dependabot's own) would fail every 1.3 job
+  with "Unknown lockfile version", as it did in adaptive-learner. Both
+  lockfiles stay `lockfileVersion: 1`, which bun 1.4.2 installs frozen
+  without changes, so the dependency tree is unchanged. A guard test
+  (`backend/tests/test_bun_version_single_source.py`) fails on a second
+  pinned version, on a pin file whose version it no longer recognises,
+  and on a lockfile the pinned bun cannot read.
+
 ## [0.3.0] - 2026-08-13
 
 The installability release. v0.2.0 made Topos work offline; this one

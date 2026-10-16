@@ -123,7 +123,7 @@ jobs:
       # because the bun install cache below replaces its npm cache.
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.14"
+          bun-version: "1.4.2"
 
       - name: Cache bun install
         uses: actions/cache@v5
@@ -178,7 +178,7 @@ jobs:
       # frontend workspace has to be installed here.
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.3.14"
+          bun-version: "1.4.2"
       - name: Install frontend dependencies
         working-directory: frontend
         run: bun install --frozen-lockfile
