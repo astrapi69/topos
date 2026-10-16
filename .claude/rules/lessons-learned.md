@@ -2103,6 +2103,22 @@ needs stdlib plus one package CI can `pip install`.
 When adding a local hook, run it in the CI job's environment, not only
 locally where everything is already installed.
 
+### A bun upgrade is a lockfile-format question
+
+The lockfile format follows the bun that writes it, and the pinned bun
+must read whatever lands in the repository. Measured 2026-10-16 (#25):
+bun 1.3.14 reads only `lockfileVersion: 1` and fails on newer ones with
+`error: Unknown lockfile version`; bun 1.4.2 installs frozen from 1, 2
+and 3, keeps an existing v1 lock at v1 (even on `bun add`), and writes 2
+for a fresh lock. Dependabot runs its own bun and can push a format the
+pin cannot parse; adaptive-learner's frontend went red that way.
+
+So the global bun on a developer machine, Dependabot and the pin have to
+agree, and the pin moves in every file at once.
+`backend/tests/test_bun_version_single_source.py` holds that: one
+version across all pin files, every pin file recognised, and each lock
+in a format the pinned line is recorded to read.
+
 ## Vitest runs a skipped `describe` body during collection
 
 `describe.skipIf(cond)` (and `describe.skip`) still executes the

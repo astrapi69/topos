@@ -23,7 +23,7 @@ optional self-hosted backend.
 
 - Python 3.11 or newer
 - Node.js 24 (runtime for Vite builds)
-- bun 1.3.14 (package manager + script runner for `frontend/`
+- bun 1.4.2 (package manager + script runner for `frontend/`
   and `e2e/`)
 - Poetry (Python dependency management)
 - Docker + Docker Compose v2+ (for the prod-shape flow; not
